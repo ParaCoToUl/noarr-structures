@@ -18,3 +18,4 @@
 ### Less
 
 - [ekondis/mixbench](https://github.com/ekondis/mixbench)
+- [cupy/cupy](https://github.com/cupy/cupy)
