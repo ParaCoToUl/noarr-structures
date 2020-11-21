@@ -40,3 +40,5 @@
 - we want to be able to enforce an alignment
 - do we want something like a primitive type system (no functions, no pointers, just raw data)? (open for discussion)
 - we would like it if it could provide us the get_by_index functions
+
+### Streaming vs One-chunk approach
