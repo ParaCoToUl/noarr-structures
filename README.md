@@ -9,3 +9,8 @@
 - [NumPy](https://numpy.org/)
 - [cuda-kmeans](https://github.com/krulis-martin/cuda-kmeans)
 - [Beaver's C++ Library](https://github.com/krulis-martin/bpplib)
+
+### More
+
+- [vochi/vuh](https://github.com/vochi/vuh)
+- [BrookGPU](http://graphics.stanford.edu/projects/brookgpu/)
