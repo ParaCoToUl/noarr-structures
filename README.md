@@ -18,6 +18,7 @@ More of the interesting things
 
 - [vochi/vuh](https://github.com/vochi/vuh)
 - [BrookGPU](http://graphics.stanford.edu/projects/brookgpu/)
+- [r/cpp](https://www.reddit.com/r/cpp)
 
 ### Less
 
