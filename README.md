@@ -25,3 +25,4 @@ Some of the less interesting things (or not yet explored)
 
 - [ekondis/mixbench](https://github.com/ekondis/mixbench)
 - [cupy/cupy](https://github.com/cupy/cupy)
+- [r/cuda](https://www.reddit.com/r/CUDA)
