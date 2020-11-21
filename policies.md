@@ -48,7 +48,7 @@
     ```cpp
     tuple<array<float, N, primitive>, array<float, N, primitive>, array<float, N, primitive>> = array<float, 3 * N, SoA<N,N,N>>
     ```
-    - Pak na kazdem specialni `get` funkce (tak to maj i tuply)
+    - Then a special `get` funnction on each of them (just like for tuples)
       ```cpp
       T &get<0, array<T,N,primitive>>(array &a, size_t index) { return a[index]; }
       T &get<n, array<T,N,SoA<N,N,N>>>(array &a, size_t index) { return a[N*n + index]; }
