@@ -3,6 +3,7 @@
 ## Data
 
 - [policies](policies.md)
+- [inspiration for policies](https://github.com/krulis-martin/cuda-kmeans/blob/master/experimental/k-means/k-means/headers/layout_policies.hpp)
 
 ## Repos and sites of interest
 
