@@ -35,8 +35,8 @@
 
 ## requirements
 
-- give me a list of pixels (`struct{int,int,int}`)
-- here is a pixel (`struct{int,int,int}`), make a SoA representation of it
+- give me an array of pixels (`tuple<int,int,int>`) = AoS
+- here is a pixel (`tuple<int,int,int>`), make a SoA representation of it
 
 
 ## How to do it? + ideas
