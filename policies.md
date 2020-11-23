@@ -33,6 +33,12 @@
     float get_point_x(int i) { return points[i/8].x[i%8]; }
     ```
 
+## requirements
+
+- give me a list of pixels (`struct{int,int,int}`)
+- here is a pixel (`struct{int,int,int}`), make a SoA representation of it
+
+
 ## How to do it? + ideas
 
 - we want to tell the `std::array<float, 3 * N>` what its data are like (e.g. one of the above)
