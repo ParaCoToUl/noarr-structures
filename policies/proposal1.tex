@@ -20,12 +20,11 @@
 \usepackage{color}
 
 \lstset{language=C++,
-                basicstyle=\ttfamily,
-                keywordstyle=\color{blue}\ttfamily,
-                morekeywords={constexpr},
-                stringstyle=\color{red}\ttfamily,
-                commentstyle=\color{gray}\ttfamily,
-                morecomment=[l][\color{magenta}]{\#}
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        morekeywords={constexpr},
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{gray}\ttfamily
 }
 
 \usepackage{setspace}
@@ -69,14 +68,14 @@
 
     Uvažujme následující příklad pro ukázání iterace na SoA a AoS:
     \begin{lstlisting}
-using policy1 = tuple<float, int, char> cross array<N>; // SoA
-using policy2 = array<N> cross tuple<float, int, char>; // AoS
+using policy1 = tuple<float, int, char> cross array<N>; //SoA
+using policy2 = array<N> cross tuple<float, int, char>; //AoS
 
 auto i1 = policy1::begin(data);
 auto i2 = policy2::begin(data);
     \end{lstlisting}
 
-    potom platí (vedle očekávaných vlastností), že \lstinline{i1->get<n>()} a \lstinline{i1->get<n>()} jsou stejného typu (kde $n \in [0..2]$) a je definováno lineární uspořádání na sjednocení množin obou iterátorů (? i operace na nich) tak, že:
+    potom platí (vedle očekávaných vlastností), že \lstinline{i1->get<n>()} a \lstinline{i2->get<n>()} jsou\linebreak stejného typu (kde $n \in [0..2]$) a je definováno lineární uspořádání na sjednocení množin obou iterátorů (? i operace na nich) tak, že:
 
     \begin{center}
         \lstinline{policy1::begin(data)} $==$ \lstinline{policy2::begin(data)} $\wedge$
