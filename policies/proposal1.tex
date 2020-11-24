@@ -19,7 +19,14 @@
 \usepackage{listings}
 \usepackage{color}
 
-\lstset{language=C++}
+\lstset{language=C++,
+                basicstyle=\ttfamily,
+                keywordstyle=\color{blue}\ttfamily,
+                morekeywords={constexpr},
+                stringstyle=\color{red}\ttfamily,
+                commentstyle=\color{gray}\ttfamily,
+                morecomment=[l][\color{magenta}]{\#}
+}
 
 \usepackage{setspace}
 \setlength{\parindent}{0in}
@@ -79,5 +86,5 @@ auto i2 = policy2::begin(data);
     \section{\lstinline{at()} funkce}
 
     Funkce \lstinline{at()} je definována rekurzivním voláním pomocí template například následujícím způsobem (subject to change; zde jen velice zjednodušeně pro array), měla by korespondovat s implementací iterátorů:
-    \lstinputlisting[language=C++]{draftsimplified1.cpp}
+    \lstinputlisting{draftsimplified1.cpp}
 \end{document}
