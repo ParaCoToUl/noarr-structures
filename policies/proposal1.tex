@@ -1,12 +1,12 @@
-\documentclass[a4paper,12pt]{article} % This defines the style of your paper
+\documentclass[a4paper,12pt]{article}
 
 \usepackage[top = 2.5cm, bottom = 2.5cm, left = 2.5cm, right = 2.5cm]{geometry} 
 
 \usepackage[utf8]{inputenc}
 \usepackage[czech]{babel}
 
-\usepackage{multirow} % Multirow is for tables with multiple rows within one cell.
-\usepackage{booktabs} % For even nicer tables.
+\usepackage{multirow}
+\usepackage{booktabs}
 
 \usepackage{graphicx}
 \usepackage{amsfonts}
@@ -78,6 +78,6 @@ auto i2 = policy2::begin(data);
 
     \section{\lstinline{at()} funkce}
 
-    Funkce \lstinline{at()} je definována rekurzivním voláním pomocí templatů například následujícím způsobem (subject to change; zde jen velice zjednodušeně pro array), měla by korespondovat s implementací iterátorů:
+    Funkce \lstinline{at()} je definována rekurzivním voláním pomocí template například následujícím způsobem (subject to change; zde jen velice zjednodušeně pro array), měla by korespondovat s implementací iterátorů:
     \lstinputlisting[language=C++]{draftsimplified1.cpp}
 \end{document}

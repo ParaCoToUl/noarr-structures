@@ -1,16 +1,16 @@
 # Policies
 
 - policy classes on data layouts (tuples, arrays, vectors, primitive types; combinations of such)
-- main policies: (all of those ~fit in a `std::arrray<float, 3 * N>`)
+- main policies: (all of those ~fit in a `std::array<float, 3 * N>`)
   - SoA
 
     ```cpp
-    struct pointlist3D {
+    struct point_list3D {
       float x[N];
       float y[N];
       float z[N];
     };
-    struct pointlist3D points;
+    struct point_list3D points;
     float get_point_x(int i) { return points.x[i]; }
     ```
 

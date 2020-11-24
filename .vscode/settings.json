@@ -1,3 +1,7 @@
 {
-    "cSpell.language": "en,cs"
+    "cSpell.language": "en,cs",
+    "cSpell.words": [
+        "simd",
+        "struct"
+    ]
 }
