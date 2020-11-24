@@ -4,7 +4,8 @@
 
 - [policies](policies.md)
 - [proposal 1](policies/proposal1.pdf)
-- [inspiration for policies](https://github.com/krulis-martin/cuda-kmeans/blob/master/experimental/k-means/k-means/headers/layout_policies.hpp)
+- [k-means: inspiration for policies](https://github.com/krulis-martin/cuda-kmeans/blob/master/experimental/k-means/k-means/headers/layout_policies.hpp)
+- [theory: explanation of policies](https://www.boost.org/community/generic_programming.html)
 
 ## Repos and sites of interest
 
