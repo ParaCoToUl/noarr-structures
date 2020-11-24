@@ -15,9 +15,12 @@ int[10, 5, 3, 20] cube;
 
 [H1] Triangle
 Arrays of legth 1, 2, 3, 4, 5, 6...
-PROBLEM: Space wasted is O(N).
+PROBLEM [IN CUBIFICATION]: Space wasted is O(N). 
 
 [H1] Heap 
 Arrays of length 1, 2, 4, 8, 16, 32, 64...
-PROBLEM: Space wasted is O(N^2).
+PROBLEM [IN CUBIFICATION]: Space wasted is O(N^2).
 
+[H1] Any 
+Arrays of length any legth, where max legth is N and legth of array of arrays is M
+PROBLEM [IN CUBIFICATION]: Space wasted is O(N*M).
