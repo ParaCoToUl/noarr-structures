@@ -34,37 +34,46 @@
 \begin{document}
     \section{Gramatika}
 
-    \begin{grammar}
-        <policy> ::= <simple_policy>
-        \alt <type_policy>
-        \alt <policy> `cross' <policy>
-        \alt <policy> `plus' <policy>
+    Policy jsou definovány jednoduchou gramatikou definující strukturu dat (rozšiřitelnou o strategie procházení, zarovnání, atd.).
 
-        <simple_policy> ::= <array>
+    \begin{grammar}
+        <policy> ::= `policy<' <shape> `>'
+
+        <shape> ::= <tag>
+        \alt <tag> `, plus, ' <shape>
+        \alt <tag> `, cross, ' <shape>
+        \alt <tag> `, ' <shape> (same as the previous alternative: i.e. `cross' assumed)
+
+        <tag> ::= <simple_tag>
+        \alt <type_tag>
+
+        <simple_tag> ::= <array>
         \alt <tuple>
         \alt <vector>
 
         <array> ::= `array<' <N> `>'
 
-        <tuple> ::= `tuple<' <type_list> `>'
+        <tuple> ::= `tuple<' <shape> `>'
 
         <vector> ::= `vector'
 
-        <type_policy> ::= <type>
+        <type_tag> ::= <type>
     \end{grammar}
 
-    $\mathbf{\langle simple\_policy \rangle}$ definuje jednoduchou strukturu s běžnou sémantikou.
+    $\mathbf{\langle simple\_tag \rangle}$ definuje jednoduchou strukturu s běžnou sémantikou.
 
-    $\mathbf{\langle type\_policy \rangle}$ definuje typ dat ve struktuře, funguje na základě definování typového ``módu'', kdy všechny následující data sdílejí daný typ, tuto funkci má i $\mathbf{\langle tuple \rangle}$.
+    $\mathbf{\langle type\_tag \rangle}$ definuje typ dat ve struktuře, funguje na základě definování typového\linebreak``módu'', kdy všechna následující data sdílejí daný typ, podobnou funkci má i $\mathbf{\langle tuple \rangle}$, je-li použit pouze s $\mathbf{\langle type\_tag \rangle}$.
 
-    \textbf{cross} a \textbf{plus} jsou operátory kombinující jednotlivé policy.
-    \textbf{cross} má přednost a jeho význam je, že struktura definovaná levým operandem je složena z podstruktur definovaných pravým operandem. Význam \textbf{plus} je jednoduché řetězení operandů za sebou.
+    \textbf{cross} a \textbf{plus} jsou operátory kombinující jednotlivé tagy.
+    \textbf{cross} má přednost a jeho význam je, že struktura definovaná levým operandem je složena z podstruktur definovaných pravým operandem. Význam \textbf{plus} je jednoduché řetězení operandů za sebou, uvnitř $\mathbf{\langle type\_tag \rangle}$ má \textbf{plus} operátor funkci čárky.
 
-    \section{iterace}
+    \section{Iterace}
 
     Jednoduchá iterace je definovaná pro jednoduché policy a pro všechny policy, jež využívají pouze \textbf{cross} operátor. Iterace skrze tuple je prováděna paralelně, zatímco skrze array sekvenčně s intuitivní definicí procházení kombinace tohoto dle definicí výše (jako u matic vždy iterátor řádků, sloupců; iterátory vícerozměrným systémem + s fixovanou danou souřadnicí/souřadnicemi).
 
-    Procházení je definováno pro operátor \textbf{plus} pouze, jsou-li po sobě jdoucí policy stejného typu, pak je prováděno sekvenčně.
+    Procházení je definováno pro operátor \textbf{plus} pouze, jsou-li po sobě jdoucí policy kompatibilního typu (vysvětleno příkladem níže), pak je prováděno sekvenčně.
+
+    \subsection{Příklad}
 
     Uvažujme následující příklad pro ukázání iterace na SoA a AoS:
     \begin{lstlisting}
@@ -82,7 +91,7 @@ auto i2 = policy2::begin(data);
     \lstinline{i1} $==$ \lstinline{i2} $\to$ \lstinline{++i1} $==$ \lstinline{++i2}
     \end{center}
 
-    \section{\lstinline{at()} funkce}
+    \section{Funkce \lstinline{at()}}
 
     Funkce \lstinline{at()} je definována rekurzivním voláním pomocí template například následujícím způsobem (subject to change; zde jen velice zjednodušeně pro array), měla by korespondovat s implementací iterátorů:
     \lstinputlisting{draftsimplified1.cpp}
