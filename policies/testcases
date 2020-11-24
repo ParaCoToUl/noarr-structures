@@ -11,7 +11,7 @@ int[10, 5, 3, 20] cube;
 
 
 
-[h2] Arrays of arrays
+[h2] Arrays of arrays (where N is raw size of the data = sum of the legths of all rows)
 
 [H1] Triangle
 Arrays of legth 1, 2, 3, 4, 5, 6...
