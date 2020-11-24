@@ -1,7 +1,16 @@
 {
     "cSpell.language": "en,cs",
     "cSpell.words": [
+        "Repos",
+        "SYCL",
+        "constexpr",
+        "cuda",
+        "ekondis",
+        "kmeans",
+        "mixbench",
         "simd",
-        "struct"
+        "stringstyle",
+        "struct",
+        "vochi"
     ]
 }
