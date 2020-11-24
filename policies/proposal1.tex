@@ -1,0 +1,83 @@
+\documentclass[a4paper,12pt]{article} % This defines the style of your paper
+
+\usepackage[top = 2.5cm, bottom = 2.5cm, left = 2.5cm, right = 2.5cm]{geometry} 
+
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+
+\usepackage{multirow} % Multirow is for tables with multiple rows within one cell.
+\usepackage{booktabs} % For even nicer tables.
+
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+\usepackage{syntax}
+
+\usepackage{verbatim}
+\usepackage[usenames,dvipsnames]{xcolor}
+\usepackage{listings}
+\usepackage{color}
+
+\lstset{language=C++}
+
+\usepackage{setspace}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{.5em}
+
+\begin{document}
+    \section{Gramatika}
+
+    \begin{grammar}
+        <policy> ::= <simple_policy>
+        \alt <type_policy>
+        \alt <policy> `cross' <policy>
+        \alt <policy> `plus' <policy>
+
+        <simple_policy> ::= <array>
+        \alt <tuple>
+        \alt <vector>
+
+        <array> ::= `array<' <N> `>'
+
+        <tuple> ::= `tuple<' <type_list> `>'
+
+        <vector> ::= `vector'
+
+        <type_policy> ::= <type>
+    \end{grammar}
+
+    $\mathbf{\langle simple\_policy \rangle}$ definuje jednoduchou strukturu s běžnou sémantikou.
+
+    $\mathbf{\langle type\_policy \rangle}$ definuje typ dat ve struktuře, funguje na základě definování typového ``módu'', kdy všechny následující data sdílejí daný typ, tuto funkci má i $\mathbf{\langle tuple \rangle}$.
+
+    \textbf{cross} a \textbf{plus} jsou operátory kombinující jednotlivé policy.
+    \textbf{cross} má přednost a jeho význam je, že struktura definovaná levým operandem je složena z podstruktur definovaných pravým operandem. Význam \textbf{plus} je jednoduché řetězení operandů za sebou.
+
+    \section{iterace}
+
+    Jednoduchá iterace je definovaná pro jednoduché policy a pro všechny policy, jež využívají pouze \textbf{cross} operátor. Iterace skrze tuple je prováděna paralelně, zatímco skrze array sekvenčně s intuitivní definicí procházení kombinace tohoto dle definicí výše (jako u matic vždy iterátor řádků, sloupců; iterátory vícerozměrným systémem + s fixovanou danou souřadnicí/souřadnicemi).
+
+    Procházení je definováno pro operátor \textbf{plus} pouze, jsou-li po sobě jdoucí policy stejného typu, pak je prováděno sekvenčně.
+
+    Uvažujme následující příklad pro ukázání iterace na SoA a AoS:
+    \begin{lstlisting}
+using policy1 = tuple<float, int, char> cross array<N>; // SoA
+using policy2 = array<N> cross tuple<float, int, char>; // AoS
+
+auto i1 = policy1::begin(data);
+auto i2 = policy2::begin(data);
+    \end{lstlisting}
+
+    potom platí (vedle očekávaných vlastností), že \lstinline{i1->get<n>()} a \lstinline{i1->get<n>()} jsou stejného typu (kde $n \in [0..2]$) a je definováno lineární uspořádání na sjednocení množin obou iterátorů (? i operace na nich) tak, že:
+
+    \begin{center}
+        \lstinline{policy1::begin(data)} $==$ \lstinline{policy2::begin(data)} $\wedge$
+    \lstinline{i1} $==$ \lstinline{i2} $\to$ \lstinline{++i1} $==$ \lstinline{++i2}
+    \end{center}
+
+    \section{\lstinline{at()} funkce}
+
+    Funkce \lstinline{at()} je definována rekurzivním voláním pomocí templatů například následujícím způsobem (subject to change; zde jen velice zjednodušeně pro array), měla by korespondovat s implementací iterátorů:
+    \lstinputlisting[language=C++]{draftsimplified1.cpp}
+\end{document}
