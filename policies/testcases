@@ -2,24 +2,30 @@ TODO: formatting
 
 [H2] Basic
 
-[H1]  Struct
+[H1] Struct
 
-[H1]   Array
+[H1] Array
 
-[H1]   Cube
+[H1] Cube
+
 int[10, 5, 3, 20] cube;
-
 
 
 [h2] Arrays of arrays (where N is raw size of the data = sum of the legths of all rows)
 
 [H1] Triangle
 Arrays of legth 1, 2, 3, 4, 5, 6...
-PROBLEM [IN CUBIFICATION]: Space wasted is O(N). 
+PROBLEM [IN CUBIFICATION]: Space wasted is O(N).
+DEFINITION [IN SHAPE-POLICY]: policy<array<1>, plus, array<2>, plus, array<3>, plus, array<4>, plus, array<5>, plus, array<6>, ...> (0 waste)
 
 [H1] Heap 
 Arrays of length 1, 2, 4, 8, 16, 32, 64...
 PROBLEM [IN CUBIFICATION]: Space wasted is O(N^2).
+DEFINITION [IN SHAPE-POLICY]: (0 waste)
+  [1]  policy<tuple<array<1>,array<16>>,tuple<array<1>,array<4>>,tuple<array<1>,array<2>>>
+  [2]  policy<array<1>, plus, array<2>, plus, array<4>, plus, array<8>, plus, array<16>, plus, array<32>, plus, array<64>, ...>
+  [3]  policy<tuple<array<1>, array<2>, array<4>, array<8>, array<16>, array<32>, array<64>, ...>>
+  [etc]
 
 [H1] Any 
 Arrays of length any legth, where max legth is N and legth of array of arrays is M
