@@ -36,7 +36,7 @@
 
 \begin{document}
 
-\section{Kontejnerová algebra pro jednoduché souřadnice}
+\section{Kontejnery s jednoduchými souřadnicemi}
 
 \begin{definition}[Paměť]
 Paměť je $\mathbb{N}_0$.
@@ -47,19 +47,19 @@ Cesta $p$ je slovo čísel z $\mathbb{N}_0$, univerzum cest budeme značit $P$.
 \end{definition}
 
 \begin{definition}[Adresový prostor]
-Adresový prostor $A$ je taková podmnožina univerza cest $P$, že $\forall X n Y \in A \wedge n > 0 \wedge X,Y \in P: X (n - 1) Y \in A$.
+Adresový prostor $A$ je taková podmnožina univerza cest $P$, že $\forall X n Y \in A \wedge n > 0 \wedge X,Y \in P: \exists Y' \in P: X (n - 1) Y' \in A$. (Neboli: každá větev cest je indexovaná od nuly a nejsou přeskočeny žádné indexy)
 \end{definition}
 
 \begin{definition}[Velikost prvku]
-Velikost prvku daného adresového prostoru $A$ je funkce $\mu_A: A \to N_0$.
+Velikost prvku daného adresového prostoru $A$ je funkce $\mu_A: \mathbb{N}_0 \to \mathbb{N}_0$.
 \end{definition}
 
 \begin{definition}[Offset prvku]
-Offset prvku daného adresového prostoru $A$ je funkce $\delta_A: A \to N_0$, $\delta(a) = \sum\limits_{n=0}^{a-1} \mu_A(n)$.
+Offset prvku daného adresového prostoru $A$ je funkce $\delta_A: A \to \mathbb{N}_0$, $\delta(a) = \sum\limits_{n=0}^{a-1} \mu_A(n)$.
 \end{definition}
 
 \begin{definition}[Adresace]
-Mějme dán adresový prostor $A$, potom pro adresový prostor $M \subseteq A$, zobrazení $\alpha: M \to \mathbb{N}_0$ se nazývá adresace (v adresovém prostoru $A$).
+Mějme dán adresový prostor $A$, potom pro adresový prostor $M \subseteq A$ se zobrazení $\alpha: M \to \mathbb{N}_0$ nazývá adresace (v adresovém prostoru $A$).
 \end{definition}
 
 \begin{corollary}[O adresaci]
@@ -82,8 +82,10 @@ Adresace může mít následující vlastnosti:
 \end{definition}
 
 \begin{definition}[Tuple]
-    Array je takový kontejner v daném adresovém prostoru $A$, že jeho definičním oborem $M$ je množina obsahující pouze slova délky $1$.
+    Tuple je takový kontejner v daném adresovém prostoru $A$, že jeho definičním oborem $M$ je množina obsahující pouze slova délky $1$.
 \end{definition}
+
+\subsection{Runtime kontejnery}
 
 \begin{definition}[Univerzum runtime]
     Univerzem runtime budeme nazývat nějakou nekonečnou množinu jevů $R$.
@@ -113,19 +115,51 @@ Adresace může mít následující vlastnosti:
     Vektor v runtime je takový dynamický kontejner $v_R$, jehož hodnotami jsou array vždy v nějakém adresovém prostoru $A_r$, na jejich definičních oborech je $\mu_A$ vždy konstantní a vždy stejná bez ohledu na $r$ a množina všech definičních oborů zmíněných array je $\{\{0,1,\dots n\}; n \in N_0\}$.
 \end{definition}
 
+\subsection{Kontejnerová algebra}
+
+\begin{definition}[Abstraktní kontejner]
+    Abstraktní kontejner je zobrazení, které každému runtime přiřadí adresový prostor
+\end{definition}
+
+\begin{definition}[Array a vektor tagy]
+    Array (a vektor) tag je abstrakcí nad danou strukturou značící všechny array (či vektory) v daném univerzu runtime.
+\end{definition}
+
 \begin{definition}[Algebra kontejnerů]
-    TODO, ale easy:
+    TODO formální definice
 
     \begin{itemize}
         \item $\cdot$ má sémantiku rozdělení kontejneru na sub-kontejnery, násobí cesty
+        \begin{itemize}
+            \item alespoň jeden z operandů musí být abstraktní
+        \end{itemize}
         \item $+$ má sémantiku řazení za sebe, řadí cesty za sebe, pravého operandu zvětšeny v dominantním rozměru (první znak) o maximum z levého operandu plus jedna (nezvětší, pokud maximum není dobře definováno)
+        \begin{itemize}
+            \item oba operandy musí být stejného typu (abstraktní $\times$ konkrétní)
+        \end{itemize}
     \end{itemize}
 \end{definition}
 
 \begin{corollary}[Úplnost algebry kontejnerů]
-    TODO
+    TODO: mělo by to platit
 
     Algebra kontejnerů pokrývá všechny netriviální kontejnery
 \end{corollary}
+
+\subsection{View}
+
+\begin{definition}[View]
+    View je zobecněním kontejneru. Nemá omezení na spojitost a rostoucnost, je však stále monotónní v každé jedné souřadnici (ne však napříč souřadnicemi).
+\end{definition}
+
+\begin{definition}[Reverse, shift a align]
+    Funkce \textbf{reverse} obrací indexaci v nejvyšší souřadnici, \textbf{shift} posouvá všechny prvky (obrazy adresace) o zadanou konstantu, \textbf{align} posune danou strukturu (view či kontejner) na násobek dané konstanty.
+\end{definition}
+
+\section{Mapy}
+
+\begin{definition}[Mapa]
+    Mapa je zobecněním view, kde je upuštěno od monotonie a prostoty. Do této kategorie patří vše myslitelné i nemyslitelné.
+\end{definition}
 
 \end{document}
