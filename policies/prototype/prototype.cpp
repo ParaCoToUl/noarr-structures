@@ -6,6 +6,24 @@ template<std::size_t S, typename T> struct array;
 template<typename T = void> struct vector;
 template<typename...Ts> struct tuple;
 
+template<typename T>
+struct traits {
+    template<typename _T, typename = void>
+    struct size_ {
+        static constexpr std::size_t value = sizeof(_T);
+    };
+
+    template<typename...>
+    using void_t = void;
+
+    template<typename _T>
+    struct size_<_T, void_t<decltype(_T::size)>> {
+        static constexpr std::size_t value = _T::size;
+    };
+    
+    static constexpr std::size_t size = size_<T>::value;
+};
+
 template<std::size_t S, typename T>
 struct array {
 private:
@@ -19,33 +37,20 @@ private:
         using type = T*;
     };
 
-    template<typename _T, typename = void>
-    struct size_ {
-        static constexpr std::size_t value = sizeof(_T);
-    };
-
-    template<typename...>
-    using void_t = void;
-
-    template<typename _T>
-    struct size_<_T, void_t<decltype(_T::size)>> {
-        static constexpr std::size_t value = _T::size;
-    };
-
 public:
-    static constexpr std::size_t size = S * size_<T>::value;
+    static constexpr std::size_t size = S * traits<T>::size;
 
     template<typename I, typename... Is>
     using at_type = typename at_type_<I, Is...>::type;
 
     template<typename I, typename... Is>
     static at_type<I, Is...> at(void* data, I i, Is... is) {
-        return T::at((void*)((char*)data + size_<T>::value * i), is...);
+        return T::at((void*)((char*)data + traits<T>::size * i), is...);
     }
 
     template<typename I>
     static at_type<I> at(void* data, I i) {
-        return (at_type<I>)((char*)data + size_<T>::value * i);
+        return (at_type<I>)((char*)data + traits<T>::size * i);
     }
 };
 
