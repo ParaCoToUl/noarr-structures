@@ -4,23 +4,22 @@
 #include "arrr.hpp"
 
 using namespace arrr;
-using data_type = decltype(scalar<float> ^ array<'y', 20> ^ array<'x', 20>);
 
-__global__ void use(float *data) {
-    data_type as{};
+template<typename AS>
+__global__ void use(float *data, AS as) {
     *(as % fixs<'x','y'>(blockIdx.x, threadIdx.x) % at(data)) = blockIdx.x * blockDim.x + threadIdx.x;
 }
 
 int main() {
     float *data;
 
-    std::array<float, 400> local;
+    std::array<float, 400000> local;
 
-    cudaMalloc(&data, 400*sizeof(float));
+    cudaMalloc(&data, sizeof(local));
 
-    use<<<20, 20>>>(data);
+    use<<<20000, 20>>>(data, (scalar<float> ^ vector<'y'> ^ array<'x', 20000>) % resize<'y'>(20));
 
-    cudaMemcpy(local.data(), data, 400*sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(local.data(), data, sizeof(local), cudaMemcpyDeviceToHost);
 
     size_t i = 0;
     for (auto f : local) {
