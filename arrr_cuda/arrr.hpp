@@ -11,7 +11,7 @@ namespace arrr {
  * anything have size 1 because of some memory layout BS. Include this in
  * structs that should really be empty. */
 struct empty_struct_t {
-  int empty_struct_dummy[0] = {};
+  // int empty_struct_dummy[0] = {};
 };
 
 /* polymorphic dot-style function application, avoids lisp))))))) */
@@ -106,17 +106,28 @@ struct tuple_dim {
 };
 
 /* tuple type modifications; thanks @sebrockm on stackoverflow */
+
+template<size_t B>
+struct tuple_slice_B { static constexpr size_t value = B; };
+
+template<typename B, typename T, size_t... IS>
+constexpr auto tuple_slice_help(std::index_sequence<IS...>, T &t, B) {
+  return std::make_tuple(std::get<B::value + IS>(t)...);
+}
+
 template <size_t B, size_t E, typename T>
 constexpr auto tuple_slice(T t) {
-  return [&]<size_t... IS>(std::index_sequence<IS...>) {
-    return std::make_tuple(std::get<B + IS>(t)...);
-  }
-  (std::make_index_sequence<E - B>());
+  // return [&]<size_t... IS>(std::index_sequence<IS...>) {
+  //   return std::make_tuple(std::get<B + IS>(t)...);
+  // }
+  // (std::make_index_sequence<E - B>());
+
+  return tuple_slice_help(std::make_index_sequence<E - B>(), t, tuple_slice_B<B>{});
 }
 
 template <std::size_t I, typename T, typename NT>
 constexpr auto tuple_set_element(T tuple, NT t) {
-  constexpr auto N = std::tuple_size_v<T>;
+  constexpr auto N = std::tuple_size<T>{};
   return std::tuple_cat(tuple_slice<0, I>(tuple), std::make_tuple(t),
                         tuple_slice<I + 1, N>(tuple));
 }
@@ -167,7 +178,7 @@ struct size_f {
 
   template <typename... TS>
   static constexpr size_t tuple_size(std::tuple<TS...> t) {
-    return std::apply(tuple_size1<TS...>, t);
+    return *std::forward(t).*tuple_size1<TS...>;
   }
 
   template <char DIM, size_t I, typename... TS>
@@ -176,7 +187,7 @@ struct size_f {
   }
 };
 
-static constexpr size_f size;
+static constexpr size_f size = {};
 
 /* demo: total layers of construction all the way to a scalar */
 struct depth_f {
@@ -212,7 +223,7 @@ struct depth_f {
   }
 };
 
-static constexpr depth_f depth;
+static constexpr depth_f depth = {};
 
 /* reverse depth -- construction layers between the index and a base scalar */
 template <char C>
@@ -502,17 +513,28 @@ struct unfix_all_f {
     return join2<A, B, X, decltype(j.t % unfix_all_f()), IMPL>(
         j.t % unfix_all_f(), j.impl);
   }
+  template<char DIM>
+  struct unfix_all_f_DIM { static constexpr char value = DIM; };
+
+  template<size_t I>
+  struct unfix_all_f_I { static constexpr size_t value = I; };
+
+  template<typename DIM, typename I, typename T, size_t... IS>
+  static constexpr auto unfix_all_f_help(std::index_sequence<IS...>, T &t, DIM, I) {
+    return make_tuple_dim<DIM::value, I::value>((std::get<IS>(t.ts) % unfix_all_f())...);
+  }
 
   template <char DIM, size_t I, typename... TS>
   constexpr auto operator()(tuple_dim<DIM, I, TS...> t) {
-    return [&]<size_t... IS>(std::index_sequence<IS...>) {
-      return make_tuple_dim<DIM, I>((std::get<IS>(t.ts) % unfix_all_f())...);
-    }
-    (std::make_index_sequence<sizeof...(TS)>());
+    // return [&]<size_t... IS>(std::index_sequence<IS...>) {
+    //   return make_tuple_dim<DIM, I>((std::get<IS>(t.ts) % unfix_all_f())...);
+    // }
+    // (std::make_index_sequence<sizeof...(TS)>());
+    return unfix_all_f_help(std::make_index_sequence<sizeof...(TS)>(), t, unfix_all_f_DIM<DIM>{}, unfix_all_f_I<I>{});
   }
 };
 
-static constexpr unfix_all_f unfix_all;
+static constexpr unfix_all_f unfix_all{};
 
 /* fix an index in one dimension */
 template <char C>
@@ -622,7 +644,7 @@ struct dimval_f {
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr  size_t operator()(tuple_dim<DIM, I, TS...> t) {
     return std::get<I>(t.ts) % dimval_f();
   }
 };
@@ -664,29 +686,29 @@ struct field_f {
   }
 };
 
-template <char DIM, size_t FLD>
-static constexpr field_f<DIM, FLD> field;
+// template <char DIM, size_t FLD>
+// static constexpr field_f<DIM, FLD> field;
 
-template <char C, size_t FLD, auto... ETC>
-struct fields_f {
-  empty_struct_t empty_struct;
-  template <typename K>
-  constexpr auto operator()(K k) {
-    return k % field_f<C, FLD>() % fields_f<ETC...>();
-  }
-};
+// template <char C, size_t FLD, auto... ETC>
+// struct fields_f {
+//   empty_struct_t empty_struct;
+//   template <typename K>
+//   constexpr auto operator()(K k) {
+//     return k % field_f<C, FLD>() % fields_f<ETC...>();
+//   }
+// };
 
-template <char C, size_t FLD>
-struct fields_f<C, FLD> {
-  empty_struct_t empty_struct;
-  template <typename K>
-  constexpr auto operator()(K k) {
-    return k % field_f<C, FLD>();
-  }
-};
+// template <char C, size_t FLD>
+// struct fields_f<C, FLD> {
+//   empty_struct_t empty_struct;
+//   template <typename K>
+//   constexpr auto operator()(K k) {
+//     return k % field_f<C, FLD>();
+//   }
+// };
 
-template <char DIM, size_t FLD, auto... ETC>
-static constexpr fields_f<DIM, FLD, ETC...> fields;
+// template <char DIM, size_t FLD, auto... ETC>
+// static constexpr fields_f<DIM, FLD, ETC...> fields{};
 
 /* TODO has_field_p and pals */
 
@@ -717,9 +739,10 @@ struct offset_f {
 
   template <char A, char X, char Y, typename T, typename IMPL, typename DIMS>
   constexpr size_t operator()(split2<A, X, Y, T, IMPL> s, DIMS ds) {
-    auto [x, y] = s.impl(s.t, ds % dimval_f<A>());
+    // auto [x, y] = s.impl(s.t, ds % dimval_f<A>());
+    auto xy = s.impl(s.t, ds % dimval_f<A>());
     return operator()(s.t, fixed_dimension<X, fixed_dimension<Y, DIMS>>(
-                               x, fixed_dimension<Y, DIMS>(y, ds)));
+                               std::get<0>(xy), fixed_dimension<Y, DIMS>(std::get<1>(xy), ds)));
   }
 
   template <char A, char B, char X, typename T, typename IMPL, typename DIMS>
@@ -736,7 +759,7 @@ struct offset_f {
   }
 };
 
-static constexpr offset_f offset;
+static constexpr offset_f offset{};
 
 /* get a pointer relative to the data structure origin */
 struct at {
@@ -890,7 +913,7 @@ constexpr auto operator^(K k, array_part<C, N> a) {
 }
 
 template <char C, size_t N>
-static constexpr array_part<C, N> array;
+static constexpr array_part<C, N> array{};
 
 template <char C>
 struct unsized_vector_part {
