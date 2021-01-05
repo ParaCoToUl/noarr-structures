@@ -11,7 +11,7 @@ namespace arrr {
  * anything have size 1 because of some memory layout BS. Include this in
  * structs that should really be empty. */
 struct empty_struct_t {
-  // int empty_struct_dummy[0] = {};
+  char empty_struct_dummy[0] = {};
 };
 
 /* polymorphic dot-style function application, avoids lisp))))))) */
@@ -111,7 +111,7 @@ template<size_t B>
 struct tuple_slice_B { static constexpr size_t value = B; };
 
 template<typename B, typename T, size_t... IS>
-constexpr auto tuple_slice_help(std::index_sequence<IS...>, T &t, B) {
+constexpr auto tuple_slice_help(std::index_sequence<IS...>, T t, B) {
   return std::make_tuple(std::get<B::value + IS>(t)...);
 }
 
@@ -138,31 +138,29 @@ constexpr auto tuple_set_element(T tuple, NT t) {
  * Functions on type kinds!
  */
 
-struct size_f {
-  empty_struct_t empty_struct;
-
+struct size_f : empty_struct_t {
   template <typename T>
-  constexpr size_t operator()(scalar_t<T> s) {
+  constexpr size_t operator()(scalar_t<T> s) const {
     return sizeof(T);
   }
 
   template <char DIM, typename T, typename IMPL>
-  constexpr size_t operator()(dimension<DIM, T, IMPL> d) {
+  constexpr size_t operator()(dimension<DIM, T, IMPL> d) const {
     return d.impl.size(d.t);
   }
 
   template <char DIM, typename T>
-  constexpr size_t operator()(fixed_dimension<DIM, T> d) {
+  constexpr size_t operator()(fixed_dimension<DIM, T> d) const {
     return d.t % size_f();
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) const {
     return s.t % size_f();
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) const {
     return j.t % size_f();
   }
 
@@ -182,43 +180,43 @@ struct size_f {
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t) const {
     return tuple_size(t.ts);
   }
 };
 
-static constexpr size_f size = {};
+static constexpr size_f size{};
 
 /* demo: total layers of construction all the way to a scalar */
 struct depth_f {
   empty_struct_t empty_struct;
   template <typename T>
-  constexpr size_t operator()(scalar_t<T> s) {
+  constexpr size_t operator()(scalar_t<T> s) const {
     return 0;
   }
 
   template <char DIM, typename T, typename IMPL>
-  constexpr size_t operator()(dimension<DIM, T, IMPL> d) {
+  constexpr size_t operator()(dimension<DIM, T, IMPL> d) const {
     return 1 + d.t % depth_f();
   }
 
   template <char DIM, typename T>
-  constexpr size_t operator()(fixed_dimension<DIM, T> d) {
+  constexpr size_t operator()(fixed_dimension<DIM, T> d) const {
     return d.t % depth_f();
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) const {
     return s.t % depth_f();
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) const {
     return j.t % depth_f();
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t) const {
     return 1 + std::get<I>(t.ts) % depth_f();
   }
 };
@@ -231,7 +229,7 @@ struct level_f {
   empty_struct_t empty_struct;
 
   template <char DIM, typename T, typename IMPL>
-  constexpr size_t operator()(dimension<DIM, T, IMPL> d) {
+  constexpr size_t operator()(dimension<DIM, T, IMPL> d) const {
     if constexpr (DIM == C)
       return d.t % depth_f();
     else
@@ -239,12 +237,12 @@ struct level_f {
   }
 
   template <char DIM, typename T>
-  constexpr size_t operator()(fixed_dimension<DIM, T> d) {
+  constexpr size_t operator()(fixed_dimension<DIM, T> d) const {
     return d.t % level_f();
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) const {
     if constexpr (A == C)
       return s.t % depth_f();
     else
@@ -252,7 +250,7 @@ struct level_f {
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) const {
     if constexpr (A == C || B == C)
       return j.t % depth_f();
     else
@@ -260,7 +258,7 @@ struct level_f {
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t) const {
     if constexpr (DIM == C)
       return std::get<I>(t.ts) % depth_f();
     else
@@ -284,11 +282,15 @@ struct has_dim_p<C, scalar_t<T>> {
 template <char C, char DIM, typename T, typename IMPL>
 struct has_dim_p<C, dimension<DIM, T, IMPL>> {
   static constexpr bool get() {
-    if constexpr (C == DIM) {
-      static_assert(!has_dim_p<C, T>::get(), "redundant dimension");
-      return true;
-    } else
-      return has_dim_p<C, T>::get();
+    return has_dim_p<C, T>::get();
+  }
+};
+
+template <char C, typename T, typename IMPL>
+struct has_dim_p<C, dimension<C, T, IMPL>> {
+  static constexpr bool get() {
+    static_assert(!has_dim_p<C, T>::get(), "redundant dimension");
+    return true;
   }
 };
 
@@ -326,7 +328,7 @@ struct has_dim_f {
   empty_struct_t empty_struct;
 
   template <typename K>
-  constexpr bool operator()(K) {
+  constexpr bool operator()(K) const {
     return has_dim_p<C, K>::get();
   }
 };
@@ -340,7 +342,7 @@ struct has_dims_f {
   empty_struct_t empty_struct;
 
   template <typename K>
-  constexpr bool operator()(K k) {
+  constexpr bool operator()(K k) const {
     return k % has_dim_f<C>() && k % has_dims_f<CS...>();
   }
 };
@@ -350,7 +352,7 @@ struct has_dims_f<C> {
   empty_struct_t empty_struct;
 
   template <typename K>
-  constexpr bool operator()(K k) {
+  constexpr bool operator()(K k) const {
     return k % has_dim_f<C>();
   }
 };
@@ -390,23 +392,32 @@ struct resize {
 
   constexpr resize(size_t n) : n(n) {}
 
+  template<char DIM, typename T, typename IMPL>
+  struct _par_op_help1 {
+    static constexpr auto call(resize<C> This, dimension<DIM, T, IMPL> d) {
+      return dimension<DIM, decltype(d.t % resize<C>(This.n)), IMPL>(d.t % resize<C>(This.n), d.impl);
+    }
+  };
+
+  template<typename T, typename IMPL>
+  struct _par_op_help1<C, T, IMPL> {
+    static constexpr auto call(resize<C> This, dimension<C, T, IMPL> d) {
+      return dimension<C, T, decltype(d.impl.resize(This.n))>(d.t, d.impl.resize(This.n));
+    }
+  };
+
   template <char DIM, typename T, typename IMPL>
-  constexpr auto operator()(dimension<DIM, T, IMPL> d) {
-    if constexpr (DIM == C)
-      return dimension<DIM, T, decltype(d.impl.resize(n))>(d.t,
-                                                           d.impl.resize(n));
-    else
-      return dimension<DIM, decltype(d.t % resize<C>(n)), IMPL>(
-          d.t % resize<C>(n), d.impl);
+  constexpr auto operator()(dimension<DIM, T, IMPL> d) const {
+    return _par_op_help1<DIM, T, IMPL>::call(*this, d);
   }
 
   template <char DIM, typename T>
-  constexpr auto operator()(fixed_dimension<DIM, T> d) {
+  constexpr auto operator()(fixed_dimension<DIM, T> d) const {
     return d.t % resize<C>(n);  // FIXME this removes the fix, is that right?
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) const {
     if constexpr (A == C)
       return split2<A, X, Y, T, decltype(s.impl.resize(n))>(s.t,
                                                             s.impl.resize(n));
@@ -416,7 +427,7 @@ struct resize {
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr auto operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr auto operator()(join2<A, B, X, T, IMPL> j) const {
     if constexpr (A == C)
       return join2<A, B, X, T, decltype(j.impl.resize1(n))>(j.t,
                                                             j.impl.resize1(n));
@@ -429,7 +440,7 @@ struct resize {
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) const {
     return make_tuple<DIM, I>(
         tuple_set_element<I>(t.ts, std::get<I>(t.ts) % resize<C>(n)));
   }
@@ -441,39 +452,50 @@ struct unfix_f {
   empty_struct_t empty_struct;
 
   template <typename T>
-  constexpr auto operator()(scalar_t<T> s) {
+  constexpr auto operator()(scalar_t<T> s) const {
     return s;
   }
 
   template <char DIM, typename T, typename IMPL>
-  constexpr auto operator()(dimension<DIM, T, IMPL> d) {
+  constexpr auto operator()(dimension<DIM, T, IMPL> d) const {
     return dimension<DIM, decltype(d.t % unfix_f<C>()), IMPL>(
         d.t % unfix_f<C>(), d.impl);
   }
 
-  template <char DIM, typename T>
-  constexpr auto operator()(fixed_dimension<DIM, T> d) {
-    if constexpr (DIM == C)
-      return d.t;
-    else
+  template<char DIM, typename T>
+  struct _par_op_help2 {
+    static constexpr auto call(fixed_dimension<DIM, T> d) {
       return fixed_dimension<DIM, decltype(d.t % unfix_f<C>())>(
           d.idx, d.t % unfix_f<C>());
+    }
+  };
+
+  template<typename T>
+  struct _par_op_help2<C, T> {
+    static constexpr auto call(fixed_dimension<C, T> d) {
+      return d.t;
+    }
+  };
+
+  template <char DIM, typename T>
+  constexpr auto operator()(fixed_dimension<DIM, T> d) const {
+    return _par_op_help2<DIM, T>::call(d);
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) const {
     return split2<A, X, Y, decltype(s.t % unfix_f<C>()), IMPL>(
         s.t % unfix_f<C>(), s.impl);
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr auto operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr auto operator()(join2<A, B, X, T, IMPL> j) const {
     return join2<A, B, X, decltype(j.t % unfix_f<C>()), IMPL>(
         j.t % unfix_f<C>(), j.impl);
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) const {
     return make_tuple<DIM, I>(
         tuple_set_element<I>(t.ts, std::get<I>(t.ts) % unfix_f<C>()));
   }
@@ -487,29 +509,29 @@ struct unfix_all_f {
   empty_struct_t empty_struct;
 
   template <typename T>
-  constexpr auto operator()(scalar_t<T> s) {
+  constexpr auto operator()(scalar_t<T> s) const {
     return s;
   }
 
   template <char DIM, typename T, typename IMPL>
-  constexpr auto operator()(dimension<DIM, T, IMPL> d) {
+  constexpr auto operator()(dimension<DIM, T, IMPL> d) const {
     return dimension<DIM, decltype(d.t % unfix_all_f()), IMPL>(
         d.t % unfix_all_f(), d.impl);
   }
 
   template <char DIM, typename T>
-  constexpr auto operator()(fixed_dimension<DIM, T> d) {
+  constexpr auto operator()(fixed_dimension<DIM, T> d) const {
     return d.t % unfix_all_f();
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) const {
     return split2<A, X, Y, decltype(s.t % unfix_all_f()), IMPL>(
         s.t % unfix_all_f(), s.impl);
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr auto operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr auto operator()(join2<A, B, X, T, IMPL> j) const {
     return join2<A, B, X, decltype(j.t % unfix_all_f()), IMPL>(
         j.t % unfix_all_f(), j.impl);
   }
@@ -520,12 +542,12 @@ struct unfix_all_f {
   struct unfix_all_f_I { static constexpr size_t value = I; };
 
   template<typename DIM, typename I, typename T, size_t... IS>
-  static constexpr auto unfix_all_f_help(std::index_sequence<IS...>, T &t, DIM, I) {
+  static constexpr auto unfix_all_f_help(std::index_sequence<IS...>, T t, DIM, I) {
     return make_tuple_dim<DIM::value, I::value>((std::get<IS>(t.ts) % unfix_all_f())...);
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) const {
     // return [&]<size_t... IS>(std::index_sequence<IS...>) {
     //   return make_tuple_dim<DIM, I>((std::get<IS>(t.ts) % unfix_all_f())...);
     // }
@@ -583,17 +605,17 @@ struct has_dimval_f {
   empty_struct_t empty_struct;
 
   template <typename T>
-  constexpr bool operator()(scalar_t<T> s) {
+  constexpr bool operator()(scalar_t<T> s) const {
     return false;
   }
 
   template <char DIM, typename T, typename IMPL>
-  constexpr bool operator()(dimension<DIM, T, IMPL> d) {
+  constexpr bool operator()(dimension<DIM, T, IMPL> d) const {
     return d.t % has_dimval_f();
   }
 
   template <char DIM, typename T>
-  constexpr bool operator()(fixed_dimension<DIM, T> d) {
+  constexpr bool operator()(fixed_dimension<DIM, T> d) const {
     if constexpr (DIM == C)
       return true;
     else
@@ -601,17 +623,17 @@ struct has_dimval_f {
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr bool operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr bool operator()(split2<A, X, Y, T, IMPL> s) const {
     return s.t % has_dimval_f();
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr bool operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr bool operator()(join2<A, B, X, T, IMPL> j) const {
     return j.t % has_dimval_f();
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr bool operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr bool operator()(tuple_dim<DIM, I, TS...> t) const {
     return std::get<I>(t.ts) % has_dimval_f();
   }
 };
@@ -621,30 +643,41 @@ struct dimval_f {
   empty_struct_t empty_struct;
 
   template <char DIM, typename T, typename IMPL>
-  constexpr size_t operator()(dimension<DIM, T, IMPL> d) {
+  constexpr size_t operator()(dimension<DIM, T, IMPL> d) const {
     return d.t % dimval_f();
   }
 
   template <char DIM, typename T>
-  constexpr size_t operator()(fixed_dimension<DIM, T> d) {
-    if constexpr (DIM == C)
-      return d.idx;
-    else
+  struct _par_op_help1 {
+    static constexpr auto call(fixed_dimension<DIM, T> d) {
       return d.t % dimval_f();
+    }
+  };
+
+  template <typename T>
+  struct _par_op_help1<C, T> {
+    static constexpr auto call(fixed_dimension<C, T> d) {
+      return d.idx;
+    }
+  };
+
+  template <char DIM, typename T>
+  constexpr size_t operator()(fixed_dimension<DIM, T> d) const {
+    return _par_op_help1<DIM, T>::call(d);
   }
 
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s) const {
     return s.t % dimval_f();
   }
 
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr size_t operator()(join2<A, B, X, T, IMPL> j) const {
     return j.t % dimval_f();
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr  size_t operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr  size_t operator()(tuple_dim<DIM, I, TS...> t) const {
     return std::get<I>(t.ts) % dimval_f();
   }
 };
@@ -655,29 +688,29 @@ struct field_f {
   empty_struct_t empty_struct;
 
   template <char DIM, typename T, typename IMPL>
-  constexpr auto operator()(dimension<DIM, T, IMPL> d) {
+  constexpr auto operator()(dimension<DIM, T, IMPL> d) const {
     return dimension<DIM, decltype(d.t % field_f<C, FLD>()), IMPL>(
         d.t % field_f<C, FLD>(), d.impl);
   }
 
   template <char DIM, typename T>
-  constexpr auto operator()(fixed_dimension<DIM, T> d) {
+  constexpr auto operator()(fixed_dimension<DIM, T> d) const {
     return fixed_dimension<DIM, decltype(d.t % field_f<C, FLD>())>(
         d.t % field_f<C, FLD>());
   }
   template <char A, char X, char Y, typename T, typename IMPL>
-  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) {
+  constexpr auto operator()(split2<A, X, Y, T, IMPL> s) const {
     return split2<A, X, Y, decltype(s.t % field_f<C, FLD>()), IMPL>(
         s.t % field_f<C, FLD>(), s.impl);
   }
   template <char A, char B, char X, typename T, typename IMPL>
-  constexpr auto operator()(join2<A, B, X, T, IMPL> j) {
+  constexpr auto operator()(join2<A, B, X, T, IMPL> j) const {
     return join2<A, B, X, decltype(j.t % field_f<C, FLD>()), IMPL>(
         j.t % field_f<C, FLD>(), j.impl);
   }
 
   template <char DIM, size_t I, typename... TS>
-  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) {
+  constexpr auto operator()(tuple_dim<DIM, I, TS...> t) const {
     if constexpr (DIM == C)
       return make_tuple<DIM, FLD>(t.ts);
     else
@@ -693,7 +726,7 @@ struct field_f {
 // struct fields_f {
 //   empty_struct_t empty_struct;
 //   template <typename K>
-//   constexpr auto operator()(K k) {
+//   constexpr auto operator()(K k) const {
 //     return k % field_f<C, FLD>() % fields_f<ETC...>();
 //   }
 // };
@@ -702,7 +735,7 @@ struct field_f {
 // struct fields_f<C, FLD> {
 //   empty_struct_t empty_struct;
 //   template <typename K>
-//   constexpr auto operator()(K k) {
+//   constexpr auto operator()(K k) const {
 //     return k % field_f<C, FLD>();
 //   }
 // };
@@ -713,32 +746,32 @@ struct field_f {
 /* TODO has_field_p and pals */
 
 /* get the offset for the current fix (finally)! */
-struct offset_f {
-  empty_struct_t empty_struct;
+struct offset_f : empty_struct_t {
+  constexpr offset_f() {}
 
   template <typename K>
-  constexpr size_t operator()(K k) {
+  constexpr size_t operator()(K k) const {
     return operator()(k, scalar_t<empty_struct_t>());
   }
 
   template <typename T, typename DIMS>
-  constexpr size_t operator()(scalar_t<T> s, DIMS) {
+  constexpr size_t operator()(scalar_t<T> s, DIMS) const {
     return 0;
   }
 
   template <char DIM, typename T, typename DIMS>
-  constexpr size_t operator()(fixed_dimension<DIM, T> d, DIMS ds) {
+  constexpr size_t operator()(fixed_dimension<DIM, T> d, DIMS ds) const {
     return operator()(d.t, fixed_dimension<DIM, DIMS>(d.idx, ds));
   }
 
   template <char DIM, typename T, typename IMPL, typename DIMS>
-  constexpr size_t operator()(dimension<DIM, T, IMPL> d, DIMS ds) {
+  constexpr size_t operator()(dimension<DIM, T, IMPL> d, DIMS ds) const {
     static_assert(IMPL::has_size, "dimension size unavailable");
     return ds % dimval_f<DIM>() * d.impl.step(d.t) + operator()(d.t, ds);
   }
 
   template <char A, char X, char Y, typename T, typename IMPL, typename DIMS>
-  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s, DIMS ds) {
+  constexpr size_t operator()(split2<A, X, Y, T, IMPL> s, DIMS ds) const {
     // auto [x, y] = s.impl(s.t, ds % dimval_f<A>());
     auto xy = s.impl(s.t, ds % dimval_f<A>());
     return operator()(s.t, fixed_dimension<X, fixed_dimension<Y, DIMS>>(
@@ -746,13 +779,13 @@ struct offset_f {
   }
 
   template <char A, char B, char X, typename T, typename IMPL, typename DIMS>
-  constexpr size_t operator()(join2<A, B, X, T, IMPL> j, DIMS ds) {
+  constexpr size_t operator()(join2<A, B, X, T, IMPL> j, DIMS ds) const {
     auto x = j.impl(j.t, ds % dimval_f<A>(), ds % dimval_f<B>());
     return operator()(j.t, fixed_dimension<X, DIMS>(x, ds));
   }
 
   template <char DIM, size_t I, typename... TS, typename DIMS>
-  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t, DIMS ds) {
+  constexpr size_t operator()(tuple_dim<DIM, I, TS...> t, DIMS ds) const {
     return size_f::tuple_size(tuple_slice<0, I>(t.ts)) + operator()(
                                                              std::get<I>(t.ts),
                                                              ds);
@@ -781,7 +814,7 @@ struct idx {
   idx<CS...> fs;
 
   template <typename... NS>
-  idx(size_t n, NS... ns) : n(n), fs(ns...) {}
+  constexpr idx(size_t n, NS... ns) : n(n), fs(ns...) {}
 
   template <typename K>
   constexpr size_t operator()(K k) const {
@@ -793,7 +826,7 @@ template <char C>
 struct idx<C> {
   size_t n;
 
-  idx(size_t n) : n(n) {}
+  constexpr idx(size_t n) : n(n) {}
 
   template <typename K>
   constexpr size_t operator()(K k) const {
@@ -859,7 +892,7 @@ struct split2_bitblock {
   empty_struct_t empty_struct;
 
   template <typename T>
-  constexpr std::pair<size_t, size_t> operator()(T t, size_t idx) {
+  constexpr std::pair<size_t, size_t> operator()(T t, size_t idx) const {
     return {idx >> N, idx & ((size_t(1) << N) - 1)};
   }
 };
@@ -869,7 +902,7 @@ struct split2_divmod {
   empty_struct_t empty_struct;
 
   template <typename T>
-  constexpr std::pair<size_t, size_t> operator()(T t, size_t idx) {
+  constexpr std::pair<size_t, size_t> operator()(T t, size_t idx) const {
     return {idx / N, idx % N};
   }
 };
@@ -878,7 +911,7 @@ struct join2_zorder32 {
   empty_struct_t empty_struct;
 
   template <typename T>
-  constexpr size_t operator()(T t, size_t idx1, size_t idx2) {
+  constexpr size_t operator()(T t, size_t idx1, size_t idx2) const {
     idx1 &= 0xffffffff;
     idx1 = (idx1 ^ (idx1 << 16)) & 0x0000ffff0000ffff;
     idx1 = (idx1 ^ (idx1 << 8)) & 0x00ff00ff00ff00ff;
@@ -926,7 +959,7 @@ constexpr auto operator^(K k, unsized_vector_part<C> v) {
 }
 
 template <char C>
-static constexpr unsized_vector_part<C> vector;
+static constexpr unsized_vector_part<C> vector{};
 
 template <char C>
 struct vector_sized {
