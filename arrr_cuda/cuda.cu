@@ -5,9 +5,14 @@
 
 using namespace arrr;
 
+// same body, two data layouts:
 template<typename AS>
-__global__ void use(float *data, AS as) {
+__global__ void kernel(float *data, AS as) {
     *(as % fixs<'x','y'>(blockIdx.x, threadIdx.x) % at(data)) = blockIdx.x * blockDim.x + threadIdx.x;
+}
+
+__global__ void kernel_handmade(float *data, size_t size) {
+    data[blockIdx.x * size + threadIdx.x] = blockIdx.x * blockDim.x + threadIdx.x;
 }
 
 int main() {
@@ -17,7 +22,9 @@ int main() {
 
     cudaMalloc(&data, sizeof(local));
 
-    use<<<20000, 20>>>(data, (scalar<float> ^ vector<'y'> ^ array<'x', 20000>) % resize<'y'>(20));
+    // kernel<<<20000, 20>>>(data, (scalar<float> ^ vector<'y'> ^ array<'x', 20000>) % resize<'y'>(20));
+    kernel<<<20000, 20>>>(data, (scalar<float> ^ vector<'x'> ^ array<'y', 20>) % resize<'x'>(20000));
+    kernel_handmade<<<20000, 20>>>(data, 20);
 
     cudaMemcpy(local.data(), data, sizeof(local), cudaMemcpyDeviceToHost);
 
