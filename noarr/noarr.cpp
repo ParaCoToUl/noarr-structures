@@ -12,16 +12,21 @@ using void_t = void;
 template<class T>
 using remove_cvref = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
-struct empty_struct_t { private: const char _value[0] = {}; };
+struct empty_struct_t {
+    constexpr empty_struct_t() : _value{} {}
+    const char _value[0];
+};
 
 template<class T>
 struct is_array {
-    static constexpr bool value = false;
+    using value_type = bool;
+    static constexpr value_type value = false;
 };
 
 template<class T, std::size_t N>
 struct is_array<T[N]> {
-    static constexpr bool value = true;
+    using value_type = bool;
+    static constexpr value_type value = true;
 };
 
 template<char... DIMs>
@@ -32,7 +37,8 @@ struct dims_impl<> {};
 
 template<char DIM, char... DIMs>
 struct dims_impl<DIM, DIMs...> : dims_impl<DIMs...> {
-    static constexpr char value = DIM;
+    using value_type = char;
+    static constexpr value_type value = DIM;
 };
 
 template<class T>
@@ -40,12 +46,13 @@ struct dims_length;
 
 template<>
 struct dims_length<dims_impl<>> {
-    static constexpr std::size_t value = 0;
+    using value_type = std::size_t;
+    static constexpr value_type value = 0UL;
 };
 
 template<char DIM, char... DIMs>
 struct dims_length<dims_impl<DIM, DIMs...>> {
-    static constexpr std::size_t value = dims_length<dims_impl<DIMs...>>::value + 1;
+    static constexpr std::size_t value = dims_length<dims_impl<DIMs...>>::value + 1UL;
 };
 
 template<typename T, typename = void>
@@ -60,17 +67,20 @@ struct dims_have;
 
 template<char NEEDLE>
 struct dims_have<dims_impl<>, NEEDLE> {
-    static constexpr bool value = false;
+    using value_type = bool;
+    static constexpr value_type value = false;
 };
 
 template<char NEEDLE, char... HAY_TAIL>
 struct dims_have<dims_impl<NEEDLE, HAY_TAIL...>, NEEDLE> {
-    static constexpr bool value = true;
+    using value_type = bool;
+    static constexpr value_type value = true;
 };
 
 template<char NEEDLE, char HAY_HEAD, char... HAY_TAIL>
 struct dims_have<dims_impl<HAY_HEAD, HAY_TAIL...>, NEEDLE, std::enable_if_t<HAY_HEAD != NEEDLE>> {
-    static constexpr bool value = dims_have<dims_impl<HAY_TAIL...>, NEEDLE>::value;
+    using value_type = bool;
+    static constexpr value_type value = dims_have<dims_impl<HAY_TAIL...>, NEEDLE>::value;
 };
 
 // TODO: check if tuple
@@ -162,13 +172,13 @@ template<typename S, typename F, typename>
 struct can_apply { static constexpr bool value = false; };
 
 template<typename S, typename F>
-struct can_apply<S, F, void_t<decltype(std::declval<F>()(S{}))>> { static constexpr bool value = true; };
+struct can_apply<S, F, void_t<decltype(std::declval<F>()(std::declval<S>()))>> { static constexpr bool value = true; };
 
 template<typename S, typename F>
 constexpr bool can_apply_v = can_apply<S, F, void>::value;
 
 template<typename S, typename F>
-struct fmapper<S, F, std::enable_if_t<!can_apply_v<S, F>, void_t<decltype(fmap_traversor::sub_fmap(S{}, F{}))>>>  {
+struct fmapper<S, F, std::enable_if_t<!can_apply_v<S, F>, void_t<decltype(fmap_traversor::sub_fmap(std::declval<S>(), std::declval<F>()))>>>  {
     static constexpr auto fmap(S s, F f) {
         return fmap_traversor::sub_fmap(s, f);
     }
@@ -296,6 +306,9 @@ constexpr auto pipe(S s, Fs... funcs) {
     return piper<S, Fs...>::pipe(s, funcs...);
 }
 
+template <typename T>
+using is_empty = typename std::is_base_of<empty_struct_t, T>;
+
 template<typename T>
 struct scalar {
     std::tuple<> sub_structures;
@@ -324,7 +337,8 @@ struct array {
     std::tuple<T> sub_structures;
     static constexpr std::size_t length = L;
     static constexpr dims_impl<DIM> dims = {};
-    constexpr array(T sub_structure) : sub_structures{make_tuple(sub_structure)} {}
+    constexpr array() : sub_structures{{}} {}
+    constexpr array(T sub_structure) : sub_structures{std::make_tuple(sub_structure)} {}
     template<typename T2>
     static constexpr array<DIM, L, T2> construct(T2 sub_structure) {
         return {sub_structure};
@@ -418,6 +432,7 @@ int main() {
     E e;
     F<A, D> f1;
     vector<'x', scalar<float>> v;
+    array<'y', 20, vector<'x', scalar<float>>> v2;
     b % X{}; // transform
     std::cout << "b % X{}: " << typeid(b % X{}).name() << std::endl;
     e % Y{}; // get
@@ -435,6 +450,11 @@ int main() {
     std::cout << "vs = v % resize<'x'>{10}: " << typeid(vs).name() << std::endl;
     std::cout << "vs.size(): " << vs.size() << std::endl;
     std::cout << "sizeof(vs) :( : " << sizeof(vs) << std::endl;
+    
+    auto vs2 = v2 % resize<'x'>{10}; // transform
+    std::cout << "vs2 = v % resize<'x'>{10}: " << typeid(vs2).name() << std::endl;
+    std::cout << "vs2.size(): " << vs2.size() << std::endl;
+    std::cout << "sizeof(vs2) :( : " << sizeof(vs2) << std::endl;
 }
 
-// TODO: we want smarter tuples or an alternative
+// TODO: we want smarter tuples that understand emptiness (recursively and on each element separately)
