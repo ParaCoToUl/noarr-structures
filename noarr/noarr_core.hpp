@@ -6,6 +6,8 @@
 
 #include "noarr_std_ext.hpp"
 
+// TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
+
 namespace noarr {
 
 template<char... DIMs>
@@ -49,16 +51,36 @@ struct sub_structures<T, void_t<decltype(T::sub_structures)>> {
     const value_type value;
 };
 
-template<class T, char DIM, typename = void>
-struct dims_have;
+template<typename T, typename = void>
+struct dims { 
+    static constexpr dims_impl<> value = {};
+};
 
-template<char NEEDLE>
+// TODO: check if of type dims_impl
+template<typename T>
+struct dims<T, void_t<decltype(T::dims)>> {
+    static constexpr auto value = T::dims;
+};
+
+/**
+ * @brief returns (via value) true if DIMS contain DIM, otherwise returns false
+ * 
+ * @tparam DIMS is expected of type dims_impl, otherwise remove_cvref<decltype(dims<DIMS>::value)> is applied
+ * @tparam DIM the needle DIM
+ */
+template<class DIMS, char DIM, typename = void>
+struct dims_have {
+    using value_type = bool;
+    static constexpr value_type value = dims_have<remove_cvref<decltype(dims<DIMS>::value)>, DIM>::value;
+};
+
+template<char NEEDLE> // HAY is empty
 struct dims_have<dims_impl<>, NEEDLE> {
     using value_type = bool;
     static constexpr value_type value = false;
 };
 
-template<char NEEDLE, char... HAY_TAIL>
+template<char NEEDLE, char... HAY_TAIL> // NEEDLE == HAY_HEAD
 struct dims_have<dims_impl<NEEDLE, HAY_TAIL...>, NEEDLE> {
     using value_type = bool;
     static constexpr value_type value = true;
@@ -70,16 +92,7 @@ struct dims_have<dims_impl<HAY_HEAD, HAY_TAIL...>, NEEDLE, std::enable_if_t<HAY_
     static constexpr value_type value = dims_have<dims_impl<HAY_TAIL...>, NEEDLE>::value;
 };
 
-template<typename T, typename = void>
-struct dims { 
-    static constexpr dims_impl<> value = {};
-};
-
-// TODO: check if dims_impl
-template<typename T>
-struct dims<T, void_t<decltype(T::dims)>> {
-    static constexpr auto value = T::dims;
-};
+// TODO: implement the recursive version using sub_structures
 
 template<typename S, typename F>
 constexpr auto operator%(S s, F f);
