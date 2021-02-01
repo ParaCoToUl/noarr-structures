@@ -1,11 +1,15 @@
 {
     "cSpell.language": "en,cs",
     "cSpell.words": [
+        "NOARR",
         "Repos",
         "SYCL",
         "constexpr",
         "cuda",
+        "cvref",
         "ekondis",
+        "fmap",
+        "fmapper",
         "kmeans",
         "mixbench",
         "simd",
