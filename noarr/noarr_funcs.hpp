@@ -36,6 +36,28 @@ struct cresize {
     }
 };
 
+template<char DIM>
+struct get_offset {
+    const std::size_t idx;
+    explicit constexpr get_offset(std::size_t idx) : idx{idx} {}
+    using func_family = get_trait;
+    
+    template<typename T>
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<!dims_have<T, DIM>::value>>(), t.offset(idx)) {
+        return t.offset(idx);
+    }
+};
+
+struct get_size {
+    constexpr get_size() {}
+    using func_family = get_trait;
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> decltype(t.size()) {
+        return t.size();
+    }
+};
+
 }
 
 #endif // NOARR_FUNCS_HPP
