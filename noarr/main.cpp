@@ -78,6 +78,8 @@ int main() {
     std::cout << "vs2 = v % resize<'x'>{10}: " << typeid(vs2).name() << std::endl;
     std::cout << "vs2.size(): " << vs2.size() << std::endl;
     std::cout << "sizeof(vs2) :( : " << sizeof(vs2) << std::endl;
+    std::cout << "vs2 % get_offset<'x'>{5}:" << (vs2 % get_offset<'x'>{5}) << std::endl;
+    std::cout << "vs2 % get_offset<'y'>{5}:" << (vs2 % get_offset<'y'>{5}) << std::endl;
     
     auto vs3 = v2 % cresize<'x', 10>{}; // transform
     std::cout << "vs3 = v % cresize<'x', 10>{}: " << typeid(vs3).name() << std::endl;
