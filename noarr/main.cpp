@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "noarr_structs.hpp"
+#include "noarr_funcs.hpp"
 
 using namespace noarr;
 
