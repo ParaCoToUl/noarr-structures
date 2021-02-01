@@ -12,6 +12,7 @@ using void_t = void;
 template<class T>
 using remove_cvref = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
+// TODO: this is not really cosher
 struct empty_struct_t {
     constexpr empty_struct_t() : _value{} {}
     const char _value[0];
