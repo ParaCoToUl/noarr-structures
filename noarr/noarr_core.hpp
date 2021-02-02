@@ -7,8 +7,24 @@
 #include "noarr_std_ext.hpp"
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
+// TODO: add consuming dims
 
 namespace noarr {
+
+template<typename T, typename = void>
+struct sub_structures {
+    explicit sub_structures(T) {}
+    using value_type = std::tuple<>;
+    static constexpr std::tuple<> value = std::tuple<>{};
+};
+
+// TODO: check if tuple
+template<typename T>
+struct sub_structures<T, void_t<decltype(T::sub_structures)>> {
+    explicit constexpr sub_structures(T t) : value {t.sub_structures} {}
+    using value_type = remove_cvref<decltype(T::sub_structures)>;
+    const value_type value;
+};
 
 template<char... DIMs>
 struct dims_impl;
@@ -34,21 +50,6 @@ struct dims_length<dims_impl<>> {
 template<char DIM, char... DIMs>
 struct dims_length<dims_impl<DIM, DIMs...>> {
     static constexpr std::size_t value = dims_length<dims_impl<DIMs...>>::value + 1UL;
-};
-
-template<typename T, typename = void>
-struct sub_structures {
-    explicit sub_structures(T) {}
-    using value_type = std::tuple<>;
-    static constexpr std::tuple<> value = std::tuple<>{};
-};
-
-// TODO: check if tuple
-template<typename T>
-struct sub_structures<T, void_t<decltype(T::sub_structures)>> {
-    explicit constexpr sub_structures(T t) : value {t.sub_structures} {}
-    using value_type = remove_cvref<decltype(T::sub_structures)>;
-    const value_type value;
 };
 
 template<typename T, typename = void>
@@ -195,27 +196,27 @@ struct fmapper<S, F, std::enable_if_t<can_apply<F, S>::value>> {
 template<typename S, typename F, typename = void>
 struct getter;
 
-template<typename S, typename F, std::size_t J = 0, typename = void>
+template<typename S, typename F, typename J = std::integral_constant<std::size_t, 0>, typename = void>
 struct getter_impl;
 
 template<typename S, typename F, std::size_t J>
-struct getter_impl<S, F, J, std::enable_if_t<!can_apply<F, S>::value>> {
+struct getter_impl<S, F, std::integral_constant<std::size_t, J>, std::enable_if_t<!can_apply<F, S>::value>> {
     static constexpr auto get(S s, F f) {
         return std::tuple_cat(
-            getter_impl<S, F, J + 1>::get(s, f),
+            getter_impl<S, F, std::integral_constant<std::size_t, J + 1>>::get(s, f),
             getter_impl<std::tuple_element_t<J, typename sub_structures<S>::value_type>, F>::get(std::get<J>(sub_structures<S>(s).value), f));
         }
-    static constexpr std::size_t count = getter_impl<S, F, J + 1>::count + getter_impl<std::tuple_element_t<J, typename sub_structures<S>::value_type>,F>::count;
+    static constexpr std::size_t count = getter_impl<S, F, std::integral_constant<std::size_t, J + 1>>::count + getter_impl<std::tuple_element_t<J, typename sub_structures<S>::value_type>,F>::count;
 };
 
 template<typename S, typename F>
-struct getter_impl<S, F, 0, std::enable_if_t<can_apply<F, S>::value>> {
+struct getter_impl<S, F, std::integral_constant<std::size_t, 0>, std::enable_if_t<can_apply<F, S>::value>> {
     static constexpr auto get(S s, F f) { return std::make_tuple(f(s)); }
     static constexpr std::size_t count = 1;
 };
 
 template<typename S, typename F>
-struct getter_impl<S, F, static_cast<std::size_t>(std::tuple_size<typename sub_structures<S>::value_type>::value), std::enable_if_t<!can_apply<F, S>::value>> {
+struct getter_impl<S, F, std::integral_constant<std::size_t, std::tuple_size<typename sub_structures<S>::value_type>::value>, std::enable_if_t<!can_apply<F, S>::value>> {
     static constexpr auto get(S, F) { return std::tuple<>{}; }
     static constexpr std::size_t count = 0;
 };
