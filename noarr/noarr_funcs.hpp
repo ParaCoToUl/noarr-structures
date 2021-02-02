@@ -65,8 +65,8 @@ struct fix {
     explicit constexpr fix(std::size_t idx) : idx{idx} {}
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), fixed_dim<decltype(safe_get<0>(t))>{safe_get<0>(t), idx}) {
-        return fixed_dim<decltype(safe_get<0>(t))>{safe_get<0>(t), idx};
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), fixed_dim<decltype(safe_get<0>(t))>{safe_get<0>(t), t.offset(idx)}) {
+        return fixed_dim<decltype(safe_get<0>(t))>{safe_get<0>(t), t.offset(idx)};
     }
 };
 
@@ -111,8 +111,13 @@ struct offset {
     explicit constexpr offset() {}
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(t.offset()) {
-        return t.offset();
+    constexpr std::size_t operator()(scalar<T>) const {
+        return 0;
+    }
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> decltype(std::declval<typename T::template get_t<>>(), t.offset()) {
+        return t.offset() + (std::get<0>(t.sub_structures) % offset{});
     }
 };
 
