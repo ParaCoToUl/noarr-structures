@@ -68,24 +68,25 @@ int main() {
     std::cout << "pipe(f1, Z{}, X{}): " << typeid(pipe(f1, Z{}, X{})).name() << std::endl;
     pipe(f1, X{}, Y{}); // transform and get
     std::cout << "pipe(f1, X{}, Y{}): " << typeid(pipe(f1, X{}, Y{})).name() << std::endl;
-    
+
     auto vs = v % resize<'x'>{10}; // transform
     std::cout << "vs = v % resize<'x'>{10}: " << typeid(vs).name() << std::endl;
     std::cout << "vs.size(): " << vs.size() << std::endl;
     std::cout << "sizeof(vs) :( : " << sizeof(vs) << std::endl;
-    
+
     auto vs2 = v2 % resize<'x'>{10}; // transform
     std::cout << "vs2 = v % resize<'x'>{10}: " << typeid(vs2).name() << std::endl;
     std::cout << "vs2.size(): " << vs2.size() << std::endl;
     std::cout << "sizeof(vs2) :( : " << sizeof(vs2) << std::endl;
-    std::cout << "vs2 % get_offset<'x'>{5}:" << (vs2 % get_offset<'x'>{5}) << std::endl;
+    std::cout << "vs2 % fix<'x'>{5}:" << typeid(vs2 % fix<'x'>{5}).name() << std::endl;
+    std::cout << "vs2 % fix<'x'>{5} % fix<'y'>{5}:" << typeid(vs2 % fix<'x'>{5} % fix<'y'>{5}).name() << std::endl;
+    std::cout << "vs2 % fixs<'x', 'y'>{5, 5}:" << typeid(vs2 % fixs<'x', 'y'>{5, 5}).name() << std::endl;
     std::cout << "vs2 % get_offset<'y'>{5}:" << (vs2 % get_offset<'y'>{5}) << std::endl;
-    
+
     auto vs3 = v2 % cresize<'x', 10>{}; // transform
     std::cout << "vs3 = v % cresize<'x', 10>{}: " << typeid(vs3).name() << std::endl;
     std::cout << "vs3.size(): " << vs3.size() << std::endl;
     std::cout << "sizeof(vs3) :( : " << sizeof(vs3) << std::endl;
-    
 
     std::size_t l;
     std::cout << "choose l... ";
