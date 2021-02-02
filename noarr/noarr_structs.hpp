@@ -82,6 +82,26 @@ struct sized_vector : vector<DIM, T> {
     constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures).size() * i; }
 };
 
+/**
+ * @brief fixed dimension, carries a single sub_structure offset by a certain value
+ * 
+ * @tparam T substructure type
+ */
+template<typename T>
+struct fixed_dim {
+    const std::tuple<T> sub_structures;
+    const std::size_t offset_;
+    static constexpr dims_impl<> dims = {};
+    constexpr fixed_dim(T sub_structure, std::size_t offset) : sub_structures{sub_structure}, offset_{offset} {}
+    template<typename T2>
+    constexpr auto construct(T2 sub_structure) const {
+        return fixed_dim<T2>{sub_structure, offset_};
+    }
+
+    constexpr std::size_t size() const { return std::get<0>(sub_structures).size() + offset_; }
+    constexpr std::size_t offset(std::size_t) const { return offset_; }
+};
+
 }
 
 #endif // NOARR_STRUCTS_HPP
