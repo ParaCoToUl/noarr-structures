@@ -160,24 +160,31 @@ struct fmap_traverser {
     }
 };
 
-template<typename S, typename F, typename>
+template<typename F, typename S, typename>
 struct can_apply { static constexpr bool value = false; };
 
-template<typename S, typename F>
-struct can_apply<S, F, void_t<decltype(std::declval<F>()(std::declval<S>()))>> { static constexpr bool value = true; };
+template<typename F, typename S>
+struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> { static constexpr bool value = true; };
+
+template<typename S, typename F, typename = void>
+struct _fmapper_cond_helper {
+    static constexpr bool value = false;
+};
 
 template<typename S, typename F>
-constexpr bool can_apply_v = can_apply<S, F, void>::value;
+struct _fmapper_cond_helper<S, F, void_t<decltype(fmap_traverser::sub_fmap(std::declval<S>(), std::declval<F>()))>> {
+    static constexpr bool value = true;
+};
 
 template<typename S, typename F>
-struct fmapper<S, F, std::enable_if_t<!can_apply_v<S, F>, void_t<decltype(fmap_traverser::sub_fmap(std::declval<S>(), std::declval<F>()))>>>  {
+struct fmapper<S, F, std::enable_if_t<_fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>>  {
     static constexpr auto fmap(S s, F f) {
         return fmap_traverser::sub_fmap(s, f);
     }
 };
 
 template<typename S, typename F>
-struct fmapper<S, F, std::enable_if_t<can_apply_v<S, F>>> {
+struct fmapper<S, F, std::enable_if_t<can_apply<F, S>::value>> {
     static constexpr auto fmap(S s, F f) {
         return f(s);
     }
@@ -192,7 +199,7 @@ template<typename S, typename F, std::size_t J = 0, typename = void>
 struct getter_impl;
 
 template<typename S, typename F, std::size_t J>
-struct getter_impl<S, F, J, std::enable_if_t<!can_apply_v<S, F>>> {
+struct getter_impl<S, F, J, std::enable_if_t<!can_apply<F, S>::value>> {
     static constexpr auto get(S s, F f) {
         return std::tuple_cat(
             getter_impl<S, F, J + 1>::get(s, f),
@@ -202,35 +209,38 @@ struct getter_impl<S, F, J, std::enable_if_t<!can_apply_v<S, F>>> {
 };
 
 template<typename S, typename F>
-struct getter_impl<S, F, 0, std::enable_if_t<can_apply_v<S, F>>> {
+struct getter_impl<S, F, 0, std::enable_if_t<can_apply<F, S>::value>> {
     static constexpr auto get(S s, F f) { return std::make_tuple(f(s)); }
     static constexpr std::size_t count = 1;
 };
 
 template<typename S, typename F>
-struct getter_impl<S, F, static_cast<std::size_t>(std::tuple_size<typename sub_structures<S>::value_type>::value), std::enable_if_t<!can_apply_v<S, F>>> {
+struct getter_impl<S, F, static_cast<std::size_t>(std::tuple_size<typename sub_structures<S>::value_type>::value), std::enable_if_t<!can_apply<F, S>::value>> {
     static constexpr auto get(S, F) { return std::tuple<>{}; }
     static constexpr std::size_t count = 0;
 };
 
 template<typename S, typename F>
-struct getter<S, F, std::enable_if_t<can_apply_v<S, F>>> {
+struct getter<S, F, std::enable_if_t<can_apply<F, S>::value>> {
     static constexpr auto get(S s, F f) { return f(s); }
 };
 
 template<typename S, typename F>
-struct getter<S, F, std::enable_if_t<!can_apply_v<S, F> && (getter_impl<S, F>::count == 1)>> {
+struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, F>::count == 1)>> {
     static constexpr auto get(S s, F f) { return std::get<0>(getter_impl<S, F>::get(s, f)); }
 };
 
 template<typename S, typename F>
-struct getter<S, F, std::enable_if_t<!can_apply_v<S, F> && (getter_impl<S, F>::count != 1)>> {
+struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, F>::count != 1)>> {
     static_assert(getter_impl<S, F>::count != 0, "getter has to be applicable");
     static_assert(!(getter_impl<S, F>::count > 1), "getter cannot be ambiguous");
 };
 
+
+/* func families */
 struct transform_trait;
 struct get_trait;
+struct top_trait;
 
 using default_trait = transform_trait;
 
@@ -250,6 +260,11 @@ struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, get_
 };
 
 template<typename F>
+struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, top_trait>::value>> {
+    using type = top_trait;
+};
+
+template<typename F>
 using func_trait_t = typename func_trait<F>::type;
 
 template<typename F, typename = void>
@@ -265,6 +280,12 @@ template<typename F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, get_trait>::value>> {
     template<typename S>
     static constexpr auto operate(S s, F f) { return getter<S, F>::get(s, f);  }
+};
+
+template<typename F>
+struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_trait>::value>> {
+    template<typename S>
+    static constexpr auto operate(S s, F f) { return f(s);  }
 };
 
 template<typename S, typename F>
