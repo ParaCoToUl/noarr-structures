@@ -5,6 +5,19 @@
 
 namespace noarr {
 
+template<typename T, typename... Ks>
+struct _scalar_get_t;
+
+template<typename T>
+struct _scalar_get_t<T> {
+    using type = T;
+};
+
+template<typename T>
+struct _scalar_get_t<T, void> {
+    using type = T;
+};
+
 /**
  * @brief The ground structure
  * 
@@ -14,11 +27,34 @@ template<typename T>
 struct scalar {
     std::tuple<> sub_structures;
     static constexpr dims_impl<> dims = {};
+
+    template<typename... Ks>
+    using get_t = typename _scalar_get_t<T, Ks...>::type;
+
     constexpr scalar() : sub_structures{} {}
     static constexpr auto construct() {
         return scalar<T>{};
     }
     static constexpr std::size_t size() { return sizeof(T); }
+    constexpr std::size_t offset() const { return 0; }
+};
+
+template<typename T, typename... Ks>
+struct _array_get_t;
+
+template<typename T>
+struct _array_get_t<T> {
+    using type = T;
+};
+
+template<typename T>
+struct _array_get_t<T, void> {
+    using type = T;
+};
+
+template<typename T, std::size_t K>
+struct _array_get_t<T, std::integral_constant<std::size_t, K>> {
+    using type = T;
 };
 
 /**
@@ -32,6 +68,10 @@ struct array {
     const std::tuple<T> sub_structures;
     static constexpr std::size_t length = L;
     static constexpr dims_impl<DIM> dims = {};
+
+    template<typename... Ks>
+    using get_t = typename _array_get_t<T, Ks...>::type;
+
     constexpr array() : sub_structures{} {}
     explicit constexpr array(T sub_structure) : sub_structures{std::make_tuple(sub_structure)} {}
     template<typename T2>
@@ -61,6 +101,24 @@ struct vector {
     }
 };
 
+template<typename T, typename... Ks>
+struct _sized_vector_get_t;
+
+template<typename T>
+struct _sized_vector_get_t<T> {
+    using type = T;
+};
+
+template<typename T>
+struct _sized_vector_get_t<T, void> {
+    using type = T;
+};
+
+template<typename T, std::size_t K>
+struct _sized_vector_get_t<T, std::integral_constant<std::size_t, K>> {
+    using type = T;
+};
+
 /**
  * @brief sized vector (size reassignable by the resize function)
  * 
@@ -72,6 +130,10 @@ struct sized_vector : vector<DIM, T> {
     const std::size_t length;
     using vector<DIM, T>::dims;
     using vector<DIM, T>::sub_structures;
+
+    template<typename... Ks>
+    using get_t = typename _sized_vector_get_t<T, Ks...>::type;
+
     constexpr sized_vector(T sub_structure, std::size_t length) : vector<DIM, T>{sub_structure}, length{length} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
@@ -80,6 +142,19 @@ struct sized_vector : vector<DIM, T> {
 
     constexpr std::size_t size() const { return std::get<0>(sub_structures).size() * length; }
     constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures).size() * i; }
+};
+
+template<typename T, typename... Ks>
+struct _fixed_dim_get_t;
+
+template<typename T>
+struct _fixed_dim_get_t<T> {
+    using type = T;
+};
+
+template<typename T>
+struct _fixed_dim_get_t<T, void> {
+    using type = T;
 };
 
 /**
@@ -92,6 +167,10 @@ struct fixed_dim {
     const std::tuple<T> sub_structures;
     const std::size_t offset_;
     static constexpr dims_impl<> dims = {};
+
+    template<typename... Ks>
+    using get_t = typename _fixed_dim_get_t<T, Ks...>::type;
+
     constexpr fixed_dim(T sub_structure, std::size_t offset) : sub_structures{sub_structure}, offset_{offset} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
@@ -99,7 +178,7 @@ struct fixed_dim {
     }
 
     constexpr std::size_t size() const { return std::get<0>(sub_structures).size() + offset_; }
-    constexpr std::size_t offset(std::size_t) const { return offset_; }
+    constexpr std::size_t offset() const { return offset_; }
 };
 
 }
