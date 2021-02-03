@@ -300,4 +300,4 @@ inline constexpr auto pipe(S s, Fs... funcs) {
 
 }
 
-#endif  // NOARR_CORE_HPP
+#endif // NOARR_CORE_HPP
