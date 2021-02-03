@@ -7,7 +7,7 @@
 #include "noarr_std_ext.hpp"
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
-// TODO: add consuming dims
+// TODO: add dim checking (+ for consume_dims(s))
 
 namespace noarr {
 
@@ -20,9 +20,9 @@ struct sub_structures {
 
 // TODO: check if tuple
 template<typename T>
-struct sub_structures<T, void_t<decltype(T::sub_structures)>> {
-    explicit constexpr sub_structures(T t) : value {t.sub_structures} {}
-    using value_type = remove_cvref<decltype(T::sub_structures)>;
+struct sub_structures<T, void_t<decltype(std::declval<T>().sub_structures())>> {
+    explicit constexpr sub_structures(T t) : value {t.sub_structures()} {}
+    using value_type = decltype(std::declval<T>().sub_structures());
     const value_type value;
 };
 
@@ -96,70 +96,13 @@ struct dims_have<dims_impl<HAY_HEAD, HAY_TAIL...>, NEEDLE, std::enable_if_t<HAY_
 // TODO: implement the recursive version using sub_structures
 
 template<typename S, typename F>
-constexpr auto operator%(S s, F f);
+inline constexpr auto operator%(S s, F f);
 
 template<typename S, typename F, typename = void>
 struct fmapper;
 
 template<typename S, typename F, typename = void>
 struct can_apply;
-
-struct fmap_traverser;
-
-template<std::size_t I, std::size_t J = 0>
-struct fmap_traverser_impl;
-
-template<std::size_t I, std::size_t J>
-struct fmap_traverser_impl {
-    friend struct fmap_traverser;
-    template<std::size_t, std::size_t>
-    friend struct fmap_traverser_impl;
-
-private:
-    template<typename S, typename F, std::size_t ...Is>
-    static constexpr auto sub_fmap_build(S s, F f) {
-        return fmap_traverser_impl<I, J + 1>::template sub_fmap_build<S, F, J, Is...>(s, f);
-    }
-};
-
-template<std::size_t I>
-struct fmap_traverser_impl<I, I> {
-    friend struct fmap_traverser;
-    template<std::size_t, std::size_t>
-    friend struct fmap_traverser_impl;
-
-private:
-    template<typename S, typename F, std::size_t ...Is>
-    static constexpr auto sub_fmap_explicit(S s, F f) {
-        return s.construct((std::get<I - 1 - Is>(sub_structures<S>{s}.value) % f) ...);
-    }
-
-    template<typename S, typename F, std::size_t ...Is>
-    static constexpr auto sub_fmap_build(S s, F f) {
-        return sub_fmap_explicit<S, F, Is...>(s, f);
-    }
-};
-
-template<>
-struct fmap_traverser_impl<0, 0> {
-private:
-    template<typename S, typename F>
-    static constexpr auto sub_fmap_explicit(S s, F) {
-        return s;
-    }
-public:
-    template<typename S, typename F>
-    static constexpr auto sub_fmap_build(S s, F f) {
-        return sub_fmap_explicit<S, F>(s, f);
-    }
-};
-
-struct fmap_traverser {
-    template<typename S, typename F>
-    static constexpr auto sub_fmap(S s, F f) {
-        return fmap_traverser_impl<std::tuple_size<typename sub_structures<S>::value_type>::value>::template sub_fmap_build<S, F>(s, f);
-    }
-};
 
 template<typename F, typename S, typename>
 struct can_apply { static constexpr bool value = false; };
@@ -171,16 +114,51 @@ template<typename S, typename F, typename = void>
 struct _fmapper_cond_helper {
     static constexpr bool value = false;
 };
+template<typename S, typename F, std::size_t MAX = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = MAX>
+struct construct_builder;
+
+template<typename S, typename F, std::size_t MAX, std::size_t I>
+struct construct_builder {
+    template<std::size_t... IDXs>
+    static constexpr auto construct_build(S s, F f) {
+        return construct_builder<S, F, MAX, I - 1>::template construct_build<I - 1, IDXs...>(s, f);
+    }
+};
+
+template<typename S, typename F, std::size_t MAX>
+struct construct_builder<S, F, MAX, 0> {
+    template<std::size_t... IDXs>
+    static constexpr auto construct_build(S s, F f) {
+        return construct_build_last<IDXs...>(s, f);
+    }
+    template<std::size_t... IDXs>
+    static constexpr auto construct_build_last(S s, F f) {
+        return s.construct((std::get<IDXs>(s.sub_structures()) % f)...);
+    }
+};
+
+// this explicit instance is here because the more general one makes warnings on structures with zero substructures
+template<typename S, typename F>
+struct construct_builder<S, F, 0, 0> {
+    template<std::size_t... IDXs>
+    static constexpr auto construct_build(S s, F f) {
+        return construct_build_last<IDXs...>(s, f);
+    }
+    template<std::size_t... IDXs>
+    static constexpr auto construct_build_last(S s, F) {
+        return s.construct();
+    }
+};
 
 template<typename S, typename F>
-struct _fmapper_cond_helper<S, F, void_t<decltype(fmap_traverser::sub_fmap(std::declval<S>(), std::declval<F>()))>> {
+struct _fmapper_cond_helper<S, F, void_t<decltype(construct_builder<S, F>::construct_build(std::declval<S>(), std::declval<F>()))>> {
     static constexpr bool value = true;
 };
 
 template<typename S, typename F>
 struct fmapper<S, F, std::enable_if_t<_fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>>  {
     static constexpr auto fmap(S s, F f) {
-        return fmap_traverser::sub_fmap(s, f);
+        return construct_builder<S, F>::construct_build(s, f);
     }
 };
 
@@ -290,12 +268,12 @@ struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_trait>
 };
 
 template<typename S, typename F>
-constexpr auto operator%(S s, F f) {
+inline constexpr auto operator%(S s, F f) {
     return pipe_decider<F>::template operate<S>(s, f);
 }
 
 template<typename S, typename... Fs>
-constexpr auto pipe(S s, Fs... funcs);
+inline constexpr auto pipe(S s, Fs... funcs);
 
 template<typename S, typename... Fs>
 struct piper;
@@ -316,7 +294,7 @@ struct piper<S, F> {
 };
 
 template<typename S, typename... Fs>
-constexpr auto pipe(S s, Fs... funcs) {
+inline constexpr auto pipe(S s, Fs... funcs) {
     return piper<S, Fs...>::pipe(s, funcs...);
 }
 

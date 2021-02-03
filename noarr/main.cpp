@@ -5,88 +5,29 @@
 
 using namespace noarr;
 
-struct A {
-
-};
-
-struct B {
-    template<typename A, typename C>
-    static constexpr B construct(A a, C b) {
-        std::cout << "constructing a B from " << typeid(A).name() << " and " << typeid(C).name() << std::endl;
-        return B{};
-    }
-    static constexpr std::tuple<A, A> sub_structures = {{}, {}};
-};
-
-struct D {
-
-};
-
-struct E {
-    static constexpr std::tuple<A, D> sub_structures = {{}, {}};
-};
-
-template<typename T1, typename T2>
-struct F {
-    static constexpr std::tuple<T1, T2> sub_structures = {{}, {}};
-    template<typename A, typename C>
-    static constexpr F<A, C> construct(A a, C b) {
-        std::cout << "constructing a F<" << typeid(A).name() << "," << typeid(C).name() << "> from " << typeid(A).name() << " and " << typeid(C).name() << std::endl;
-        return F<A, C>{};
-    }
-};
-
-struct X {
-    int operator()(A t) { return 0; }
-};
-
-struct Y {
-    float operator()(D t) { return 0; }
-    using func_family = get_trait;
-};
-
-struct Z {
-    char operator()(D t) { return 0; }
-    using func_family = transform_trait;
-};
-
 int main() {
-    B b;
-    E e;
-    F<A, D> f1;
     vector<'x', scalar<float>> v;
-    array<'y', 20, vector<'x', scalar<float>>> v2;
-    b % X{}; // transform
-    std::cout << "b % X{}: " << typeid(b % X{}).name() << std::endl;
-    e % Y{}; // get
-    std::cout << "e % Y{}: " << typeid(e % Y{}).name() << std::endl;
-    f1 % X{}; // transform
-    std::cout << "f1 % X{}: " << typeid(f1 % X{}).name() << std::endl;
-    f1 % Z{}; // transform
-    std::cout << "f1 % Z{}: " << typeid(f1 % Z{}).name() << std::endl;
-    pipe(f1, Z{}, X{}); // transform twice
-    std::cout << "pipe(f1, Z{}, X{}): " << typeid(pipe(f1, Z{}, X{})).name() << std::endl;
-    pipe(f1, X{}, Y{}); // transform and get
-    std::cout << "pipe(f1, X{}, Y{}): " << typeid(pipe(f1, X{}, Y{})).name() << std::endl;
-
+    array<'y', 20000, vector<'x', scalar<float>>> v2;
     auto vs = v % resize<'x'>{10}; // transform
     std::cout << "vs = v % resize<'x'>{10}: " << typeid(vs).name() << std::endl;
     std::cout << "vs.size(): " << vs.size() << std::endl;
-    std::cout << "sizeof(vs) :( : " << sizeof(vs) << std::endl;
+    std::cout << "sizeof(vs): " << sizeof(vs) << std::endl;
 
-    auto vs2 = v2 % resize<'x'>{10}; // transform
+    auto vs2 = v2 % resize<'x'>{20}; // transform
     std::cout << "vs2 = v % resize<'x'>{10}: " << typeid(vs2).name() << std::endl;
     std::cout << "vs2.size(): " << vs2.size() << std::endl;
-    std::cout << "sizeof(vs2) :( : " << sizeof(vs2) << std::endl;
+    std::cout << "sizeof(vs2): " << sizeof(vs2) << std::endl;
     std::cout << "vs2 % fix<'x'>{5}:" << typeid(vs2 % fix<'x'>{5}).name() << std::endl;
     std::cout << "vs2 % fix<'x'>{5} % fix<'y'>{5}:" << typeid(vs2 % fix<'x'>{5} % fix<'y'>{5}).name() << std::endl;
     std::cout << "vs2 % fixs<'x', 'y'>{5, 5}:" << typeid(vs2 % fixs<'x', 'y'>{5, 5}).name() << std::endl;
+    std::cout << "vs2 % fixs<'x', 'y'>{5, 5} % offset{}:" << vs2 % fixs<'x', 'y'>{5, 5} % offset{} << std::endl;
+    std::cout << "vs2 % fixs<'x', 'y'>{5, 5} % offset{}:" << (vs2 % fixs<'y', 'x'>{5, 5} % offset()) << std::endl;
     std::cout << "vs2 % get_offset<'y'>{5}:" << (vs2 % get_offset<'y'>{5}) << std::endl;
 
     auto vs3 = v2 % cresize<'x', 10>{}; // transform
     std::cout << "vs3 = v % cresize<'x', 10>{}: " << typeid(vs3).name() << std::endl;
     std::cout << "vs3.size(): " << vs3.size() << std::endl;
-    std::cout << "sizeof(vs3) :( : " << sizeof(vs3) << std::endl;
+    std::cout << "sizeof(vs3): " << sizeof(vs3) << std::endl;
 
     std::size_t l;
     std::cout << "choose l... ";
@@ -94,5 +35,5 @@ int main() {
     auto vs4 = pipe(v2, cresize<'y', 10>{}, resize<'x'>{l}); // transform
     std::cout << "vs4 = pipe(v2, cresize<'y', 10>{}, resize<'x'>{l}): " << typeid(vs4).name() << std::endl;
     std::cout << "vs4.size(): " << vs4.size() << std::endl;
-    std::cout << "sizeof(vs4) :( : " << sizeof(vs4) << std::endl;
+    std::cout << "sizeof(vs4): " << sizeof(vs4) << std::endl;
 }

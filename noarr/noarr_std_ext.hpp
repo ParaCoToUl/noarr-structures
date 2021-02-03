@@ -35,4 +35,4 @@ struct is_array<T[N]> {
 
 } // namespace noarr
 
-#endif // NOARR_STD_EXT_HPP 
+#endif // NOARR_STD_EXT_HPP

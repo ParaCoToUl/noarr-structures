@@ -25,13 +25,13 @@ struct _scalar_get_t<T, void> {
  */
 template<typename T>
 struct scalar {
-    std::tuple<> sub_structures;
+    std::tuple<> sub_structures() const { return {}; }
     static constexpr dims_impl<> dims = {};
 
     template<typename... Ks>
     using get_t = typename _scalar_get_t<T, Ks...>::type;
 
-    constexpr scalar() : sub_structures{} {}
+    constexpr scalar() {}
     static constexpr auto construct() {
         return scalar<T>{};
     }
@@ -64,23 +64,23 @@ struct _array_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam T substructure type
  */
 template<char DIM, std::size_t L, typename T>
-struct array {
-    const std::tuple<T> sub_structures;
+struct array : private T {
     static constexpr std::size_t length = L;
     static constexpr dims_impl<DIM> dims = {};
+    constexpr std::tuple<T> sub_structures() const { return {static_cast<const T&>(*this)}; }
 
     template<typename... Ks>
     using get_t = typename _array_get_t<T, Ks...>::type;
 
-    constexpr array() : sub_structures{} {}
-    explicit constexpr array(T sub_structure) : sub_structures{std::make_tuple(sub_structure)} {}
+    constexpr array() : T{} {}
+    explicit constexpr array(T sub_structure) : T{sub_structure} {}
     template<typename T2>
-    static constexpr auto construct(T2 sub_structure) {
+    constexpr auto construct(T2 sub_structure) const {
         return array<DIM, L, T2>{sub_structure};
     }
 
-    constexpr std::size_t size() const { return std::get<0>(sub_structures).size() * L; }
-    constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures).size() * i; }
+    constexpr std::size_t size() const { return static_cast<const T&>(*this).size() * L; }
+    constexpr std::size_t offset(std::size_t i) const { return static_cast<const T&>(*this).size() * i; }
 };
 
 /**
@@ -90,13 +90,14 @@ struct array {
  * @tparam T substructure type
  */
 template<char DIM, typename T>
-struct vector {
-    const std::tuple<T> sub_structures;
+struct vector : private T {
     static constexpr dims_impl<DIM> dims = {};
-    constexpr vector() : sub_structures{} {}
-    explicit constexpr vector(T sub_structure) : sub_structures{std::make_tuple(sub_structure)} {}
+    constexpr std::tuple<T> sub_structures() const { return {static_cast<const T&>(*this)}; }
+
+    constexpr vector() : T{} {}
+    explicit constexpr vector(T sub_structure) : T{sub_structure} {}
     template<typename T2>
-    static constexpr auto construct(T2 sub_structure) {
+    constexpr auto construct(T2 sub_structure) const {
         return vector<DIM, T2>{sub_structure};
     }
 };
@@ -126,7 +127,7 @@ struct _sized_vector_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam T substructure type
  */
 template<char DIM, typename T>
-struct sized_vector : vector<DIM, T> {
+struct sized_vector : private vector<DIM, T> {
     const std::size_t length;
     using vector<DIM, T>::dims;
     using vector<DIM, T>::sub_structures;
@@ -140,8 +141,8 @@ struct sized_vector : vector<DIM, T> {
         return sized_vector<DIM, T2>{sub_structure, length};
     }
 
-    constexpr std::size_t size() const { return std::get<0>(sub_structures).size() * length; }
-    constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures).size() * i; }
+    constexpr std::size_t size() const { return std::get<0>(sub_structures()).size() * length; }
+    constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures()).size() * i; }
 };
 
 template<typename T, typename... Ks>
@@ -158,27 +159,29 @@ struct _fixed_dim_get_t<T, void> {
 };
 
 /**
- * @brief fixed dimension, carries a single sub_structure offset by a certain value
+ * @brief fixed dimension, carries a single sub_structure with a fixed index
  * 
  * @tparam T substructure type
  */
-template<typename T>
-struct fixed_dim {
-    const std::tuple<T> sub_structures;
-    const std::size_t offset_;
-    static constexpr dims_impl<> dims = {};
+template<char DIM, typename T>
+struct fixed_dim : private T {
+    const std::size_t idx_;
+    static constexpr dims_impl<DIM> dims = {};
+    static constexpr dims_impl<DIM> consume_dims = {};
+    constexpr auto sub_structures() const { return static_cast<const T&>(*this).sub_structures(); }
 
     template<typename... Ks>
     using get_t = typename _fixed_dim_get_t<T, Ks...>::type;
 
-    constexpr fixed_dim(T sub_structure, std::size_t offset) : sub_structures{sub_structure}, offset_{offset} {}
+    constexpr fixed_dim(T sub_structure, std::size_t idx) : T{sub_structure}, idx_{idx} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
-        return fixed_dim<T2>{sub_structure, offset_};
+        return fixed_dim<DIM, decltype(T::construct(sub_structure))>{
+            static_cast<const T&>(*this).construct(sub_structure), idx_};
     }
 
-    constexpr std::size_t size() const { return std::get<0>(sub_structures).size() + offset_; }
-    constexpr std::size_t offset() const { return offset_; }
+    constexpr std::size_t size() const { return static_cast<const T&>(*this).size(); }
+    constexpr std::size_t offset() const { return static_cast<const T&>(*this).offset(idx_); }
 };
 
 }

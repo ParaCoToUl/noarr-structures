@@ -8,16 +8,17 @@ namespace noarr {
 template<char DIM>
 struct resize {
     const std::size_t length;
+    using func_family = transform_trait;
 
     explicit constexpr resize(std::size_t length) : length{length} {}
 
     template<typename T>
     constexpr auto operator()(vector<DIM, T> v) const {
-        return sized_vector<DIM, T>{std::get<0>(v.sub_structures), length};
+        return sized_vector<DIM, T>{std::get<0>(v.sub_structures()), length};
     }
     template<typename T>
     constexpr auto operator()(sized_vector<DIM, T> v) const {
-        return sized_vector<DIM, T>{std::get<0>(v.sub_structures), length};
+        return sized_vector<DIM, T>{std::get<0>(v.sub_structures()), length};
     }
 };
 
@@ -27,15 +28,15 @@ struct cresize {
 
     template<typename T>
     constexpr auto operator()(vector<DIM, T> v) const {
-        return array<DIM, L, T>{std::get<0>(v.sub_structures)};
+        return array<DIM, L, T>{std::get<0>(v.sub_structures())};
     }
     template<typename T>
     constexpr auto operator()(sized_vector<DIM, T> v) const {
-        return array<DIM, L, T>{std::get<0>(v.sub_structures)};
+        return array<DIM, L, T>{std::get<0>(v.sub_structures())};
     }
     template<typename T>
     constexpr auto operator()(array<DIM, L, T> v) const {
-        return array<DIM, L, T>{std::get<0>(v.sub_structures)};
+        return array<DIM, L, T>{std::get<0>(v.sub_structures())};
     }
 };
 
@@ -47,9 +48,9 @@ struct safe_get_ {
 };
 
 template<typename T, std::size_t i>
-struct safe_get_<T, i, std::enable_if_t<(std::tuple_size<remove_cvref<decltype(T::sub_structures)>>::value > i)>> {
+struct safe_get_<T, i, std::enable_if_t<(std::tuple_size<remove_cvref<decltype(std::declval<T>().sub_structures())>>::value > i)>> {
     static constexpr auto get(T t) {
-        return std::get<i>(t.sub_structures);
+        return std::get<i>(t.sub_structures());
     }
 };
 
@@ -65,8 +66,8 @@ struct fix {
     explicit constexpr fix(std::size_t idx) : idx{idx} {}
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), fixed_dim<decltype(safe_get<0>(t))>{safe_get<0>(t), t.offset(idx)}) {
-        return fixed_dim<decltype(safe_get<0>(t))>{safe_get<0>(t), t.offset(idx)};
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), fixed_dim<DIM, T>{t, idx}) {
+        return fixed_dim<DIM, T>{t, idx};
     }
 };
 
@@ -79,7 +80,7 @@ struct fixs<DIM, DIMS...> {
     const fixs<DIMS...> fixs_;
 
     template <typename... IDXs>
-    constexpr fixs(std::size_t idx, IDXs... idxs) : idx_{idx}, fixs_{idxs...} {}
+    constexpr fixs(std::size_t idx, IDXs... idxs) : idx_{idx}, fixs_{static_cast<size_t>(idxs)...} {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
@@ -117,7 +118,7 @@ struct offset {
 
     template<typename T>
     constexpr auto operator()(T t) const -> decltype(std::declval<typename T::template get_t<>>(), t.offset()) {
-        return t.offset() + (std::get<0>(t.sub_structures) % offset{});
+        return t.offset() + (std::get<0>(t.sub_structures()) % offset{});
     }
 };
 
