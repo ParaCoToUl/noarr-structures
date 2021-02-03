@@ -1,20 +1,25 @@
 {
     "cSpell.language": "en,cs",
     "cSpell.words": [
+        "Malloc",
+        "Memcpy",
         "NOARR",
         "Repos",
         "SYCL",
         "constexpr",
+        "cout",
         "cuda",
         "cvref",
         "ekondis",
         "fmap",
         "fmapper",
+        "iostream",
         "kmeans",
         "mixbench",
         "simd",
         "stringstyle",
         "struct",
+        "unsized",
         "vochi"
     ],
     "files.associations": {
