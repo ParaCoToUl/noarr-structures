@@ -39,6 +39,59 @@ struct scalar {
     constexpr std::size_t offset() const { return 0; }
 };
 
+// TODO: finish tuple description
+/**
+ * @brief tuple
+ * 
+ * @tparam DIM dimmension added by the structure
+ * @tparam T,Ts... substructure types
+ */
+template<char DIM, typename... Ts>
+struct tuple;
+
+template<typename TUPLE, std::size_t I>
+struct tuple_part;
+
+template<typename T, typename... Ks>
+struct _tuple_get_t;
+
+template<char DIM, typename T, typename... Ts, std::size_t I, std::size_t K>
+struct _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, I>, std::integral_constant<std::size_t, K>> {
+    using type = typename _tuple_get_t<tuple_part<tuple<DIM, Ts...>, I + 1>, std::integral_constant<std::size_t, K - 1>>::type;
+};
+
+template<char DIM, typename T, typename... Ts, std::size_t I>
+struct _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, I>, std::integral_constant<std::size_t, 0>> {
+    using type = T;
+};
+
+template<char DIM, typename... Ts, typename T, std::size_t I>
+struct tuple_part<tuple<DIM, T, Ts...>, I> : private tuple_part<tuple<DIM, Ts...>, I + 1>, private T {
+    constexpr tuple_part(T t, Ts... ts) : T{t}, tuple_part<tuple<DIM, Ts...>, I + 1>{ts...} {}
+    constexpr auto sub_structures() const {
+        return std::tuple_cat(std::tuple<T>{static_cast<const T&>(*this)}, tuple_part<tuple<DIM, Ts...>, I + 1>::sub_structures());
+    }
+};
+
+template<char DIM, typename T, typename... Ts>
+struct tuple<DIM, T, Ts...> : private tuple_part<tuple<DIM, T, Ts...>, 0> {
+    static constexpr dims_impl<DIM> dims = {};
+    constexpr std::tuple<T, Ts...> sub_structures() const { return tuple_part<tuple<DIM, T, Ts...>, 0>::sub_structures(); }
+
+    template<typename... Ks>
+    using get_t = typename _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, 0>, Ks...>::type;
+
+    constexpr tuple() : tuple_part<tuple<DIM, T, Ts...>, 0>{} {}
+    constexpr tuple(T ss, Ts... sss) : tuple_part<tuple<DIM, T, Ts...>, 0>{ss, sss...} {}
+    template<typename T2, typename... T2s>
+    constexpr auto construct(T2 ss, T2s... sss) const {
+        return tuple<DIM, T2, T2s...>{ss, sss...};
+    }
+
+    constexpr std::size_t size() const { return /*TODO: implement tuple size*/0; }
+    constexpr std::size_t offset(std::size_t /*i*/) const { return /*TODO: implement tuple offset*/0; }
+};
+
 template<typename T, typename... Ks>
 struct _array_get_t;
 
@@ -57,6 +110,7 @@ struct _array_get_t<T, std::integral_constant<std::size_t, K>> {
     using type = T;
 };
 
+// TODO: finish array description
 /**
  * @brief array
  * 
