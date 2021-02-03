@@ -42,9 +42,7 @@ struct cresize {
 
 template<typename T, std::size_t i, typename = void>
 struct safe_get_ {
-    static constexpr void get(T) {
-
-    }
+    static constexpr void get(T t) = delete;
 };
 
 template<typename T, std::size_t i>
@@ -75,16 +73,15 @@ template<char... DIMS>
 struct fixs;
 
 template<char DIM, char... DIMS>
-struct fixs<DIM, DIMS...> {
+struct fixs<DIM, DIMS...> : private fixs<DIMS...> {
     const std::size_t idx_;
-    const fixs<DIMS...> fixs_;
 
     template <typename... IDXs>
-    constexpr fixs(std::size_t idx, IDXs... idxs) : idx_{idx}, fixs_{static_cast<size_t>(idxs)...} {}
+    constexpr fixs(std::size_t idx, IDXs... idxs) : idx_{idx}, fixs<DIMS...>{static_cast<size_t>(idxs)...} {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
-        return pipe(t, fix<DIM>{idx_}, fixs_);
+        return pipe(t, fix<DIM>{idx_}, static_cast<const fixs<DIMS...>&>(*this));
     }
 };
 
@@ -106,7 +103,6 @@ struct get_offset {
     }
 };
 
-// TODO: implement recursive offset
 struct offset {
     using func_family = top_trait;
     explicit constexpr offset() {}
