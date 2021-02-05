@@ -9,6 +9,7 @@
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
 // TODO: make dims more generic
+// TODO: add loading and storing to files (binary, json, xml, ...) maybe mangling? (but a special kind of mangling)
 
 namespace noarr {
 
