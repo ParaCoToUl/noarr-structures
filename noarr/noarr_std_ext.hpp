@@ -33,6 +33,30 @@ struct is_array<T[N]> {
     static constexpr value_type value = true;
 };
 
+template<class T, T... vs>
+struct integral_pack;
+
+template<class... Packs>
+struct _integral_pack_concat;
+
+template<class T, T... vs1, T... vs2, class...Packs>
+struct _integral_pack_concat<integral_pack<T, vs1...>, integral_pack<T, vs2...>, Packs...> {
+    using type = typename _integral_pack_concat<integral_pack<T, vs1..., vs2...>, Packs...>::type;
+};
+
+template<class T, T... vs1>
+struct _integral_pack_concat<integral_pack<T, vs1...>> {
+    using type = integral_pack<T, vs1...>;
+};
+
+template<class... Packs>
+using integral_pack_concat = typename _integral_pack_concat<Packs...>::type;
+
+template<typename T>
+struct template_false {
+    static constexpr bool value = false;
+};
+
 } // namespace noarr
 
 #endif // NOARR_STD_EXT_HPP
