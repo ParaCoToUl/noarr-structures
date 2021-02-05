@@ -8,12 +8,19 @@
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
+// TODO: make dims more generic
 
 namespace noarr {
 
+/**
+ * @brief retrieves sub_structures from the given structure
+ * 
+ * @return value of type value_type will hold the list of sub_structures in a tuple
+ * @tparam T the type of the given structure
+ */
 template<typename T, typename = void>
 struct sub_structures {
-    explicit sub_structures(T) {}
+    explicit constexpr sub_structures(T) {}
     using value_type = std::tuple<>;
     static constexpr std::tuple<> value = std::tuple<>{};
 };
@@ -22,10 +29,15 @@ struct sub_structures {
 template<typename T>
 struct sub_structures<T, void_t<decltype(std::declval<T>().sub_structures())>> {
     explicit constexpr sub_structures(T t) : value {t.sub_structures()} {}
-    using value_type = decltype(std::declval<T>().sub_structures());
+    using value_type = remove_cvref<decltype(std::declval<T>().sub_structures())>;
     const value_type value;
 };
 
+/**
+ * @brief The type that holds all the dimensions of a structure
+ * 
+ * @tparam DIMs the dimensions
+ */
 template<char... DIMs>
 struct dims_impl;
 
@@ -167,7 +179,6 @@ struct fmapper<S, F, std::enable_if_t<can_apply<F, S>::value>> {
     static constexpr auto fmap(S s, F f) {
         return f(s);
     }
-
 };
 
 // TODO: add context
@@ -282,7 +293,7 @@ template<typename S, typename F, typename... Fs>
 struct piper<S, F, Fs...> {
     static constexpr auto pipe(S s, F func, Fs... funcs) {
         auto s1 = s % func;
-        return piper<decltype(s1), Fs...>::pipe(s1, funcs...);
+        return piper<remove_cvref<decltype(s1)>, Fs...>::pipe(s1, funcs...);
     }
 };
 
