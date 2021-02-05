@@ -2,13 +2,16 @@
 
 #include "noarr_structs.hpp"
 #include "noarr_funcs.hpp"
+#include "noarr_io.hpp"
 
 using namespace noarr;
 
 int main() {
     vector<'x', scalar<float>> v;
+
     array<'y', 20000, vector<'x', scalar<float>>> v2;
     tuple<'t', array<'x', 10, scalar<float>>, array<'x', 10, scalar<int>>> t;
+    print_struct(std::cout, t) << std::endl;
 
     auto vs = v % resize<'x'>{10}; // transform
     std::cout << "vs = v % resize<'x'>{10}: " << typeid(vs).name() << std::endl;
