@@ -67,9 +67,45 @@ struct _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, I>, std::integral_constant<
 
 template<char DIM, typename... Ts, typename T, std::size_t I>
 struct tuple_part<tuple<DIM, T, Ts...>, I> : private tuple_part<tuple<DIM, Ts...>, I + 1>, private T {
-    constexpr tuple_part(T t, Ts... ts) : T{t}, tuple_part<tuple<DIM, Ts...>, I + 1>{ts...} {}
+    constexpr tuple_part() : tuple_part<tuple<DIM, Ts...>, I + 1>{}, T{} {}
+    constexpr tuple_part(T t, Ts... ts) : tuple_part<tuple<DIM, Ts...>, I + 1>{ts...}, T{t} {}
     constexpr auto sub_structures() const {
         return std::tuple_cat(std::tuple<T>{static_cast<const T&>(*this)}, tuple_part<tuple<DIM, Ts...>, I + 1>::sub_structures());
+    }
+};
+
+template<char DIM, typename T, std::size_t I>
+struct tuple_part<tuple<DIM, T>, I> : private T {
+    constexpr tuple_part() : T{} {}
+    explicit constexpr tuple_part(T t) : T{t} {}
+    constexpr auto sub_structures() const {
+        return std::tuple<T>{static_cast<const T&>(*this)};
+    }
+};
+
+template<typename T, std::size_t I = std::tuple_size<T>::value>
+struct _tuple_size_getter;
+
+template<typename T, std::size_t I>
+struct _tuple_size_getter {
+    template<std::size_t... IDXs>
+    static constexpr std::size_t size(T t) {
+        return _tuple_size_getter<T, I - 1>::template size<I - 1, IDXs...>(t);
+    }
+};
+
+template<typename T>
+struct _tuple_size_getter<T, 0> {
+    template<typename... Args>
+    static constexpr std::size_t sum(std::size_t arg, Args... args) {
+        return arg + sum(args...);
+    }
+    static constexpr std::size_t sum(std::size_t arg) {
+        return arg;
+    }
+    template<std::size_t... IDXs>
+    static constexpr std::size_t size(T t) {
+        return sum(std::get<IDXs>(t).size()...);
     }
 };
 
@@ -88,8 +124,13 @@ struct tuple<DIM, T, Ts...> : private tuple_part<tuple<DIM, T, Ts...>, 0> {
         return tuple<DIM, T2, T2s...>{ss, sss...};
     }
 
-    constexpr std::size_t size() const { return /*TODO: implement tuple size*/0; }
-    constexpr std::size_t offset(std::size_t /*i*/) const { return /*TODO: implement tuple offset*/0; }
+    constexpr std::size_t size() const {
+        return _tuple_size_getter<remove_cvref<decltype(sub_structures())>>::size(sub_structures());
+    }
+    template<std::size_t i>
+    constexpr std::size_t offset() const {
+        return _tuple_size_getter<remove_cvref<decltype(sub_structures())>, i>::size(sub_structures());
+    }
 };
 
 template<typename T, typename... Ks>
