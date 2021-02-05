@@ -10,6 +10,8 @@
 // TODO: add dim checking (+ for consume_dims(s))
 // TODO: make dims more generic
 // TODO: add loading and storing to files (binary, json, xml, ...) maybe mangling? (but a special kind of mangling)
+// TODO: add mangling strings
+// TODO: add struct checkers
 
 namespace noarr {
 
