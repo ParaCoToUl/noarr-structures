@@ -49,8 +49,29 @@ struct _integral_pack_concat<integral_pack<T, vs1...>> {
     using type = integral_pack<T, vs1...>;
 };
 
+template<class Sep, class... Packs>
+struct _integral_pack_concat_sep;
+
+template<class T, T... vs1, T... vs2, T... sep, class...Packs>
+struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1...>, integral_pack<T, vs2...>, Packs...> {
+    using type = typename _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1..., vs2...>, Packs...>::type;
+};
+
+template<class T, T v1, T v2, T... vs1, T... vs2, T... sep, class...Packs>
+struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, v1, vs1...>, integral_pack<T, v2, vs2...>, Packs...> {
+    using type = typename _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, v1, vs1..., sep..., v2, vs2...>, Packs...>::type;
+};
+
+template<class T, T... vs1, T... sep>
+struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1...>> {
+    using type = integral_pack<T, vs1...>;
+};
+
 template<class... Packs>
 using integral_pack_concat = typename _integral_pack_concat<Packs...>::type;
+
+template<class... Packs>
+using integral_pack_concat_sep = typename _integral_pack_concat_sep<Packs...>::type;
 
 template<typename T>
 struct template_false {

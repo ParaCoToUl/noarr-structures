@@ -2,6 +2,7 @@
 #define NOARR_STRUCTS_HPP
 
 #include "noarr_core.hpp"
+#include "noarr_struct_desc.hpp"
 
 namespace noarr {
 
@@ -27,7 +28,11 @@ template<typename T>
 struct scalar {
     std::tuple<> sub_structures() const { return {}; }
     static constexpr dims_impl<> dims = {};
-    using name = integral_pack<char, 's', 'c', 'a', 'l', 'a', 'r'>;
+    using desc = struct_desc<
+        integral_pack<char, 's', 'c', 'a', 'l', 'a', 'r'>,
+        dims_impl<>,
+        dims_impl<>,
+        type_param<T>>;
 
     template<typename... Ks>
     using get_t = typename _scalar_get_t<T, Ks...>::type;
@@ -114,7 +119,12 @@ template<char DIM, typename T, typename... Ts>
 struct tuple<DIM, T, Ts...> : private tuple_part<tuple<DIM, T, Ts...>, 0> {
     static constexpr dims_impl<DIM> dims = {};
     constexpr std::tuple<T, Ts...> sub_structures() const { return tuple_part<tuple<DIM, T, Ts...>, 0>::sub_structures(); }
-    using name = integral_pack<char, 't', 'u', 'p', 'l', 'e'>;
+    using desc = struct_desc<
+        integral_pack<char, 't', 'u', 'p', 'l', 'e'>,
+        dims_impl<DIM>,
+        dims_impl<>,
+        type_param<T>,
+        type_param<Ts>...>;
 
     template<typename... Ks>
     using get_t = typename _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, 0>, Ks...>::type;
@@ -165,7 +175,12 @@ struct array : private T {
     static constexpr std::size_t length = L;
     static constexpr dims_impl<DIM> dims = {};
     constexpr std::tuple<T> sub_structures() const { return {static_cast<const T&>(*this)}; }
-    using name = integral_pack<char, 'a', 'r', 'r', 'a', 'y'>;
+    using desc = struct_desc<
+        integral_pack<char, 'a', 'r', 'r', 'a', 'y'>,
+        dims_impl<DIM>,
+        dims_impl<>,
+        value_param<std::size_t, L>,
+        type_param<T>>;
 
     template<typename... Ks>
     using get_t = typename _array_get_t<T, Ks...>::type;
@@ -191,7 +206,11 @@ template<char DIM, typename T>
 struct vector : private T {
     static constexpr dims_impl<DIM> dims = {};
     constexpr std::tuple<T> sub_structures() const { return {static_cast<const T&>(*this)}; }
-    using name = integral_pack<char, 'v', 'e', 'c', 't', 'o', 'r'>;
+    using desc = struct_desc<
+        integral_pack<char, 'v', 'e', 'c', 't', 'o', 'r'>,
+        dims_impl<DIM>,
+        dims_impl<>,
+        type_param<T>>;
 
     constexpr vector() : T{} {}
     explicit constexpr vector(T sub_structure) : T{sub_structure} {}
@@ -230,7 +249,11 @@ struct sized_vector : private vector<DIM, T> {
     const std::size_t length;
     using vector<DIM, T>::dims;
     using vector<DIM, T>::sub_structures;
-    using name = integral_pack<char, 's', 'i', 'z', 'e', 'd', '_', 'v', 'e', 'c', 't', 'o', 'r'>;
+    using desc = struct_desc<
+        integral_pack<char, 's', 'i', 'z', 'e', 'd', '_', 'v', 'e', 'c', 't', 'o', 'r'>,
+        dims_impl<DIM>,
+        dims_impl<>,
+        type_param<T>>;
 
     template<typename... Ks>
     using get_t = typename _sized_vector_get_t<T, Ks...>::type;
@@ -269,7 +292,11 @@ struct fixed_dim : private T {
     static constexpr dims_impl<DIM> dims = {};
     static constexpr dims_impl<DIM> consume_dims = {};
     constexpr auto sub_structures() const { return static_cast<const T&>(*this).sub_structures(); }
-    using name = integral_pack<char, 'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>;
+    using desc = struct_desc<
+        integral_pack<char, 'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
+        dims_impl<DIM>,
+        dims_impl<>,
+        type_param<T>>;
 
     template<typename... Ks>
     using get_t = typename _fixed_dim_get_t<T, Ks...>::type;
