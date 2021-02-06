@@ -11,7 +11,9 @@ int main() {
 
     array<'y', 20000, vector<'x', scalar<float>>> v2;
     tuple<'t', array<'x', 10, scalar<float>>, array<'x', 10, scalar<int>>> t;
-    print_struct(std::cout, t) << std::endl;
+    print_struct(std::cout, v) << " v;" << std::endl;
+    print_struct(std::cout, v2) << " v2;" << std::endl;
+    print_struct(std::cout, t) << " t;" << std::endl << std::endl;
 
     auto vs = v % resize<'x'>{10}; // transform
     std::cout << "vs = v % resize<'x'>{10}: " << typeid(vs).name() << std::endl;
