@@ -7,9 +7,7 @@ namespace noarr {
 
 template<char DIM>
 struct resize {
-    const std::size_t length;
     using func_family = transform_trait;
-
     explicit constexpr resize(std::size_t length) : length{length} {}
 
     template<typename T>
@@ -20,6 +18,9 @@ struct resize {
     constexpr auto operator()(sized_vector<DIM, T> v) const {
         return sized_vector<DIM, T>{std::get<0>(v.sub_structures()), length};
     }
+
+private:
+    const std::size_t length;
 };
 
 template<char DIM, std::size_t L>
@@ -63,10 +64,12 @@ inline constexpr auto safe_get(T t) {
 
 template<char DIM>
 struct fix {
-    const std::size_t idx;
-
     explicit constexpr fix(std::size_t idx) : idx{idx} {}
 
+private:
+    const std::size_t idx;
+
+public:
     template<typename T>
     constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), fixed_dim<DIM, T>{t, idx}) {
         return fixed_dim<DIM, T>{t, idx};
@@ -78,15 +81,16 @@ struct fixs;
 
 template<char DIM, char... DIMS>
 struct fixs<DIM, DIMS...> : private fixs<DIMS...> {
-    const std::size_t idx_;
-
     template <typename... IDXs>
-    constexpr fixs(std::size_t idx, IDXs... idxs) : idx_{idx}, fixs<DIMS...>{static_cast<size_t>(idxs)...} {}
+    constexpr fixs(std::size_t idx, IDXs... idxs) : fixs<DIMS...>{static_cast<size_t>(idxs)...}, idx_{idx} {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
         return pipe(t, fix<DIM>{idx_}, static_cast<const fixs<DIMS...>&>(*this));
     }
+
+private:
+    const std::size_t idx_;
 };
 
 template<char DIM>
@@ -96,11 +100,13 @@ struct fixs<DIM> : fix<DIM> {
 
 template<char DIM>
 struct get_offset {
-    const std::size_t idx;
     using func_family = get_trait;
-
     explicit constexpr get_offset(std::size_t idx) : idx{idx} {}
 
+private:
+    const std::size_t idx;
+
+public:
     template<typename T>
     constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), t.offset(idx)) {
         return t.offset(idx);

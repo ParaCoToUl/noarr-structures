@@ -37,7 +37,7 @@ struct scalar {
     template<typename... Ks>
     using get_t = typename _scalar_get_t<T, Ks...>::type;
 
-    constexpr scalar() {}
+    constexpr scalar() = default;
     static constexpr auto construct() {
         return scalar<T>{};
     }
@@ -73,7 +73,7 @@ struct _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, I>, std::integral_constant<
 
 template<char DIM, typename... Ts, typename T, std::size_t I>
 struct tuple_part<tuple<DIM, T, Ts...>, I> : private tuple_part<tuple<DIM, Ts...>, I + 1>, private T {
-    constexpr tuple_part() : tuple_part<tuple<DIM, Ts...>, I + 1>{}, T{} {}
+    constexpr tuple_part() = default;
     constexpr tuple_part(T t, Ts... ts) : tuple_part<tuple<DIM, Ts...>, I + 1>{ts...}, T{t} {}
     constexpr auto sub_structures() const {
         return std::tuple_cat(std::tuple<T>{static_cast<const T&>(*this)}, tuple_part<tuple<DIM, Ts...>, I + 1>::sub_structures());
@@ -82,7 +82,7 @@ struct tuple_part<tuple<DIM, T, Ts...>, I> : private tuple_part<tuple<DIM, Ts...
 
 template<char DIM, typename T, std::size_t I>
 struct tuple_part<tuple<DIM, T>, I> : private T {
-    constexpr tuple_part() : T{} {}
+    constexpr tuple_part() = default;
     explicit constexpr tuple_part(T t) : T{t} {}
     constexpr auto sub_structures() const {
         return std::tuple<T>{static_cast<const T&>(*this)};
@@ -129,7 +129,7 @@ struct tuple<DIM, T, Ts...> : private tuple_part<tuple<DIM, T, Ts...>, 0> {
     template<typename... Ks>
     using get_t = typename _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, 0>, Ks...>::type;
 
-    constexpr tuple() : tuple_part<tuple<DIM, T, Ts...>, 0>{} {}
+    constexpr tuple() = default;
     constexpr tuple(T ss, Ts... sss) : tuple_part<tuple<DIM, T, Ts...>, 0>{ss, sss...} {}
     template<typename T2, typename... T2s>
     constexpr auto construct(T2 ss, T2s... sss) const {
@@ -185,7 +185,7 @@ struct array : private T {
     template<typename... Ks>
     using get_t = typename _array_get_t<T, Ks...>::type;
 
-    constexpr array() : T{} {}
+    constexpr array() = default;
     explicit constexpr array(T sub_structure) : T{sub_structure} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
@@ -212,7 +212,7 @@ struct vector : private T {
         dims_impl<>,
         type_param<T>>;
 
-    constexpr vector() : T{} {}
+    constexpr vector() = default;
     explicit constexpr vector(T sub_structure) : T{sub_structure} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
@@ -246,7 +246,6 @@ struct _sized_vector_get_t<T, std::integral_constant<std::size_t, K>> {
  */
 template<char DIM, typename T>
 struct sized_vector : private vector<DIM, T> {
-    const std::size_t length;
     using vector<DIM, T>::dims;
     using vector<DIM, T>::sub_structures;
     using desc = struct_desc<
@@ -258,6 +257,7 @@ struct sized_vector : private vector<DIM, T> {
     template<typename... Ks>
     using get_t = typename _sized_vector_get_t<T, Ks...>::type;
 
+    constexpr sized_vector() = default;
     constexpr sized_vector(T sub_structure, std::size_t length) : vector<DIM, T>{sub_structure}, length{length} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
@@ -266,6 +266,9 @@ struct sized_vector : private vector<DIM, T> {
 
     constexpr std::size_t size() const { return std::get<0>(sub_structures()).size() * length; }
     constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures()).size() * i; }
+
+private:
+    const std::size_t length;
 };
 
 template<typename T, typename... Ks>
@@ -288,7 +291,6 @@ struct _fixed_dim_get_t<T, void> {
  */
 template<char DIM, typename T>
 struct fixed_dim : private T {
-    const std::size_t idx_;
     static constexpr dims_impl<DIM> dims = {};
     static constexpr dims_impl<DIM> consume_dims = {};
     constexpr auto sub_structures() const { return static_cast<const T&>(*this).sub_structures(); }
@@ -301,6 +303,7 @@ struct fixed_dim : private T {
     template<typename... Ks>
     using get_t = typename _fixed_dim_get_t<T, Ks...>::type;
 
+    constexpr fixed_dim() = default;
     constexpr fixed_dim(T sub_structure, std::size_t idx) : T{sub_structure}, idx_{idx} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
@@ -310,6 +313,9 @@ struct fixed_dim : private T {
 
     constexpr std::size_t size() const { return static_cast<const T&>(*this).size(); }
     constexpr std::size_t offset() const { return static_cast<const T&>(*this).offset(idx_); }
+
+private:
+    const std::size_t idx_;
 };
 
 }
