@@ -26,7 +26,7 @@ struct _scalar_get_t<T, void> {
  */
 template<typename T>
 struct scalar {
-    std::tuple<> sub_structures() const { return {}; }
+    static constexpr std::tuple<> sub_structures() { return {}; }
     static constexpr dims_impl<> dims = {};
     using desc = struct_desc<
         integral_pack<char, 's', 'c', 'a', 'l', 'a', 'r'>,
@@ -268,7 +268,7 @@ struct sized_vector : private vector<DIM, T> {
     constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures()).size() * i; }
 
 private:
-    const std::size_t length;
+    std::size_t length;
 };
 
 template<typename T, typename... Ks>
@@ -315,7 +315,7 @@ struct fixed_dim : private T {
     constexpr std::size_t offset() const { return static_cast<const T&>(*this).offset(idx_); }
 
 private:
-    const std::size_t idx_;
+    std::size_t idx_;
 };
 
 }

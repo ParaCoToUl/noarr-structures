@@ -20,12 +20,12 @@ struct resize {
     }
 
 private:
-    const std::size_t length;
+    std::size_t length;
 };
 
 template<char DIM, std::size_t L>
 struct cresize {
-    constexpr cresize() {}
+    constexpr cresize() = default;
 
     template<typename T>
     constexpr auto operator()(vector<DIM, T> v) const {
@@ -67,7 +67,7 @@ struct fix {
     explicit constexpr fix(std::size_t idx) : idx{idx} {}
 
 private:
-    const std::size_t idx;
+    std::size_t idx;
 
 public:
     template<typename T>
@@ -90,7 +90,7 @@ struct fixs<DIM, DIMS...> : private fixs<DIMS...> {
     }
 
 private:
-    const std::size_t idx_;
+    std::size_t idx_;
 };
 
 template<char DIM>
@@ -104,7 +104,7 @@ struct get_offset {
     explicit constexpr get_offset(std::size_t idx) : idx{idx} {}
 
 private:
-    const std::size_t idx;
+    std::size_t idx;
 
 public:
     template<typename T>
@@ -115,7 +115,7 @@ public:
 
 struct offset {
     using func_family = top_trait;
-    explicit constexpr offset() {}
+    explicit constexpr offset() = default;
 
     template<typename T>
     constexpr std::size_t operator()(scalar<T>) const {
@@ -130,7 +130,7 @@ struct offset {
 
 struct get_size {
     using func_family = top_trait;
-    constexpr get_size() {}
+    constexpr get_size() = default;
 
     template<typename T>
     constexpr auto operator()(T t) const -> decltype(t.size()) {
