@@ -8,10 +8,10 @@
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
-// TODO: make dims more generic
+// TODO?: make dims more generic (not just char)
 // TODO: add loading and storing to files (binary, json, xml, ...) maybe mangling? (but a special kind of mangling)
-// TODO: add mangling strings
 // TODO: add struct checkers
+// TODO: change dims_impl to be just an alias for integral_pack as they are very similar
 
 namespace noarr {
 
