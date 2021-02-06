@@ -42,16 +42,7 @@ struct sub_structures<T, void_t<decltype(std::declval<T>().sub_structures())>> {
  * @tparam DIMs the dimensions
  */
 template<char... DIMs>
-struct dims_impl;
-
-template<>
-struct dims_impl<> {};
-
-template<char DIM, char... DIMs>
-struct dims_impl<DIM, DIMs...> : dims_impl<DIMs...> {
-    using value_type = char;
-    static constexpr value_type value = DIM;
-};
+struct dims_impl {};
 
 template<class T>
 struct dims_length;
