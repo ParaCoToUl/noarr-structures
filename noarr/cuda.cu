@@ -1,3 +1,4 @@
+#include <array>
 #include <iostream>
 
 #include "noarr_funcs.hpp"
@@ -16,9 +17,8 @@ __global__ void kernel_handmade(float *data, size_t size) {
 }
 
 int main() {
-    float *data;
-
     std::array<float, 400000> local;
+    float *data;
 
     cudaMalloc(&data, sizeof(local));
 
