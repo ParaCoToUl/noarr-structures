@@ -25,9 +25,7 @@ template<typename T>
 using mangle = typename _mangle<T>::type;
 
 template<typename T, typename>
-struct get_struct_desc {
-    static_assert(template_false<T>::value, "the T::desc (or get_struct_desc_<T>) has to be implemented");
-};
+struct get_struct_desc;
 
 // TODO: check if integral_pack
 template<typename T>
@@ -36,7 +34,7 @@ struct get_struct_desc<T, void_t<typename T::desc>> {
 };
 
 template<typename T>
-struct scalar_name<T, void_t<mangle<T>>> {
+struct scalar_name<T, void_t<get_struct_desc_t<T>>> {
     using type = mangle<T>;
 };
 
@@ -92,7 +90,7 @@ struct _mangle<type_param<T>, Pre, Post> {
 
 template<typename T, T V, typename Pre, typename Post>
 struct _mangle<value_param<T, V>, Pre, Post> {
-    using type = integral_pack_concat<Pre, mangle_value<T, V>, Post>;
+    using type = integral_pack_concat<Pre, integral_pack<char, '('>, scalar_name_t<T>, integral_pack<char, ')'>, mangle_value<T, V>, Post>;
 };
 
 template<typename T, typename Pre, typename Post>
