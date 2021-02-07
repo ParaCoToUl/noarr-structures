@@ -2,6 +2,7 @@
 #define NOARR_SCALAR_NAMES_HPP
 
 #include "noarr_std_ext.hpp"
+#include "noarr_mangle_value.hpp"
 
 namespace noarr {
 
@@ -16,19 +17,19 @@ struct scalar_name {
     static_assert(template_false<T>::value, "scalar_name<T> has to be implemented");
 };
 
-template<>
-struct scalar_name<double> {
-    using type = integral_pack<char, 'd', 'o', 'u', 'b', 'l', 'e'>;
+template<typename T>
+struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>> {
+    using type = integral_pack_concat<integral_pack<char, 'i'>, mangle_value<int, 8 * sizeof(T)>>;
 };
 
-template<>
-struct scalar_name<float> {
-    using type = integral_pack<char, 'f', 'l', 'o', 'a', 't'>;
+template<typename T>
+struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value>> {
+    using type = integral_pack_concat<integral_pack<char, 'u'>, mangle_value<int, 8 * sizeof(T)>>;
 };
 
-template<>
-struct scalar_name<int> {
-    using type = integral_pack<char, 'i', 'n', 't'>;
+template<typename T>
+struct scalar_name<T, std::enable_if_t<std::is_floating_point<T>::value>> {
+    using type = integral_pack_concat<integral_pack<char, 'f'>, mangle_value<int, 8 * sizeof(T)>>;
 };
 
 }
