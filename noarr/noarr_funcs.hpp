@@ -58,7 +58,7 @@ inline constexpr auto safe_get(T t) {
     return safe_get_<T, i>::get(t);
 }
 
-// TODO?: cfix & cfixs
+// TODO?: implement cfix and cfixs
 // TODO: support fix and fixs somehow on tuples
 // TODO: support the arrr::at functor
 
@@ -71,7 +71,7 @@ private:
 
 public:
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), fixed_dim<DIM, T>{t, idx}) {
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<DIM>()>>(), fixed_dim<DIM, T>{t, idx}) {
         return fixed_dim<DIM, T>{t, idx};
     }
 };
@@ -108,7 +108,7 @@ private:
 
 public:
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<dims_have<T, DIM>::value>>(), t.offset(idx)) {
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<DIM>()>>(), t.offset(idx)) {
         return t.offset(idx);
     }
 };

@@ -19,17 +19,17 @@ struct scalar_name {
 
 template<typename T>
 struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>> {
-    using type = integral_pack_concat<integral_pack<char, 'i'>, mangle_value<int, 8 * sizeof(T)>>;
+    using type = integral_pack_concat<char_pack<'i'>, mangle_value<int, 8 * sizeof(T)>>;
 };
 
 template<typename T>
 struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value>> {
-    using type = integral_pack_concat<integral_pack<char, 'u'>, mangle_value<int, 8 * sizeof(T)>>;
+    using type = integral_pack_concat<char_pack<'u'>, mangle_value<int, 8 * sizeof(T)>>;
 };
 
 template<typename T>
 struct scalar_name<T, std::enable_if_t<std::is_floating_point<T>::value>> {
-    using type = integral_pack_concat<integral_pack<char, 'f'>, mangle_value<int, 8 * sizeof(T)>>;
+    using type = integral_pack_concat<char_pack<'f'>, mangle_value<int, 8 * sizeof(T)>>;
 };
 
 }

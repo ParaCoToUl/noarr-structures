@@ -15,7 +15,7 @@ namespace noarr {
 template<typename T, typename = void>
 struct get_struct_desc;
 
-template<typename T, typename Pre = integral_pack<char>, typename Post = integral_pack<char>>
+template<typename T, typename Pre = char_pack<>, typename Post = char_pack<>>
 struct _mangle;
 
 template<typename T>
@@ -29,8 +29,8 @@ struct get_struct_desc;
 
 // TODO: check if integral_pack
 template<typename T>
-struct get_struct_desc<T, void_t<typename T::desc>> {
-    using type = typename T::desc;
+struct get_struct_desc<T, void_t<typename T::description>> {
+    using type = typename T::description;
 };
 
 template<typename T>
@@ -46,20 +46,20 @@ struct _mangle {
 template<typename T, typename Pre, typename Post>
 struct _mangle_scalar;
 
-template<typename Dims, typename Acc = integral_pack<char>>
+template<typename Dims, typename Acc = char_pack<>>
 struct _transform_dims;
 
 template<typename... Dims>
 using transform_dims = typename _transform_dims<Dims...>::type;
 
 template<char Dim1, char Dim2, char... Dims, char... Acc>
-struct _transform_dims<dims_impl<Dim1, Dim2, Dims...>, integral_pack<char, Acc...>> {
-    using type = typename _transform_dims<dims_impl<Dim2, Dims...>, integral_pack<char, '\'', Dim1, '\'', ',', Acc...>>::type;
+struct _transform_dims<dims_impl<Dim1, Dim2, Dims...>, char_pack<Acc...>> {
+    using type = typename _transform_dims<dims_impl<Dim2, Dims...>, char_pack<'\'', Dim1, '\'', ',', Acc...>>::type;
 };
 
 template<char Dim, char... Acc>
-struct _transform_dims<dims_impl<Dim>, integral_pack<char, Acc...>> {
-    using type = integral_pack<char, '\'', Dim, '\'', Acc...>;
+struct _transform_dims<dims_impl<Dim>, char_pack<Acc...>> {
+    using type = char_pack<'\'', Dim, '\'', Acc...>;
 };
 
 template<typename Acc>
@@ -68,19 +68,19 @@ struct _transform_dims<dims_impl<>, Acc> {
 };
 
 template<typename Name, typename Dims, typename ADims, typename... Params, typename Pre, typename Post>
-struct _mangle<struct_desc<Name, Dims, ADims, Params...>, Pre, Post> {
+struct _mangle<struct_description<Name, Dims, ADims, Params...>, Pre, Post> {
     using type = integral_pack_concat<
         Pre,
         Name,
-        integral_pack<char, '<'>,
-        integral_pack_concat_sep<integral_pack<char, ','>, transform_dims<Dims>, transform_dims<ADims>, mangle<Params>...>,
-        integral_pack<char, '>'>,
+        char_pack<'<'>,
+        integral_pack_concat_sep<char_pack<','>, transform_dims<Dims>, transform_dims<ADims>, mangle<Params>...>,
+        char_pack<'>'>,
         Post>;
 };
 
 template<typename Name, typename Param, typename Pre, typename Post>
-struct _mangle_scalar<struct_desc<Name, dims_impl<>, dims_impl<>, type_param<Param>>, Pre, Post> {
-    using type = integral_pack_concat<Pre, Name, integral_pack<char, '<'>, scalar_name_t<Param>, integral_pack<char, '>'>, Post>;
+struct _mangle_scalar<struct_description<Name, dims_impl<>, dims_impl<>, type_param<Param>>, Pre, Post> {
+    using type = integral_pack_concat<Pre, Name, char_pack<'<'>, scalar_name_t<Param>, char_pack<'>'>, Post>;
 };
 
 template<typename T, typename Pre, typename Post>
@@ -90,7 +90,7 @@ struct _mangle<type_param<T>, Pre, Post> {
 
 template<typename T, T V, typename Pre, typename Post>
 struct _mangle<value_param<T, V>, Pre, Post> {
-    using type = integral_pack_concat<Pre, integral_pack<char, '('>, scalar_name_t<T>, integral_pack<char, ')'>, mangle_value<T, V>, Post>;
+    using type = integral_pack_concat<Pre, char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>, Post>;
 };
 
 template<typename T, typename Pre, typename Post>
@@ -107,7 +107,7 @@ template<typename T>
 struct _print_struct;
 
 template<char... Name>
-struct _print_struct<integral_pack<char, Name...>> {
+struct _print_struct<char_pack<Name...>> {
     static constexpr std::ostream &print(std::ostream &out) {
         constexpr char name[] = {Name..., '\0'};
         return out << name;

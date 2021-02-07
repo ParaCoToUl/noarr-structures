@@ -8,10 +8,8 @@
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
-// TODO?: make dims more generic (not just char)
 // TODO: add loading and storing to files (binary, json, xml, ...) maybe mangling? (but a special kind of mangling)
 // TODO: add struct checkers
-// TODO: change dims_impl to be just an alias for integral_pack as they are very similar
 
 namespace noarr {
 
@@ -61,64 +59,14 @@ struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, 
  * 
  * @tparam DIMs the dimensions
  */
+template<char... VS>
+using char_pack = integral_pack<char, VS...>;
+
 template<char... DIMs>
-struct dims_impl {};
+using dims_impl = char_pack<DIMs...>;
 
-template<class T>
-struct dims_length;
-
-template<>
-struct dims_length<dims_impl<>> {
-    using value_type = std::size_t;
-    static constexpr value_type value = 0UL;
-};
-
-template<char DIM, char... DIMs>
-struct dims_length<dims_impl<DIM, DIMs...>> {
-    static constexpr std::size_t value = dims_length<dims_impl<DIMs...>>::value + 1UL;
-};
-
-template<typename T, typename = void>
-struct dims { 
-    static constexpr dims_impl<> value = {};
-};
-
-// TODO: check if of type dims_impl
 template<typename T>
-struct dims<T, void_t<decltype(T::dims)>> {
-    static constexpr auto value = T::dims;
-};
-
-/**
- * @brief returns (via value) true if DIMS contain DIM, otherwise returns false
- * 
- * @tparam DIMS is expected of type dims_impl, otherwise remove_cvref<decltype(dims<DIMS>::value)> is applied
- * @tparam DIM the needle DIM
- */
-template<class DIMS, char DIM, typename = void>
-struct dims_have {
-    using value_type = bool;
-    static constexpr value_type value = dims_have<remove_cvref<decltype(dims<DIMS>::value)>, DIM>::value;
-};
-
-template<char NEEDLE> // HAY is empty
-struct dims_have<dims_impl<>, NEEDLE> {
-    using value_type = bool;
-    static constexpr value_type value = false;
-};
-
-template<char NEEDLE, char... HAY_TAIL> // NEEDLE == HAY_HEAD
-struct dims_have<dims_impl<NEEDLE, HAY_TAIL...>, NEEDLE> {
-    using value_type = bool;
-    static constexpr value_type value = true;
-};
-
-template<char NEEDLE, char HAY_HEAD, char... HAY_TAIL>
-struct dims_have<dims_impl<HAY_HEAD, HAY_TAIL...>, NEEDLE, std::enable_if_t<HAY_HEAD != NEEDLE>> {
-    using value_type = bool;
-    static constexpr value_type value = dims_have<dims_impl<HAY_TAIL...>, NEEDLE>::value;
-};
-
+using get_dims = typename T::description::dims;
 // TODO: implement the recursive version using sub_structures
 
 template<typename S, typename F>

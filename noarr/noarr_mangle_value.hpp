@@ -18,13 +18,13 @@ template<typename T, T V>
 using mangle_integral = typename _mangle_integral<T, V>::type;
 
 template<typename T, char... Acc, T V>
-struct _mangle_integral<T, V, integral_pack<char, Acc...>, std::enable_if_t<(V >= 10)>> {
-    using type = typename _mangle_integral<T, V / 10, integral_pack<char, (char)(V % 10) + '0', Acc...>>::type;
+struct _mangle_integral<T, V, char_pack<Acc...>, std::enable_if_t<(V >= 10)>> {
+    using type = typename _mangle_integral<T, V / 10, char_pack<(char)(V % 10) + '0', Acc...>>::type;
 };
 
 template<typename T, char... Acc, T V>
-struct _mangle_integral<T, V, integral_pack<char, Acc...>, std::enable_if_t<(V < 10 && V >= 0)>> {
-    using type = integral_pack<char, (char)(V % 10) + '0', Acc...>;
+struct _mangle_integral<T, V, char_pack<Acc...>, std::enable_if_t<(V < 10 && V >= 0)>> {
+    using type = char_pack<(char)(V % 10) + '0', Acc...>;
 };
 
 template<typename T, T V>
