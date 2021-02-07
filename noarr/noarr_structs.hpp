@@ -255,7 +255,7 @@ struct tuple<DIM, T, Ts...> : private tuple_part<tuple<DIM, T, Ts...>, 0> {
     constexpr tuple() = default;
     constexpr tuple(T ss, Ts... sss) : tuple_part<tuple<DIM, T, Ts...>, 0>{ss, sss...} {}
     template<typename T2, typename... T2s>
-    constexpr auto construct(T2 ss, T2s... sss) const {
+    static constexpr auto construct(T2 ss, T2s... sss) {
         return tuple<DIM, T2, T2s...>{ss, sss...};
     }
 
@@ -311,7 +311,7 @@ struct array : private T {
     constexpr array() = default;
     explicit constexpr array(T sub_structure) : T{sub_structure} {}
     template<typename T2>
-    constexpr auto construct(T2 sub_structure) const {
+    static constexpr auto construct(T2 sub_structure) {
         return array<DIM, L, T2>{sub_structure};
     }
 
@@ -338,7 +338,7 @@ struct vector : private T {
     constexpr vector() = default;
     explicit constexpr vector(T sub_structure) : T{sub_structure} {}
     template<typename T2>
-    constexpr auto construct(T2 sub_structure) const {
+    static constexpr auto construct(T2 sub_structure) {
         return vector<DIM, T2>{sub_structure};
     }
 };
