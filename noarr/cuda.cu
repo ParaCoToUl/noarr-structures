@@ -1,6 +1,14 @@
 #include <array>
 #include <iostream>
 
+#if _WIN32 || _WIN64
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+#define SIZE_CONSTANT 10000
+#else
+#define SIZE_CONSTANT 20000
+#endif
+
 #include "noarr_funcs.hpp"
 
 using namespace noarr;
@@ -17,17 +25,16 @@ __global__ void kernel_handmade(float *data, size_t size) {
 }
 
 int main() {
-    std::array<float, 400000> local;
+    std::array<float, 20 * SIZE_CONSTANT> local;
     float *data;
 
     cudaMalloc(&data, sizeof(local));
 
-    // kernel<<<20000, 20>>>(data, (scalar<float> ^ vector<'y'> ^ array<'x', 20000>) % resize<'y'>(20));
-    const auto av = array<'y', 20000, vector<'x', scalar<float>>>{};
+    const auto av = array<'y', SIZE_CONSTANT, vector<'x', scalar<float>>>{};
     volatile std::size_t s = 20;
     const auto avr = av % resize<'x'>(s);
-    kernel<<<20000, 20>>>(data, avr);
-    //kernel_handmade<<<20000, 20>>>(data, 20);
+    kernel<<<SIZE_CONSTANT, 20>>>(data, avr);
+    //kernel_handmade<<<SIZE_CONSTANT, 20>>>(data, 20);
     
     cudaMemcpy(local.data(), data, sizeof(local), cudaMemcpyDeviceToHost);
     
