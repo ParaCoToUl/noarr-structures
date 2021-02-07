@@ -59,8 +59,6 @@ struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, 
  * 
  * @tparam DIMs the dimensions
  */
-template<char... VS>
-using char_pack = integral_pack<char, VS...>;
 
 template<char... DIMs>
 using dims_impl = char_pack<DIMs...>;

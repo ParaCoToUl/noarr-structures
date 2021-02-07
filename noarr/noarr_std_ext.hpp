@@ -96,6 +96,9 @@ struct _integral_pack_contains<T, V, integral_pack<T>> {
     static constexpr bool value = false;
 };
 
+template<char... VS>
+using char_pack = integral_pack<char, VS...>;
+
 template<typename T>
 struct template_false {
     static constexpr bool value = false;
