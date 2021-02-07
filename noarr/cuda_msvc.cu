@@ -22,23 +22,27 @@ int main() {
     float *data;
     std::cout << "hi" << std::endl;
 
-    std::array<float, 40000> local;
+    std::array<float, 200000> local;
     
 
     cudaMalloc(&data, sizeof(local));
 
-    // kernel<<<20000, 20>>>(data, (scalar<float> ^ vector<'y'> ^ array<'x', 20000>) % resize<'y'>(20));
-    const auto av = array<'y', 2000, vector<'x', scalar<float>>>{};
+    const auto av = array<'y', 10000, vector<'x', scalar<float>>>{};
     volatile std::size_t s = 20;
     const auto avr = av % resize<'x'>(s);
-    kernel<<<2000, 20>>>(data, avr);
-    //kernel_handmade<<<2000, 20>>>(data, 20);
+    kernel<<<10000, 20>>>(data, avr);
+    //kernel_handmade<<<10000, 20>>>(data, 20);
     
     cudaMemcpy(local.data(), data, sizeof(local), cudaMemcpyDeviceToHost);
     
     size_t i = 0;
     for (auto f : local) {
-        std::cout << f << ((i++ % 25 == 24) ? '\n' : ' ');
+        std::cout << f;
+        if (i++ % 25 == 24) {
+            std::cout << std::endl;
+        } else {
+            std::cout << ' ';
+        }
     }
 
     std::cout.flush();
