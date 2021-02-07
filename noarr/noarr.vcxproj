@@ -99,9 +99,7 @@
     <ClInclude Include="noarr_struct_desc.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="cuda_msvc.cu">
-      <CudaRuntime Condition="'$(Configuration)|$(Platform)'=='Release|x64'">None</CudaRuntime>
-    </CudaCompile>
+    <CudaCompile Include="cuda.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
