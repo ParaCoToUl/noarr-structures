@@ -1,3 +1,14 @@
+## Usual compiled files:
+*.out
+*.exe
+*.obj
+*.o
+
+## VS files
+.vs/
+x64/
+x86/
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
