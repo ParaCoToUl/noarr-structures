@@ -6,6 +6,128 @@
 
 namespace noarr {
 
+template<typename, typename... Ts>
+struct _contain;
+
+template<typename... Ts>
+using contain = _contain<void, Ts...>;
+
+template<typename T, std::size_t I>
+struct _contain_get {
+    static constexpr auto get(const T &t) {
+        return t.template get_next_<I>();
+    }
+};
+
+template<typename T>
+struct _contain_get<T, 0> {
+    static constexpr auto get(const T &t) {
+        return t.get_();
+    }
+};
+
+template<typename T, typename... Ts>
+struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain<Ts...>>::value && (sizeof...(Ts) > 0)>, T, Ts...> {
+    T t;
+    contain<Ts...> ts;
+
+    constexpr _contain() = default;
+    explicit constexpr _contain(T t, Ts... ts) : t{t}, ts{ts...} {}
+
+    template<std::size_t I>
+    constexpr auto get() const {
+        return _contain_get<_contain, I>::get(*this);
+    }
+
+    template<std::size_t I>
+    constexpr auto get_next_() const {
+        return ts.template get<I -1>();
+    }
+
+    constexpr auto get_() const {
+        return t;
+    }
+};
+
+template<typename T, typename... Ts>
+struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain<Ts...>>::value && (sizeof...(Ts) > 0)>, T, Ts...> : private contain<Ts...> {
+    T t;
+
+    constexpr _contain() = default;
+    explicit constexpr _contain(T t) : t{t} {}
+    explicit constexpr _contain(T t, Ts...) : t{t} {}
+
+    template<std::size_t I>
+    constexpr auto get() const {
+        return _contain_get<_contain, I>::get(*this);
+    }
+
+    template<std::size_t I>
+    constexpr auto get_next_() const {
+        return contain<Ts...>::template get<I -1>();
+    }
+
+    constexpr auto get_() const {
+        return t;
+    }
+};
+
+template<typename T, typename... Ts>
+struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(Ts) > 0)>, T, Ts...> : private contain<Ts...> {
+    constexpr _contain() = default;
+    explicit constexpr _contain(Ts... ts) : contain<Ts...>{ts...} {}
+    explicit constexpr _contain(T, Ts... ts) : contain<Ts...>{ts...} {}
+
+    template<std::size_t I>
+    constexpr auto get() const {
+        return _contain_get<_contain, I>::get(*this);
+    }
+
+    template<std::size_t I>
+    constexpr auto get_next_() const {
+        return contain<Ts...>::template get<I -1>();
+    }
+
+    constexpr auto get_() const {
+        return T{};
+    }
+};
+
+template<typename T>
+struct _contain<std::enable_if_t<std::is_empty<T>::value>, T> {
+    constexpr _contain() = default;
+    explicit constexpr _contain(T) {}
+
+    template<std::size_t I>
+    constexpr auto get() const {
+        return _contain_get<_contain, I>::get(*this);
+    }
+
+    constexpr auto get_() const {
+        return T{};
+    }
+};
+
+template<typename T>
+struct _contain<std::enable_if_t<!std::is_empty<T>::value>, T> {
+    T t;
+
+    constexpr _contain() = default;
+    explicit constexpr _contain(T t) : t{t} {}
+
+    template<std::size_t I>
+    constexpr auto get() const {
+        return _contain_get<_contain, I>::get(*this);
+    }
+
+    constexpr auto get_() const {
+        return t;
+    }
+};
+
+template<>
+struct _contain<void> {};
+
 template<typename T, typename... Ks>
 struct _scalar_get_t;
 
@@ -71,21 +193,22 @@ struct _tuple_get_t<tuple_part<tuple<DIM, T, Ts...>, I>, std::integral_constant<
     using type = T;
 };
 
-template<char DIM, typename... Ts, typename T, std::size_t I>
-struct tuple_part<tuple<DIM, T, Ts...>, I> : private tuple_part<tuple<DIM, Ts...>, I + 1>, private T {
+template<char DIM, typename T, typename... Ts, std::size_t I>
+struct tuple_part<tuple<DIM, T, Ts...>, I> : private contain<T, tuple_part<tuple<DIM, Ts...>, I + 1>> {
+    using base = contain<T, tuple_part<tuple<DIM, Ts...>, I + 1>>;
     constexpr tuple_part() = default;
-    constexpr tuple_part(T t, Ts... ts) : tuple_part<tuple<DIM, Ts...>, I + 1>{ts...}, T{t} {}
+    explicit constexpr tuple_part(T t, Ts... ts) : base{t, tuple_part<tuple<DIM, Ts...>, I + 1>{ts...}} {}
     constexpr auto sub_structures() const {
-        return std::tuple_cat(std::tuple<T>{static_cast<const T&>(*this)}, tuple_part<tuple<DIM, Ts...>, I + 1>::sub_structures());
+        return std::tuple_cat(std::tuple<T>{base::template get<0>()}, base::template get<1>().sub_structures());
     }
 };
 
 template<char DIM, typename T, std::size_t I>
-struct tuple_part<tuple<DIM, T>, I> : private T {
+struct tuple_part<tuple<DIM, T>, I> : private contain<T> {
     constexpr tuple_part() = default;
-    explicit constexpr tuple_part(T t) : T{t} {}
+    explicit constexpr tuple_part(T t) : contain<T>{t} {}
     constexpr auto sub_structures() const {
-        return std::tuple<T>{static_cast<const T&>(*this)};
+        return std::tuple<T>{contain<T>::template get<0>()};
     }
 };
 
@@ -245,9 +368,10 @@ struct _sized_vector_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam T substructure type
  */
 template<char DIM, typename T>
-struct sized_vector : private vector<DIM, T> {
-    using vector<DIM, T>::dims;
-    using vector<DIM, T>::sub_structures;
+struct sized_vector : private contain<vector<DIM, T>, std::size_t> {
+    using base = contain<vector<DIM, T>, std::size_t>;
+    static constexpr auto dims = vector<DIM, T>::dims;
+    constexpr std::tuple<T> sub_structures() const { return base::template get<0>().sub_structures(); }
     using desc = struct_desc<
         integral_pack<char, 's', 'i', 'z', 'e', 'd', '_', 'v', 'e', 'c', 't', 'o', 'r'>,
         dims_impl<DIM>,
@@ -258,17 +382,14 @@ struct sized_vector : private vector<DIM, T> {
     using get_t = typename _sized_vector_get_t<T, Ks...>::type;
 
     constexpr sized_vector() = default;
-    constexpr sized_vector(T sub_structure, std::size_t length) : vector<DIM, T>{sub_structure}, length{length} {}
+    constexpr sized_vector(T sub_structure, std::size_t length) : base{vector<DIM, T>{sub_structure}, length} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
-        return sized_vector<DIM, T2>{sub_structure, length};
+        return sized_vector<DIM, T2>{sub_structure, base::template get<1>()};
     }
 
-    constexpr std::size_t size() const { return std::get<0>(sub_structures()).size() * length; }
+    constexpr std::size_t size() const { return std::get<0>(sub_structures()).size() * base::template get<1>(); }
     constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures()).size() * i; }
-
-private:
-    std::size_t length;
 };
 
 template<typename T, typename... Ks>
@@ -290,10 +411,11 @@ struct _fixed_dim_get_t<T, void> {
  * @tparam T substructure type
  */
 template<char DIM, typename T>
-struct fixed_dim : private T {
+struct fixed_dim : private contain<T, std::size_t> {
+    using base = contain<T, std::size_t>;
     static constexpr dims_impl<DIM> dims = {};
     static constexpr dims_impl<DIM> consume_dims = {};
-    constexpr auto sub_structures() const { return static_cast<const T&>(*this).sub_structures(); }
+    constexpr auto sub_structures() const { return base::template get<0>().sub_structures(); }
     using desc = struct_desc<
         integral_pack<char, 'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
         dims_impl<DIM>,
@@ -304,18 +426,15 @@ struct fixed_dim : private T {
     using get_t = typename _fixed_dim_get_t<T, Ks...>::type;
 
     constexpr fixed_dim() = default;
-    constexpr fixed_dim(T sub_structure, std::size_t idx) : T{sub_structure}, idx_{idx} {}
+    constexpr fixed_dim(T sub_structure, std::size_t idx) : base{sub_structure, idx} {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
-        return fixed_dim<DIM, decltype(T::construct(sub_structure))>{
-            static_cast<const T&>(*this).construct(sub_structure), idx_};
+        return fixed_dim<DIM, decltype(std::declval<T>().construct(sub_structure))>{
+            base::template get<0>().construct(sub_structure), base::template get<1>()};
     }
 
-    constexpr std::size_t size() const { return static_cast<const T&>(*this).size(); }
-    constexpr std::size_t offset() const { return static_cast<const T&>(*this).offset(idx_); }
-
-private:
-    std::size_t idx_;
+    constexpr std::size_t size() const { return base::template get<0>().size(); }
+    constexpr std::size_t offset() const { return base::template get<0>().offset(base::template get<1>()); }
 };
 
 }
