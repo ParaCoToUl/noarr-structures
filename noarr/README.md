@@ -18,5 +18,5 @@ For a structure `T`:
 - the structure shall define `description`, a type that is a specialization of `struct_description` and describes the struct
   - the first entry shall be a `char_pack` specialization containing the structure's name
   - the second entry shall be a `dims_impl` specialization containing the dimension (if any - *e.g. `scalar<T>` doesn't introduce a dimension*) the structure introduces
-  - the third entry shall be a `dims_impl` specialization containing the dimension (if any) the structure consumes from its substructures
+  - the third entry shall be a `dims_impl` specialization containing the dimensions (if any) the structure consumes from its sub-structures
   - the other entries are each a specialization of either `struct_param` or `struct_param` <!-- TODO -->
