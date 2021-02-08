@@ -188,11 +188,11 @@ struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, 
 
 
 /* func families */
-struct transform_trait;
-struct get_trait;
-struct top_trait;
+struct transform_tag;
+struct get_tag;
+struct top_tag;
 
-using default_trait = transform_trait;
+using default_trait = transform_tag;
 
 template<typename F, typename = void>
 struct func_trait {
@@ -200,18 +200,18 @@ struct func_trait {
 };
 
 template<typename F>
-struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, transform_trait>::value>> {
-    using type = transform_trait;
+struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, transform_tag>::value>> {
+    using type = transform_tag;
 };
 
 template<typename F>
-struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, get_trait>::value>> {
-    using type = get_trait;
+struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, get_tag>::value>> {
+    using type = get_tag;
 };
 
 template<typename F>
-struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, top_trait>::value>> {
-    using type = top_trait;
+struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, top_tag>::value>> {
+    using type = top_tag;
 };
 
 template<typename F>
@@ -221,19 +221,19 @@ template<typename F, typename = void>
 struct pipe_decider;
 
 template<typename F>
-struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, transform_trait>::value>> {
+struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, transform_tag>::value>> {
     template<typename S>
     static constexpr auto operate(S s, F f) { return fmapper<S, F>::fmap(s, f);  }
 };
 
 template<typename F>
-struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, get_trait>::value>> {
+struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, get_tag>::value>> {
     template<typename S>
     static constexpr auto operate(S s, F f) { return getter<S, F>::get(s, f);  }
 };
 
 template<typename F>
-struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_trait>::value>> {
+struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::value>> {
     template<typename S>
     static constexpr auto operate(S s, F f) { return f(s);  }
 };

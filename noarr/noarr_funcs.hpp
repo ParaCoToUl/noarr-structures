@@ -7,7 +7,7 @@ namespace noarr {
 
 template<char Dim>
 struct resize {
-    using func_family = transform_trait;
+    using func_family = transform_tag;
     explicit constexpr resize(std::size_t length) : length{length} {}
 
     template<typename T>
@@ -100,7 +100,7 @@ struct fixs<Dim> : fix<Dim> {
 
 template<char Dim>
 struct get_offset {
-    using func_family = get_trait;
+    using func_family = get_tag;
     explicit constexpr get_offset(std::size_t idx) : idx{idx} {}
 
 private:
@@ -114,7 +114,7 @@ public:
 };
 
 struct offset {
-    using func_family = top_trait;
+    using func_family = top_tag;
     explicit constexpr offset() = default;
 
     template<typename T>
@@ -129,7 +129,7 @@ struct offset {
 };
 
 struct get_size {
-    using func_family = top_trait;
+    using func_family = top_tag;
     constexpr get_size() = default;
 
     template<typename T>
