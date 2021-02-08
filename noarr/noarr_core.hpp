@@ -60,8 +60,8 @@ struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, 
  * @tparam DIMs the dimensions
  */
 
-template<char... DIMs>
-using dims_impl = char_pack<DIMs...>;
+template<char... Dims>
+using dims_impl = char_pack<Dims...>;
 
 template<typename T>
 using get_dims = typename T::description::dims;
