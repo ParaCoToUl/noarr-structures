@@ -10,6 +10,7 @@
 // TODO: add dim checking (+ for consume_dims(s))
 // TODO: add loading and storing to files (binary, json, xml, ...) maybe mangling? (but a special kind of mangling)
 // TODO: add struct checkers
+// TODO: add maximum index to each struct somehow
 
 namespace noarr {
 
