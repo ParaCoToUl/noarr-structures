@@ -17,6 +17,6 @@ For a structure `T`:
   - *two structures can have indistinguishable sub-structures and still be distinguishable from each other: e.g. two `sized_vector`s of a different length*
 - the structure shall define `description`, a type that is a specialization of `struct_description` and describes the struct
   - the first entry shall be a `char_pack` specialization containing the structure's name
-  - the second entry shall be a `dims_impl` specialization containing dimension the structure introduces
-  - the third entry shall be a `dims_impl` specialization containing dimension the structure consumes from its substructures
+  - the second entry shall be a `dims_impl` specialization containing the dimension (if any - *e.g. `scalar<T>` doesn't introduce a dimension*) the structure introduces
+  - the third entry shall be a `dims_impl` specialization containing the dimension (if any) the structure consumes from its substructures
   - the other entries are each a specialization of either `struct_param` or `struct_param` <!-- TODO -->
