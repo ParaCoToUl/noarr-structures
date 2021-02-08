@@ -410,8 +410,8 @@ struct fixed_dim : private contain<T, std::size_t> {
     constexpr auto sub_structures() const { return base::template get<0>().sub_structures(); }
     using description = struct_description<
         char_pack<'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
-        dims_impl<Dim>,
         dims_impl<>,
+        dims_impl<Dim>,
         type_param<T>>;
 
     template<typename... KS>
