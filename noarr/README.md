@@ -13,5 +13,10 @@ For a structure `T`:
   - it shall be `constexpr` and either `static` or `const` (it shall be `static` iff the structure depends solely on its sub-structures - e.g. `sized_vector::construct` is `const` and `array::construct` is `static`)
   - it shall be a pure function
   - all structures constructed from the same structure and having indistinguishable sub-structures shall be indistinguishable
-  - A new structure constructed from a structures constructed from a structure `T t` is indistinguishable from a structure constructed from the structure `t` if these two constructions took indistinguishable sub-structures
+  - A new structure constructed from structures constructed from a structure `T t` is indistinguishable from a structure constructed from the structure `t` if these two constructions took indistinguishable sub-structures
   - *two structures can have indistinguishable sub-structures and still be distinguishable from each other: e.g. two `sized_vector`s of a different length*
+- the structure shall define `description`, a type that is a specialization of `struct_description` and describes the struct
+  - the first entry shall be a `char_pack` specialization containing the structure's name
+  - the second entry shall be a `dims_impl` specialization containing dimension the structure introduces
+  - the third entry shall be a `dims_impl` specialization containing dimension the structure consumes from its substructures
+  - the other entries are each a specialization of either `struct_param` or `struct_param` <!-- TODO -->
