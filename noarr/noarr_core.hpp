@@ -57,7 +57,7 @@ struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, 
 /**
  * @brief The type that holds all the dimensions of a structure
  * 
- * @tparam DIMs the dimensions
+ * @tparam Dims the dimensions
  */
 
 template<char... Dims>
@@ -86,37 +86,37 @@ template<typename S, typename F, typename = void>
 struct _fmapper_cond_helper {
     static constexpr bool value = false;
 };
-template<typename S, typename F, std::size_t MAX = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = MAX>
+template<typename S, typename F, std::size_t Max = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = Max>
 struct construct_builder;
 
-template<typename S, typename F, std::size_t MAX, std::size_t I>
+template<typename S, typename F, std::size_t Max, std::size_t I>
 struct construct_builder {
-    template<std::size_t... IDXs>
+    template<std::size_t... IS>
     static constexpr auto construct_build(S s, F f) {
-        return construct_builder<S, F, MAX, I - 1>::template construct_build<I - 1, IDXs...>(s, f);
+        return construct_builder<S, F, Max, I - 1>::template construct_build<I - 1, IS...>(s, f);
     }
 };
 
-template<typename S, typename F, std::size_t MAX>
-struct construct_builder<S, F, MAX, 0> {
-    template<std::size_t... IDXs>
+template<typename S, typename F, std::size_t Max>
+struct construct_builder<S, F, Max, 0> {
+    template<std::size_t... IS>
     static constexpr auto construct_build(S s, F f) {
-        return construct_build_last<IDXs...>(s, f);
+        return construct_build_last<IS...>(s, f);
     }
-    template<std::size_t... IDXs>
+    template<std::size_t... IS>
     static constexpr auto construct_build_last(S s, F f) {
-        return s.construct((std::get<IDXs>(s.sub_structures()) % f)...);
+        return s.construct((std::get<IS>(s.sub_structures()) % f)...);
     }
 };
 
 // this explicit instance is here because the more general one makes warnings on structures with zero substructures
 template<typename S, typename F>
 struct construct_builder<S, F, 0, 0> {
-    template<std::size_t... IDXs>
+    template<std::size_t... IS>
     static constexpr auto construct_build(S s, F f) {
-        return construct_build_last<IDXs...>(s, f);
+        return construct_build_last<IS...>(s, f);
     }
-    template<std::size_t... IDXs>
+    template<std::size_t... IS>
     static constexpr auto construct_build_last(S s, F) {
         return s.construct();
     }
@@ -243,17 +243,17 @@ inline constexpr auto operator%(S s, F f) {
     return pipe_decider<F>::template operate<S>(s, f);
 }
 
-template<typename S, typename... Fs>
-inline constexpr auto pipe(S s, Fs... funcs);
+template<typename S, typename... FS>
+inline constexpr auto pipe(S s, FS... funcs);
 
-template<typename S, typename... Fs>
+template<typename S, typename... FS>
 struct piper;
 
-template<typename S, typename F, typename... Fs>
-struct piper<S, F, Fs...> {
-    static constexpr auto pipe(S s, F func, Fs... funcs) {
+template<typename S, typename F, typename... FS>
+struct piper<S, F, FS...> {
+    static constexpr auto pipe(S s, F func, FS... funcs) {
         auto s1 = s % func;
-        return piper<remove_cvref<decltype(s1)>, Fs...>::pipe(s1, funcs...);
+        return piper<remove_cvref<decltype(s1)>, FS...>::pipe(s1, funcs...);
     }
 };
 
@@ -264,9 +264,9 @@ struct piper<S, F> {
     }
 };
 
-template<typename S, typename... Fs>
-inline constexpr auto pipe(S s, Fs... funcs) {
-    return piper<S, Fs...>::pipe(s, funcs...);
+template<typename S, typename... FS>
+inline constexpr auto pipe(S s, FS... funcs) {
+    return piper<S, FS...>::pipe(s, funcs...);
 }
 
 }

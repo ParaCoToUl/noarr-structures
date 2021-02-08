@@ -5,39 +5,39 @@
 
 namespace noarr {
 
-template<char DIM>
+template<char Dim>
 struct resize {
     using func_family = transform_trait;
     explicit constexpr resize(std::size_t length) : length{length} {}
 
     template<typename T>
-    constexpr auto operator()(vector<DIM, T> v) const {
-        return sized_vector<DIM, T>{std::get<0>(v.sub_structures()), length};
+    constexpr auto operator()(vector<Dim, T> v) const {
+        return sized_vector<Dim, T>{std::get<0>(v.sub_structures()), length};
     }
     template<typename T>
-    constexpr auto operator()(sized_vector<DIM, T> v) const {
-        return sized_vector<DIM, T>{std::get<0>(v.sub_structures()), length};
+    constexpr auto operator()(sized_vector<Dim, T> v) const {
+        return sized_vector<Dim, T>{std::get<0>(v.sub_structures()), length};
     }
 
 private:
     std::size_t length;
 };
 
-template<char DIM, std::size_t L>
+template<char Dim, std::size_t L>
 struct cresize {
     constexpr cresize() = default;
 
     template<typename T>
-    constexpr auto operator()(vector<DIM, T> v) const {
-        return array<DIM, L, T>{std::get<0>(v.sub_structures())};
+    constexpr auto operator()(vector<Dim, T> v) const {
+        return array<Dim, L, T>{std::get<0>(v.sub_structures())};
     }
     template<typename T>
-    constexpr auto operator()(sized_vector<DIM, T> v) const {
-        return array<DIM, L, T>{std::get<0>(v.sub_structures())};
+    constexpr auto operator()(sized_vector<Dim, T> v) const {
+        return array<Dim, L, T>{std::get<0>(v.sub_structures())};
     }
     template<typename T>
-    constexpr auto operator()(array<DIM, L, T> v) const {
-        return array<DIM, L, T>{std::get<0>(v.sub_structures())};
+    constexpr auto operator()(array<Dim, L, T> v) const {
+        return array<Dim, L, T>{std::get<0>(v.sub_structures())};
     }
 };
 
@@ -62,7 +62,7 @@ inline constexpr auto safe_get(T t) {
 // TODO: support fix and fixs somehow on tuples
 // TODO: support the arrr::at functor
 
-template<char DIM>
+template<char Dim>
 struct fix {
     explicit constexpr fix(std::size_t idx) : idx{idx} {}
 
@@ -71,34 +71,34 @@ private:
 
 public:
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<DIM>()>>(), fixed_dim<DIM, T>{t, idx}) {
-        return fixed_dim<DIM, T>{t, idx};
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), fixed_dim<Dim, T>{t, idx}) {
+        return fixed_dim<Dim, T>{t, idx};
     }
 };
 
-template<char... DIMS>
+template<char... Dims>
 struct fixs;
 
-template<char DIM, char... DIMS>
-struct fixs<DIM, DIMS...> : private fixs<DIMS...> {
-    template <typename... IDXs>
-    constexpr fixs(std::size_t idx, IDXs... idxs) : fixs<DIMS...>{static_cast<size_t>(idxs)...}, idx_{idx} {}
+template<char Dim, char... Dims>
+struct fixs<Dim, Dims...> : private fixs<Dims...> {
+    template <typename... IS>
+    constexpr fixs(std::size_t idx, IS... is) : fixs<Dims...>{static_cast<size_t>(is)...}, idx_{idx} {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
-        return pipe(t, fix<DIM>{idx_}, static_cast<const fixs<DIMS...>&>(*this));
+        return pipe(t, fix<Dim>{idx_}, static_cast<const fixs<Dims...>&>(*this));
     }
 
 private:
     std::size_t idx_;
 };
 
-template<char DIM>
-struct fixs<DIM> : fix<DIM> {
-    explicit constexpr fixs(std::size_t idx) : fix<DIM>{idx} {}
+template<char Dim>
+struct fixs<Dim> : fix<Dim> {
+    explicit constexpr fixs(std::size_t idx) : fix<Dim>{idx} {}
 };
 
-template<char DIM>
+template<char Dim>
 struct get_offset {
     using func_family = get_trait;
     explicit constexpr get_offset(std::size_t idx) : idx{idx} {}
@@ -108,7 +108,7 @@ private:
 
 public:
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<DIM>()>>(), t.offset(idx)) {
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), t.offset(idx)) {
         return t.offset(idx);
     }
 };

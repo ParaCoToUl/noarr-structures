@@ -24,7 +24,7 @@ struct is_array<T[N]> {
     static constexpr value_type value = true;
 };
 
-template<class T, T... vs>
+template<class T, T... VS>
 struct integral_pack;
 
 template<class T, T V, class Pack, typename = void>
@@ -33,7 +33,7 @@ struct _integral_pack_contains;
 template<class Pack, typename Pack::value_type V>
 using integral_pack_contains = _integral_pack_contains<typename Pack::value_type, V, Pack>;
 
-template<class T, T... vs>
+template<class T, T... VS>
 struct integral_pack {
     using value_type = T;
     using type = integral_pack;
@@ -81,14 +81,14 @@ using integral_pack_concat = typename _integral_pack_concat<Packs...>::type;
 template<class... Packs>
 using integral_pack_concat_sep = typename _integral_pack_concat_sep<Packs...>::type;
 
-template<class T, T V, T... vs>
-struct _integral_pack_contains<T, V, integral_pack<T, V, vs...>> {
+template<class T, T V, T... VS>
+struct _integral_pack_contains<T, V, integral_pack<T, V, VS...>> {
     static constexpr bool value = true;
 };
 
-template<class T, T V, T v, T... vs>
-struct _integral_pack_contains<T, V, integral_pack<T, v, vs...>, std::enable_if_t<(V != v)>> {
-    static constexpr bool value = _integral_pack_contains<T, V, integral_pack<T, vs...>>::value;
+template<class T, T V, T v, T... VS>
+struct _integral_pack_contains<T, V, integral_pack<T, v, VS...>, std::enable_if_t<(V != v)>> {
+    static constexpr bool value = _integral_pack_contains<T, V, integral_pack<T, VS...>>::value;
 };
 
 template<class T, T V>
