@@ -54,9 +54,9 @@ int main() {
     static_assert(std::is_pod<decltype(vs4)>::value, "a struct has to be a podtype");
 
     std::cout << "sizeof(t): " << sizeof(t) << std::endl;
-
     auto ts = t % resize<'x'>(20);
     print_struct(std::cout, ts) << " ts;" << std::endl;
+    std::cout << "sizeof(ts): " << sizeof(ts) << std::endl;
     std::cout << "ts.size(): " << ts.size() << std::endl;
     static_assert(std::is_pod<decltype(ts)>::value, "a struct has to be a podtype");
 }
