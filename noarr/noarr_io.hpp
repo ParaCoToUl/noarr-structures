@@ -14,7 +14,7 @@ struct _print_struct;
 template<char... Name>
 struct _print_struct<char_pack<Name...>> {
     static constexpr std::ostream &print(std::ostream &out) {
-        constexpr char name[] = {Name..., '\0'};
+        constexpr const char name[] = {Name..., '\0'};
         return out << name;
     }
 };
