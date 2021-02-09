@@ -41,7 +41,7 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<cont
 
     template<std::size_t I>
     constexpr auto get_next_() const {
-        return ts.template get<I -1>();
+        return ts.template get<I - 1>();
     }
 
     constexpr auto get_() const {
@@ -64,7 +64,7 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<conta
 
     template<std::size_t I>
     constexpr auto get_next_() const {
-        return contain<TS...>::template get<I -1>();
+        return contain<TS...>::template get<I - 1>();
     }
 
     constexpr auto get_() const {
@@ -85,7 +85,7 @@ struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>
 
     template<std::size_t I>
     constexpr auto get_next_() const {
-        return contain<TS...>::template get<I -1>();
+        return contain<TS...>::template get<I - 1>();
     }
 
     constexpr auto get_() const {
