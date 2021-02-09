@@ -23,6 +23,52 @@ private:
     std::size_t length;
 };
 
+template<char Dim>
+struct _reassemble_get {
+    using func_family = get_tag;
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> remove_cvref<decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), t)> {
+        return t;
+    }
+};
+
+template<char Dim, typename T, typename T2>
+struct _reassemble_set : contain<T> {
+    constexpr _reassemble_set() = default;
+    explicit constexpr _reassemble_set(T t) : contain<T>{t} {}
+    using func_family = transform_tag;
+
+    constexpr auto operator()(T2 t) const {
+        return construct(contain<T>::template get<0>(), t.sub_structures());
+    }
+};
+
+template<char Dim1, char Dim2>
+struct reassemble {
+private:
+    template<char Dim, typename T, typename T2>
+    constexpr auto reassemble_2(T t, T2 t2) const {
+        return construct(t2, (t % _reassemble_set<Dim, T, remove_cvref<decltype(t2)>>{t}).sub_structures());
+    }
+    template<char Dim, typename T>
+    constexpr auto reassemble_(T t) const -> decltype(reassemble_2<Dim>(t, t % _reassemble_get<Dim>{})) {
+        return reassemble_2<Dim>(t, t % _reassemble_get<Dim>{});
+    }
+public:
+    using func_family = transform_tag;
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> decltype(reassemble_<std::enable_if_t<get_dims<T>::template contains<Dim1>(), char>(Dim2)>(t)) {
+        return reassemble_<Dim2>(t);
+    }
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> decltype(reassemble_<std::enable_if_t<get_dims<T>::template contains<Dim2>() && Dim1 != Dim2, char>(Dim1)>(t)) {
+        return reassemble_<Dim1>(t);
+    }
+};
+
 template<char Dim, std::size_t L>
 struct cresize {
     constexpr cresize() = default;
