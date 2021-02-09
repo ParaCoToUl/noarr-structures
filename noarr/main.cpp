@@ -37,6 +37,7 @@ int main() {
     std::cout << "vs2 % fixs<'x', 'y'>{5, 5} % offset{}:" << vs2 % fixs<'x', 'y'>{5, 5} % offset{} << std::endl;
     std::cout << "vs2 % fixs<'x', 'y'>{5, 5} % offset{}:" << (vs2 % fixs<'y', 'x'>{5, 5} % offset()) << std::endl;
     static_assert(std::is_pod<decltype(vs2 % fixs<'y', 'x'>{5, 5})>::value, "a struct has to be a podtype");
+    static_assert(std::is_pod<decltype(fixs<'y', 'x'>{5, 5})>::value, "a struct has to be a podtype");
     std::cout << "vs2 % get_offset<'y'>{5}:" << (vs2 % get_offset<'y'>{5}) << std::endl << std::endl;
 
     auto vs3 = v2 % cresize<'x', 10>{}; // transform
