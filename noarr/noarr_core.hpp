@@ -185,6 +185,7 @@ template<typename S, typename F>
 struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, F>::count != 1)>> {
     static_assert(getter_impl<S, F>::count != 0, "getter has to be applicable");
     static_assert(!(getter_impl<S, F>::count > 1), "getter cannot be ambiguous");
+    static constexpr void get(S, F) {};
 };
 
 

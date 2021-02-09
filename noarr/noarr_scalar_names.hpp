@@ -15,6 +15,7 @@ using scalar_name_t = typename scalar_name<T>::type;
 template<typename T, typename>
 struct scalar_name {
     static_assert(template_false<T>::value, "scalar_name<T> has to be implemented");
+    using type = void;
 };
 
 template<typename T>
