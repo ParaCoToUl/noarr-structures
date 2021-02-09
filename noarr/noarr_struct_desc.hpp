@@ -11,6 +11,7 @@ struct struct_description {
     using name = Name;
     using dims = Dims;
     using adims = ADims;
+    using description = struct_description;
 };
 
 template<typename>
