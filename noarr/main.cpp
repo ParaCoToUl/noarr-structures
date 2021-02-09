@@ -11,6 +11,7 @@ int main() {
 
     array<'y', 20000, vector<'x', scalar<float>>> v2;
     tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
+    tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
 
     static_assert(std::is_pod<decltype(v)>::value, "a struct has to be a podtype");
     static_assert(std::is_pod<decltype(v2)>::value, "a struct has to be a podtype");
@@ -44,9 +45,8 @@ int main() {
     std::cout << "vs3.size(): " << vs3.size() << std::endl;
     std::cout << "sizeof(vs3): " << sizeof(vs3) << std::endl << std::endl;
 
-    std::size_t l;
+    volatile std::size_t l = 20;
     std::cout << "choose l... ";
-    std::cin >> l;
     auto vs4 = pipe(v2, cresize<'y', 10>{}, resize<'x'>{l}); // transform
     std::cout << "vs4 = pipe(v2, cresize<'y', 10>{}, resize<'x'>{l}): " << typeid(vs4).name() << std::endl;
     std::cout << "vs4.size(): " << vs4.size() << std::endl;
@@ -59,4 +59,8 @@ int main() {
     std::cout << "sizeof(ts): " << sizeof(ts) << std::endl;
     std::cout << "ts.size(): " << ts.size() << std::endl;
     static_assert(std::is_pod<decltype(ts)>::value, "a struct has to be a podtype");
+
+    print_struct(std::cout, t2 % reassemble<'x', 'y'>{}) << " t2';" << std::endl;
+    print_struct(std::cout, t2 % resize<'x'>(10) % reassemble<'y', 'x'>{}) << " t2'';" << std::endl;
+    print_struct(std::cout, t2 % reassemble<'x', 'x'>{}) << " t2;" << std::endl;
 }
