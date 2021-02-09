@@ -60,7 +60,6 @@ struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, 
  * 
  * @tparam Dims the dimensions
  */
-
 template<char... Dims>
 using dims_impl = char_pack<Dims...>;
 
