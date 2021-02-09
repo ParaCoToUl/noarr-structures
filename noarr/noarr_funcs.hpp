@@ -34,7 +34,7 @@ struct _reassemble_get {
 };
 
 template<char Dim, typename T, typename T2>
-struct _reassemble_set : contain<T> {
+struct _reassemble_set : private contain<T> {
     constexpr _reassemble_set() = default;
     explicit constexpr _reassemble_set(T t) : contain<T>{t} {}
     using func_family = transform_tag;
@@ -110,6 +110,7 @@ inline constexpr auto safe_get(T t) {
 
 template<char Dim>
 struct fix {
+    constexpr fix() = default;
     explicit constexpr fix(std::size_t idx) : idx{idx} {}
 
 private:
@@ -126,23 +127,22 @@ template<char... Dims>
 struct fixs;
 
 template<char Dim, char... Dims>
-struct fixs<Dim, Dims...> : private fixs<Dims...> {
+struct fixs<Dim, Dims...> : private contain<fix<Dim>, fixs<Dims...>> {
+private:
+    using base = contain<fix<Dim>, fixs<Dims...>>;
+public:
+    constexpr fixs() = default;
     template <typename... IS>
-    constexpr fixs(std::size_t idx, IS... is) : fixs<Dims...>{static_cast<size_t>(is)...}, idx_{idx} {}
+    constexpr fixs(std::size_t idx, IS... is) : base{fix<Dim>{idx}, fixs<Dims...>{static_cast<std::size_t>(is)...}} {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
-        return pipe(t, fix<Dim>{idx_}, static_cast<const fixs<Dims...>&>(*this));
+        return pipe(t, base::template get<0>(), base::template get<1>());
     }
-
-private:
-    std::size_t idx_;
 };
 
 template<char Dim>
-struct fixs<Dim> : fix<Dim> {
-    explicit constexpr fixs(std::size_t idx) : fix<Dim>{idx} {}
-};
+struct fixs<Dim> : fix<Dim> { using fix<Dim>::fix; using fix<Dim>::operator(); };
 
 template<char Dim>
 struct get_offset {
