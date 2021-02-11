@@ -2,11 +2,11 @@
 #include <iostream>
 
 #if _WIN32 || _WIN64
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
-#define SIZE_CONSTANT 10000
+    #include "cuda_runtime.h"
+    #include "device_launch_parameters.h"
+    #define SIZE_CONSTANT 10000
 #else
-#define SIZE_CONSTANT 20000
+    #define SIZE_CONSTANT 20000
 #endif
 
 #include "noarr_funcs.hpp"
