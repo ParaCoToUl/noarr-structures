@@ -11,6 +11,7 @@
 // TODO: add loading and storing to files (binary, json, xml, ...) maybe mangling? (but a special kind of mangling)
 // TODO: add struct checkers
 // TODO: add maximum index to each struct somehow
+// TODO: the piping mechanism should understand dimensions so we don't abuse template sfinae so much
 
 namespace noarr {
 
