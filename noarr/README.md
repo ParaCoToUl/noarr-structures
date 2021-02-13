@@ -45,7 +45,8 @@ For a structure `T`:
   - if the structure has no dimension then `T::get_t` shall take both no argument or a single `void` argument, `T::offset` shall take no argument, and they shall return the type and the offset of the only sub_structure, respectively
     - `T::get<>` and `T::get<void>` shall return the same type
   - if the structure has one static dimension then `T::get_t` shall take a single `std::integral_constant<std::size_t, ...>` argument, `T::offset` shall take one `std::size_t` template argument , and they shall return the type and the offset of the sub_structure with the given index
-  - if the structure has one dynamic dimension then `T::get_t` shall combine the behavior of the `get_t` of a structure with no dimension and of a structure with one static dimension, `T::offset` shall take one `std::size_t` formal argument, and they shall return the type and the offset of the sub_structure with the given index
+  - if the structure has one dynamic dimension then `T::get_t` shall combine the behavior of the `get_t` of a structure with no dimension and of a structure with one static dimension, `T::offset` shall take both one `std::size_t` formal argument or one `std::size_t` template argument, and they shall return the type and the offset of the sub_structure with the given index
     - `T::get_t` shall return the same type for any correct arguments given
+    - `T::offset` shall return the same offset for the given index regardless of whether it was given via template or formally
   - if the structure has a dimension then it is called static or dynamic if the structure would satisfy the previous statements (this means that the staticity or dynamicity of the dimension is deduced)
   - if the structure has a dimension then it shall be either static or dynamic

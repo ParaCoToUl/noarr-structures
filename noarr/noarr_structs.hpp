@@ -193,6 +193,8 @@ struct array : private T {
 
     constexpr std::size_t size() const { return static_cast<const T&>(*this).size() * L; }
     constexpr std::size_t offset(std::size_t i) const { return static_cast<const T&>(*this).size() * i; }
+    template<std::size_t I>
+    constexpr std::size_t offset() const { return std::get<0>(sub_structures()).size() * I; }
     static constexpr std::size_t length() { return L; }
 };
 
@@ -265,6 +267,8 @@ struct sized_vector : private contain<vector<Dim, T>, std::size_t> {
 
     constexpr std::size_t size() const { return std::get<0>(sub_structures()).size() * base::template get<1>(); }
     constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures()).size() * i; }
+    template<std::size_t I>
+    constexpr std::size_t offset() const { return std::get<0>(sub_structures()).size() * I; }
     constexpr std::size_t length() const { return base::template get<1>(); }
 };
 
