@@ -32,3 +32,20 @@ For a structure `T`:
   - the second entry shall be a `dims_impl` specialization containing the dimension (if any - *e.g. `scalar<T>` doesn't introduce a dimension*) the structure introduces
   - the third entry shall be a `dims_impl` specialization containing the dimensions (if any) the structure consumes from its sub-structures
   - the other entries are each a specialization of either `struct_param` or `struct_param` <!-- TODO -->
+- `T::length()` is a function that returns a `std::size_t` value which specifies the range of indices the structure supports via `T::offset`
+  - it shall be `constexpr`
+  - it shall be either `static` or `const`
+  - if the structure has no dimension it shall return `0`
+- `T::offset()`, `T::offset<std::size_t>()`, or `T::offset(std::size_t)` is a function that returns a `std::size_t` value which specifies the offset of a sub_structure with the given index
+  - it shall be `constexpr`
+  - it shall be either `static` or `const`
+  - it shall take an argument (either template or formal) iff the structure has a dimension
+  - the implementation of `T::offset` should satisfy requirements for it implied by requirements for `T::get_t`
+- `T::get_t<...>` is a type of the sub_structure at `T::offset` given the following:
+  - if the structure has no dimension then `T::get_t` shall take both no argument or a single `void` argument, `T::offset` shall take no argument, and they shall return the type and the offset of the only sub_structure, respectively
+    - `T::get<>` and `T::get<void>` shall return the same type
+  - if the structure has one static dimension then `T::get_t` shall take a single `std::integral_constant<std::size_t, ...>` argument, `T::offset` shall take one `std::size_t` template argument , and they shall return the type and the offset of the sub_structure with the given index
+  - if the structure has one dynamic dimension then `T::get_t` shall combine the behavior of the `get_t` of a structure with no dimension and of a structure with one static dimension, `T::offset` shall take one `std::size_t` formal argument, and they shall return the type and the offset of the sub_structure with the given index
+    - `T::get_t` shall return the same type for any correct arguments given
+  - if the structure has a dimension then it is called static or dynamic if the structure would satisfy the previous statements (this means that the staticity or dynamicity of the dimension is deduced)
+  - if the structure has a dimension then it shall be either static or dynamic
