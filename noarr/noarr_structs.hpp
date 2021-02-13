@@ -42,7 +42,8 @@ struct scalar {
         return scalar<T>{};
     }
     static constexpr std::size_t size() { return sizeof(T); }
-    constexpr std::size_t offset() const { return 0; }
+    static constexpr std::size_t offset() { return 0; }
+    static constexpr std::size_t length() { return 0; }
 };
 
 /**
@@ -142,6 +143,7 @@ struct tuple<Dim, T, TS...> : private tuple_part<tuple<Dim, T, TS...>, 0> {
     constexpr std::size_t offset() const {
         return _tuple_size_getter<remove_cvref<decltype(sub_structures())>, i>::size(sub_structures());
     }
+    static constexpr std::size_t length() { return sizeof...(TS) + 1; }
 };
 
 template<typename T, typename... KS>
@@ -171,7 +173,6 @@ struct _array_get_t<T, std::integral_constant<std::size_t, K>> {
  */
 template<char Dim, std::size_t L, typename T>
 struct array : private T {
-    static constexpr std::size_t length = L;
     constexpr std::tuple<T> sub_structures() const { return {static_cast<const T&>(*this)}; }
     using description = struct_description<
         char_pack<'a', 'r', 'r', 'a', 'y'>,
@@ -192,6 +193,7 @@ struct array : private T {
 
     constexpr std::size_t size() const { return static_cast<const T&>(*this).size() * L; }
     constexpr std::size_t offset(std::size_t i) const { return static_cast<const T&>(*this).size() * i; }
+    static constexpr std::size_t length() { return L; }
 };
 
 /**
@@ -263,6 +265,7 @@ struct sized_vector : private contain<vector<Dim, T>, std::size_t> {
 
     constexpr std::size_t size() const { return std::get<0>(sub_structures()).size() * base::template get<1>(); }
     constexpr std::size_t offset(std::size_t i) const { return std::get<0>(sub_structures()).size() * i; }
+    constexpr std::size_t length() const { return base::template get<1>(); }
 };
 
 template<typename T, typename... KS>
@@ -306,6 +309,7 @@ struct fixed_dim : private contain<T, std::size_t> {
 
     constexpr std::size_t size() const { return base::template get<0>().size(); }
     constexpr std::size_t offset() const { return base::template get<0>().offset(base::template get<1>()); }
+    constexpr std::size_t length() const { return 0; }
 };
 
 template<typename T, std::size_t I = std::tuple_size<typename sub_structures<T>::value_type>::value>
