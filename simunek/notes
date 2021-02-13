@@ -8,11 +8,13 @@ Main ideas:
   a) Hopefully simpler and shorter code of k-means
   b) Natural support of diffener data layouts (easy swaps)
   c) Similar or higher level of performance
-4) Get at last mark 3 after we fail to achieve anything.
-
+4) Get somehow at last mark 3 after we fail to achieve anything.
+5) Run.
 
 
 Functional requiremets
+- Support for C++, bindings to Python, R
+- Predefined basic data layouts for quick ot of the box usage.
 
 Quality requiremets
 Usability
