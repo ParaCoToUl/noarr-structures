@@ -10,26 +10,11 @@
 
 namespace noarr {
 
-template<typename T, typename = void>
-struct get_struct_desc;
-
 template<typename T, typename Pre = char_pack<>, typename Post = char_pack<>>
 struct _mangle;
 
 template<typename T>
-using get_struct_desc_t = typename get_struct_desc<T>::type;
-
-template<typename T>
 using mangle = typename _mangle<T>::type;
-
-template<typename T, typename>
-struct get_struct_desc;
-
-// TODO: check if integral_pack
-template<typename T>
-struct get_struct_desc<T, void_t<typename T::description>> {
-    using type = typename T::description;
-};
 
 template<typename T>
 struct scalar_name<T, void_t<get_struct_desc_t<T>>> {
