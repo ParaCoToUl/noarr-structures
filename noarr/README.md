@@ -63,4 +63,4 @@ A cube is a structure hierarchy which has all its dimensions dynamic. This has a
 
 ### Point
 
-A point is a structure hierarchy with no dimensions
+A point is a structure hierarchy with no dimensions. It has only a single scalar type
