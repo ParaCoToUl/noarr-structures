@@ -45,6 +45,7 @@ int main() {
     static_assert(std::is_pod<decltype(vs2 % fixs<'y', 'x'>{5, 5})>::value, "a struct has to be a podtype");
     static_assert(std::is_pod<decltype(fixs<'y', 'x'>{5, 5})>::value, "a struct has to be a podtype");
     std::cout << "vs2 % get_offset<'y'>{5}:" << (vs2 % get_offset<'y'>{5}) << std::endl << std::endl;
+    static_assert(is_point<decltype(vs2 % fixs<'y', 'x'>{5, 5})>::value, "`vs2 % fixs<'y', 'x'>{5, 5}` has to be a point");
 
     auto vs3 = v2 % cresize<'x', 10>{}; // transform
     static_assert(is_cube<decltype(vs3)>::value, "vs3 has to be a cube");

@@ -40,11 +40,16 @@ using is_static_dimension = typename _is_static_dimension<T>::type;
 template<typename T>
 using is_dynamic_dimension = typename _is_dynamic_dimension<T>::type;
 
-template<typename T>
-struct _is_point; // TODO
+template<typename T, typename = void>
+struct _is_point;
 
 template<typename T>
-using is_point = typename _is_point<T>::type;
+using is_point = typename _is_point<remove_cvref<T>>::type;
+
+template<typename T>
+struct _is_point<T, std::enable_if_t<(std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value) && tuple_forall<is_point, typename sub_structures<T>::value_type>::value>> {
+    using type = std::true_type;
+};
 
 template<typename T, typename = void>
 struct _is_cube {
