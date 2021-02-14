@@ -8,9 +8,8 @@
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
-// TODO: add loading and storing to files (binary, json, xml, ...) maybe mangling? (but a special kind of mangling)
+// TODO: add loading and storing to files (binary, json, xml, ...)
 // TODO: add struct checkers
-// TODO: add maximum index to each struct somehow
 // TODO: the piping mechanism should understand dimensions so we don't abuse template sfinae so much
 
 namespace noarr {
