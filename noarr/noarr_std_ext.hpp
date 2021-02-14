@@ -104,6 +104,24 @@ struct template_false {
     static constexpr bool value = false;
 };
 
+template<template<typename> class Function, typename Tuple, typename = void>
+struct _tuple_forall {
+    static constexpr bool value = false;
+};
+
+template<template<typename> class Function, typename T, typename... TS>
+struct _tuple_forall<Function, std::tuple<T, TS...>, std::enable_if_t<Function<T>::value>> {
+    static constexpr bool value = _tuple_forall<Function, std::tuple<TS...>>::value;
+};
+
+template<template<typename> class Function>
+struct _tuple_forall<Function, std::tuple<>> {
+    static constexpr bool value = true;
+};
+
+template<template<typename> class Function, typename Tuple>
+using tuple_forall = _tuple_forall<Function, Tuple>;
+
 } // namespace noarr
 
 #endif // NOARR_STD_EXT_HPP
