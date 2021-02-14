@@ -24,11 +24,6 @@ struct _is_dynamic_dimension {
     using type = std::false_type;
 };
 
-template<typename T, typename = void>
-struct _is_dynamic_dimension2 {
-    using type = std::false_type;
-};
-
 template<typename T>
 struct _is_dynamic_dimension<T, void_t<decltype(std::declval<T>().offset(std::declval<std::size_t>()))>> {
     using type = std::true_type;
