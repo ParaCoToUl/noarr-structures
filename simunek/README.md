@@ -1,26 +1,27 @@
-Mother of all requiremets
+# Mother of all requiremets
 https://github.com/krulis-martin/cuda-kmeans
 
 Main ideas:
-1) All GPU programs can be separated into: CPU logic/policies/GPU logic
-2) Policy = logic of data transfering and accesing them on GPU.
-3) Create high performace core for data modeling
-4) Create library of common policies
-5) Create binding into common languages like Python/R
-6) Rewrite cuda-kmeans using new framework, to gain following:
+1. All GPU programs can be separated into: CPU logic/policies/GPU logic
+2. Policy = logic of data transfering and accesing them on GPU.
+3. Create high performace core for data modeling
+4. Create library of common policies
+5. Create binding into common languages like Python/R
+6. Rewrite cuda-kmeans using new framework, to gain following:
   a) Demontrate usability of our libraly
   b) Hopefully achive simpler and shorter code of k-means
   c) Natural support of diffener data layouts (easy swaps) (AOS vs SOA)
   d) Similar or higher level of performance
-4) Get somehow at last mark 3 after we fail to achieve anything.
-5) Run.
+7. Add fancy formating to this document
+8. Get somehow at last mark 3 after we fail to achieve anything.
+9. Run.
 
-
-Functional requiremets
+#Requiremets
+**Functional requiremets**
 - Support for C++, bindings to Python, R
 - Predefined basic data layouts for quick ot of the box usage.
 
-Quality requiremets
+**Quality requiremets**
 Usability
 - dots
 
@@ -31,7 +32,7 @@ Usability
 
 
 
-Jirka wrote earlier (To be depricated):
+#Jirka wrote earlier (To be depricated):
 Separate data layout from data access.
     Why: Algorithm implemementation should not depend on data layout.
 
