@@ -1,7 +1,7 @@
 # Mother of all requiremets
 https://github.com/krulis-martin/cuda-kmeans
 
-# Main ideas
+# Main ideas & Core principles
 1. All GPU programs can be separated into: CPU logic/policies/GPU logic
 2. Policy = logic of data transfering and accesing them on GPU.
 3. Create high performace core for data modeling
@@ -32,7 +32,7 @@ Usability
 
 
 
-#Jirka wrote earlier (To be depricated):
+# Jirka wrote earlier (To be depricated):
 Separate data layout from data access.
     Why: Algorithm implemementation should not depend on data layout.
 
