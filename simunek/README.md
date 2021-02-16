@@ -57,3 +57,40 @@ Tuples should not be iterated at runtime, causes return value ambiguity.
     But that's ok, coz we infer the value type from virtual layout.
 
 All algorithms at some point work with scalar values only - make scalar value access the priority.
+
+
+# 16.2.2021 Notes
+- Ty % už nesnáší i Mirek
+- Martin, Mirek, Jirka# i já nelikujeme {} oproti () u resize
+- Mirek byl vyděšenej z get_size{}
+- | (or) je ok; % je úplně na ...; >> Je dost vytíženej. Mirkovi se nelíbí kvůli templatů; **Martin chce tečky. Mirek chce taky tečky, páč to je common case.** (Mirek nazval visual studio jako "shit"). **Mirek nepřekládá rozšířitelnost ohledně funktorů.** | a . jsou oboje velmi schůdný. **Závěr je takovej, že chceme tečky, low level dostupnej, ať si to lidi udělaj sami.**
+- Smooth data jsou top.
+- Jagged data: Mirek by se na ně zatím vykašlal. Martin: **Jagged data musí umět sekvenci různě velkejch blobů. To by mělo stačit.**
+- Uděláme pokus na vektoru stringů až z toho vybublá co je potřeba supportovat.
+## Lifotvání
+- Ať nám hlavička nerozbíjí aligment
+- Blob alignovanej na začátek stránky (HDF5) - Máme zachovat rozdělení na 2 fyly, tak jak to máme nějak
+- Binární blob je super, hlavička zvlášť
+- "Prostě to dodělejte"
+- Do hlavičky metadata. Když budu chtít vlastní kompatní formát abych byl schopnej narvat vlastní hlavičku nebo appendovat do hlavičky
+- **"Kdyby bylo .csv, tak bych učůrával blahem"**
+## Python
+- Mirek pošle nějakej browser, kterej to znásilní, ale bude to fungovat. Vzít libovolnej projekt (například nezaujatě k-means) a tam okoukat numpy
+- Vytvořit demíčko, co to je. Trochu větší než volání funkce.
+- (Mirek šel řešit píčovinu)
+- Vysněnej interface: C-kový rozhraní, který je nějak anotovaný, který se přeloží do nějakýho interfacu. Který nějak zavolá tu naši pičovinu.
+- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
