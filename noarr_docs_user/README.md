@@ -47,7 +47,7 @@ A *structure* object is immutable. The `%` operator (the pipe) is used to create
 
 > The pipe operator is the preffered way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label.
 
-The reson we specify the size later is that it allows us to decouple the *structure* layout from the resizing action. The resizing action specifies a dimension label `i` and it doesn't care, where that dimension is inside the *structure*.
+The reason we specify the size later is that it allows us to decouple the *structure* layout from the resizing action. The resizing action specifies a dimension label `i` and it doesn't care, where that dimension is inside the *structure*.
 
 Here's how we would create a vector of arrays, that can either be in SoA or AoS, based on a constant we can vary to benchmark different physical layouts:
 
@@ -67,18 +67,13 @@ auto create_structure() {
     }
 }
 
-template<typename TStructure>
-auto set_size(TStructure structure, std::size_t size) {
-    return structure
-        % noarr::resize<'v'>{size};
-        // you could set sizes of all dynamic dimensions here
-}
-
 int main() {
     std::size_t data_size = 42; // obtain size from somewhere
 
     // create a structure of proper dimensions
-    auto my_structure = set_size(create_structure<USED_POLICY>(), data_size);
+    auto my_structure = create_structure<USED_POLICY>()
+        % noarr::resize<'v'>{size};
+        // you could set sizes of all dynamic dimensions here;
     
     // ... work with the structure ...
 }
