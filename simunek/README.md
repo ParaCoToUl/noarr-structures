@@ -1,7 +1,7 @@
 # Mother of all requiremets
 https://github.com/krulis-martin/cuda-kmeans
 
-Main ideas:
+# Main ideas:
 1. All GPU programs can be separated into: CPU logic/policies/GPU logic
 2. Policy = logic of data transfering and accesing them on GPU.
 3. Create high performace core for data modeling
@@ -16,7 +16,7 @@ Main ideas:
 8. Get somehow at last mark 3 after we fail to achieve anything.
 9. Run.
 
-#Requiremets
+# Requiremets
 **Functional requiremets**
 - Support for C++, bindings to Python, R
 - Predefined basic data layouts for quick ot of the box usage.
