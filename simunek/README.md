@@ -8,10 +8,10 @@ https://github.com/krulis-martin/cuda-kmeans
 4. Create library of common policies
 5. Create binding into common languages like Python/R
 6. Rewrite cuda-kmeans using new framework, to gain following:
-  a. Demontrate usability of our libraly
-  b. Hopefully achive simpler and shorter code of k-means
-  c. Natural support of diffener data layouts (easy swaps) (AOS vs SOA)
-  d. Similar or higher level of performance
+  - Demontrate usability of our libraly
+  - Hopefully achive simpler and shorter code of k-means
+  - Natural support of diffener data layouts (easy swaps) (AOS vs SOA)
+  - Similar or higher level of performance
 7. Add fancy formating to this document
 8. Get somehow at last mark 3 after we fail to achieve anything.
 9. Run.
