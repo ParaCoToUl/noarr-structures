@@ -67,7 +67,7 @@ All algorithms at some point work with scalar values only - make scalar value ac
 - Smooth data jsou top.
 - Jagged data: Mirek by se na ně zatím vykašlal. Martin: **Jagged data musí umět sekvenci různě velkejch blobů. To by mělo stačit.**
 - Uděláme pokus na vektoru stringů až z toho vybublá co je potřeba supportovat.
-## Lifotvání
+## Liftování
 - Ať nám hlavička nerozbíjí aligment
 - Blob alignovanej na začátek stránky (HDF5) - Máme zachovat rozdělení na 2 fyly, tak jak to máme nějak
 - Binární blob je super, hlavička zvlášť
@@ -79,18 +79,15 @@ All algorithms at some point work with scalar values only - make scalar value ac
 - Vytvořit demíčko, co to je. Trochu větší než volání funkce.
 - (Mirek šel řešit píčovinu)
 - Vysněnej interface: C-kový rozhraní, který je nějak anotovaný, který se přeloží do nějakýho interfacu. Který nějak zavolá tu naši pičovinu.
-- 
-
-
-
-
-
-
-
-
-
-
-
-
-
+- Je rozumnej mezistupeň kompilace? Martinovi to je jedno. Mirek: "Je to jednoduchý a doporučuje to". Nějakym BASHem to je primitivní.
+## R-ko
+- Link: https://github.com/exaexa/scattermore
+- Řádek 63, castění, C shit, pointer na int, scattermore, alfabelending, z toho kódu si příklad brát nemáme, "nebudu to radši komentovat", https://youtu.be/yR0EVtcPgD0
+- 2 úrovně uživatelů: 1. je ten co v C napíše pičoviny, bashem vygeneruje kokotinu a tun si druhej uživatel strčí do src.
+## Kernely jako lamda výrazy
+- Long story shor: není to úplně core problému asi, takže na to spíš jebáme. Bylo by cool kdyby jsme mohli do budoucna top level používat dál. Mezivrstva/spodní je možná měnit.
+- Defakto jsme došli k tomu, že to vlastně tak jako možná úplně jistě chceme. Ale ne nutně hned teď, včera to stačilo. Ale prej to není naše práce.
+- Mirek: Spíš než framework by to měla bejt knihovna.
+- Takže na to defakto teď sereme
+- Tohle odsere někdo po nás
 
