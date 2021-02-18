@@ -16,8 +16,7 @@ using namespace noarr;
 // same body, two data layouts:
 template<typename AS>
 __global__ void kernel(float *data, AS as) {
-    auto index = as % fixs<'y', 'x'>(blockIdx.x, threadIdx.x);
-    *(float*)((char*)data + (index % offset())) = blockIdx.x * blockDim.x + threadIdx.x;
+    as | fixs<'y', 'x'>(blockIdx.x, threadIdx.x) | get_at(data) = blockIdx.x * blockDim.x + threadIdx.x;
 }
 
 __global__ void kernel_handmade(float *data, size_t size) {
@@ -30,9 +29,9 @@ int main() {
 
     cudaMalloc(&data, sizeof(local));
 
-    const auto av = array<'y', SIZE_CONSTANT, vector<'x', scalar<float>>>{};
+    const auto av = array<'y', SIZE_CONSTANT, vector<'x', scalar<float>>>();
     volatile std::size_t s = 20;
-    const auto avr = av % resize<'x'>(s);
+    const auto avr = av | resize<'x'>(s);
     kernel<<<SIZE_CONSTANT, 20>>>(data, avr);
     //kernel_handmade<<<SIZE_CONSTANT, 20>>>(data, 20);
     

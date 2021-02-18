@@ -31,7 +31,7 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<cont
     contain<TS...> ts;
 
     constexpr _contain() = default;
-    explicit constexpr _contain(T t, TS... ts) : t{t}, ts{ts...} {}
+    explicit constexpr _contain(T t, TS... ts) : t(t), ts(ts...) {}
 
     template<std::size_t I>
     constexpr auto get() const {
@@ -53,8 +53,8 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<conta
     T t;
 
     constexpr _contain() = default;
-    explicit constexpr _contain(T t) : t{t} {}
-    explicit constexpr _contain(T t, TS...) : t{t} {}
+    explicit constexpr _contain(T t) : t(t) {}
+    explicit constexpr _contain(T t, TS...) : t(t) {}
 
     template<std::size_t I>
     constexpr auto get() const {
@@ -74,8 +74,8 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<conta
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain<TS...> {
     constexpr _contain() = default;
-    explicit constexpr _contain(TS... ts) : contain<TS...>{ts...} {}
-    explicit constexpr _contain(T, TS... ts) : contain<TS...>{ts...} {}
+    explicit constexpr _contain(TS... ts) : contain<TS...>(ts...) {}
+    explicit constexpr _contain(T, TS... ts) : contain<TS...>(ts...) {}
 
     template<std::size_t I>
     constexpr auto get() const {
@@ -88,7 +88,7 @@ struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>
     }
 
     constexpr auto get_() const {
-        return T{};
+        return T();
     }
 };
 
@@ -103,7 +103,7 @@ struct _contain<std::enable_if_t<std::is_empty<T>::value>, T> {
     }
 
     constexpr auto get_() const {
-        return T{};
+        return T();
     }
 };
 
@@ -112,7 +112,7 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value>, T> {
     T t;
 
     constexpr _contain() = default;
-    explicit constexpr _contain(T t) : t{t} {}
+    explicit constexpr _contain(T t) : t(t) {}
 
     template<std::size_t I>
     constexpr auto get() const {

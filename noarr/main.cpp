@@ -24,56 +24,59 @@ int main() {
     print_struct(std::cout, v2) << " v2;" << std::endl;
     print_struct(std::cout, t) << " t;" << std::endl << std::endl;
 
-    auto vs = v % resize<'x'>{10}; // transform
+    auto vs = v | resize<'x'>(10); // transform
     static_assert(is_cube<decltype(vs)>::value, "vs has to be a cube");
     static_assert(std::is_pod<decltype(vs)>::value, "a struct has to be a podtype");
-    std::cout << "vs = v % resize<'x'>{10}: " << typeid(vs).name() << std::endl;
+    std::cout << "vs = v | resize<'x'>(10): " << typeid(vs).name() << std::endl;
     std::cout << "vs.size(): " << vs.size() << std::endl;
     std::cout << "sizeof(vs): " << sizeof(vs) << std::endl << std::endl;
 
-    auto vs2 = v2 % resize<'x'>{20}; // transform
+    auto vs2 = v2 | resize<'x'>(20); // transform
     static_assert(is_cube<decltype(vs2)>::value, "vs2 has to be a cube");
     static_assert(std::is_pod<decltype(vs2)>::value, "a struct has to be a podtype");
-    std::cout << "vs2 = v % resize<'x'>{10}: " << typeid(vs2).name() << std::endl;
+    std::cout << "vs2 = v | resize<'x'>(10): " << typeid(vs2).name() << std::endl;
     std::cout << "vs2.size(): " << vs2.size() << std::endl;
     std::cout << "sizeof(vs2): " << sizeof(vs2) << std::endl;
-    std::cout << "vs2 % fix<'x'>{5}:" << typeid(vs2 % fix<'x'>{5}).name() << std::endl;
-    std::cout << "vs2 % fix<'x'>{5} % fix<'y'>{5}:" << typeid(vs2 % fix<'x'>{5} % fix<'y'>{5}).name() << std::endl;
-    std::cout << "vs2 % fixs<'x', 'y'>{5, 5}:" << typeid(vs2 % fixs<'x', 'y'>{5, 5}).name() << std::endl;
-    std::cout << "vs2 % fixs<'x', 'y'>{5, 5} % offset{}:" << vs2 % fixs<'x', 'y'>{5, 5} % offset{} << std::endl;
-    std::cout << "vs2 % fixs<'x', 'y'>{5, 5} % offset{}:" << (vs2 % fixs<'y', 'x'>{5, 5} % offset()) << std::endl;
-    static_assert(std::is_pod<decltype(vs2 % fixs<'y', 'x'>{5, 5})>::value, "a struct has to be a podtype");
-    static_assert(std::is_pod<decltype(fixs<'y', 'x'>{5, 5})>::value, "a struct has to be a podtype");
-    std::cout << "vs2 % get_offset<'y'>{5}:" << (vs2 % get_offset<'y'>{5}) << std::endl << std::endl;
-    static_assert(is_point<decltype(vs2 % fixs<'y', 'x'>{5, 5})>::value, "`vs2 % fixs<'y', 'x'>{5, 5}` has to be a point");
+    std::cout << "vs2 | fix<'x'>(5):" << typeid(vs2 | fix<'x'>(5)).name() << std::endl;
+    std::cout << "vs2 | fix<'x'>(5) | fix<'y'>(5):" << typeid(vs2 | fix<'x'>(5) | fix<'y'>(5)).name() << std::endl;
+    std::cout << "vs2 | fixs<'x', 'y'>(5, 5):" << typeid(vs2 | fixs<'x', 'y'>(5, 5)).name() << std::endl;
+    std::cout << "vs2 | fixs<'x', 'y'>(5, 5) | offset():" << (vs2 | fixs<'x', 'y'>(5, 5) | offset()) << std::endl;
+    std::cout << "vs2 | fixs<'y', 'x'>(5, 5) | offset():" << (vs2 | fixs<'y', 'x'>(5, 5) | offset()) << std::endl;
 
-    auto vs3 = v2 % cresize<'x', 10>{}; // transform
+    std::cout << "vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr): " << typeid(vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name() << std::endl;
+
+    static_assert(std::is_pod<decltype(vs2 | fixs<'y', 'x'>(5, 5))>::value, "a struct has to be a podtype");
+    static_assert(std::is_pod<decltype(fixs<'y', 'x'>(5, 5))>::value, "a struct has to be a podtype");
+    std::cout << "vs2 | get_offset<'y'>(5):" << (vs2 | get_offset<'y'>(5)) << std::endl << std::endl;
+    static_assert(is_point<decltype(vs2 | fixs<'y', 'x'>(5, 5))>::value, "`vs2 | fixs<'y', 'x'>(5, 5)` has to be a point");
+
+    auto vs3 = v2 | cresize<'x', 10>(); // transform
     static_assert(is_cube<decltype(vs3)>::value, "vs3 has to be a cube");
     static_assert(std::is_pod<decltype(vs3)>::value, "a struct has to be a podtype");
-    std::cout << "vs3 = v % cresize<'x', 10>{}: " << typeid(vs3).name() << std::endl;
+    std::cout << "vs3 = v | cresize<'x', 10>(): " << typeid(vs3).name() << std::endl;
     std::cout << "vs3.size(): " << vs3.size() << std::endl;
     std::cout << "sizeof(vs3): " << sizeof(vs3) << std::endl << std::endl;
 
     volatile std::size_t l = 20;
     std::cout << "choose l... ";
 
-    auto vs4 = pipe(v2, cresize<'y', 10>{}, resize<'x'>{l}); // transform
+    auto vs4 = pipe(v2, cresize<'y', 10>(), resize<'x'>(l)); // transform
     static_assert(is_cube<decltype(vs4)>::value, "vs4 has to be a cube");
     static_assert(std::is_pod<decltype(vs4)>::value, "vs4 has to be a podtype");
-    std::cout << "vs4 = pipe(v2, cresize<'y', 10>{}, resize<'x'>{l}): " << typeid(vs4).name() << std::endl;
+    std::cout << "vs4 = pipe(v2, cresize<'y', 10>(), resize<'x'>(l)): " << typeid(vs4).name() << std::endl;
     std::cout << "vs4.size(): " << vs4.size() << std::endl;
     std::cout << "sizeof(vs4): " << sizeof(vs4) << std::endl << std::endl;
 
     std::cout << "sizeof(t): " << sizeof(t) << std::endl;
 
-    auto ts = t % resize<'x'>(20);
+    auto ts = t | resize<'x'>(20);
     static_assert(!is_cube<decltype(ts)>::value, "ts must not be a cube");
     static_assert(std::is_pod<decltype(ts)>::value, "ts has to be a podtype");
     print_struct(std::cout, ts) << " ts;" << std::endl;
     std::cout << "sizeof(ts): " << sizeof(ts) << std::endl;
     std::cout << "ts.size(): " << ts.size() << std::endl;
 
-    print_struct(std::cout, t2 % reassemble<'x', 'y'>{}) << " t2';" << std::endl;
-    print_struct(std::cout, t2 % resize<'x'>(10) % reassemble<'y', 'x'>{}) << " t2'';" << std::endl;
-    print_struct(std::cout, t2 % reassemble<'x', 'x'>{}) << " t2;" << std::endl;
+    print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
+    print_struct(std::cout, t2 | resize<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;
+    print_struct(std::cout, t2 | reassemble<'x', 'x'>()) << " t2;" << std::endl;
 }

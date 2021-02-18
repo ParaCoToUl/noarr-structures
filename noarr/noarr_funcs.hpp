@@ -2,21 +2,22 @@
 #define NOARR_FUNCS_HPP
 
 #include "noarr_structs.hpp"
+#include "noarr_struct_traits.hpp"
 
 namespace noarr {
 
 template<char Dim>
 struct resize {
     using func_family = transform_tag;
-    explicit constexpr resize(std::size_t length) : length{length} {}
+    explicit constexpr resize(std::size_t length) : length(length) {}
 
     template<typename T>
     constexpr auto operator()(vector<Dim, T> v) const {
-        return sized_vector<Dim, T>{std::get<0>(v.sub_structures()), length};
+        return sized_vector<Dim, T>(std::get<0>(v.sub_structures()), length);
     }
     template<typename T>
     constexpr auto operator()(sized_vector<Dim, T> v) const {
-        return sized_vector<Dim, T>{std::get<0>(v.sub_structures()), length};
+        return sized_vector<Dim, T>(std::get<0>(v.sub_structures()), length);
     }
 
 private:
@@ -36,7 +37,7 @@ struct _reassemble_get {
 template<char Dim, typename T, typename T2>
 struct _reassemble_set : private contain<T> {
     constexpr _reassemble_set() = default;
-    explicit constexpr _reassemble_set(T t) : contain<T>{t} {}
+    explicit constexpr _reassemble_set(T t) : contain<T>(t) {}
     using func_family = transform_tag;
 
     constexpr auto operator()(T2 t) const {
@@ -49,11 +50,11 @@ struct reassemble {
 private:
     template<char Dim, typename T, typename T2>
     constexpr auto reassemble_2(T t, T2 t2) const {
-        return construct(t2, (t % _reassemble_set<Dim, T, remove_cvref<decltype(t2)>>{t}).sub_structures());
+        return construct(t2, (t | _reassemble_set<Dim, T, remove_cvref<decltype(t2)>>(t)).sub_structures());
     }
     template<char Dim, typename T>
-    constexpr auto reassemble_(T t) const -> decltype(reassemble_2<Dim>(t, t % _reassemble_get<Dim>{})) {
-        return reassemble_2<Dim>(t, t % _reassemble_get<Dim>{});
+    constexpr auto reassemble_(T t) const -> decltype(reassemble_2<Dim>(t, t | _reassemble_get<Dim>())) {
+        return reassemble_2<Dim>(t, t | _reassemble_get<Dim>());
     }
 public:
     using func_family = transform_tag;
@@ -75,15 +76,15 @@ struct cresize {
 
     template<typename T>
     constexpr auto operator()(vector<Dim, T> v) const {
-        return array<Dim, L, T>{std::get<0>(v.sub_structures())};
+        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
     }
     template<typename T>
     constexpr auto operator()(sized_vector<Dim, T> v) const {
-        return array<Dim, L, T>{std::get<0>(v.sub_structures())};
+        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
     }
     template<typename T>
     constexpr auto operator()(array<Dim, L, T> v) const {
-        return array<Dim, L, T>{std::get<0>(v.sub_structures())};
+        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
     }
 };
 
@@ -111,15 +112,15 @@ inline constexpr auto safe_get(T t) {
 template<char Dim>
 struct fix {
     constexpr fix() = default;
-    explicit constexpr fix(std::size_t idx) : idx{idx} {}
+    explicit constexpr fix(std::size_t idx) : idx(idx) {}
 
 private:
     std::size_t idx;
 
 public:
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), fixed_dim<Dim, T>{t, idx}) {
-        return fixed_dim<Dim, T>{t, idx};
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), fixed_dim<Dim, T>(t, idx)) {
+        return fixed_dim<Dim, T>(t, idx);
     }
 };
 
@@ -133,7 +134,7 @@ private:
 public:
     constexpr fixs() = default;
     template <typename... IS>
-    constexpr fixs(std::size_t idx, IS... is) : base{fix<Dim>{idx}, fixs<Dims...>{static_cast<std::size_t>(is)...}} {}
+    constexpr fixs(std::size_t idx, IS... is) : base(fix<Dim>(idx), fixs<Dims...>(static_cast<std::size_t>(is)...)) {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
@@ -147,7 +148,7 @@ struct fixs<Dim> : fix<Dim> { using fix<Dim>::fix; using fix<Dim>::operator(); }
 template<char Dim>
 struct get_offset {
     using func_family = get_tag;
-    explicit constexpr get_offset(std::size_t idx) : idx{idx} {}
+    explicit constexpr get_offset(std::size_t idx) : idx(idx) {}
 
 private:
     std::size_t idx;
@@ -164,13 +165,13 @@ struct offset {
     explicit constexpr offset() = default;
 
     template<typename T>
-    constexpr std::size_t operator()(scalar<T>) const {
+    constexpr std::size_t operator()(scalar<T>) {
         return 0;
     }
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<typename T::template get_t<>>(), t.offset()) {
-        return t.offset() + (std::get<0>(t.sub_structures()) % offset{});
+    constexpr auto operator()(T t) const -> std::enable_if_t<is_point<T>::value, std::size_t> {
+        return t.offset() + (std::get<0>(t.sub_structures()) | offset());
     }
 };
 
@@ -181,6 +182,21 @@ struct get_size {
     template<typename T>
     constexpr auto operator()(T t) const -> decltype(t.size()) {
         return t.size();
+    }
+};
+
+struct get_at : private contain<char*> {
+    using func_family = top_tag;
+
+    constexpr get_at() = delete;
+
+    template<typename T>
+    explicit constexpr get_at(T *ptr) : contain<char *>(reinterpret_cast<char *>(ptr)) {}
+
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> std::enable_if_t<is_cube<T>::value, scalar_t<T> &> {
+        return reinterpret_cast<scalar_t<T> &>(*(contain<char *>::template get<0>() + (t | offset())));
     }
 };
 
