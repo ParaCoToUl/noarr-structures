@@ -96,7 +96,8 @@
     <ClInclude Include="noarr_scalar_names.hpp" />
     <ClInclude Include="noarr_std_ext.hpp" />
     <ClInclude Include="noarr_structs.hpp" />
-    <ClInclude Include="noarr_struct_desc.hpp" />
+    <ClInclude Include="noarr_struct_decls.hpp" />
+    <ClInclude Include="noarr_is_struct.hpp" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="cuda.cu" />

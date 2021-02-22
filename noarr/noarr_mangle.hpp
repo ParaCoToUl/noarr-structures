@@ -1,12 +1,11 @@
 #ifndef NOARR_MANGLE_HPP
 #define NOARR_MANGLE_HPP
 
-#include "noarr_core.hpp"
 #include "noarr_std_ext.hpp"
-#include "noarr_structs.hpp"
+#include "noarr_scalar.hpp"
 #include "noarr_mangle_value.hpp"
 #include "noarr_scalar_names.hpp"
-#include "noarr_struct_desc.hpp"
+#include "noarr_struct_decls.hpp"
 
 namespace noarr {
 

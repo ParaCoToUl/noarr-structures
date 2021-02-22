@@ -4,8 +4,7 @@
 #include <type_traits>
 
 #include "noarr_std_ext.hpp"
-#include "noarr_core.hpp"
-#include "noarr_struct_desc.hpp"
+#include "noarr_struct_decls.hpp"
 #include "noarr_scalar.hpp"
 
 namespace noarr {

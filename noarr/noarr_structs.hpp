@@ -1,8 +1,7 @@
 #ifndef NOARR_STRUCTS_HPP
 #define NOARR_STRUCTS_HPP
 
-#include "noarr_core.hpp"
-#include "noarr_struct_desc.hpp"
+#include "noarr_struct_decls.hpp"
 #include "noarr_contain.hpp"
 #include "noarr_scalar.hpp"
 
@@ -277,35 +276,6 @@ struct fixed_dim : private contain<T, std::size_t> {
     constexpr std::size_t offset() const { return base::template get<0>().offset(base::template get<1>()); }
     constexpr std::size_t length() const { return 0; }
 };
-
-template<typename T, std::size_t I = std::tuple_size<typename sub_structures<T>::value_type>::value>
-struct _construct;
-
-template<typename T, std::size_t I>
-struct _construct {
-    template<std::size_t... IS, typename... TS>
-    static constexpr auto construct(T t, std::tuple<TS...> sub_structures){
-        return _construct<T, I - 1>::template construct<I - 1, IS...>(t, sub_structures);
-    }
-};
-
-template<typename T>
-struct _construct<T, 0> {
-    template<std::size_t... IS, typename... TS>
-    static constexpr auto construct(T t, std::tuple<TS...> sub_structures) {
-        return t.construct(std::get<IS>(sub_structures)...);
-    }
-};
-
-template<typename T, typename... TS>
-inline constexpr auto construct(T t, TS... ts) {
-    return t.construct(ts...);
-}
-
-template<typename T, typename... TS>
-inline constexpr auto construct(T t, std::tuple<TS...> ts) {
-    return _construct<T>::construct(t, ts);
-}
 
 }
 

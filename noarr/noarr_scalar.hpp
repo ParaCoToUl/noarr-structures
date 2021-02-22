@@ -2,7 +2,7 @@
 #define NOARR_SCALAR_HPP
 
 #include "noarr_core.hpp"
-#include "noarr_struct_desc.hpp"
+#include "noarr_struct_decls.hpp"
 #include "noarr_contain.hpp"
 
 namespace noarr {

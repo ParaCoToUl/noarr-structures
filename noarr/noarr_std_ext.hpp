@@ -122,6 +122,19 @@ struct _tuple_forall<Function, std::tuple<>> {
 template<template<typename> class Function, typename Tuple>
 using tuple_forall = _tuple_forall<Function, Tuple>;
 
+template<typename S, typename F, typename = void>
+struct can_apply;
+
+template<typename F, typename S, typename>
+struct can_apply {
+    static constexpr bool value = false;
+};
+
+template<typename F, typename S>
+struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
+    static constexpr bool value = true;
+};
+
 } // namespace noarr
 
 #endif // NOARR_STD_EXT_HPP

@@ -1,87 +1,21 @@
 #ifndef NOARR_CORE_HPP
 #define NOARR_CORE_HPP
 
-#include <tuple>
-#include <cassert>
-
 #include "noarr_std_ext.hpp"
+#include "noarr_struct_decls.hpp"
+#include "noarr_is_struct.hpp"
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
 // TODO: add loading and storing to files (binary, json, xml, ...)
 // TODO: add struct checkers
 // TODO: the piping mechanism should understand dimensions so we don't abuse template sfinae so much
+// TODO: use std::integer_sequence and std::index_sequence wherever applicable
 
 namespace noarr {
 
-/**
- * @brief retrieves sub_structures from the given structure
- * 
- * @return value of type value_type will hold the list of sub_structures in a tuple
- * @tparam T the type of the given structure
- */
-template<typename T, typename = void>
-struct sub_structures {
-    explicit constexpr sub_structures() = default;
-    explicit constexpr sub_structures(T) {}
-    using value_type = std::tuple<>;
-    static constexpr std::tuple<> value = std::tuple<>();
-};
-
-template<typename T, typename = void>
-struct _sub_structures_is_static {
-    static constexpr bool value = false;
-};
-
-template<typename T>
-struct _sub_structures_is_static<T, void_t<decltype(T::sub_structures())>> {
-    static constexpr bool value = true;
-};
-
-// TODO: check if tuple
-template<typename T>
-struct sub_structures<T, std::enable_if_t<_sub_structures_is_static<T>::value>> {
-    explicit constexpr sub_structures() = default;
-    explicit constexpr sub_structures(T) {}
-    using value_type = remove_cvref<decltype(T::sub_structures())>;
-    static constexpr value_type value = T::sub_structures();
-};
-
-template<typename T>
-struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, void_t<decltype(std::declval<T>().sub_structures())>>> {
-    explicit constexpr sub_structures() = delete;
-    explicit constexpr sub_structures(T t) : value(t.sub_structures()) {}
-    using value_type = remove_cvref<decltype(std::declval<T>().sub_structures())>;
-    value_type value;
-};
-
-/**
- * @brief The type that holds all the dimensions of a structure
- * 
- * @tparam Dims the dimensions
- */
-template<char... Dims>
-using dims_impl = char_pack<Dims...>;
-
-template<typename T>
-using get_dims = typename T::description::dims;
-// TODO: implement the recursive version using sub_structures
-
 template<typename S, typename F, typename = void>
 struct fmapper;
-
-template<typename S, typename F, typename = void>
-struct can_apply;
-
-template<typename F, typename S, typename>
-struct can_apply {
-    static constexpr bool value = false;
-};
-
-template<typename F, typename S>
-struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
-    static constexpr bool value = true;
-};
 
 template<typename S, typename F, typename = void>
 struct _fmapper_cond_helper {
@@ -241,7 +175,7 @@ struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::
 };
 
 template<typename S, typename F>
-inline constexpr decltype(auto) operator|(S s, F f) {
+inline constexpr auto operator|(S s, F f) -> std::enable_if_t<is_structoid<S>::value, decltype(pipe_decider<F>::template operate<S>(std::declval<S>(), std::declval<F>()))> {
     return pipe_decider<F>::template operate<S>(s, f);
 }
 

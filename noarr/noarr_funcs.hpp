@@ -3,6 +3,7 @@
 
 #include "noarr_structs.hpp"
 #include "noarr_struct_traits.hpp"
+#include "noarr_core.hpp"
 
 namespace noarr {
 
