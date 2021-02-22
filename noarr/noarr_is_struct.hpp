@@ -4,6 +4,8 @@
 #include "noarr_std_ext.hpp"
 #include "noarr_core.hpp"
 
+// TODO: is_struct and is_structoid should be more strict
+
 namespace noarr {
 
 template<typename T, typename = void>
