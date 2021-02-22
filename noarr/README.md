@@ -53,7 +53,7 @@ For a structure `T`:
     - `T::offset` shall return the same offset for the given index regardless of whether it was given via template or formally
   - if the structure has a dimension then it is called static or dynamic if the structure would satisfy the previous statements (this means that the staticity or dynamicity of the dimension is deduced)
   - if the structure has a dimension then it shall be either static or dynamic
-  - if the structure has any sub-structures, `T::get_t` shall always return one of types of sub-structures in `T::sub_structures()` and for every sub-structure type there shall exist an argument to `T::get_t` such that it returns this sub-structure
+  - if the structure has any sub-structures, `T::get_t` shall always return one of types of sub-structures in `T::sub_structures()` and for every sub-structure type there shall exist an argument to `T::get_t` such that it returns this sub-structure and they shall share their indices
     - *as a result, structures with a dynamic dimension will have just one sub-structure or it should be a ground (leaf) structure*
   - if the structure has no sub-structures, `T::get_t` shall return a representation of the type of the physical data
 
