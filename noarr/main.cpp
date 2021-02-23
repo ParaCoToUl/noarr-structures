@@ -4,15 +4,18 @@
 #include "noarr_funcs.hpp"
 #include "noarr_io.hpp"
 #include "noarr_struct_traits.hpp"
+#include "noarr_lifting.hpp"
 
 using namespace noarr;
 
 int main() {
-    vector<'x', scalar<float>> v;
+    std::array<float, 300> data;
 
+    vector<'x', scalar<float>> v;
     array<'y', 20000, vector<'x', scalar<float>>> v2;
     tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
     tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
+
     static_assert(!is_cube<decltype(v)>::value, "t must not be a cube");
     static_assert(!is_cube<decltype(t)>::value, "t must not be a cube");
     static_assert(!is_cube<decltype(t2)>::value, "t2 must not be a cube");
@@ -75,6 +78,8 @@ int main() {
     print_struct(std::cout, ts) << " ts;" << std::endl;
     std::cout << "sizeof(ts): " << sizeof(ts) << std::endl;
     std::cout << "ts.size(): " << ts.size() << std::endl;
+    lift(std::cin, ts, (char*)data.data());
+    unlift(std::cout, ts, (char*)data.data());
 
     print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
     print_struct(std::cout, t2 | resize<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;
