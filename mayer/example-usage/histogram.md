@@ -151,8 +151,8 @@ __global__ void reduce_histograms(
     // sum one bin over all chunks
     for (int c = 0; c < histogramCount; c++) {
         finalHistogram[histogramBin] += s_chunkHistograms
-            | noarrr::fixs<'c', 'b'>(c, histogramBin)
-            | noarrr::get_at(chunkHistograms);
+            | noarr::fixs<'c', 'b'>(c, histogramBin)
+            | noarr::get_at(chunkHistograms);
     }
 }
 
