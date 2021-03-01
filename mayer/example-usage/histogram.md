@@ -101,12 +101,12 @@ void compute_histogram(
     reduce_histograms<<<1, 256>>>(d_chunkHistograms, chunkCount, d_finalHistogram);
 
     // get data out of the device
-    histogram = move(d_finalHistogram); // *pseudo code
+    cudaMemcpy(histogram, d_finalHistogram, sizeof(d_finalHistogram), cudaMemcpyDeviceToHost);
 
     // free up device buffers
-    free(d_pixels);
-    free(d_chunkHistograms);
-    free(d_finalHistogram);
+    cudaFree(d_pixels);
+    cudaFree(d_chunkHistograms);
+    cudaFree(d_finalHistogram);
 }
 ```
 
@@ -197,12 +197,12 @@ void compute_histogram(
     );
 
     // get data out of the device
-    histogram = move(d_finalHistogram); // *pseudo code
+    cudaMemcpy(histogram, d_finalHistogram, sizeof(d_finalHistogram), cudaMemcpyDeviceToHost);
 
     // free up device buffers
-    free(d_pixels);
-    free(d_chunkHistograms);
-    free(d_finalHistogram);
+    cudaFree(d_pixels);
+    cudaFree(d_chunkHistograms);
+    cudaFree(d_finalHistogram);
 }
 ```
 
@@ -217,29 +217,36 @@ Methods on the wrapper:
 
 > **Question:** Why do we have unsized vector, when a vector sized to 0 would suffice?
 
-> **Performed renaming:**
-> - `resize` to `set_length` for consistency with `length`
-> - `get_size` to `blob_size` to be explicit what size is meant
+**API Reference:**
 
-- setting sizes
-    - `set_length<'x'>(4)` set runtime size along a dimension
-    - `set_length<'x', 4>()` set constant size along a dimension
-- querying sizes
-    - `length<'x'>()` number of items along a dimensions
-    - `blob_size()` size of the underlying blob in bytes
-- accessing elements
-    - `fix<'x'>(x)` fix an index along a dimension
-    - `fixs<'x', 'y'>(x, y)` fix multiple dimensions simultaneously
-    - `get()` get reference to the target scalar (all dimensions need be fixed)
-- blob control
-    - `set_host_blob(void* blob)`
-    - `set_device_blob(void* blob)`
-    - `allocate_host_blob()`
-    - `allocalte_device_blob()`
-    - `free_blobs()`
-- blob access context
-    - `to_device()` ... TODO: figure out better names here (meaning + usage context)
-    - `to_host()`
+- `noarr::structure<T>`
+    - `.set_length<'x'>(4)` set size along a dimensions
+    - `.set_length<'x', 4>()` set constant size along a dimensions
+    - `.length<'x'>()` get number of items along a dimension
+    - `.blob_size()` size of the underlying blob in bytes
+    - `.fix<'x'>(x)` fix an index along a dimension
+    - ??? tuple fixing? (`.fixt<'x', 2>()`?)
+    - `.blob_offset()` byte offset of the fixed item in the blob
+    - `.get_at(void* blob)` get fixed item inside a blob
+    - `.with_blob(blob | void*)` create a `structure_with_blob`
+- `noarr::structure_with_blob<T>`
+    - resizing methods are removed
+    - same as above:
+        - `length`, `blob_size`
+        - `fix`, `fixs`, `fixt`
+    - `get()` get the fixed item inside the attached blob
+- `noarr::blob`
+    - implementation can be swapped in `noarr::blob::driver` (how to alloc, how to copy)
+    - remembered data
+        - `void* data` data pointer, can be null
+        - `bit onDevice` device or host?    (bits are combined into a flags byte)
+        - `bit ownsData` free the data during destruction?
+    - `::from_pointer(void*)` creates a reference blob from a pointer
+    - `::device_allocate(std::size_t)` creates new device blob
+    - `::host_allocate(std::size_t)` creates new host blob
+    - `.fill_with(blob | void*)` copy data from somewhere to me
+    - `.copy_to(blob | void*)` copy data from me to somewhere
+    - `.free()` frees data, sets poitner to null, called from the destructor
 
 ```cpp
 template<typename TPixels, typename TChunkHistograms>
@@ -266,22 +273,21 @@ __global__ void reduce_chunks(
     }
 }
 
-template<typename TChunkHistograms>
+template<typename TChunkHistograms, typename TFinalHistogram>
 __global__ void reduce_histograms(
     TChunkHistograms chunkHistograms
-    int *finalHistogram
+    TFinalHistogram finalHistogram
 ) {
     int histogramBin = threadIdx.x;
     int histogramCount = chunkHistograms.length<'c'>();
 
-    finalHistogram[histogramBin] = 0;
-
     // sum one bin over all chunks
+    int sum = 0;
     for (int c = 0; c < histogramCount; c++) {
-        finalHistogram[histogramBin] += chunkHistograms
-            .fixs<'c', 'b'>(c, histogramBin)
-            .get();
+        sum += chunkHistograms.fixs<'c', 'b'>(c, histogramBin).get();
     }
+
+    finalHistogram.fix<'b'>(histogramBin).get() = sum;
 }
 
 void compute_histogram(
@@ -296,46 +302,50 @@ void compute_histogram(
     std::size_t chunkSize = (pixelCount / BLOCK_SIZE) + 1;
     std::size_t chunkCount = BLOCK_SIZE;
 
-    /**
-     * TODO
-     * 
-     * POKRAČUJ TÍM, ŽE PŘEPÍŠEŠ ALOKACE BLOBŮ A BUDEŠ SPRÁVNĚ SWITCHOVAT KONTEXT
-     */ 
-
-    // re-interpret the given blob with noir as a sequence of chunks
+    // re-interpret the given blob with noarr as a sequence of chunks
     // c = chunk
     // p = pixel
-    auto s_pixels = noarr::vector<'c', noarr::vector<'p', noarr::scalar<char>>>()
+    auto s_pixels = noarr::structure<
+        noarr::vector<'c', noarr::vector<'p', noarr::scalar<char>>>
+    >()
         .set_length<'c'>(chunkSize)
         .set_length<'p'>(chunkSize);
 
     // create structure for chunk histograms
     // c = chunk
     // b = bin
-    auto s_chunkHistograms = noarr::vector<'c', noarr::array<'b', 256, noarr::scalar<int>>>()
-        | noarr::resize<'c'>(chunkCount);
-
+    auto s_chunkHistograms = noarr::structure<
+        noarr::vector<'c', noarr::array<'b', 256, noarr::scalar<int>>>
+    >()
+        .set_length<'c'>(chunkCount);
+    
     // move data onto the device & allocate buffers (pseudocode)
-    char *d_pixels = copy(pixels);
-    int *d_chunkHistograms = allocate(s_chunkHistograms | noarr::get_size());
-    int *d_finalHistogram = allocate(sizeof(int) * 256);
+    auto h_pixels = blob::from_pointer(pixels);
+    auto d_pixels = blob::device_allocate(width * height).fill_with(pixels);
+    //h_pixels.copy_to(d_pixels); // also could be used for data movement
+
+    auto h_chunkHistograms = blob::host_allocate(s_chunkHistograms.blob_size());
+    auto d_chunkHistograms = blob::device_allocate(s_chunkHistograms.blob_size());
+
+    auto s_finalHistogram = noarr::structure<
+        noarr::array<'b', 256, noarr::scalar<int>>
+    >();
+    auto d_finalHistogram = blob::device_allocate(s_finalHistogram.blob_size());
 
     // run kernels
     reduce_chunks<<<1, chunkCount>>>(
-        d_pixels, s_pixels,
-        d_chunkHistograms, s_chunkHistograms
+        s_pixels.with_blob(d_pixels),
+        s_chunkHistograms.with_blob(d_chunkHistograms)
     );
     reduce_histograms<<<1, 256>>>(
-        d_chunkHistograms, s_chunkHistograms,
-        d_finalHistogram
+        s_chunkHistograms.with_blob(d_chunkHistograms),
+        s_finalHistogram.with_blob(d_finalHistogram)
     );
 
     // get data out of the device
-    histogram = move(d_finalHistogram); // *pseudo code
+    d_finalHistogram.copy_to(histogram);
 
-    // free up device buffers
-    free(d_pixels);
-    free(d_chunkHistograms);
-    free(d_finalHistogram);
+    // buffers are freed up during destruction
+    // (only those that were allocated, not referenced)
 }
 ```
