@@ -209,14 +209,6 @@ void compute_histogram(
 
 ## Hypothetical dreamland API
 
-Design a wrapper that will hold the structure, allow dot access and hold the host blob and the device blob.
-
-To which blob we're accessing can be toggled by some `.toDevice()` or `.toHost()` methods. Etc...
-
-Methods on the wrapper:
-
-> **Question:** Why do we have unsized vector, when a vector sized to 0 would suffice?
-
 **API Reference:**
 
 - `noarr::structure<T>`
@@ -325,7 +317,6 @@ void compute_histogram(
     auto d_pixels = blob::device_allocate(width * height).fill_with(pixels);
     //h_pixels.copy_to(d_pixels); // also could be used for data movement
 
-    auto h_chunkHistograms = blob::host_allocate(s_chunkHistograms.blob_size());
     auto d_chunkHistograms = blob::device_allocate(s_chunkHistograms.blob_size());
 
     auto s_finalHistogram = noarr::structure<
@@ -348,5 +339,134 @@ void compute_histogram(
 
     // buffers are freed up during destruction
     // (only those that were allocated, not referenced)
+}
+```
+
+
+## Hypothetical dreamland API v 2.0
+
+> **Note:** We need a master blob allocator that contains blob holders, etc...
+
+**API Reference**
+
+- `noarr::bag`
+    - sohuld be only used in host code!
+    - contains reference to a `blob_holder`, can be null
+    - passed into the structure
+        - `.length<'x'>()`
+        - `.fix<'x'>(1)`
+        - `.blob_offset()`
+        - `.blob_size()`
+        - `.get()` accesses the host blob
+        - `.get<'x'>(42)` = fix + get
+    - blob handling methods
+        - `.set_host_blob(void*)` sets value for the host blob by reference (not allocated)
+        - `.set_device_blob(void*)` --||--
+        - `.copy_host_to_device()` copies data from host blob to device blob
+        - `.copy_device_to_host()` --||--
+        - `.copy_host_to(void* target)` copies data from host blob to
+        - `.copy_device_to(void* target)` --||--
+    - to enter the device context
+        - `.enter_device()` returns a `device_bag` instance
+            - ensures that device blobs are allocated
+- `noarr::device_bag`
+    - should be only used in device code!
+    - contains stupid pointer to the device blob only
+    - passed into the structure
+        - `.length<'x'>()`
+        - `.fix<'x'>(1)`
+        - `.blob_offset()`
+        - `.blob_size()`
+        - `.get()` accesses the device blob
+        - `.get<'x'>(42)` = fix + get
+
+```cpp
+template<typename TPixels, typename TChunkHistograms>
+__global__ void reduce_chunks(
+    TPixels pixels,
+    TChunkHistograms chunkHistograms
+) {
+    int chunkIndex = threadIdx.x;
+    int chunkSize = pixels.length<'p'>();
+
+    auto chunk = pixels.fix<'c'>(chunkIndex);
+    auto histogram = chunkHistograms.fix<'c'>(chunkIndex);
+    
+    // clear the chunk histogram
+    for (int i = 0; i < 256; i++) {
+        histogram.get<'b'>(i) = 0;
+    }
+
+    // populate the chunk histogram by running over the chunk data
+    for (int i = 0; i < chunkSize; i++) {
+        histogram.get<'b'>(chunk.get<'p'>(i)) += 1;
+    }
+}
+
+template<typename TChunkHistograms, typename TFinalHistogram>
+__global__ void reduce_histograms(
+    TChunkHistograms chunkHistograms
+    TFinalHistogram finalHistogram
+) {
+    int histogramBin = threadIdx.x;
+    int histogramCount = chunkHistograms.length<'c'>();
+
+    // sum one bin over all chunks
+    int sum = 0;
+    for (int c = 0; c < histogramCount; c++) {
+        sum += chunkHistograms.get<'c', 'b'>(c, histogramBin);
+    }
+
+    finalHistogram.get<'b'>(histogramBin) = sum;
+}
+
+void compute_histogram(
+    const char* pixelData,
+    const std::size_t width,
+    const std::size_t height,
+    std::array<int, 256>& histogram
+) {
+    const std::size_t BLOCK_SIZE = 1024; // max threads per block
+
+    assert(pixelCount % BLOCK_SIZE == 0, "Padding chunk at the end not supported");
+
+    std::size_t pixelCount = width * height;
+    std::size_t chunkSize = pixelCount / BLOCK_SIZE;
+    std::size_t chunkCount = BLOCK_SIZE;
+
+    // re-interpret the given pixelData with noarr as a sequence of chunks:
+
+    auto pixels = noarr::bag(
+        // c = chunk, p = pixel
+        noarr::vector<'c', noarr::vector<'p', noarr::scalar<char>>>()
+            .set_length<'c'>(chunkSize)
+            .set_length<'p'>(chunkSize)
+    )
+        .set_host_blob(pixelData)
+        .copy_host_to_device();
+
+    auto chunkHistograms = noarr::bag(
+        // c = chunk, b = bin
+        noarr::vector<'c', noarr::array<'b', 256, noarr::scalar<int>>>()
+           .set_length<'c'>(chunkCount);
+    );
+
+    auto finalHistogram = noarr::bag(
+        // b = bin
+        noarr::array<'b', 256, noarr::scalar<int>>()
+    );
+
+    // run kernels
+    reduce_chunks<<<1, chunkCount>>>(
+        pixels.enter_device(),
+        chunkHistograms.enter_device()
+    );
+    reduce_histograms<<<1, 256>>>(
+        chunkHistograms.enter_device(),
+        finalHistogram.enter_device()
+    );
+
+    // get data out of the device
+    finalHistogram.copy_device_to(histogram);
 }
 ```
