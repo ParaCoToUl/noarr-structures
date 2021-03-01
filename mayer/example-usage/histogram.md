@@ -241,7 +241,8 @@ Methods on the wrapper:
         - `void* data` data pointer, can be null
         - `bit onDevice` device or host?    (bits are combined into a flags byte)
         - `bit ownsData` free the data during destruction?
-    - `::from_pointer(void*)` creates a reference blob from a pointer
+    - `::from_host_pointer(void*)` creates a reference blob from a host pointer
+    - `::from_device_pointer(void*)` creates a reference blob from a device pointer
     - `::device_allocate(std::size_t)` creates new device blob
     - `::host_allocate(std::size_t)` creates new host blob
     - `.fill_with(blob | void*)` copy data from somewhere to me
@@ -320,7 +321,7 @@ void compute_histogram(
         .set_length<'c'>(chunkCount);
     
     // move data onto the device & allocate buffers (pseudocode)
-    auto h_pixels = blob::from_pointer(pixels);
+    auto h_pixels = blob::from_host_pointer(pixels);
     auto d_pixels = blob::device_allocate(width * height).fill_with(pixels);
     //h_pixels.copy_to(d_pixels); // also could be used for data movement
 
