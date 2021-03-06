@@ -7,9 +7,10 @@
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
-// TODO: add loading and storing to files (binary, json, xml, ...)
+// TODO: add loading and storing to files (binary, json?, xml?, ...)
 // TODO: the piping mechanism should understand dimensions so we don't abuse template sfinae so much
 // TODO?: use std::integer_sequence and std::index_sequence wherever applicable
+// TODO: add a method for structures that configures the struct => this will be reflected by 2nd serialization
 
 namespace noarr {
 

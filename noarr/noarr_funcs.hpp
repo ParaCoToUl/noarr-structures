@@ -5,6 +5,10 @@
 #include "noarr_struct_traits.hpp"
 #include "noarr_core.hpp"
 
+// TODO: rename resize to set_length
+// TODO: rename fixs to fix
+// TODO: rework get_at so it works as fix... | get_at on non-points
+
 namespace noarr {
 
 template<char Dim>
