@@ -4,7 +4,6 @@
 #include "noarr_funcs.hpp"
 #include "noarr_io.hpp"
 #include "noarr_struct_traits.hpp"
-#include "noarr_lifting.hpp"
 
 using namespace noarr;
 
@@ -78,8 +77,6 @@ int main() {
     print_struct(std::cout, ts) << " ts;" << std::endl;
     std::cout << "sizeof(ts): " << sizeof(ts) << std::endl;
     std::cout << "ts.size(): " << ts.size() << std::endl;
-    lift(std::cin, ts, (char*)data.data());
-    unlift(std::cout, ts, (char*)data.data());
 
     print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
     print_struct(std::cout, t2 | resize<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;
