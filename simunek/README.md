@@ -2,19 +2,33 @@
 https://github.com/krulis-martin/cuda-kmeans
 
 # Main ideas & Core principles
-1. All GPU programs can be separated into: CPU logic/policies/GPU logic
-2. Policy = logic of data transfering and accesing them on GPU.
-3. Create high performace core for data modeling
-4. Create library of common policies
-5. Create binding into common languages like Python/R
-6. Rewrite cuda-kmeans using new framework, to gain following:
+### Real world case problem
+- All GPU programs can be separated into: CPU logic/policies/GPU logic
+- Policy = logic of data layout on GPU
+- Data need to be send onto GPU in organized manner
+- We can have huge data, which need to process.
+- K-means as an example how complex it is
+
+### Solution
+- Create high performace core for data modeling
+- This framework will handle data transfers
+- Library of common policies + extendability
+- Support for data serialization, lifning and streaming
+
+### Prove of usability
+- Create binding into common languages like Python/R
+- Rewrite cuda-kmeans using new framework, to gain following:
   - Demontrate usability of our libraly
   - Hopefully achive simpler and shorter code of k-means
   - Natural support of diffener data layouts (easy swaps) (AOS vs SOA)
   - Similar or higher level of performance
-7. Add fancy formating to this document
-8. Get somehow at last mark 3 after we fail to achieve anything.
-9. Run.
+
+### After effects
+- Add fancy formating to this document
+- Get somehow at last mark 3 after we fail to achieve anything.
+- Run.
+
+
 
 # Requiremets
 **Functional requiremets**
@@ -22,8 +36,7 @@ https://github.com/krulis-martin/cuda-kmeans
 - Predefined basic data layouts for quick ot of the box usage.
 
 **Quality requiremets**
-Usability
-- dots
+ - Dots syntax
 
 
 
