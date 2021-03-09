@@ -1,5 +1,6 @@
 # Mother of all requiremets
 https://github.com/krulis-martin/cuda-kmeans
+https://www.ksi.mff.cuni.cz/teaching/projects-web/pravidla.pdf
 
 # Main ideas & Core principles
 ### Real world case problem
