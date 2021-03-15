@@ -32,16 +32,13 @@
 - Data serialization, lifting
 - IN PROGRESS
 
+### k-means™ powered by noarr™
+- Code size
+- Speed
+- Supported layouts
+- **Poster?**
+
 ### After effects
 - Add fancy formating to this document
 - Get somehow at last mark 3 after we fail to achieve anything.
 - Run.
-
-
-
-
-
-
-
-
-
