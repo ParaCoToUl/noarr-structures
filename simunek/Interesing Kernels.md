@@ -1,6 +1,29 @@
 # Interesting kernels
 
-### Common look of the kernel
+### Něco, co neco skutečně dělá
+``` cpp
+template <KMCUDADistanceMetric M, typename F>
+__global__ void kmeans_calc_average_distance(
+    uint32_t offset, uint32_t length, const F *__restrict__ samples,
+    const F *__restrict__ centroids, const uint32_t *__restrict__ assignments,
+    atomic_float *distance) {
+  volatile uint64_t sample = blockIdx.x * blockDim.x + threadIdx.x;
+  float dist = 0;
+  if (sample < length) {
+    sample += offset;
+    dist = METRIC<M, F>::distance_t(
+        samples, centroids + assignments[sample] * d_features_size,
+        d_samples_size, sample);
+  }
+  float sum = warpReduceSum(dist);
+  if (threadIdx.x % 32 == 0) {
+    atomicAdd(distance, sum);
+  }
+}
+```
+
+
+### Common look of some kernels
 ``` cpp
 // Common reduction kernel that aggregates all privatized copies into one.
 template<typename F, typename IDX_T, class LAYOUT_MEANS>
