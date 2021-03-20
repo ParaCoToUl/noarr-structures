@@ -1,0 +1,25 @@
+# editors
+/.vscode
+/.vs
+
+# CMake stuff on windows
+# (use this folder when running CMake on windows)
+/out
+
+# CMake stuff
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# CTest & testing
+/ParseAndAddCatchTests.cmake
+/DartConfiguration.tcl
+/test-runner

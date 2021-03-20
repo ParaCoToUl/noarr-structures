@@ -74,6 +74,13 @@ int main() {
             when to execute nodes after an aggregation node
     */
 
+
+    // crap
+    auto ml = new my_loader();
+    auto b = new buffer()
+    ml.setBuffer(b);
+
+
     // === build the pipeline ===
 
     auto pipeline = linear_pipeline();
