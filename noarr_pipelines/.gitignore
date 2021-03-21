@@ -1,10 +1,7 @@
 # editors
 /.vscode
 /.vs
-
-# CMake stuff on windows
-# (use this folder when running CMake on windows)
-/out
+/.idea
 
 # CMake stuff
 CMakeLists.txt.user
@@ -23,3 +20,12 @@ _deps
 /ParseAndAddCatchTests.cmake
 /DartConfiguration.tcl
 /test-runner
+
+# CMake stuff on Windows
+/Debug
+/x64
+/test-runner.dir
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln

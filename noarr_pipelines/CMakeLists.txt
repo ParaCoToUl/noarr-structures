@@ -29,7 +29,7 @@ file(
     DOWNLOAD
     "https://raw.githubusercontent.com/catchorg/Catch2/devel/extras/ParseAndAddCatchTests.cmake"
     "ParseAndAddCatchTests.cmake")
-include(CTest)
+enable_testing()
 cmake_policy(SET CMP0110 OLD)
 include("ParseAndAddCatchTests.cmake")
 ParseAndAddCatchTests(test-runner)
