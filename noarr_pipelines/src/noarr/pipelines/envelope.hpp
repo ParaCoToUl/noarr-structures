@@ -1,6 +1,7 @@
 #ifndef NOARR_PIPELINES_ENVELOPE_HPP
 #define NOARR_PIPELINES_ENVELOPE_HPP 1
 
+#include <cstddef>
 #include "noarr/pipelines/chunk_stream_processor.hpp"
 
 namespace noarr {
@@ -23,16 +24,24 @@ public:
     /**
      * Port is the thing that's given to a compute node for buffer resolution
      */
+    template<typename Structure, typename BufferItem = void>
     class port {
     public:
         // TODO: add reference to an envelope instance, implement this
 
         /**
-         * Returns
+         * Returns pointer to the buffer that holds the data
          */
-        void* get_buffer() {
+        BufferItem* get_buffer() {
             // TODO
             return nullptr;
+        };
+
+        /**
+         * Returns structure of the data buffer
+         */
+        Structure get_structure() {
+            // TODO
         };
 
         /**
@@ -76,12 +85,13 @@ public:
  * be used exclusively by a single compute node.
  * (it does not support the chunk_stream_processor interface, obviously)
  */
+template<typename Structure, typename BufferItem = void>
 class buffer_envelope : public envelope {
 public:
     /**
      * Returns a port that provides access to the underlying buffer
      */
-    envelope::port get_port() {
+    envelope::port<Structure, BufferItem> get_port() {
         // TODO: implement this
     }
 };
@@ -89,16 +99,22 @@ public:
 /**
  * Pipe envelope has one input port and one output port
  */
+template<
+    typename InputStructure,
+    typename OutputStructure,
+    typename InputBufferItem = void,
+    typename OutputBufferItem = void
+>
 class pipe_envelope : public chunk_stream_processor {
     /**
      * Returns the input port for for this pipeline envelope
      */
-    virtual envelope::port get_input_port() = 0;
+    virtual envelope::port<InputStructure, InputBufferItem> get_input_port() = 0;
 
     /**
      * Returns the output port for for this pipeline envelope
      */
-    virtual envelope::port get_output_port() = 0;
+    virtual envelope::port<OutputStructure, OutputBufferItem> get_output_port() = 0;
 };
 
 class move_h2d_envelope : public envelope {
@@ -122,25 +138,36 @@ class compute_node : public chunk_stream_processor {
 /**
  * A compute node with one input port and one output port
  */
+template<
+    typename InputStructure,
+    typename OutputStructure,
+    typename InputBufferItem = void,
+    typename OutputBufferItem = void
+>
 class pipe_compute_node : public compute_node {
 public:
-    void set_input_port(envelope::port p) {
+    using input_port_t = envelope::port<InputStructure, InputBufferItem>;
+    using output_port_t = envelope::port<OutputStructure, OutputBufferItem>;
+
+    void set_input_port(input_port_t p) {
         this->input_port = p;
     }
-    void set_output_port(envelope::port p) {
+    void set_output_port(output_port_t p) {
         this->output_port = p;
     };
 
 protected:
-    envelope::port input_port;
-    envelope::port output_port;
+    input_port_t input_port;
+    output_port_t output_port;
 };
 
 /**
  * And example mapping compute node
  * (runs synchronously on the host)
  */
-class my_mapping_node : public pipe_compute_node {
+class my_mapping_node : public pipe_compute_node<
+    std::size_t, std::size_t, int, int
+> {
 
     bool is_ready_for_next_chunk() override {
         return this->input_port.contains_chunk();

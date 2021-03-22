@@ -5,7 +5,7 @@ Include(FetchContent)
 project(Noarr VERSION 0.1)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # download testing library Catch2
@@ -17,6 +17,8 @@ FetchContent_MakeAvailable(Catch2)
 
 # setup the test runner executable
 file(GLOB tests_source_files CONFIGURE_DEPENDS
+    "tests/*_test.hpp"
+    "tests/*_test.cpp"
     "tests/**/*_test.hpp"
     "tests/**/*_test.cpp"
 )
