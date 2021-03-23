@@ -22,6 +22,8 @@ public:
     /**
      * Starts the worker on a next chunk
      * (override this, and call base)
+     * 
+     * TODO: replace this with promise API?
      */
     virtual void start_next_chunk_processing() {
         chunk_processing_finished = false;
