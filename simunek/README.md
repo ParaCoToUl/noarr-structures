@@ -35,7 +35,6 @@
 - Code size
 - Speed
 - Supported layouts
-- **Poster?**
 
 ### After effects
 - Add fancy formating to this document
