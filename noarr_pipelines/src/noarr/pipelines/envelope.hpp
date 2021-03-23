@@ -105,35 +105,24 @@ public:
 
 /**
  * Pipe envelope has one input port and one output port
+ * with data of the same type
  */
-template<
-    typename InputStructure,
-    typename OutputStructure,
-    typename InputBufferItem = void,
-    typename OutputBufferItem = void
->
+template<typename Structure, typename BufferItem = void>
 class pipe_envelope : public chunk_stream_processor {
 public:
     /**
      * Returns the input port for for this pipeline envelope
      */
-    virtual envelope::port<InputStructure, InputBufferItem> get_input_port() = 0;
+    virtual envelope::port<Structure, BufferItem> get_input_port() = 0;
 
     /**
      * Returns the output port for for this pipeline envelope
      */
-    virtual envelope::port<OutputStructure, OutputBufferItem> get_output_port() = 0;
+    virtual envelope::port<Structure, BufferItem> get_output_port() = 0;
 };
 
-template<
-    typename InputStructure,
-    typename OutputStructure,
-    typename InputBufferItem = void,
-    typename OutputBufferItem = void
->
-class move_h2d_envelope : public pipe_envelope<
-    InputStructure, OutputStructure, InputBufferItem, OutputBufferItem
-> {
+template<typename Structure, typename BufferItem = void>
+class move_h2d_envelope : public pipe_envelope<Structure, BufferItem> {
 public:
     /*
         Envelope for passing data from host to device
@@ -143,8 +132,8 @@ public:
         //
     }
 
-    envelope::port<InputStructure, InputBufferItem> get_input_port() override { }
-    envelope::port<OutputStructure, OutputBufferItem> get_output_port() override { }
+    envelope::port<Structure, BufferItem> get_input_port() override { }
+    envelope::port<Structure, BufferItem> get_output_port() override { }
 
     bool is_ready_for_next_chunk() override {
         return true;

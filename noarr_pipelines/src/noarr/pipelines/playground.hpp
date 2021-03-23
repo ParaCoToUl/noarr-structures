@@ -44,7 +44,8 @@ class my_mapping_node : public pipe_compute_node<
 > {
 
     bool is_ready_for_next_chunk() override {
-        return this->input_port.contains_chunk();
+        return this->input_port.contains_chunk()
+            && !this->output_port.contains_chunk();
     }
 
     void start_next_chunk_processing() override {
@@ -119,6 +120,24 @@ public:
     }
 };
 
+// TOHLE CHCE UŽIVATEL - TOHLE JE LAMBDA
+class my_node : compute_node {
+    auto lmbd = [](
+        link<std::size_t, int, input> input,
+        link<std::size_t, int, input> input2,
+        link<std::size_t, float, output> output
+    ) {
+        int* input_buffer = input->get_buffer();
+        int* input_buffer2 = input2->get_buffer();
+        float* output_buffer = output->get_buffer();
+
+        std::size_t items_count_1 = input->get_structure();
+
+        for (std::size_t i = 0; i < items_count_1; i++)
+            output_buffer[i] = input_buffer[i] * 2;
+    };
+}
+
 void my_pipeline_running_function() {
     // prepare data that will go through the pipeline
     std::vector<int> items {
@@ -128,10 +147,12 @@ void my_pipeline_running_function() {
     // build the pipeline
     auto prod = my_producing_node(&items);
 
-    auto env = move_h2d_envelope<std::size_t, std::size_t, int, int>();
+    auto env = move_h2d_envelope<std::size_t, int>();
     prod.set_output_port(env.get_input_port());
+    prod.attach_envelope(&env, envelope::WRITE_ATTACHMENT);
 
     auto print = my_printing_node();
+    print.attach_envelope(&env, envelope::READ_ATTACHMENT);
     print.set_input_port(env.get_output_port());
 
     // run the pipeline to completion
@@ -145,7 +166,57 @@ void my_pipeline_running_function() {
 
         if (print.is_ready_for_next_chunk())
             print.start_next_chunk_processing();
+
+        // sleep_on_some_lock()
     }
+
+    // print the result
+    // print.log;
+}
+
+void my_better_pipeline_building_approach() {
+    // prepare data that will go through the pipeline
+    std::vector<int> items {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    };
+
+    // build the pipeline (manual)
+    auto prod = my_producing_node(&items);
+
+    auto env = move_h2d_envelope<std::size_t, int>();
+    prod.set_output_port(env.get_input_port());
+
+    auto print = my_printing_node();
+    print.set_input_port(env.get_output_port());
+
+    // build the pipeline
+    /*linear_pipeline pip =*/ linear_pipeline::builder()
+        .foo<my_producing_node>();
+        //.start_node<my_producing_node, std::size_t, int>(&items)
+        // .start_node_new(
+        //     static_cast<std::unique_ptr<producer_compute_node<std::size_t, int>>>(
+        //         std::make_unique<my_producing_node>(&items)
+        //     )
+        // )
+        //.start_node_existing(&prod)
+        //.envelope_existing(&env);
+
+    auto pipeline = linear_pipeline::builder()
+        .start_node_existing(&prod)
+        .follows(&env) // secondary API, but pass only a poitner and don't start owning!
+        .ends_with(&print);
+
+    // Primary API:
+    auto pipeline = linear_pipeline::builder()
+        .start_node<my_producing_node>(&items)
+        .envelope<move_h2d_envelope<std::size_t, int>>()
+        .node<>
+        .end_node<my_printing_node>();
+
+    //std::make_unique<my_producing_node>(&items);
+
+    // run the pipeline to completion
+    pipeline.run();
 
     // print the result
     // print.log;
