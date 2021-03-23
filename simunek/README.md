@@ -28,9 +28,8 @@
 ### Features / Timeline
 - noarr - high performance indexing structure?
 - Blobs
-- Data streaming/uploads
 - Data serialization, lifting
-- IN PROGRESS
+- Data streaming/uploads: pipelines - envelopes, CPU/GPU nodes, links
 
 ### k-means™ powered by noarr™
 - Code size
