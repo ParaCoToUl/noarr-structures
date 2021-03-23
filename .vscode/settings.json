@@ -72,5 +72,8 @@
         "streambuf": "cpp",
         "typeinfo": "cpp"
     },
-    "c-cpp-flylint.clang.standard": ["c++14"]
+    "c-cpp-flylint.clang.standard": [
+        "c++14"
+    ],
+    "cmake.configureOnOpen": false
 }

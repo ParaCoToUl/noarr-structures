@@ -6,6 +6,7 @@
 
 ## VS files
 .vs/
+.vscode/
 x64/
 x86/
 
