@@ -260,6 +260,9 @@ void my_better_pipeline_building_approach() {
     aby se např. nepřesovaly na hosta, není-li to třeba. Čili compute node
     se může spustit, když všechny jeho linky jsou synchronizované, ne až když
     celá envelopa je synchronizovaná.
+    Ještě note: nechci jen vlastní flagy, ale obecně libovolná metadata. Někdy
+    může mít compute node dva vstupy a chci aby byly oba ze stejného chunku
+    (e.g. v H.265 mám pipeline takovou strukturu)
 
 
     Compute node
@@ -286,3 +289,95 @@ void my_better_pipeline_building_approach() {
     paralelizovatelnost (kernel jde paralelizovat třeba s cudaCopy nebo cpu
     výpočtem). Touhle cestou bych se nepouštěl.
  */
+
+void lambda_based_envelope_linking_with_scheduler() {
+    /*
+        Scenario:
+        For each chunk:
+            Items get loaded into an envelope `frame_envelope`.
+            Then a mapping operation takes place (*2)
+            Then a reduction operation takes place (sum) and outputs the
+                result into an `aggregation_envelope`
+            Then the result is printed.
+     */
+
+    // input items
+    std::vector<int> items {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 // ...
+    };
+
+    // create the pipeline
+    auto frame_envelope = envelope<std::size_t, int>();
+    bool frame_envelope_was_mapped = false;
+    auto aggregation_envelope = envelope<void, int>();
+
+    auto producer = lambda_compute_node()
+        .start_when([&](compute_node* node) {
+            return items.size() > 0 && !frame_envelope.contains_data;
+        })
+        .prepare_envelopes([&](compute_node* node) {
+            frame_envelope.prepare_buffer(
+                envelope::MODE_WRITE, envelope::RESIDENCE_HOST
+            );
+            // NOTE: (only adds jobs onto some queue and then processes async)
+        })
+        .computation([&](compute_node* node) {
+            // add three more items to the frame buffer
+            std::size_t items_to_produce = std::max(3UL, items.size());
+            frame_envelope.structure = items_to_produce;
+            int* frame = frame_envelope.buffer; // NOTE: set by preparation
+            for (int i = 0; i < items_to_produce; i++) {
+                frame[i] = *items.end();
+                items.pop_back();
+            }
+
+            node->computation_done();
+        })
+        .finalization([&](compute_node* node) {
+            // runs on the scheduler thread again,
+            // after the callback is called (->computation_done())
+            frame_envelope.contains_data = true;
+        });
+
+    auto mapper = lambda_compute_node()
+        .start_when([&](compute_node* node) {
+            return frame_envelope.contains_data && !frame_envelope_was_mapped;
+        })
+        .prepare_envelopes([&](compute_node* node) {
+            frame_envelope.prepare_buffer(
+                envelope::MODE_READ_WRITE, envelope::RESIDENCE_DEVICE
+            );
+            // NOTE: (only adds jobs onto some queue and then processes async)
+        })
+        .computation([&](compute_node* node) {
+            std::size_t items_to_map = frame_envelope.structure;
+            int* frame = frame_envelope.buffer; // NOTE: set by preparation
+            // for (int i = 0; i < items_to_map; i++) {
+            //     frame[i] *= 2;
+            // }
+            run_mapping_kernel<<<?,?>>>(items_to_map, frame);
+            cudaSynchronize();
+
+            frame_envelope_was_mapped = true;
+            node->computation_done();
+        })
+        .finalization([&](compute_node* node) {
+            frame_envelope_was_mapped = true;
+        });
+
+    // TODO: reducer
+
+    // TODO: printer
+    
+    // create scheduler
+    auto s = scheduler();
+    s.add_envelope(frame_envelope);
+    s.add_envelope(aggregation_envelope);
+    s.add_node(producer);
+    s.add_node(mapper);
+    s.add_node(reducer);
+    s.add_node(printer);
+
+    // run to completion
+    s.run();
+}
