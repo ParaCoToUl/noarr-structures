@@ -221,3 +221,68 @@ void my_better_pipeline_building_approach() {
     // print the result
     // print.log;
 }
+
+
+///////////////////
+// Rewrite 29.3. //
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+    Envelope
+    --------
+
+    Envelope logicky představuje jeden buffer, do kterého mají přístup
+    compute nody. Jeden takový přístup se nazývá link. Link má následující
+    vlastnosti:
+        - accessMode: R, W, RW
+        - residence: host, device
+    V ideálním světě je envelope "nějaký buffer" a čtení/zápis z libovolného
+    linku edituje jeho obsah. V praxi musíme řešit pohyb dat nebo swapování
+    bufferů, proto je potřeba zavést vlastnosti linků a nechávat envelope na
+    základě techto vlastností data distribuovat. Můžeme si to představit tak,
+    v každém linku je jedna kopie dat a veškeré kopie v envelope se musí
+    udržovat synchronizované. K desynchronizaci může dojít, pokud nějaký
+    link typu W nebo RW sáhne na data (touch). V takový okamžik mají najednou
+    všechny ostatní linky zastaralá data a je třeba provést synchronizaci.
+    Odsud má každý link oepraci `touch` a každá envelope operaci `synchronize`.
+        NOTE: Výhoda R linků je, že nezpůsobují desynchronizaci.
+    ~~~~~~~~~~~ Odsud je to vymyšlené jen napůl:
+    Ještě je třeba spolu s každým bufferem svázat nějaká další data:
+        - hodnota: structure
+        - příznaky: has EOS, has chunk, vlastní (62 dalších)
+    Structure popisuje strukturu dat v bufferu. EOS je signál, který
+    propaguje skrz pipeline informaci o konci výpočtu. Has chunk je příznak,
+    který značí, zda buffer obsahuje zajímavá data, nebo je prázdný.
+    Příznaky nespouští operaci `touch`, jelikož jsou uložené jednou,
+    pro celou envelope a tedy mohou být nastavovány i linky typu R.
+    ~~~~~~~~~~~ Ještě optimalizace:
+    Operace `synchronize` musí vědět, do jakých linků chceme data dostat,
+    aby se např. nepřesovaly na hosta, není-li to třeba. Čili compute node
+    se může spustit, když všechny jeho linky jsou synchronizované, ne až když
+    celá envelopa je synchronizovaná.
+
+
+    Compute node
+    ------------
+
+    Compute node je cokoliv, co provádí výpočet, a pro ten to vyžaduje odkazy
+    na envelopy. Když chci compute node spustit, tak vím jaké má R a RW linky
+    a musím tedy zajistit, aby se příslušné envelopy synchronizovaly, jinak
+    uzel nemůžu spustit.
+
+
+    Scheduler
+    ---------
+
+    Scheduler strká do uzlů aby běžely. Každý uzel umí poznat, kdy může běžet.
+    Scheduler doběhne, když není žádný uzel, který by se nechal pošťouchnout.
+    Každý uzel vidí jen na připojené envelopy, čili komunikace o stavu výpočtu
+    musí probíhat skrz příznaky envelop. Někdy je třeba přidat vlastní přínaky,
+    pokud je jedna envelopa sdílená více uzly v režimu RW a uzly mají běžet
+    nějak sekvenčně po sobě.
+
+    NOTE: Nebude-li se stav výpočtu předávat přes příznaky envelop, tak musí
+    být scheduler chytřejší -> uživatel si ho musí napsat sám, ALE to ztěžuje
+    paralelizovatelnost (kernel jde paralelizovat třeba s cudaCopy nebo cpu
+    výpočtem). Touhle cestou bych se nepouštěl.
+ */
