@@ -1,9 +1,9 @@
 #include <iostream>
 
-#include "noarr_structs.hpp"
-#include "noarr_funcs.hpp"
-#include "noarr_io.hpp"
-#include "noarr_struct_traits.hpp"
+#include "noarr/structures/structs.hpp"
+#include "noarr/structures/funcs.hpp"
+#include "noarr/structures/io.hpp"
+#include "noarr/structures/struct_traits.hpp"
 
 using namespace noarr;
 

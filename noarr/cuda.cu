@@ -9,7 +9,7 @@
     #define SIZE_CONSTANT 20000
 #endif
 
-#include "noarr_funcs.hpp"
+#include "noarr/structures/funcs.hpp"
 
 using namespace noarr;
 
