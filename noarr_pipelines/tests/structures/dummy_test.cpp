@@ -100,7 +100,7 @@ TEST_CASE("Resize 3", "[Resizing]") {
 
 
 
-TEST_CASE("Resize 3", "[Resizing]") {
+TEST_CASE("Resize 4", "[Resizing]") {
 	volatile std::size_t l = 20;
 	array<'y', 20000, vector<'x', scalar<float>>> v2;
 	tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
