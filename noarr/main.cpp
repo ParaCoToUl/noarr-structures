@@ -8,7 +8,6 @@
 using namespace noarr;
 
 int main() {
-    std::array<float, 300> data;
 
     vector<'x', scalar<float>> v;
     array<'y', 20000, vector<'x', scalar<float>>> v2;
