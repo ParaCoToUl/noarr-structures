@@ -1,8 +1,8 @@
-#ifndef NOARR_IS_STRUCT_HPP
-#define NOARR_IS_STRUCT_HPP
+#ifndef NOARR_STRUCTURES_IS_STRUCT_HPP
+#define NOARR_STRUCTURES_IS_STRUCT_HPP
 
-#include "noarr_std_ext.hpp"
-#include "noarr_core.hpp"
+#include "std_ext.hpp"
+#include "core.hpp"
 
 // TODO: is_struct and is_structoid should be more strict
 
@@ -88,4 +88,4 @@ struct _is_struct<T, std::enable_if_t<is_structoid<T>::value && has_get_t<T>::va
 
 }
 
-#endif // NOARR_IS_STRUCT_HPP
+#endif // NOARR_STRUCTURES_IS_STRUCT_HPP

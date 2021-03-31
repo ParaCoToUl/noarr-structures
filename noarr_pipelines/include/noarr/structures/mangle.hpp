@@ -1,11 +1,11 @@
-#ifndef NOARR_MANGLE_HPP
-#define NOARR_MANGLE_HPP
+#ifndef NOARR_STRUCTURES_MANGLE_HPP
+#define NOARR_STRUCTURES_MANGLE_HPP
 
-#include "noarr_std_ext.hpp"
-#include "noarr_scalar.hpp"
-#include "noarr_mangle_value.hpp"
-#include "noarr_scalar_names.hpp"
-#include "noarr_struct_decls.hpp"
+#include "std_ext.hpp"
+#include "scalar.hpp"
+#include "mangle_value.hpp"
+#include "scalar_names.hpp"
+#include "struct_decls.hpp"
 
 namespace noarr {
 
@@ -82,4 +82,4 @@ struct _mangle<std::tuple<>, Pre, Post> {
 
 }
 
-#endif // NOARR_MANGLE_HPP
+#endif // NOARR_STRUCTURES_MANGLE_HPP

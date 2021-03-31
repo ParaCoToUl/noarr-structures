@@ -1,13 +1,13 @@
-#ifndef NOARR_STREAM_LIFTING_HPP
-#define NOARR_STREAM_LIFTING_HPP
+#ifndef NOARR_STRUCTURES_STREAM_LIFTING_HPP
+#define NOARR_STRUCTURES_STREAM_LIFTING_HPP
 
 #include <istream>
 #include <ostream>
 #include <type_traits>
 
-#include "noarr_std_ext.hpp"
-#include "noarr_is_struct.hpp"
-#include "noarr_struct_traits.hpp"
+#include "std_ext.hpp"
+#include "is_struct.hpp"
+#include "struct_traits.hpp"
 
 namespace noarr {
 
@@ -91,4 +91,4 @@ inline constexpr std::ostream &stream_unlift(std::ostream &out, scalar<Type>, ch
 
 }
 
-#endif // NOARR_STREAM_LIFTING_HPP
+#endif // NOARR_STRUCTURES_STREAM_LIFTING_HPP

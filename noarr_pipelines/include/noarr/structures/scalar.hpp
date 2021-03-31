@@ -1,9 +1,9 @@
-#ifndef NOARR_SCALAR_HPP
-#define NOARR_SCALAR_HPP
+#ifndef NOARR_STRUCTURES_SCALAR_HPP
+#define NOARR_STRUCTURES_SCALAR_HPP
 
-#include "noarr_core.hpp"
-#include "noarr_struct_decls.hpp"
-#include "noarr_contain.hpp"
+#include "core.hpp"
+#include "struct_decls.hpp"
+#include "contain.hpp"
 
 namespace noarr {
 
@@ -48,4 +48,4 @@ struct scalar {
 
 }
 
-#endif // NOARR_SCALAR_HPP
+#endif // NOARR_STRUCTURES_SCALAR_HPP

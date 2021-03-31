@@ -1,5 +1,5 @@
-#ifndef NOARR_WRAPPER_HPP
-#define NOARR_WRAPPER_HPP
+#ifndef NOARR_STRUCTURES_WRAPPER_HPP
+#define NOARR_STRUCTURES_WRAPPER_HPP
 
 namespace noarr {
 
@@ -16,4 +16,4 @@ inline constexpr auto wrap(Structure s) {
 
 }
 
-#endif // NOARR_WRAPPER_HPP
+#endif // NOARR_STRUCTURES_WRAPPER_HPP

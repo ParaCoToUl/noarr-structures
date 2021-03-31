@@ -1,9 +1,9 @@
-#ifndef NOARR_STRUCT_DECLS_HPP
-#define NOARR_STRUCT_DECLS_HPP
+#ifndef NOARR_STRUCTURES_STRUCT_DECLS_HPP
+#define NOARR_STRUCTURES_STRUCT_DECLS_HPP
 
 #include <tuple>
 
-#include "noarr_std_ext.hpp"
+#include "std_ext.hpp"
 
 namespace noarr {
 
@@ -125,4 +125,4 @@ inline constexpr auto construct(T t, std::tuple<TS...> ts) {
 
 }
 
-#endif // NOARR_STRUCT_DECLS_HPP
+#endif // NOARR_STRUCTURES_STRUCT_DECLS_HPP

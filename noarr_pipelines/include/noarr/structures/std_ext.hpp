@@ -1,5 +1,5 @@
-#ifndef NOARR_STD_EXT_HPP
-#define NOARR_STD_EXT_HPP
+#ifndef NOARR_STRUCTURES_STD_EXT_HPP
+#define NOARR_STRUCTURES_STD_EXT_HPP
 
 #include <cstddef>
 #include <type_traits>
@@ -137,4 +137,4 @@ struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
 
 } // namespace noarr
 
-#endif // NOARR_STD_EXT_HPP
+#endif // NOARR_STRUCTURES_STD_EXT_HPP

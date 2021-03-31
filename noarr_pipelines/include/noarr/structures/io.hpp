@@ -1,10 +1,10 @@
-#ifndef NOARR_IO_HPP
-#define NOARR_IO_HPP
+#ifndef NOARR_STRUCTURES_IO_HPP
+#define NOARR_STRUCTURES_IO_HPP
 
 #include <ostream>
 
-#include "noarr_std_ext.hpp"
-#include "noarr_mangle.hpp"
+#include "std_ext.hpp"
+#include "mangle.hpp"
 
 namespace noarr {
 
@@ -26,4 +26,4 @@ inline constexpr std::ostream &print_struct(std::ostream &out, T) {
 
 }
 
-#endif // NOARR_IO_HPP
+#endif // NOARR_STRUCTURES_IO_HPP

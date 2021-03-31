@@ -1,9 +1,9 @@
-#ifndef NOARR_STRUCTS_HPP
-#define NOARR_STRUCTS_HPP
+#ifndef NOARR_STRUCTURES_STRUCTS_HPP
+#define NOARR_STRUCTURES_STRUCTS_HPP
 
-#include "noarr_struct_decls.hpp"
-#include "noarr_contain.hpp"
-#include "noarr_scalar.hpp"
+#include "struct_decls.hpp"
+#include "contain.hpp"
+#include "scalar.hpp"
 
 namespace noarr {
 
@@ -279,4 +279,4 @@ struct fixed_dim : private contain<T, std::size_t> {
 
 }
 
-#endif // NOARR_STRUCTS_HPP
+#endif // NOARR_STRUCTURES_STRUCTS_HPP

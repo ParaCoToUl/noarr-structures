@@ -1,8 +1,8 @@
-#ifndef NOARR_SCALAR_NAMES_HPP
-#define NOARR_SCALAR_NAMES_HPP
+#ifndef NOARR_STRUCTURES_SCALAR_NAMES_HPP
+#define NOARR_STRUCTURES_SCALAR_NAMES_HPP
 
-#include "noarr_std_ext.hpp"
-#include "noarr_mangle_value.hpp"
+#include "std_ext.hpp"
+#include "mangle_value.hpp"
 
 namespace noarr {
 
@@ -35,4 +35,4 @@ struct scalar_name<T, std::enable_if_t<std::is_floating_point<T>::value>> {
 
 }
 
-#endif // NOARR_SCALAR_NAMES_HPP
+#endif // NOARR_STRUCTURES_SCALAR_NAMES_HPP

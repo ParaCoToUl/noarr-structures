@@ -1,7 +1,7 @@
-#ifndef NOARR_MANGLE_VALUE_HPP
-#define NOARR_MANGLE_VALUE_HPP
+#ifndef NOARR_STRUCTURES_MANGLE_VALUE_HPP
+#define NOARR_STRUCTURES_MANGLE_VALUE_HPP
 
-#include "noarr_std_ext.hpp"
+#include "std_ext.hpp"
 
 namespace noarr {
 
@@ -34,4 +34,4 @@ struct _mangle_value<T, V, std::enable_if_t<std::is_integral<T>::value>> {
 
 }
 
-#endif // NOARR_MANGLE_VALUE_HPP
+#endif // NOARR_STRUCTURES_MANGLE_VALUE_HPP

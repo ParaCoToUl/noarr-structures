@@ -1,5 +1,5 @@
-#ifndef NOARR_CONTAIN_HPP
-#define NOARR_CONTAIN_HPP
+#ifndef NOARR_STRUCTURES_CONTAIN_HPP
+#define NOARR_STRUCTURES_CONTAIN_HPP
 
 #include <type_traits>
 
@@ -129,4 +129,4 @@ struct _contain<void> {};
 
 }
 
-#endif // NOARR_CONTAIN_HPP
+#endif // NOARR_STRUCTURES_CONTAIN_HPP

@@ -1,9 +1,9 @@
-#ifndef NOARR_FUNCS_HPP
-#define NOARR_FUNCS_HPP
+#ifndef NOARR_STRUCTURES_FUNCS_HPP
+#define NOARR_STRUCTURES_FUNCS_HPP
 
-#include "noarr_structs.hpp"
-#include "noarr_struct_traits.hpp"
-#include "noarr_core.hpp"
+#include "structs.hpp"
+#include "struct_traits.hpp"
+#include "core.hpp"
 
 // TODO: rename resize to set_length
 // TODO: rename fixs to fix
@@ -207,4 +207,4 @@ struct get_at : private contain<char*> {
 
 }
 
-#endif // NOARR_FUNCS_HPP
+#endif // NOARR_STRUCTURES_FUNCS_HPP

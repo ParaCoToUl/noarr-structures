@@ -1,11 +1,11 @@
-#ifndef NOARR_STRUCT_TRAITS_HPP
-#define NOARR_STRUCT_TRAITS_HPP
+#ifndef NOARR_STRUCTURES_STRUCT_TRAITS_HPP
+#define NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 
 #include <type_traits>
 
-#include "noarr_std_ext.hpp"
-#include "noarr_struct_decls.hpp"
-#include "noarr_scalar.hpp"
+#include "std_ext.hpp"
+#include "struct_decls.hpp"
+#include "scalar.hpp"
 
 namespace noarr {
 
@@ -90,4 +90,4 @@ struct _scalar_t<scalar<T>> {
 
 }
 
-#endif // NOARR_STRUCT_TRAITS_HPP
+#endif // NOARR_STRUCTURES_STRUCT_TRAITS_HPP

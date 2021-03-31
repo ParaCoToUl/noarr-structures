@@ -1,9 +1,9 @@
-#ifndef NOARR_CORE_HPP
-#define NOARR_CORE_HPP
+#ifndef NOARR_STRUCTURES_CORE_HPP
+#define NOARR_STRUCTURES_CORE_HPP
 
-#include "noarr_std_ext.hpp"
-#include "noarr_struct_decls.hpp"
-#include "noarr_is_struct.hpp"
+#include "std_ext.hpp"
+#include "struct_decls.hpp"
+#include "is_struct.hpp"
 
 // TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
 // TODO: add dim checking (+ for consume_dims(s))
@@ -208,4 +208,4 @@ inline constexpr decltype(auto) pipe(S s, FS... funcs) {
 
 }
 
-#endif // NOARR_CORE_HPP
+#endif // NOARR_STRUCTURES_CORE_HPP
