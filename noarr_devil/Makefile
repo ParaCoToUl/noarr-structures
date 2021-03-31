@@ -2,7 +2,7 @@ CXX       :=  g++
 STD       := -std=c++14
 OPTLEVEL  := 2
 CXXFLAGS  := -O$(OPTLEVEL) -Wall -Wextra -pedantic -Werror
-INCLUDES  := ../noarr_pipelines/include
+INCLUDES  := ../noarr/include
 NVCCFLAGS := -ccbin $(CXX) -O$(OPTLEVEL) $(STD) -arch=sm_50 --expt-relaxed-constexpr
 PROG      := a.out
 
