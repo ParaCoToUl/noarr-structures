@@ -23,7 +23,7 @@ file(GLOB tests_source_files CONFIGURE_DEPENDS
     "tests/**/*_test.cpp"
 )
 add_executable(test-runner tests/main_test.cpp ${tests_source_files})
-target_include_directories(test-runner PUBLIC src)
+target_include_directories(test-runner PUBLIC include)
 target_link_libraries(test-runner PRIVATE Catch2::Catch2)
 
 # setup CTest integration
@@ -32,6 +32,5 @@ file(
     "https://raw.githubusercontent.com/catchorg/Catch2/devel/extras/ParseAndAddCatchTests.cmake"
     "ParseAndAddCatchTests.cmake")
 enable_testing()
-cmake_policy(SET CMP0110 OLD)
 include("ParseAndAddCatchTests.cmake")
 ParseAndAddCatchTests(test-runner)
