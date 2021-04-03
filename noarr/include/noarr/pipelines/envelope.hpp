@@ -1,143 +1,49 @@
 #ifndef NOARR_PIPELINES_ENVELOPE_HPP
-#define NOARR_PIPELINES_ENVELOPE_HPP 1
+#define NOARR_PIPELINES_ENVELOPE_HPP
 
 #include <cstddef>
-#include "noarr/pipelines/chunk_stream_processor.hpp"
+#include "noarr/pipelines/link.hpp"
 
 namespace noarr {
 namespace pipelines {
 
 /**
- * Envelopes are responsible for moving data between buffers
- * 
- * NOTE: A general envelope is not a chunk stream processor, only some envelopes are.
+ * Envelope represents a logical buffer
  */
+template<typename Structure, typename BufferItem = void>
 class envelope {
-
-    // TODO: What do all envelopes have in common?
-    // Do they need a shared interface?
-    // ...
-    // probably yes - an allocator, memory management, etc...
+private:
+    std::vector<std::unique_ptr<link>> links;
+    std::size_t buffer_size;
 
 public:
-
-    /**
-     * Port is the thing that's given to a compute node for buffer resolution
-     */
-    template<typename Structure, typename BufferItem = void>
-    class port {
-    public:
-        // TODO: add reference to an envelope instance, implement this
-
-        /**
-         * Returns pointer to the buffer that holds the data
-         */
-        BufferItem* get_buffer() {
-            // TODO
-            return nullptr;
-        }
-
-        /**
-         * Returns structure of the data buffer
-         */
-        Structure get_structure() {
-            // TODO
-        }
-
-        /**
-         * Sets the structure of the data buffer
-         */
-        void set_structure(Structure structure) {
-            // TODO
-        }
-
-        /**
-         * Returns true if the port contains a valid chunk data,
-         * false if it doesn't contain anything useful (is empty)
-         */
-        bool contains_chunk() {
-            return false; // TODO: implement this
-        }
-
-        /**
-         * Returns true if the port contains the EOS flag
-         * (end of stream - it means no more chunks will ever be available)
-         */
-        bool contains_end_of_stream() {
-            return false; // TODO: implement this
-        }
-
-        /**
-         * Sets the contains_chunk flag
-         * 
-         * (to true when someone populates the buffer and to false
-         * when someone consumes the buffer)
-         */
-        void set_contains_chunk(bool value) {
-            // TODO: implement this
-        }
-
-        /**
-         * Sends the EOS flag into the envelope and the envelope
-         * has the ability to pass it further down the pipeline
-         */
-        void send_end_of_stream() {
-            // TODO: implement this
-        }
-    };
-};
-
-/**
- * Buffer envelope holds one buffer that might, for example,
- * be used exclusively by a single compute node.
- * (it does not support the chunk_stream_processor interface, obviously)
- */
-template<typename Structure, typename BufferItem = void>
-class buffer_envelope : public envelope {
-public:
-    /**
-     * Returns a port that provides access to the underlying buffer
-     */
-    envelope::port<Structure, BufferItem> get_port() {
-        // TODO: implement this
-    }
-};
-
-/**
- * Pipe envelope has one input port and one output port
- * with data of the same type
- */
-template<typename Structure, typename BufferItem = void>
-class pipe_envelope : public chunk_stream_processor {
-public:
-    /**
-     * Returns the input port for for this pipeline envelope
-     */
-    virtual envelope::port<Structure, BufferItem> get_input_port() = 0;
-
-    /**
-     * Returns the output port for for this pipeline envelope
-     */
-    virtual envelope::port<Structure, BufferItem> get_output_port() = 0;
-};
-
-template<typename Structure, typename BufferItem = void>
-class move_h2d_envelope : public pipe_envelope<Structure, BufferItem> {
-public:
-    /*
-        Envelope for passing data from host to device
-        (maybe could be implemented  by pipe_envelope with proper settings?)
-     */
-    move_h2d_envelope() {
-        //
+    envelope(std::size_t buffer_size) {
+        this->buffer_size = buffer_size;
     }
 
-    envelope::port<Structure, BufferItem> get_input_port() override { }
-    envelope::port<Structure, BufferItem> get_output_port() override { }
-
-    bool is_ready_for_next_chunk() override {
-        return true;
+    link* create_link() {
+        this->links.push_back(std::make_unique<link>());
     }
+
+    /**
+     * Called by the scheduler to advance data through the envelope
+     * @returns True if an asynchronous operation has been started
+     */
+    bool advance() {
+
+        // go over all the links and find those that could be made ready
+
+        // check these resulting links can be made ready in parallel
+
+        // start routines that turn these links to ready and return the future
+        
+        return false;
+    }
+
+    void can_be_made_ready(link* l) {
+
+    }
+
 };
 
 } // pipelines namespace

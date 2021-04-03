@@ -1,15 +1,21 @@
-# Noarr (pipelines)
+# Noarr
 
 This folder contains the the Noarr library.
 
-> **NOTE:** It contains only the `pipelines` module, the `structures` module will be migrated in here later. (Why here and not the other way around? Because we want to migrate to CMake due to platform independence.)
-
 To build the project on linux:
 
-    cmake --build .
+```sh
+# needs to be run to generate the build files
+cmake .
+
+# builds the project from the build files
+cmake --build .
+```
 
 To run tests on linux:
 
-    ctest
+```sh
+./test-runner
+```
 
-To build on windows, run CMake and dump created files into a `/out` folder as it's already added to the `.gitignore` file. Then use visual studio.
+To build and test on windows, run CMake the same way from cygwin or gitbash.

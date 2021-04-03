@@ -27,10 +27,13 @@ target_include_directories(test-runner PUBLIC include)
 target_link_libraries(test-runner PRIVATE Catch2::Catch2)
 
 # setup CTest integration
-file(
-    DOWNLOAD
-    "https://raw.githubusercontent.com/catchorg/Catch2/devel/extras/ParseAndAddCatchTests.cmake"
-    "ParseAndAddCatchTests.cmake")
-enable_testing()
-include("ParseAndAddCatchTests.cmake")
-ParseAndAddCatchTests(test-runner)
+# DISABLED: because 1. it spits out test name warnings, 2. nobody uses it anyways
+# would be used by the "ctest" command, but we use "./test-runner" instead
+#
+# file(
+#     DOWNLOAD
+#     "https://raw.githubusercontent.com/catchorg/Catch2/devel/extras/ParseAndAddCatchTests.cmake"
+#     "ParseAndAddCatchTests.cmake")
+# enable_testing()
+# include("ParseAndAddCatchTests.cmake")
+# ParseAndAddCatchTests(test-runner)
