@@ -54,10 +54,10 @@ struct _is_dynamic_dimension<T, void_t<decltype(std::declval<T>().offset(std::de
 };
 
 template<typename T>
-using is_static_dimension = std::enable_if_t<_has_static_offset<T, 0>::value, typename _is_static_dimension<T>::type>;
+using is_static_dimension = std::conditional_t<_has_static_offset<T, 0>::value, typename _is_static_dimension<T>::type, std::false_type>;
 
 template<typename T>
-using is_dynamic_dimension = std::enable_if_t<_has_dynamic_offset<T>::value, typename _is_dynamic_dimension<T>::type>;
+using is_dynamic_dimension = std::conditional_t<_has_dynamic_offset<T>::value, typename _is_dynamic_dimension<T>::type, std::false_type>;
 
 template<typename T, typename = void>
 struct _is_point;
@@ -79,8 +79,8 @@ template<typename T>
 using is_cube = typename _is_cube<remove_cvref<T>>::type;
 
 template<typename T>
-struct _is_cube<T, std::enable_if_t<!std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value>> {
-    using type = std::conditional_t<is_dynamic_dimension<T>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value, std::true_type, std::false_type>;
+struct _is_cube<T, std::enable_if_t<!std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && is_dynamic_dimension<T>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value>> {
+    using type = std::true_type;
 };
 
 template<typename T>
