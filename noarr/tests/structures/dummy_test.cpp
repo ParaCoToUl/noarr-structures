@@ -2,6 +2,7 @@
 //#include "noarr/structures.hpp"
 
 #include <iostream>
+#include <array>
 
 #include "noarr/structures/structs.hpp"
 #include "noarr/structures/funcs.hpp"
