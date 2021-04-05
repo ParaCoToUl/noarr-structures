@@ -1,4 +1,4 @@
-name: WinTests
+name: Noarr srtuctures test Win
 
 on: [push]
 
