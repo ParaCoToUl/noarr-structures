@@ -45,9 +45,6 @@ struct _has_get_t2 {
 };
 
 template<typename T, typename = void>
-struct _has_offset;
-
-template<typename T, typename = void>
 struct _has_size;
 
 template<typename T>
