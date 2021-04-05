@@ -1,4 +1,4 @@
-name: CMake
+name: WinTests
 
 on: [push]
 
