@@ -1,3 +1,4 @@
+![CI status](https://github.com/jiriklepl/SWP-PLAYGROUND/workflows/Noarr%20srtuctures%20test/badge.svg)
 ![CI status](https://github.com/jiriklepl/SWP-PLAYGROUND/workflows/WinTests/badge.svg)
 
 # SWP-PLAYGROUND
