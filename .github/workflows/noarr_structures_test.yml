@@ -3,7 +3,7 @@ name: Noarr srtuctures test
 on: [push]
 
 paths:
-- 'noarr/**
+- 'noarr/**'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
