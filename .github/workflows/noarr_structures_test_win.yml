@@ -1,11 +1,9 @@
 name: Noarr srtuctures test Win
 
-on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'noarr'
+on: [push]
+
+paths:
+- 'noarr/**
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
