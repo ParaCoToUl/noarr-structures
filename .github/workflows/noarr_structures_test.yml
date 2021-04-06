@@ -2,6 +2,8 @@ name: Noarr srtuctures test
 
 on:
   push:
+    branches:
+      - master
     paths:
       - 'noarr/**'
 
