@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - !'noarr'
+    paths:
+      - 'noarr'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
