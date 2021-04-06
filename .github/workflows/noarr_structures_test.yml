@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - 'noarr'
+      - noarr
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
