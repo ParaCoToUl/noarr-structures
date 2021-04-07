@@ -13,19 +13,18 @@ using namespace noarr;
 
 TEST_CASE("Image", "[image]") {
 
-	array<'x', 1920, array<'y', 1080, array<'z', 4, scalar<float>>>> image;
-
-	tuple<scalar<'r', float>, scalar<'g', float>, scalar<'b', float>, scalar<'a', float>> pixel;
+	array<'x', 1920, array<'y', 1080, tuple<'p', scalar<float>, scalar<float>, scalar<float>, scalar<float>>>> image;
+	array<'x', 1920, array<'y', 1080, array<'z', 4, scalar<float>>>> grayscale;
 
 	SECTION("check is_cube") {
-		REQUIRE(is_cube<decltype(image)>::value);
+		REQUIRE(is_cube<decltype(grayscale)>::value);
+		REQUIRE(!is_cube<decltype(image)>::value);
 	}
 
-	/*SECTION("check is_pod") {
-		REQUIRE(std::is_pod<decltype(v)>::value);
-		REQUIRE(std::is_pod<decltype(v2)>::value);
-		REQUIRE(std::is_pod<decltype(t)>::value);
-	}*/
+	SECTION("check TODO") {
+		auto value_ref = image | fix<'x'>(0) | fix<'y'>(0) | fix<'p'>(2);
+		//float& value_ref = image | fix<'x'>(0) | fix<'y'>(0) | fix<'p'>(2) | offset();
+	}
 }
 
 
