@@ -1,10 +1,53 @@
-
-// #include <future>
+#include <string>
 #include <functional>
+
+/**
+ * Represents a device that has memory
+ * (host cpu or a gpu device)
+ */
+struct memory_device {
+    std::uint8_t device_index = -1;
+
+    memory_device() {
+        //
+    }
+
+    memory_device(std::uint8_t device_index) {
+        this->device_index = device_index;
+    }
+};
 
 class untyped_ship {
 public:
-    void* buffer;
+    /**
+     * Flag that determines whether the ship is considered full or empty
+     */
+    bool has_payload = false;
+
+    /**
+     * Pointer to the underlying buffer
+     */
+    void* untyped_buffer = nullptr;
+
+    /**
+     * Size of the data buffer in bytes
+     */
+    std::size_t size;
+
+    /**
+     * What device this ship lives on
+     */
+    memory_device device;
+
+    untyped_ship(
+        memory_device device,
+        void* existing_buffer,
+        std::size_t buffer_size
+    ) {
+        this->device = device;
+        this->untyped_buffer = existing_buffer;
+        this->size = buffer_size;
+    }
 
 protected:
     // virtual method needed for polymorphism..
@@ -15,7 +58,26 @@ protected:
 template<typename Structure, typename BufferItem = void>
 class ship : public untyped_ship {
 public:
-    // ...
+    /**
+     * The structure of data contained on the ship
+     */
+    Structure structure;
+
+    /**
+     * Pointer to the underlying data buffer
+     */
+    BufferItem* buffer;
+
+    /**
+     * Constructs a new ship from an existing buffer
+     */
+    ship(
+        memory_device device,
+        void* existing_buffer,
+        std::size_t buffer_size
+    ) : untyped_ship(device, existing_buffer, buffer_size) {
+        this->buffer = (BufferItem*) existing_buffer;
+    }
 
 protected:
     // virtual method needed for polymorphism..
@@ -67,17 +129,39 @@ public:
     /**
      * Returns a reference to the docked ship
      */
-    const untyped_ship& get_untyped_ship() {
+    untyped_ship& get_untyped_ship() {
         if (this->docked_ship == nullptr)
             throw std::runtime_error("Cannot get a ship when none is docked.");
 
         return *this->docked_ship;
     }
 
+    /**
+     * Perform a ship arrival to this dock
+     */
+    void arrive_ship(untyped_ship* ship) {
+        if (this->docked_ship != nullptr)
+            throw std::runtime_error("There's a ship already present.");
+
+        // TODO: overload the equality operator?
+        if (ship->device.device_index != this->device.device_index)
+            throw std::runtime_error("The ship belongs to a different device.");
+
+        this->docked_ship = ship;
+        this->ship_processed = false;
+    }
+
+    /**
+     * The device on which the dock exists
+     */
+    memory_device device;
+
+    untyped_ship* docked_ship = nullptr;
+    
+    bool ship_processed = false;
+
 private:
-    untyped_ship* docked_ship;
-    bool ship_processed;
-    untyped_dock* ship_target;
+    untyped_dock* ship_target = nullptr;
 };
 
 template<typename Structure, typename BufferItem = void>
@@ -87,8 +171,8 @@ public:
     /**
      * Returns a reference to the docked ship
      */
-    const ship<Structure, BufferItem>& get_ship() {
-        return dynamic_cast<const ship<Structure, BufferItem>&>(
+    ship<Structure, BufferItem>& get_ship() {
+        return dynamic_cast<ship<Structure, BufferItem>&>(
             this->get_untyped_ship()
         );
     }
@@ -185,7 +269,6 @@ private:
         // TODO ...
     }
 };
-
 
 /**
  * Scheduler manages the runtime of a pipeline
@@ -325,10 +408,25 @@ public:
     }
 
     void advance(std::function<void()> callback) override {
-        auto ship = this->output_dock.get_ship();
-        // TODO
-        
+        // get the ship to be filled up
+        auto& ship = this->output_dock.get_ship();
 
+        // compute the size of the next chunk
+        std::size_t items_to_take = std::min(
+            this->chunk_size,
+            this->data.length() - this->at_index
+        );
+
+        // move the chunk onto the ship
+        this->data.copy(ship.buffer, items_to_take, this->at_index);
+        ship.structure = items_to_take;
+        ship.has_payload = true;
+        this->output_dock.ship_processed = true;
+
+        // update our state
+        this->at_index += items_to_take;
+
+        // computation is done
         callback();
     }
 
