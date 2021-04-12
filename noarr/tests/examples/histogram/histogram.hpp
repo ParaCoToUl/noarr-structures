@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <iostream>
+#include <array>
 
 #include <noarr/structures/structs.hpp>
 #include <noarr/structures/funcs.hpp>
