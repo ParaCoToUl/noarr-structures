@@ -22,23 +22,24 @@ scheduler.run();
 ```
 
 
-# Ships, docks and harbours
+# Ships, docks and harbors
 
 The true low-level interface.
 
 Docks can have a ship. It also has a flag `processed and ready to leave`.
-Scheduler is responsible for ship movement between docks, because there
-may be two docks sending ships to one docks, but you cannot have two ships
-at one dock.
+~~Scheduler is responsible~~ Harbor during finalization is responsible for
+ship movement between docks, because there may be two docks sending ships
+to one dock, but you cannot have two ships arrive at one dock simultaneously.
 
 A dock doesn't care about the source of ships, but it knows where to send
-ships that have been handled. Harbours can take ships from docks inside or
-put ships from inside to docks.
+ships that have been handled. Harbors can take ships from docks inside or
+put ships from inside to docks. Ship inside a harbor is completely in its
+management, can be relocated to a different dock, deleted or new one created.
 
 ```cpp
 // en example with one producer and one consumer directly linked
 
-class my_producer : public harbour {
+class my_producer : public harbor {
 public:
     dock output_dock;
 
@@ -90,5 +91,16 @@ producer.output_dock.arrive_ship(my_ship);
 Envelopes abstract away ship creation and host-device data transfer.
 
 ```cpp
+// an example with one producer and one consumer on the same device
+// with one envelope in between
+
+// create the envelope
+auto env = envelope(SAME_DEVICE, BUFFERS_1, SOMETHING);
+
+// create compute nodes
+auto producer = my_producer(env);
+auto consumer = my_consumer(env);
+
+// setup scheduler
 // ...
 ```
