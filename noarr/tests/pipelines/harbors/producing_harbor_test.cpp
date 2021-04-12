@@ -3,11 +3,12 @@
 #include <cstddef>
 #include <iostream>
 
-// #include <noarr/pipelines/compute_node.hpp>
-// #include <noarr/pipelines/link.hpp>
-// #include <noarr/pipelines/envelope.hpp>
+#include <noarr/pipelines/memory_device.hpp>
+#include <noarr/pipelines/ship.hpp>
 
 #include "my_producing_harbor.hpp"
+
+using namespace noarr::pipelines;
 
 TEST_CASE("Producing harbor", "[harbor]") {
 
@@ -107,6 +108,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
     }
 }
 
+// TODO: create a new test file:
 // TEST_CASE("Two harbors can cycle a ship", "[harbor]") {
 //     // std::cout << "Hello world!" << std::endl;
 // }
