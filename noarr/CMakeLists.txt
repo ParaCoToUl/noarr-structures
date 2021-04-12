@@ -16,11 +16,9 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 # setup the test runner executable
-file(GLOB tests_source_files CONFIGURE_DEPENDS
+file(GLOB_RECURSE tests_source_files CONFIGURE_DEPENDS
     "tests/*_test.hpp"
     "tests/*_test.cpp"
-    "tests/**/*_test.hpp"
-    "tests/**/*_test.cpp"
 )
 add_executable(test-runner tests/main_test.cpp ${tests_source_files})
 target_include_directories(test-runner PUBLIC include)
