@@ -14,5 +14,5 @@ void compute_histogram(
     // say first 8 bytes tell the width and height, and then the image data comes
     // (or something else, figure out what's best)
 
-    histogram_data[0] = ((char*)image_data)[0];
+    histogram_data.at(0) = ((char*)image_data)[0];
 }

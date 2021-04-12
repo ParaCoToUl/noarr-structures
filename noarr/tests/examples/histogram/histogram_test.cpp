@@ -18,6 +18,6 @@ TEST_CASE("Histogram example", "[histogram-example]") {
         compute_histogram((void*)image_data, histogram_data);
 
         // assert that the result is ok
-        REQUIRE(histogram_data[0] == 42);
+        REQUIRE(histogram_data.at(0) == 42);
 	}
 }
