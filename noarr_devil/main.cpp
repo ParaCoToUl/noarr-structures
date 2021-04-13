@@ -16,7 +16,7 @@ int main() {
 
     tuple<'t', scalar<int>, scalar<int>> t3;
 
-    std::cout << "pipe(t3, sfixs<'t'>(std::integral_constant<std::size_t, 1>()), offset()): " << pipe(t3, sfixs<'t'>(std::integral_constant<std::size_t, 1>()), offset()) << std::endl;
+    std::cout << "pipe(t3, sfixs<'t'>(1_idx), offset()): " << pipe(t3, sfixs<'t'>(1_idx), offset()) << std::endl;
 
     static_assert(!is_cube<decltype(v)>::value, "t must not be a cube");
     static_assert(!is_cube<decltype(t)>::value, "t must not be a cube");
@@ -83,6 +83,10 @@ int main() {
     print_struct(std::cout, ts) << " ts;" << std::endl;
     std::cout << "sizeof(ts): " << sizeof(ts) << std::endl;
     std::cout << "ts.size(): " << ts.size() << std::endl;
+
+    std::cout << "ts | sfixs<'t', 'x'>(0_idx, 5) | offset(): " << (ts | sfixs<'t', 'x'>(0_idx, 5) | offset()) << std::endl;
+    std::cout << "ts | sfixs<'t', 'x'>(1_idx, 5) | offset(): " << (ts | sfixs<'t', 'x'>(1_idx, 5) | offset()) << std::endl;
+    std::cout << "ts | sfixs<'x', 't'>(5, 1_idx) | offset(): " << (ts | sfixs<'x', 't'>(5, 1_idx) | offset()) << std::endl;
 
     print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
     print_struct(std::cout, t2 | resize<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;
