@@ -96,7 +96,22 @@ private:
      * Sends ships that are ready to leave
      */
     void send_ships() {
-        // TODO ...
+        for (untyped_dock* d : this->registered_docks)
+        {
+            // TODO: move untyped_dock::state to dock_state
+            if (d->get_state() != untyped_dock::state::processed)
+                continue;
+
+            if (d->ship_target == nullptr)
+                continue;
+
+            if (d->ship_target->get_state() != untyped_dock::state::empty)
+                continue;
+
+            untyped_ship* s = d->docked_ship;
+            d->docked_ship = nullptr;
+            d->ship_target->arrive_ship(s);
+        }
     }
 };
 

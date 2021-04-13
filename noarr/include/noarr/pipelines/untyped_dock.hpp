@@ -9,6 +9,16 @@
 namespace noarr {
 namespace pipelines {
 
+/*
+    TODO: better API
+
+    - dock_ship(s)
+    - undock_ship() -> s
+
+    - dock type -> generic, loading, unloading
+        -> checks and updates ship's payload presence flag
+ */
+
 class untyped_dock {
 public:
 
@@ -84,7 +94,6 @@ public:
     
     bool ship_processed = false;
 
-private:
     untyped_dock* ship_target = nullptr;
 };
 
