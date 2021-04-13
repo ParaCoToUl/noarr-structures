@@ -9,20 +9,18 @@
 #include "noarr/structures/io.hpp"
 #include "noarr/structures/struct_traits.hpp"
 
-using namespace noarr;
-
 TEST_CASE("Sizes", "[sizes]") {
 	std::array<float, 300> data;
 
-	vector<'x', scalar<float>> v;
-	array<'y', 20000, vector<'x', scalar<float>>> v2;
-	tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
-	tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
+	noarr::vector<'x', noarr::scalar<float>> v;
+	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
+	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t2;
 
 	SECTION("check is_cube") {
-		REQUIRE(!is_cube<decltype(v)>::value);
-		REQUIRE(!is_cube<decltype(t)>::value);
-		REQUIRE(!is_cube<decltype(t2)>::value);
+		REQUIRE(!noarr::is_cube<decltype(v)>::value);
+		REQUIRE(!noarr::is_cube<decltype(t)>::value);
+		REQUIRE(!noarr::is_cube<decltype(t2)>::value);
 	}
 
 	SECTION("check is_pod") {
@@ -33,11 +31,11 @@ TEST_CASE("Sizes", "[sizes]") {
 }
 
 TEST_CASE("Resize", "[transform]") {
-	vector<'x', scalar<float>> v;
-	auto vs = v | resize<'x'>(10); // transform
+	noarr::vector<'x', noarr::scalar<float>> v;
+	auto vs = v | noarr::resize<'x'>(10); // transform
 
 	SECTION("check is_cube") {
-		REQUIRE(is_cube<decltype(vs)>::value);
+		REQUIRE(noarr::is_cube<decltype(vs)>::value);
 	}
 
 	SECTION("check is_pod") {
@@ -46,11 +44,11 @@ TEST_CASE("Resize", "[transform]") {
 }
 
 TEST_CASE("Resize 2", "[Resizing]") {
-	array<'y', 20000, vector<'x', scalar<float>>> v2;
-	auto vs2 = v2 | resize<'x'>(20); // transform
+	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	auto vs2 = v2 | noarr::resize<'x'>(20); // transform
 
 	SECTION("check is_cube") {
-		REQUIRE(is_cube<decltype(vs2)>::value);
+		REQUIRE(noarr::is_cube<decltype(vs2)>::value);
 	}
 
 	SECTION("check is_pod") {
@@ -69,24 +67,24 @@ TEST_CASE("Resize 2", "[Resizing]") {
 	typeid(vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name();*/
 
 	SECTION("check is_pod") {
-		REQUIRE(std::is_pod<decltype(vs2 | fixs<'y', 'x'>(5, 5))>::value);
-		REQUIRE(std::is_pod<decltype(fixs<'y', 'x'>(5, 5))>::value);
+		REQUIRE(std::is_pod<decltype(vs2 | noarr::fixs<'y', 'x'>(5, 5))>::value);
+		REQUIRE(std::is_pod<decltype(noarr::fixs<'y', 'x'>(5, 5))>::value);
 	}
 
 	//(vs2 | get_offset<'y'>(5));
 
 	SECTION("check point") {
-		REQUIRE(is_point<decltype(vs2 | fixs<'y', 'x'>(5, 5))>::value);
+		REQUIRE(noarr::is_point<decltype(vs2 | noarr::fixs<'y', 'x'>(5, 5))>::value);
 	}
 }
 
 TEST_CASE("Resize 3", "[Resizing]") {
-	array<'y', 20000, vector<'x', scalar<float>>> v2;
-	auto vs2 = v2 | resize<'x'>(20); // transform
-	auto vs3 = v2 | cresize<'x', 10>(); // transform
+	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	auto vs2 = v2 | noarr::resize<'x'>(20); // transform
+	auto vs3 = v2 | noarr::cresize<'x', 10>(); // transform
 
 	SECTION("check is_cube") {
-		REQUIRE(is_cube<decltype(vs3)>::value);
+		REQUIRE(noarr::is_cube<decltype(vs3)>::value);
 	}
 
 	SECTION("check is_pod") {
@@ -103,13 +101,13 @@ TEST_CASE("Resize 3", "[Resizing]") {
 
 TEST_CASE("Resize 4", "[Resizing]") {
 	volatile std::size_t l = 20;
-	array<'y', 20000, vector<'x', scalar<float>>> v2;
-	tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
+	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
 	// tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
-	auto vs4 = pipe(v2, cresize<'y', 10>(), resize<'x'>(l)); // transform
+	auto vs4 = pipe(v2, noarr::cresize<'y', 10>(), noarr::resize<'x'>(l)); // transform
 
 	SECTION("check is_cube") {
-		REQUIRE(is_cube<decltype(vs4)>::value);
+		REQUIRE(noarr::is_cube<decltype(vs4)>::value);
 	}
 
 	SECTION("check is_pod") {
@@ -122,10 +120,10 @@ TEST_CASE("Resize 4", "[Resizing]") {
 
 	sizeof(t);
 
-	auto ts = t | resize<'x'>(20);
+	auto ts = t | noarr::resize<'x'>(20);
 
 	SECTION("check is_cube") {
-		REQUIRE(!is_cube<decltype(ts)>::value);
+		REQUIRE(!noarr::is_cube<decltype(ts)>::value);
 	}
 
 	SECTION("check is_pod") {

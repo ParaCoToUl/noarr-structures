@@ -12,11 +12,11 @@ using namespace noarr::pipelines;
 
 TEST_CASE("Producing harbor", "[harbor]") {
 
-    // create a host ship
+    // create a ship
     char buffer[1024];
     auto s = ship<std::size_t, char>(memory_device(-1), buffer, 1024);
 
-    // create our producer harbor and put the ship in the dock
+    // create our producer harbor
     auto prod = my_producing_harbor("lorem ipsum", 3);
     
     SECTION("it cannot advance without a ship") {
