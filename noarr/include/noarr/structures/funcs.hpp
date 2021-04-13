@@ -9,6 +9,7 @@
 // TODO: rename fixs to fix ---> maybe even sfixs to fix as it is the most general one and supplements all others
 // TODO: rework get_at so it works as fix... | get_at on non-points <--/
 //                                                                 (this change would apply to this TODO as well)
+// TODO: it is not convenient to put std::integral_constants as arguments to sfixs() (create a good alias?)
 
 namespace noarr {
 
