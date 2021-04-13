@@ -75,6 +75,9 @@ struct _tuple_size_getter<T, 0> {
     static constexpr std::size_t size(T t) {
         return sum(std::get<IS>(t).size()...);
     }
+    static constexpr std::size_t size(T) {
+        return 0;
+    }
 };
 
 template<char Dim, typename T, typename... TS>
