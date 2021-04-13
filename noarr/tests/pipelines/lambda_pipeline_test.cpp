@@ -15,6 +15,25 @@
     This is a playground for developing a lambda-based API for pipeline building
  */
 
+/*
+    CUDA integration:
+
+    We can insert a callback function onto a cuda stream, which is exactly what we want:
+    https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#stream-callbacks
+
+    Example:
+    void advance(std::function<void()> callback) {
+        run_my_kernel<<<N, M, stream>>>(args...);
+        then_run_my_other_kernel<<<N, M, stream>>>(args...);
+        cudaMemcpyAsync(hostPtr, devPtrOut, size, cudaMemcpyDeviceToHost, stream);
+
+        // when everything finishes, call the callback
+        cudaLaunchHostFunc(stream, callback, nullptr);
+    }
+
+    Now we just need to create one cuda stream for each envelope / node
+ */
+
 using namespace noarr::pipelines;
 
 /*
