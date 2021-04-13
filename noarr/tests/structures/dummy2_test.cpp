@@ -9,8 +9,6 @@
 #include "noarr/structures/io.hpp"
 #include "noarr/structures/struct_traits.hpp"
 
-//using namespace noarr;
-
 TEST_CASE("Image", "[image]") {
 
 	//noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::tuple<'p', noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>>>> image;
