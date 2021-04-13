@@ -110,7 +110,7 @@ inline constexpr auto safe_get(T t) {
     return safe_get_<T, i>::get(t);
 }
 
-// TODO?: implement cfix and cfixs
+// TODO?: implement sfix and sfixs
 // TODO: support fix and fixs somehow on tuples
 // TODO: support the arrr::at functor
 
@@ -149,6 +149,69 @@ public:
 
 template<char Dim>
 struct fixs<Dim> : fix<Dim> { using fix<Dim>::fix; using fix<Dim>::operator(); };
+
+template<char Dim, std::size_t Idx>
+struct _sfix {
+    using idx_t = std::integral_constant<std::size_t, Idx>;
+    constexpr _sfix() = default;
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), sfixed_dim<Dim, T, Idx>(t)) {
+        return sfixed_dim<Dim, T, Idx>(t);
+    }
+};
+
+template<char Dim, std::size_t Idx>
+inline constexpr auto sfix(std::integral_constant<std::size_t, Idx>) {
+    return _sfix<Dim, Idx>();
+}
+
+template<typename... Tuples>
+struct _sfixs;
+
+template<char Dim, typename T, typename... Tuples>
+struct _sfixs<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<fix<Dim>, _sfixs<Tuples...>> {
+    using base = contain<fix<Dim>, _sfixs<Tuples...>>;
+    constexpr _sfixs() = default;
+    
+    template <typename... Ts>
+    constexpr _sfixs(T t, Ts... ts) : base(fix<Dim>(t), _sfixs<Tuples...>(ts...)) {}
+
+    template<typename S>
+    constexpr auto operator()(S s) const {
+        return pipe(s, base::template get<0>(), base::template get<1>());
+    }
+};
+
+template<char Dim, typename T>
+struct _sfixs<std::tuple<std::integral_constant<char, Dim>, T>> : fix<Dim> { using fix<Dim>::fix; using fix<Dim>::operator(); };
+
+
+template<char Dim, std::size_t Idx, typename... Tuples>
+struct _sfixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : contain<_sfix<Dim, Idx>, _sfixs<Tuples...>> {
+    using base = contain<fix<Dim>, _sfixs<Tuples...>>;
+    constexpr _sfixs() = default;
+    
+    template <typename... Ts>
+    constexpr _sfixs(Ts... ts) : base(_sfix<Dim, Idx>(), _sfixs<Tuples...>(ts...)) {}
+
+    template<typename T>
+    constexpr auto operator()(T t) const {
+        return pipe(t, base::template get<0>(), base::template get<1>());
+    }
+};
+
+template<char Dim, std::size_t Idx>
+struct _sfixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : _sfix<Dim, Idx> {
+    constexpr _sfixs() = default;
+    constexpr _sfixs(std::integral_constant<std::size_t, Idx>) : _sfix<Dim,Idx>() {}
+    using _sfix<Dim, Idx>::operator();
+};
+
+template<char... Dims, typename... Ts>
+inline constexpr auto sfixs(Ts... ts) {
+    return _sfixs<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
+}
 
 template<char Dim>
 struct get_offset {

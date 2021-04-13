@@ -14,6 +14,10 @@ int main() {
     tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
     tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
 
+    tuple<'t', scalar<int>, scalar<int>> t3;
+
+    std::cout << "pipe(t3, sfixs<'t'>(std::integral_constant<std::size_t, 1>()), offset()): " << pipe(t3, sfixs<'t'>(std::integral_constant<std::size_t, 1>()), offset()) << std::endl;
+
     static_assert(!is_cube<decltype(v)>::value, "t must not be a cube");
     static_assert(!is_cube<decltype(t)>::value, "t must not be a cube");
     static_assert(!is_cube<decltype(t2)>::value, "t2 must not be a cube");
@@ -41,8 +45,11 @@ int main() {
     std::cout << "vs2 | fix<'x'>(5):" << typeid(vs2 | fix<'x'>(5)).name() << std::endl;
     std::cout << "vs2 | fix<'x'>(5) | fix<'y'>(5):" << typeid(vs2 | fix<'x'>(5) | fix<'y'>(5)).name() << std::endl;
     std::cout << "vs2 | fixs<'x', 'y'>(5, 5):" << typeid(vs2 | fixs<'x', 'y'>(5, 5)).name() << std::endl;
+    std::cout << "vs2 | sfixs<'x', 'y'>(5, 5):" << typeid(vs2 | sfixs<'x', 'y'>(5, 5)).name() << std::endl;
     std::cout << "vs2 | fixs<'x', 'y'>(5, 5) | offset():" << (vs2 | fixs<'x', 'y'>(5, 5) | offset()) << std::endl;
     std::cout << "vs2 | fixs<'y', 'x'>(5, 5) | offset():" << (vs2 | fixs<'y', 'x'>(5, 5) | offset()) << std::endl;
+    std::cout << "vs2 | sfixs<'x', 'y'>(5, 5) | offset():" << (vs2 | sfixs<'x', 'y'>(5, 5) | offset()) << std::endl;
+    std::cout << "vs2 | sfixs<'y', 'x'>(5, 5) | offset():" << (vs2 | sfixs<'y', 'x'>(5, 5) | offset()) << std::endl;
 
     std::cout << "vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr): " << typeid(vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name() << std::endl;
 

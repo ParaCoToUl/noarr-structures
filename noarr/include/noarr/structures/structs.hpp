@@ -233,6 +233,64 @@ struct sized_vector : private contain<vector<Dim, T>, std::size_t> {
     constexpr std::size_t length() const { return base::template get<1>(); }
 };
 
+template<typename T, std::size_t Idx, typename... KS>
+struct _sfixed_dim_get_t;
+
+template<typename T, std::size_t Idx>
+struct _sfixed_dim_get_t<T, Idx> {
+    using type = typename T::template get_t<std::integral_constant<std::size_t, Idx>>;
+};
+
+template<typename T, std::size_t Idx>
+struct _sfixed_dim_get_t<T, Idx, void> {
+    using type = typename T::template get_t<std::integral_constant<std::size_t, Idx>>;
+};
+
+template<typename T, typename = void>
+struct _is_static_construct {
+    static constexpr bool value = false;
+};
+
+template<typename T>
+struct _is_static_construct<T, decltype(&T::construct, void())> {
+    static constexpr bool value = true;
+};
+
+/**
+ * @brief constant fixed dimension, carries a single sub_structure with a statically fixed index
+ * 
+ * @tparam T substructure type
+ */
+template<char Dim, typename T, std::size_t Idx>
+struct sfixed_dim : private T {
+    /* e.g. sub_structures of a sfixed tuple are the same as the substructures of the tuple
+     *(otherwise we couldn't have the right offset after an item with Idx2 < Idx in the tuple changes)
+     */
+    constexpr auto sub_structures() const { return static_cast<const T &>(*this).sub_structures(); }
+    using description = struct_description<
+        char_pack<'s', 'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
+        dims_impl<>,
+        dims_impl<Dim>,
+        type_param<T>,
+        value_param<std::size_t, Idx>>;
+
+    template<typename... KS>
+    using get_t = typename _sfixed_dim_get_t<T, Idx, KS...>::type;
+
+    constexpr sfixed_dim() = default;
+    constexpr sfixed_dim(T sub_structure) : T(sub_structure) {}
+    
+    template<typename T2, typename... T2s>
+    constexpr auto construct(T2 ss, T2s... sss) const {
+        return sfixed_dim<Dim, decltype(std::declval<T>().construct(ss, sss...)), Idx>(
+            static_cast<const T &>(*this).construct(ss, sss...));
+    }
+
+    constexpr std::size_t size() const { return static_cast<const T &>(*this).size(); }
+    constexpr std::size_t offset() const { return static_cast<const T &>(*this).template offset<Idx>(); }
+    constexpr std::size_t length() const { return 0; }
+};
+
 template<typename T, typename... KS>
 struct _fixed_dim_get_t;
 
@@ -268,8 +326,9 @@ struct fixed_dim : private contain<T, std::size_t> {
     constexpr fixed_dim(T sub_structure, std::size_t idx) : base(sub_structure, idx) {}
     template<typename T2>
     constexpr auto construct(T2 sub_structure) const {
-        return fixed_dim<Dim, decltype(std::declval<T>().construct(sub_structure))>{
-            base::template get<0>().construct(sub_structure), base::template get<1>()};
+        return fixed_dim<Dim, decltype(std::declval<T>().construct(sub_structure))>(
+            base::template get<0>().construct(sub_structure),
+            base::template get<1>());
     }
 
     constexpr std::size_t size() const { return base::template get<0>().size(); }

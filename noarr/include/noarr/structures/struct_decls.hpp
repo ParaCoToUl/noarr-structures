@@ -8,7 +8,7 @@
 namespace noarr {
 
 // TODO: add a way to get Params
-// TODO: split type_param into struct_param and scalar_param
+// TODO: split type_param into struct_param and scalar_param (or regular type param, idk)
 
 template<typename Name, typename Dims, typename ADims, typename... Params>
 struct struct_description {

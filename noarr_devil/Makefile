@@ -10,10 +10,10 @@ INCLUDES_OPTS = $(patsubst %,-I%,$(INCLUDES))
 
 .PHONY: check check-gcc check-clang check-icpx check-icpc check-nvcc1 check-nvcc2 clean all
 
-all: $(PROG)
+all: check $(PROG)
 
-$(PROG): cuda.cu
-	nvcc -o $@ $(NVCCFLAGS) $(INCLUDES_OPTS) $< 
+$(PROG): main.cpp
+	nvcc -o $@ $(NVCCFLAGS) $(INCLUDES_OPTS) $<
 
 check: check-gcc check-clang check-icpx check-icpc check-nvcc1 check-nvcc2
 	@echo "everything OK"
