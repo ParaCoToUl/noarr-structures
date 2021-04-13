@@ -187,11 +187,11 @@ struct _sfixs<std::tuple<std::integral_constant<char, Dim>, T>> : fix<Dim> { usi
 
 template<char Dim, std::size_t Idx, typename... Tuples>
 struct _sfixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : contain<_sfix<Dim, Idx>, _sfixs<Tuples...>> {
-    using base = contain<fix<Dim>, _sfixs<Tuples...>>;
+    using base = contain<_sfix<Dim, Idx>, _sfixs<Tuples...>>;
     constexpr _sfixs() = default;
     
     template <typename... Ts>
-    constexpr _sfixs(Ts... ts) : base(_sfix<Dim, Idx>(), _sfixs<Tuples...>(ts...)) {}
+    constexpr _sfixs(std::integral_constant<std::size_t, Idx>, Ts... ts) : base(_sfix<Dim, Idx>(), _sfixs<Tuples...>(ts...)) {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
@@ -209,6 +209,24 @@ struct _sfixs<std::tuple<std::integral_constant<char, Dim>, std::integral_consta
 template<char... Dims, typename... Ts>
 inline constexpr auto sfixs(Ts... ts) {
     return _sfixs<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
+}
+
+template<std::size_t Accum, char... Chars>
+struct _idx_translate;
+
+template<std::size_t Accum, char Char, char... Chars>
+struct _idx_translate<Accum, Char, Chars...> {
+    using type = typename _idx_translate<Accum * 10 + (std::size_t)(Char - '0'), Chars...>::type;
+};
+
+template<std::size_t Accum, char Char>
+struct _idx_translate<Accum, Char> {
+    using type = std::integral_constant<std::size_t, Accum * 10 + (std::size_t)(Char - '0')>;
+};
+
+template<char... Chars>
+inline constexpr typename _idx_translate<0, Chars...>::type operator""_idx() {
+    return {};
 }
 
 template<char Dim>
