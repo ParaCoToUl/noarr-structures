@@ -6,8 +6,9 @@
 #include "core.hpp"
 
 // TODO: rename resize to set_length
-// TODO: rename fixs to fix
-// TODO: rework get_at so it works as fix... | get_at on non-points
+// TODO: rename fixs to fix ---> maybe even sfixs to fix as it is the most general one and supplements all others
+// TODO: rework get_at so it works as fix... | get_at on non-points <--/
+//                                                                 (this change would apply to this TODO as well)
 
 namespace noarr {
 
@@ -109,10 +110,6 @@ template<std::size_t i, typename T>
 inline constexpr auto safe_get(T t) {
     return safe_get_<T, i>::get(t);
 }
-
-// TODO?: implement sfix and sfixs
-// TODO: support fix and fixs somehow on tuples
-// TODO: support the arrr::at functor
 
 template<char Dim>
 struct fix {
