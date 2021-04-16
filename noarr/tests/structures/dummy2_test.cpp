@@ -14,7 +14,7 @@ TEST_CASE("Image", "[image]") {
 	//noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::tuple<'p', noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>>>> image;
 
 	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::array<'p', 4, noarr::scalar<float>>>> grayscale;
-	std::vector<char> my_blob_buffer(grayscale | noarr::get_size{});
+	std::vector<char> my_blob_buffer(grayscale | noarr::get_size());
 	char* my_blob = (char*)my_blob_buffer.data();
 
 	SECTION("check is_cube") {
@@ -56,3 +56,29 @@ TEST_CASE("Image", "[image]") {
 		REQUIRE(std::is_pod<decltype(t)>::value);
 	}
 }*/
+
+TEST_CASE("Vector", "[resizing]")
+{
+	noarr::vector<'x', noarr::scalar<float>> v;
+	auto v2 = v | noarr::resize<'x'>(10); // transform
+
+	SECTION("size check 1") {
+		REQUIRE((v2 | noarr::get_size()) == 10);
+	}
+
+	auto v3 = v | noarr::resize<'x'>(20); // transform
+	auto v4 = v2 | noarr::resize<'x'>(30); // transform
+
+	SECTION("size check 2") {
+		REQUIRE((v2 | noarr::get_size()) == 10);
+		REQUIRE((v3 | noarr::get_size()) == 20);
+		REQUIRE((v4 | noarr::get_size()) == 30);
+	}
+
+	SECTION("check is_cube") {
+		REQUIRE(!noarr::is_cube<decltype(v)>::value);
+		REQUIRE(noarr::is_cube<decltype(v2)>::value);
+		REQUIRE(noarr::is_cube<decltype(v3)>::value);
+		REQUIRE(noarr::is_cube<decltype(v4)>::value);
+	}
+}
