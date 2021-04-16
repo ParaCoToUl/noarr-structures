@@ -57,6 +57,8 @@ TEST_CASE("Image", "[image]") {
 	}
 }*/
 
+
+
 TEST_CASE("Vector", "[resizing]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
@@ -80,5 +82,58 @@ TEST_CASE("Vector", "[resizing]")
 		REQUIRE(noarr::is_cube<decltype(v2)>::value);
 		REQUIRE(noarr::is_cube<decltype(v3)>::value);
 		REQUIRE(noarr::is_cube<decltype(v4)>::value);
+	}
+}
+
+
+
+TEST_CASE("Vector", "[is_trivial]")
+{
+	noarr::vector<'x', noarr::scalar<float>> v;
+	auto v2 = v | noarr::resize<'x'>(10); // transform
+
+	SECTION("is_trivial check 1") {
+		REQUIRE(std::is_trivial<decltype(v2)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	}
+
+	auto v3 = v | noarr::resize<'x'>(20); // transform
+	auto v4 = v2 | noarr::resize<'x'>(30); // transform
+
+	SECTION("is_trivial check 2") {
+		REQUIRE(std::is_trivial<decltype(v2)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+
+		REQUIRE(std::is_trivial<decltype(v3)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v3)>::value);
+
+		REQUIRE(std::is_trivial<decltype(v4)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
+	}
+}
+
+
+TEST_CASE("Array", "[is_trivial]")
+{
+	noarr::array<'x', 1920, noarr::scalar<float>> v;
+	auto v2 = v | noarr::resize<'x'>(10); // transform
+
+	SECTION("is_trivial check 1") {
+		REQUIRE(std::is_trivial<decltype(v2)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	}
+
+	auto v3 = v | noarr::resize<'x'>(20); // transform
+	auto v4 = v2 | noarr::resize<'x'>(30); // transform
+
+	SECTION("is_trivial check 2") {
+		REQUIRE(std::is_trivial<decltype(v2)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+
+		REQUIRE(std::is_trivial<decltype(v3)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v3)>::value);
+
+		REQUIRE(std::is_trivial<decltype(v4)>::value);
+		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
 	}
 }
