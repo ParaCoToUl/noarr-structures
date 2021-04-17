@@ -83,11 +83,21 @@ TEST_CASE("Vector", "[resizing]")
 		REQUIRE(noarr::is_cube<decltype(v3)>::value);
 		REQUIRE(noarr::is_cube<decltype(v4)>::value);
 	}
+
+	auto v5 = v4 | noarr::resize<'x'>(-10); // transform
+
+	SECTION("size check 2") {
+		REQUIRE((v2 | noarr::get_size()) == -10);
+	}
+
+	SECTION("check is_cube") {
+		REQUIRE(noarr::is_cube<decltype(v5)>::value);
+	}
 }
 
 
 
-TEST_CASE("Vector", "[is_trivial]")
+TEST_CASE("Vector2", "[is_trivial]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto v2 = v | noarr::resize<'x'>(10); // transform
@@ -137,3 +147,5 @@ TEST_CASE("Array", "[is_trivial]")
 		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
 	}
 }
+
+
