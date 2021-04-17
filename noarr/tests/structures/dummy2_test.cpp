@@ -22,6 +22,7 @@ TEST_CASE("Image", "[image]") {
 		//REQUIRE(!noarr::is_cube<decltype(image)>::value);
 	}
 
+	
 	SECTION("check TODO") {
 		//auto value_ref = image | fix<'x'>(0) | fix<'y'>(0) | fix<'p'>(2);
 		//std::declval
