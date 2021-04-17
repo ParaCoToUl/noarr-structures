@@ -77,7 +77,7 @@ TEST_CASE("Vector", "[resizing]")
 		REQUIRE((v4 | noarr::get_size()) == 30);
 	}
 
-	SECTION("check is_cube") {
+	SECTION("check is_cube 2") {
 		REQUIRE(!noarr::is_cube<decltype(v)>::value);
 		REQUIRE(noarr::is_cube<decltype(v2)>::value);
 		REQUIRE(noarr::is_cube<decltype(v3)>::value);
@@ -86,11 +86,11 @@ TEST_CASE("Vector", "[resizing]")
 
 	auto v5 = v4 | noarr::resize<'x'>(-10); // transform
 
-	SECTION("size check 2") {
-		REQUIRE((v2 | noarr::get_size()) == -10);
+	SECTION("size check 3") {
+		REQUIRE((v5 | noarr::get_size()) == -10);
 	}
 
-	SECTION("check is_cube") {
+	SECTION("check is_cube 3") {
 		REQUIRE(noarr::is_cube<decltype(v5)>::value);
 	}
 }
