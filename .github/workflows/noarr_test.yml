@@ -1,9 +1,9 @@
 name: Noarr test
 
-on:
-  push:
-    paths:
-    - 'noarr/**'
+on: [push]
+#  push:
+#    paths:
+#    - 'noarr/**'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -44,7 +44,7 @@ jobs:
       working-directory: ${{github.workspace}}/noarr/build
       shell: bash
       # Execute the build.  You can specify a specific target with "--target <NAME>"
-      run: cmake --build $GITHUB_WORKSPACE/noarr --config $BUILD_TYPE
+      run: cmake --build . --config $BUILD_TYPE
 
     - name: Test
       working-directory: ${{github.workspace}}/noarr/build
