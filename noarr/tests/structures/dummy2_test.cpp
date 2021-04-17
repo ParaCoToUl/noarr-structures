@@ -59,7 +59,6 @@ TEST_CASE("Image", "[image]") {
 }*/
 
 
-
 TEST_CASE("Vector", "[resizing]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
