@@ -10,7 +10,6 @@
 #include "noarr/structures/struct_traits.hpp"
 
 TEST_CASE("Image", "[image]") {
-
 	//noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::tuple<'p', noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>>>> image;
 
 	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::array<'p', 4, noarr::scalar<float>>>> grayscale;
