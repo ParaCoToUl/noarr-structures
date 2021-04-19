@@ -2,7 +2,7 @@
 #define NOARR_PIPELINES_DOCK_HPP
 
 #include <cstddef>
-#include "ship.hpp"
+#include "Envelope.hpp"
 #include "untyped_dock.hpp"
 
 namespace noarr {
@@ -13,11 +13,11 @@ class dock : public untyped_dock {
 public:
 
     /**
-     * Returns a reference to the docked ship
+     * Returns a reference to the attached envelope
      */
-    ship<Structure, BufferItem>& get_ship() {
-        return dynamic_cast<ship<Structure, BufferItem>&>(
-            this->get_untyped_ship()
+    Envelope<Structure, BufferItem>& get_envelope() {
+        return dynamic_cast<Envelope<Structure, BufferItem>&>(
+            this->get_untyped_envelope()
         );
     }
 };

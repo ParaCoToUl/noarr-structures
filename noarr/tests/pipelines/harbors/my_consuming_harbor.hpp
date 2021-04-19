@@ -28,12 +28,12 @@ public:
 
     void advance(std::function<void()> callback) override {
         // get the ship to be filled up
-        auto& ship = this->input_dock.get_ship();
+        auto& ship = this->input_dock.get_envelope();
 
         // move the chunk from ship into the accumulator
         this->received_string.append(ship.buffer, ship.structure);
         ship.has_payload = false;
-        this->input_dock.ship_processed = true;
+        this->input_dock.envelope_processed = true;
 
         // computation is done
         callback();

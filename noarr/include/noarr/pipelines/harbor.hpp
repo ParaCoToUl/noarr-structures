@@ -102,15 +102,15 @@ private:
             if (d->get_state() != untyped_dock::state::processed)
                 continue;
 
-            if (d->ship_target == nullptr)
+            if (d->envelope_target == nullptr)
                 continue;
 
-            if (d->ship_target->get_state() != untyped_dock::state::empty)
+            if (d->envelope_target->get_state() != untyped_dock::state::empty)
                 continue;
 
-            untyped_ship* s = d->docked_ship;
-            d->docked_ship = nullptr;
-            d->ship_target->arrive_ship(s);
+            UntypedEnvelope* s = d->attached_envelope;
+            d->attached_envelope = nullptr;
+            d->envelope_target->attach_envelope(s);
         }
     }
 };

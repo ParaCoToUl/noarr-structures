@@ -26,13 +26,13 @@ public:
         if (this->at_index >= this->data.length())
             return false;
         
-        // true, if we have an empty ship available
+        // true, if we have an empty envelope available
         return this->output_dock.get_state() == untyped_dock::state::arrived;
     }
 
     void advance(std::function<void()> callback) override {
-        // get the ship to be filled up
-        auto& ship = this->output_dock.get_ship();
+        // get the envelope to be filled up
+        auto& envelope = this->output_dock.get_envelope();
 
         // compute the size of the next chunk
         std::size_t items_to_take = std::min(
@@ -40,11 +40,11 @@ public:
             this->data.length() - this->at_index
         );
 
-        // move the chunk onto the ship
-        this->data.copy(ship.buffer, items_to_take, this->at_index);
-        ship.structure = items_to_take;
-        ship.has_payload = true;
-        this->output_dock.ship_processed = true;
+        // move the chunk onto the envelope
+        this->data.copy(envelope.buffer, items_to_take, this->at_index);
+        envelope.structure = items_to_take;
+        envelope.has_payload = true;
+        this->output_dock.envelope_processed = true;
 
         // update our state
         this->at_index += items_to_take;

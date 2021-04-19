@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include <noarr/pipelines/memory_device.hpp>
-#include <noarr/pipelines/ship.hpp>
+#include <noarr/pipelines/Envelope.hpp>
 #include <noarr/pipelines/scheduler.hpp>
 
 #include "harbors/my_producing_harbor.hpp"

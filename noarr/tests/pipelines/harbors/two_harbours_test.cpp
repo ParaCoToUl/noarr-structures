@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include <noarr/pipelines/memory_device.hpp>
-#include <noarr/pipelines/ship.hpp>
+#include <noarr/pipelines/Envelope.hpp>
 #include <noarr/pipelines/scheduler.hpp>
 
 #include "my_producing_harbor.hpp"
@@ -14,20 +14,20 @@ using namespace noarr::pipelines;
 
 TEST_CASE("Two harbors", "[harbor]") {
 
-    // create a ship
+    // create an envelope
     char buffer[1024];
-    auto s = ship<std::size_t, char>(memory_device(-1), buffer, 1024);
+    auto s = Envelope<std::size_t, char>(memory_device(-1), buffer, 1024);
 
     // create our harbors
     auto prod = my_producing_harbor("lorem ipsum", 3);
     auto cons = my_consuming_harbor();
 
     // link those harbors together
-    prod.output_dock.send_processed_ships_to(&cons.input_dock);
-    cons.input_dock.send_processed_ships_to(&prod.output_dock);
+    prod.output_dock.send_processed_envelopes_to(&cons.input_dock);
+    cons.input_dock.send_processed_envelopes_to(&prod.output_dock);
 
     // put the ship into the producer
-    prod.output_dock.arrive_ship(&s);
+    prod.output_dock.attach_envelope(&s);
 
     // setup a scheduler
     auto sched = scheduler();

@@ -1,5 +1,5 @@
-#ifndef NOARR_PIPELINES_UNTYPED_SHIP_HPP
-#define NOARR_PIPELINES_UNTYPED_SHIP_HPP
+#ifndef NOARR_PIPELINES_UNTYPED_ENVELOPE_HPP
+#define NOARR_PIPELINES_UNTYPED_ENVELOPE_HPP
 
 #include <cstddef>
 #include "memory_device.hpp"
@@ -7,10 +7,10 @@
 namespace noarr {
 namespace pipelines {
 
-class untyped_ship {
+class UntypedEnvelope {
 public:
     /**
-     * Flag that determines whether the ship is considered full or empty
+     * Flag that determines whether the envelope is considered full or empty
      */
     bool has_payload = false;
 
@@ -29,7 +29,7 @@ public:
      */
     memory_device device;
 
-    untyped_ship(
+    UntypedEnvelope(
         memory_device device,
         void* existing_buffer,
         std::size_t buffer_size

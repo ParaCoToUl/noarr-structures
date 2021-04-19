@@ -1,14 +1,14 @@
-#ifndef NOARR_PIPELINES_SHIP_HPP
-#define NOARR_PIPELINES_SHIP_HPP
+#ifndef NOARR_PIPELINES_ENVELOPE_HPP
+#define NOARR_PIPELINES_ENVELOPE_HPP
 
 #include <cstddef>
-#include "untyped_ship.hpp"
+#include "UntypedEnvelope.hpp"
 
 namespace noarr {
 namespace pipelines {
 
 template<typename Structure, typename BufferItem = void>
-class ship : public untyped_ship {
+class Envelope : public UntypedEnvelope {
 public:
     /**
      * The structure of data contained on the ship
@@ -23,11 +23,11 @@ public:
     /**
      * Constructs a new ship from an existing buffer
      */
-    ship(
+    Envelope(
         memory_device device,
         void* existing_buffer,
         std::size_t buffer_size
-    ) : untyped_ship(device, existing_buffer, buffer_size) {
+    ) : UntypedEnvelope(device, existing_buffer, buffer_size) {
         this->buffer = (BufferItem*) existing_buffer;
     }
 

@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include <noarr/pipelines/memory_device.hpp>
-#include <noarr/pipelines/ship.hpp>
+#include <noarr/pipelines/Envelope.hpp>
 
 #include "my_consuming_harbor.hpp"
 
@@ -12,9 +12,9 @@ using namespace noarr::pipelines;
 
 TEST_CASE("Consuming harbor", "[harbor]") {
 
-    // create a ship
+    // create an envelope
     char buffer[1024];
-    auto s = ship<std::size_t, char>(memory_device(-1), buffer, 1024);
+    auto env = Envelope<std::size_t, char>(memory_device(-1), buffer, 1024);
 
     // create our consumer harbor
     auto cons = my_consuming_harbor();
@@ -24,18 +24,18 @@ TEST_CASE("Consuming harbor", "[harbor]") {
     }
 
     SECTION("it can advance with a ship") {
-        cons.input_dock.arrive_ship(&s);
+        cons.input_dock.attach_envelope(&env);
         REQUIRE(cons.can_advance());
     }
 
     SECTION("it can consume a chunk") {
-        s.has_payload = true;
-        s.structure = 3;
-        s.buffer[0] = 'l';
-        s.buffer[1] = 'o';
-        s.buffer[2] = 'r';
+        env.has_payload = true;
+        env.structure = 3;
+        env.buffer[0] = 'l';
+        env.buffer[1] = 'o';
+        env.buffer[2] = 'r';
         
-        cons.input_dock.arrive_ship(&s);
+        cons.input_dock.attach_envelope(&env);
         
         cons.scheduler_start();
         cons.scheduler_update([](bool data_advanced){
@@ -43,7 +43,7 @@ TEST_CASE("Consuming harbor", "[harbor]") {
         });
         cons.scheduler_post_update(true);
 
-        REQUIRE(!s.has_payload);
+        REQUIRE(!env.has_payload);
         REQUIRE(cons.received_string == "lor");
     }
 }

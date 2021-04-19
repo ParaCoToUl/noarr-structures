@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <exception>
 #include "memory_device.hpp"
-#include "untyped_ship.hpp"
+#include "UntypedEnvelope.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -12,11 +12,11 @@ namespace pipelines {
 /*
     TODO: better API
 
-    - dock_ship(s)
-    - undock_ship() -> s
+    - attach_envelope(env)
+    - detach_envelope() -> env
 
-    - dock type -> generic, loading, unloading
-        -> checks and updates ship's payload presence flag
+    - attachment type -> generic, loading, unloading
+        -> checks and updates envelope's payload presence flag
  */
 
 class untyped_dock {
@@ -27,17 +27,17 @@ public:
      */
     enum state : unsigned char {
         /**
-         * No ship at the dock
+         * No envelope attached
          */
         empty = 0,
 
         /**
-         * A ship has arrived but hasn't been processed yet
+         * A envelope has been attached but hasn't been processed yet
          */
         arrived = 1,
 
         /**
-         * The ship has been processed and is ready to leave
+         * The envelope has been processed and is ready to leave
          */
         processed = 2
     };
@@ -46,43 +46,43 @@ public:
      * Returns the state of the dock
      */
     state get_state() {
-        if (this->docked_ship == nullptr)
+        if (this->attached_envelope == nullptr)
             return state::empty;
-        if (this->ship_processed)
+        if (this->envelope_processed)
             return state::processed;
         return state::arrived;
     }
 
     /**
-     * Set the target dock, to which processed ships are sent
+     * Set the target port, to which processed envelopes are sent
      */
-    void send_processed_ships_to(untyped_dock* target) {
-        this->ship_target = target;
+    void send_processed_envelopes_to(untyped_dock* target) {
+        this->envelope_target = target;
     }
 
     /**
-     * Returns a reference to the docked ship
+     * Returns a reference to the attached envelope
      */
-    untyped_ship& get_untyped_ship() {
-        if (this->docked_ship == nullptr)
-            throw std::runtime_error("Cannot get a ship when none is docked.");
+    UntypedEnvelope& get_untyped_envelope() {
+        if (this->attached_envelope == nullptr)
+            throw std::runtime_error("Cannot get an envelope when none is attached.");
 
-        return *this->docked_ship;
+        return *this->attached_envelope;
     }
 
     /**
-     * Perform a ship arrival to this dock
+     * Perform envelope arrival to this port
      */
-    void arrive_ship(untyped_ship* ship) {
-        if (this->docked_ship != nullptr)
-            throw std::runtime_error("There's a ship already present.");
+    void attach_envelope(UntypedEnvelope* env) {
+        if (this->attached_envelope != nullptr)
+            throw std::runtime_error("There's an envelope already present.");
 
         // TODO: overload the equality operator?
-        if (ship->device.device_index != this->device.device_index)
-            throw std::runtime_error("The ship belongs to a different device.");
+        if (env->device.device_index != this->device.device_index)
+            throw std::runtime_error("The envelope belongs to a different device.");
 
-        this->docked_ship = ship;
-        this->ship_processed = false;
+        this->attached_envelope = env;
+        this->envelope_processed = false;
     }
 
     /**
@@ -90,11 +90,11 @@ public:
      */
     memory_device device;
 
-    untyped_ship* docked_ship = nullptr;
+    UntypedEnvelope* attached_envelope = nullptr;
     
-    bool ship_processed = false;
+    bool envelope_processed = false;
 
-    untyped_dock* ship_target = nullptr;
+    untyped_dock* envelope_target = nullptr;
 };
 
 } // pipelines namespace
