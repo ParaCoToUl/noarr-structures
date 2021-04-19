@@ -1,5 +1,5 @@
-#ifndef NOARR_PIPELINES_UNTYPED_DOCK_HPP
-#define NOARR_PIPELINES_UNTYPED_DOCK_HPP
+#ifndef NOARR_PIPELINES_UNTYPED_PORT_HPP
+#define NOARR_PIPELINES_UNTYPED_PORT_HPP
 
 #include <cstddef>
 #include <exception>
@@ -19,12 +19,12 @@ namespace pipelines {
         -> checks and updates envelope's payload presence flag
  */
 
-class untyped_dock {
+class UntypedPort {
 public:
 
     /**
-     * Possible states of the dock
-     * TODO: move to "DockState"
+     * Possible states of the port
+     * TODO: move to "PortState"
      */
     enum state : unsigned char {
         /**
@@ -44,7 +44,7 @@ public:
     };
 
     /**
-     * Returns the state of the dock
+     * Returns the state of the port
      */
     state get_state() {
         if (this->attached_envelope == nullptr)
@@ -57,7 +57,7 @@ public:
     /**
      * Set the target port, to which processed envelopes are sent
      */
-    void send_processed_envelopes_to(untyped_dock* target) {
+    void send_processed_envelopes_to(UntypedPort* target) {
         this->envelope_target = target;
     }
 
@@ -87,7 +87,7 @@ public:
     }
 
     /**
-     * The device on which the dock exists
+     * The device on which the port exists
      */
     Device device;
 
@@ -95,7 +95,7 @@ public:
     
     bool envelope_processed = false;
 
-    untyped_dock* envelope_target = nullptr;
+    UntypedPort* envelope_target = nullptr;
 };
 
 } // pipelines namespace

@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <functional>
-#include "untyped_dock.hpp"
+#include "UntypedPort.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -15,7 +15,7 @@ public:
      * Called by the scheduler before the pipeline starts running
      */
     void scheduler_start() {
-        this->perform_dock_registration();
+        this->perform_port_registration();
     }
 
     /**
@@ -49,16 +49,16 @@ public:
         if (data_was_advanced)
             this->post_advance();
 
-        this->send_ships();
+        this->send_envelopes();
     }
 
 protected:
 
     /**
      * This function is called before the pipeline starts
-     * to register all harbor docks
+     * to register all node ports
      */
-    virtual void register_docks(std::function<void(untyped_dock*)> register_dock) = 0;
+    virtual void register_ports(std::function<void(UntypedPort*)> register_port) = 0;
 
     /**
      * Called to test, whether the advance method can be called
@@ -79,38 +79,37 @@ protected:
 
 private:
 
-    std::vector<untyped_dock*> registered_docks;
+    std::vector<UntypedPort*> registered_ports;
 
     /**
-     * Calls the register_docks method
+     * Calls the register_ports method
      */
-    void perform_dock_registration() {
-        this->registered_docks.clear();
+    void perform_port_registration() {
+        this->registered_ports.clear();
         
-        this->register_docks([&](untyped_dock* d) {
-            this->registered_docks.push_back(d);
+        this->register_ports([&](UntypedPort* d) {
+            this->registered_ports.push_back(d);
         });
     }
 
     /**
-     * Sends ships that are ready to leave
+     * Sends envelopes that are ready to leave
      */
-    void send_ships() {
-        for (untyped_dock* d : this->registered_docks)
+    void send_envelopes() {
+        for (UntypedPort* d : this->registered_ports)
         {
-            // TODO: move untyped_dock::state to dock_state
-            if (d->get_state() != untyped_dock::state::processed)
+            if (d->get_state() != UntypedPort::state::processed)
                 continue;
 
             if (d->envelope_target == nullptr)
                 continue;
 
-            if (d->envelope_target->get_state() != untyped_dock::state::empty)
+            if (d->envelope_target->get_state() != UntypedPort::state::empty)
                 continue;
 
-            UntypedEnvelope* s = d->attached_envelope;
+            UntypedEnvelope* env = d->attached_envelope;
             d->attached_envelope = nullptr;
-            d->envelope_target->attach_envelope(s);
+            d->envelope_target->attach_envelope(env);
         }
     }
 };

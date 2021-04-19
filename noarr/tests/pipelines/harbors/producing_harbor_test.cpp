@@ -24,12 +24,12 @@ TEST_CASE("Producing harbor", "[harbor]") {
     }
 
     SECTION("it can advance with an envelope") {
-        prod.output_dock.attach_envelope(&s);
+        prod.output_port.attach_envelope(&s);
         REQUIRE(prod.can_advance());
     }
 
     SECTION("it can produce a chunk") {
-        prod.output_dock.attach_envelope(&s);
+        prod.output_port.attach_envelope(&s);
         
         prod.scheduler_start();
         prod.scheduler_update([](bool data_advanced){
@@ -45,7 +45,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
     }
 
     SECTION("it can produce all chunks and stop advancing") {
-        prod.output_dock.attach_envelope(&s);
+        prod.output_port.attach_envelope(&s);
         
         prod.scheduler_start();
 
@@ -59,7 +59,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
         REQUIRE(s.buffer[0] == 'l');
 
         s.has_payload = false;
-        prod.output_dock.envelope_processed = false;
+        prod.output_port.envelope_processed = false;
 
         // chunk 1 "em "
         prod.scheduler_update([](bool data_advanced){
@@ -71,7 +71,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
         REQUIRE(s.buffer[0] == 'e');
 
         s.has_payload = false;
-        prod.output_dock.envelope_processed = false;
+        prod.output_port.envelope_processed = false;
 
         // chunk 2 "ips"
         prod.scheduler_update([](bool data_advanced){
@@ -83,7 +83,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
         REQUIRE(s.buffer[0] == 'i');
 
         s.has_payload = false;
-        prod.output_dock.envelope_processed = false;
+        prod.output_port.envelope_processed = false;
 
         // chunk 3 "um"
         prod.scheduler_update([](bool data_advanced){
@@ -95,7 +95,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
         REQUIRE(s.buffer[0] == 'u');
 
         s.has_payload = false;
-        prod.output_dock.envelope_processed = false;
+        prod.output_port.envelope_processed = false;
 
         // done
         prod.scheduler_update([](bool data_advanced){
@@ -104,6 +104,6 @@ TEST_CASE("Producing harbor", "[harbor]") {
         prod.scheduler_post_update(false);
 
         REQUIRE(!s.has_payload);
-        REQUIRE(!prod.output_dock.envelope_processed);
+        REQUIRE(!prod.output_port.envelope_processed);
     }
 }

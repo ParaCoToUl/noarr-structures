@@ -1,15 +1,15 @@
 #include <string>
 #include <functional>
 
-#include <noarr/pipelines/dock.hpp>
-#include <noarr/pipelines/untyped_dock.hpp>
+#include <noarr/pipelines/Port.hpp>
+#include <noarr/pipelines/UntypedPort.hpp>
 #include <noarr/pipelines/harbor.hpp>
 
 using namespace noarr::pipelines;
 
 class my_consuming_harbor : public harbor {
 public:
-    dock<std::size_t, char> input_dock;
+    Port<std::size_t, char> input_port;
 
     std::string received_string;
 
@@ -17,23 +17,23 @@ public:
         this->received_string.clear();
     }
 
-    virtual void register_docks(std::function<void(untyped_dock*)> register_dock) {
-        register_dock(&this->input_dock);
+    virtual void register_ports(std::function<void(UntypedPort*)> register_port) {
+        register_port(&this->input_port);
     };
 
     bool can_advance() override {
         // true, if we have a full ship available
-        return this->input_dock.get_state() == untyped_dock::state::arrived;
+        return this->input_port.get_state() == UntypedPort::state::arrived;
     }
 
     void advance(std::function<void()> callback) override {
         // get the ship to be filled up
-        auto& ship = this->input_dock.get_envelope();
+        auto& env = this->input_port.get_envelope();
 
         // move the chunk from ship into the accumulator
-        this->received_string.append(ship.buffer, ship.structure);
-        ship.has_payload = false;
-        this->input_dock.envelope_processed = true;
+        this->received_string.append(env.buffer, env.structure);
+        env.has_payload = false;
+        this->input_port.envelope_processed = true;
 
         // computation is done
         callback();

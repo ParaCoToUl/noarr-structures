@@ -24,7 +24,7 @@ TEST_CASE("Consuming harbor", "[harbor]") {
     }
 
     SECTION("it can advance with a ship") {
-        cons.input_dock.attach_envelope(&env);
+        cons.input_port.attach_envelope(&env);
         REQUIRE(cons.can_advance());
     }
 
@@ -35,7 +35,7 @@ TEST_CASE("Consuming harbor", "[harbor]") {
         env.buffer[1] = 'o';
         env.buffer[2] = 'r';
         
-        cons.input_dock.attach_envelope(&env);
+        cons.input_port.attach_envelope(&env);
         
         cons.scheduler_start();
         cons.scheduler_update([](bool data_advanced){

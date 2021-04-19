@@ -23,11 +23,11 @@ TEST_CASE("Two harbors", "[harbor]") {
     auto cons = my_consuming_harbor();
 
     // link those harbors together
-    prod.output_dock.send_processed_envelopes_to(&cons.input_dock);
-    cons.input_dock.send_processed_envelopes_to(&prod.output_dock);
+    prod.output_port.send_processed_envelopes_to(&cons.input_port);
+    cons.input_port.send_processed_envelopes_to(&prod.output_port);
 
     // put the ship into the producer
-    prod.output_dock.attach_envelope(&s);
+    prod.output_port.attach_envelope(&s);
 
     // setup a scheduler
     auto sched = scheduler();

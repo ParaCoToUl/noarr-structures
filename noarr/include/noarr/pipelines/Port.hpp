@@ -1,15 +1,15 @@
-#ifndef NOARR_PIPELINES_DOCK_HPP
-#define NOARR_PIPELINES_DOCK_HPP
+#ifndef NOARR_PIPELINES_PORT_HPP
+#define NOARR_PIPELINES_PORT_HPP
 
 #include <cstddef>
 #include "Envelope.hpp"
-#include "untyped_dock.hpp"
+#include "UntypedPort.hpp"
 
 namespace noarr {
 namespace pipelines {
 
 template<typename Structure, typename BufferItem = void>
-class dock : public untyped_dock {
+class Port : public UntypedPort {
 public:
 
     /**
