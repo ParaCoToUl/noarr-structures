@@ -28,8 +28,8 @@ TEST_CASE("Image", "[image]") {
 
 		//REQUIRE((typeid(image | noarr::fix<'x'>(0) | noarr::fix<'y'>(0) | noarr::fix<'p'>(2)).name()) == "float");
 		//auto value_ref = image | noarr::fix<'x'>(0) | noarr::fix<'y'>(0) | noarr::fix<'p'>(2);
-		//std::size_t offset = image | noarr::fixs<'x', 'y', 'p'>(0, 0, 2) | noarr::offset();
-		std::size_t offset = grayscale | noarr::fix<'x'>(0) | noarr::fix<'y'>(0) | noarr::fix<'p'>(2) | noarr::offset();
+		//std::size_t offset = image | noarr::fix<'x', 'y', 'p'>(0, 0, 2) | noarr::offset();
+		std::size_t offset = grayscale | noarr::fix<'x'>(0) | noarr::fix<'y'>(0) | noarr::fix<'p'>(2) | noarr::offset(); // FIXME: this can be rewritten into `grayscale | offset<'x', 'y', 'z'>()`
 		float& value_ref = *((float*)(my_blob + offset));
 		//float& value_ref = image | fix<'x'>(0) | fix<'y'>(0) | fix<'p'>(2) | offset();
 	}

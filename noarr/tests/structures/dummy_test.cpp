@@ -60,21 +60,21 @@ TEST_CASE("Resize 2", "[Resizing]") {
 	sizeof(vs2);
 	typeid(vs2 | fix<'x'>(5)).name();
 	typeid(vs2 | fix<'x'>(5) | fix<'y'>(5)).name();
-	typeid(vs2 | fixs<'x', 'y'>(5, 5)).name();
-	(vs2 | fixs<'x', 'y'>(5, 5) | offset());
-	(vs2 | fixs<'y', 'x'>(5, 5) | offset());
+	typeid(vs2 | fix<'x', 'y'>(5, 5)).name();
+	(vs2 | fix<'x', 'y'>(5, 5) | offset());
+	(vs2 | fix<'y', 'x'>(5, 5) | offset());
 
-	typeid(vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name();*/
+	typeid(vs2 | fix<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name();*/
 
 	SECTION("check is_pod") {
-		REQUIRE(std::is_pod<decltype(vs2 | noarr::fixs<'y', 'x'>(5, 5))>::value);
-		REQUIRE(std::is_pod<decltype(noarr::fixs<'y', 'x'>(5, 5))>::value);
+		REQUIRE(std::is_pod<decltype(vs2 | noarr::fix<'y', 'x'>(5, 5))>::value);
+		REQUIRE(std::is_pod<decltype(noarr::fix<'y', 'x'>(5, 5))>::value);
 	}
 
 	//(vs2 | get_offset<'y'>(5));
 
 	SECTION("check point") {
-		REQUIRE(noarr::is_point<decltype(vs2 | noarr::fixs<'y', 'x'>(5, 5))>::value);
+		REQUIRE(noarr::is_point<decltype(vs2 | noarr::fix<'y', 'x'>(5, 5))>::value);
 	}
 }
 
