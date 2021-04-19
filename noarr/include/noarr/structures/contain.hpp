@@ -3,6 +3,8 @@
 
 #include <type_traits>
 
+// TODO: write a better get<..> and refactor
+
 namespace noarr {
 
 template<typename, typename... TS>

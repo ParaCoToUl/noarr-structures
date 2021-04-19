@@ -16,7 +16,7 @@ int main() {
 
     tuple<'t', scalar<int>, scalar<int>> t3;
 
-    std::cout << "pipe(t3, sfixs<'t'>(1_idx), offset()): " << pipe(t3, sfixs<'t'>(1_idx), offset()) << std::endl;
+    std::cout << "pipe(t3, fix<'t'>(1_idx), offset()): " << pipe(t3, fix<'t'>(1_idx), offset()) << std::endl;
 
     static_assert(!is_cube<decltype(v)>::value, "t must not be a cube");
     static_assert(!is_cube<decltype(t)>::value, "t must not be a cube");
@@ -43,20 +43,21 @@ int main() {
     std::cout << "vs2.size(): " << vs2.size() << std::endl;
     std::cout << "sizeof(vs2): " << sizeof(vs2) << std::endl;
     std::cout << "vs2 | fix<'x'>(5):" << typeid(vs2 | fix<'x'>(5)).name() << std::endl;
-    std::cout << "vs2 | fix<'x'>(5) | fix<'y'>(5):" << typeid(vs2 | fix<'x'>(5) | fix<'y'>(5)).name() << std::endl;
-    std::cout << "vs2 | fixs<'x', 'y'>(5, 5):" << typeid(vs2 | fixs<'x', 'y'>(5, 5)).name() << std::endl;
-    std::cout << "vs2 | sfixs<'x', 'y'>(5, 5):" << typeid(vs2 | sfixs<'x', 'y'>(5, 5)).name() << std::endl;
-    std::cout << "vs2 | fixs<'x', 'y'>(5, 5) | offset():" << (vs2 | fixs<'x', 'y'>(5, 5) | offset()) << std::endl;
-    std::cout << "vs2 | fixs<'y', 'x'>(5, 5) | offset():" << (vs2 | fixs<'y', 'x'>(5, 5) | offset()) << std::endl;
-    std::cout << "vs2 | sfixs<'x', 'y'>(5, 5) | offset():" << (vs2 | sfixs<'x', 'y'>(5, 5) | offset()) << std::endl;
-    std::cout << "vs2 | sfixs<'y', 'x'>(5, 5) | offset():" << (vs2 | sfixs<'y', 'x'>(5, 5) | offset()) << std::endl;
+    std::cout << "vs2 | fix<'x'>(5) | fix<'y'>(6):" << typeid(vs2 | fix<'x'>(5) | fix<'y'>(6)).name() << std::endl;
+    std::cout << "vs2 | fix<'x', 'y'>(5, 6):" << typeid(vs2 | fix<'x', 'y'>(5, 6)).name() << std::endl;
+    std::cout << "vs2 | fix<'x', 'y'>(5, 6) | offset():" << (vs2 | fix<'x', 'y'>(5, 6) | offset()) << std::endl;
+    std::cout << "vs2 | fix<'y', 'x'>(6, 5) | offset():" << (vs2 | fix<'y', 'x'>(6, 5) | offset()) << std::endl;
+    std::cout << "vs2 | offset<'x', 'y'>(5, 6):" << (vs2 | offset<'x', 'y'>(5, 6)) << std::endl;
+    std::cout << "vs2 | offset<'y', 'x'>(6, 5):" << (vs2 | offset<'y', 'x'>(6, 5)) << std::endl;
+    std::cout << "vs2 | offset<'y', 'x'>(5, 6):" << (vs2 | offset<'y', 'x'>(5, 6)) << std::endl;
 
-    std::cout << "vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr): " << typeid(vs2 | fixs<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name() << std::endl;
+    std::cout << "vs2 | fix<'y', 'x'>(6, 5) | get_at((char *)nullptr): " << typeid(vs2 | fix<'y', 'x'>(6, 5) | get_at((char *)nullptr)).name() << std::endl;
+    std::cout << "vs2 | get_at<'y', 'x'>((char *)nullptr, 6, 5): " << typeid(vs2 | get_at<'y', 'x'>((char *)nullptr, 6, 5)).name() << std::endl;
 
-    static_assert(std::is_pod<decltype(vs2 | fixs<'y', 'x'>(5, 5))>::value, "a struct has to be a podtype");
-    static_assert(std::is_pod<decltype(fixs<'y', 'x'>(5, 5))>::value, "a struct has to be a podtype");
+    static_assert(std::is_pod<decltype(vs2 | fix<'y', 'x'>(5, 5))>::value, "a struct has to be a podtype");
+    static_assert(std::is_pod<decltype(fix<'y', 'x'>(5, 5))>::value, "a struct has to be a podtype");
     std::cout << "vs2 | get_offset<'y'>(5):" << (vs2 | get_offset<'y'>(5)) << std::endl << std::endl;
-    static_assert(is_point<decltype(vs2 | fixs<'y', 'x'>(5, 5))>::value, "`vs2 | fixs<'y', 'x'>(5, 5)` has to be a point");
+    static_assert(is_point<decltype(vs2 | fix<'y', 'x'>(5, 5))>::value, "`vs2 | fix<'y', 'x'>(5, 5)` has to be a point");
 
     auto vs3 = v2 | cresize<'x', 10>(); // transform
     static_assert(is_cube<decltype(vs3)>::value, "vs3 has to be a cube");
@@ -84,9 +85,11 @@ int main() {
     std::cout << "sizeof(ts): " << sizeof(ts) << std::endl;
     std::cout << "ts.size(): " << ts.size() << std::endl;
 
-    std::cout << "ts | sfixs<'t', 'x'>(0_idx, 5) | offset(): " << (ts | sfixs<'t', 'x'>(0_idx, 5) | offset()) << std::endl;
-    std::cout << "ts | sfixs<'t', 'x'>(1_idx, 5) | offset(): " << (ts | sfixs<'t', 'x'>(1_idx, 5) | offset()) << std::endl;
-    std::cout << "ts | sfixs<'x', 't'>(5, 1_idx) | offset(): " << (ts | sfixs<'x', 't'>(5, 1_idx) | offset()) << std::endl;
+    std::cout << "ts | fix<'t', 'x'>(0_idx, 5) | offset(): " << (ts | fix<'t', 'x'>(0_idx, 5) | offset()) << std::endl;
+    std::cout << "ts | fix<'t', 'x'>(1_idx, 5) | offset(): " << (ts | fix<'t', 'x'>(1_idx, 5) | offset()) << std::endl;
+    std::cout << "ts | fix<'x', 't'>(5, 1_idx) | offset(): " << (ts | fix<'x', 't'>(5, 1_idx) | offset()) << std::endl;
+
+    static_assert(std::is_literal_type<decltype(fix<'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'>(1_idx, 1, 1_idx, 1, 1_idx, 1, 1_idx, 1))>::value, "it has to be a pod");
 
     print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
     print_struct(std::cout, t2 | resize<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;

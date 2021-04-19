@@ -6,12 +6,25 @@
 #include "core.hpp"
 
 // TODO: rename resize to set_length
-// TODO: rename fixs to fix ---> maybe even sfixs to fix as it is the most general one and supplements all others
-// TODO: rework get_at so it works as fix... | get_at on non-points <--/
-//                                                                 (this change would apply to this TODO as well)
-// TODO: it is not convenient to put std::integral_constants as arguments to sfixs() (create a good alias?)
 
 namespace noarr {
+
+template<typename F, typename G>
+struct _compose : contain<F, G> {
+    using base = contain<F, G>;
+    using func_family = typename func_trait<F>::type;
+    constexpr _compose(F f, G g) : base(f, g) {}
+
+    template<typename T>
+    constexpr auto operator()(T t) const {
+        return pipe(t, base::template get<0>(), base::template get<1>());
+    }
+};
+
+template<typename F, typename G>
+inline constexpr auto compose(F f, G g) {
+    return _compose<F, G>(f, g);
+}
 
 template<char Dim>
 struct resize {
@@ -60,20 +73,20 @@ private:
         return construct(t2, (t | _reassemble_set<Dim, T, remove_cvref<decltype(t2)>>(t)).sub_structures());
     }
     template<char Dim, typename T>
-    constexpr auto reassemble_(T t) const -> decltype(reassemble_2<Dim>(t, t | _reassemble_get<Dim>())) {
+    constexpr auto _reassemble(T t) const -> decltype(reassemble_2<Dim>(t, t | _reassemble_get<Dim>())) {
         return reassemble_2<Dim>(t, t | _reassemble_get<Dim>());
     }
 public:
     using func_family = transform_tag;
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(reassemble_<std::enable_if_t<get_dims<T>::template contains<Dim1>(), char>(Dim2)>(t)) {
-        return reassemble_<Dim2>(t);
+    constexpr auto operator()(T t) const -> decltype(_reassemble<std::enable_if_t<get_dims<T>::template contains<Dim1>(), char>(Dim2)>(t)) {
+        return _reassemble<Dim2>(t);
     }
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(reassemble_<std::enable_if_t<get_dims<T>::template contains<Dim2>() && Dim1 != Dim2, char>(Dim1)>(t)) {
-        return reassemble_<Dim1>(t);
+    constexpr auto operator()(T t) const -> decltype(_reassemble<std::enable_if_t<get_dims<T>::template contains<Dim2>() && Dim1 != Dim2, char>(Dim1)>(t)) {
+        return _reassemble<Dim1>(t);
     }
 };
 
@@ -96,12 +109,12 @@ struct cresize {
 };
 
 template<typename T, std::size_t i, typename = void>
-struct safe_get_ {
+struct _safe_get {
     static constexpr void get(T t) = delete;
 };
 
 template<typename T, std::size_t i>
-struct safe_get_<T, i, std::enable_if_t<(std::tuple_size<remove_cvref<decltype(std::declval<T>().sub_structures())>>::value > i)>> {
+struct _safe_get<T, i, std::enable_if_t<(std::tuple_size<remove_cvref<decltype(std::declval<T>().sub_structures())>>::value > i)>> {
     static constexpr auto get(T t) {
         return std::get<i>(t.sub_structures());
     }
@@ -109,13 +122,13 @@ struct safe_get_<T, i, std::enable_if_t<(std::tuple_size<remove_cvref<decltype(s
 
 template<std::size_t i, typename T>
 inline constexpr auto safe_get(T t) {
-    return safe_get_<T, i>::get(t);
+    return _safe_get<T, i>::get(t);
 }
 
 template<char Dim>
-struct fix {
-    constexpr fix() = default;
-    explicit constexpr fix(std::size_t idx) : idx(idx) {}
+struct _fix {
+    constexpr _fix() = default;
+    explicit constexpr _fix(std::size_t idx) : idx(idx) {}
 
 private:
     std::size_t idx;
@@ -126,27 +139,6 @@ public:
         return fixed_dim<Dim, T>(t, idx);
     }
 };
-
-template<char... Dims>
-struct fixs;
-
-template<char Dim, char... Dims>
-struct fixs<Dim, Dims...> : private contain<fix<Dim>, fixs<Dims...>> {
-private:
-    using base = contain<fix<Dim>, fixs<Dims...>>;
-public:
-    constexpr fixs() = default;
-    template <typename... IS>
-    constexpr fixs(std::size_t idx, IS... is) : base(fix<Dim>(idx), fixs<Dims...>(static_cast<std::size_t>(is)...)) {}
-
-    template<typename T>
-    constexpr auto operator()(T t) const {
-        return pipe(t, base::template get<0>(), base::template get<1>());
-    }
-};
-
-template<char Dim>
-struct fixs<Dim> : fix<Dim> { using fix<Dim>::fix; using fix<Dim>::operator(); };
 
 template<char Dim, std::size_t Idx>
 struct _sfix {
@@ -165,15 +157,15 @@ inline constexpr auto sfix(std::integral_constant<std::size_t, Idx>) {
 }
 
 template<typename... Tuples>
-struct _sfixs;
+struct _fixs;
 
 template<char Dim, typename T, typename... Tuples>
-struct _sfixs<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<fix<Dim>, _sfixs<Tuples...>> {
-    using base = contain<fix<Dim>, _sfixs<Tuples...>>;
-    constexpr _sfixs() = default;
+struct _fixs<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<_fix<Dim>, _fixs<Tuples...>> {
+    using base = contain<_fix<Dim>, _fixs<Tuples...>>;
+    constexpr _fixs() = default;
     
     template <typename... Ts>
-    constexpr _sfixs(T t, Ts... ts) : base(fix<Dim>(t), _sfixs<Tuples...>(ts...)) {}
+    constexpr _fixs(T t, Ts... ts) : base(_fix<Dim>(t), _fixs<Tuples...>(ts...)) {}
 
     template<typename S>
     constexpr auto operator()(S s) const {
@@ -182,16 +174,16 @@ struct _sfixs<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : pri
 };
 
 template<char Dim, typename T>
-struct _sfixs<std::tuple<std::integral_constant<char, Dim>, T>> : fix<Dim> { using fix<Dim>::fix; using fix<Dim>::operator(); };
+struct _fixs<std::tuple<std::integral_constant<char, Dim>, T>> : _fix<Dim> { using _fix<Dim>::_fix; using _fix<Dim>::operator(); };
 
 
 template<char Dim, std::size_t Idx, typename... Tuples>
-struct _sfixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : contain<_sfix<Dim, Idx>, _sfixs<Tuples...>> {
-    using base = contain<_sfix<Dim, Idx>, _sfixs<Tuples...>>;
-    constexpr _sfixs() = default;
+struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : contain<_sfix<Dim, Idx>, _fixs<Tuples...>> {
+    using base = contain<_sfix<Dim, Idx>, _fixs<Tuples...>>;
+    constexpr _fixs() = default;
     
     template <typename... Ts>
-    constexpr _sfixs(std::integral_constant<std::size_t, Idx>, Ts... ts) : base(_sfix<Dim, Idx>(), _sfixs<Tuples...>(ts...)) {}
+    constexpr _fixs(std::integral_constant<std::size_t, Idx>, Ts... ts) : base(_sfix<Dim, Idx>(), _fixs<Tuples...>(ts...)) {}
 
     template<typename T>
     constexpr auto operator()(T t) const {
@@ -200,15 +192,15 @@ struct _sfixs<std::tuple<std::integral_constant<char, Dim>, std::integral_consta
 };
 
 template<char Dim, std::size_t Idx>
-struct _sfixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : _sfix<Dim, Idx> {
-    constexpr _sfixs() = default;
-    constexpr _sfixs(std::integral_constant<std::size_t, Idx>) : _sfix<Dim,Idx>() {}
+struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : _sfix<Dim, Idx> {
+    constexpr _fixs() = default;
+    constexpr _fixs(std::integral_constant<std::size_t, Idx>) : _sfix<Dim,Idx>() {}
     using _sfix<Dim, Idx>::operator();
 };
 
 template<char... Dims, typename... Ts>
-inline constexpr auto sfixs(Ts... ts) {
-    return _sfixs<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
+inline constexpr auto fix(Ts... ts) {
+    return _fixs<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
 }
 
 template<std::size_t Accum, char... Chars>
@@ -225,8 +217,8 @@ struct _idx_translate<Accum, Char> {
 };
 
 template<char... Chars>
-inline constexpr typename _idx_translate<0, Chars...>::type operator""_idx() {
-    return {};
+inline constexpr auto operator""_idx() {
+    return typename _idx_translate<0, Chars...>::type();
 }
 
 template<char Dim>
@@ -244,9 +236,9 @@ public:
     }
 };
 
-struct offset {
+struct _offset {
     using func_family = top_tag;
-    explicit constexpr offset() = default;
+    explicit constexpr _offset() = default;
 
     template<typename T>
     constexpr std::size_t operator()(scalar<T>) {
@@ -255,9 +247,18 @@ struct offset {
 
     template<typename T>
     constexpr auto operator()(T t) const -> std::enable_if_t<is_point<T>::value, std::size_t> {
-        return t.offset() + (std::get<0>(t.sub_structures()) | offset());
+        return t.offset() + (std::get<0>(t.sub_structures()) | _offset());
     }
 };
+
+inline constexpr auto offset() {
+    return _offset();
+}
+
+template<char... Dims, typename... Ts>
+inline constexpr auto offset(Ts... ts) {
+    return compose(fix<Dims...>(ts...), _offset());
+}
 
 struct get_size {
     using func_family = top_tag;
@@ -269,13 +270,13 @@ struct get_size {
     }
 };
 
-struct get_at : private contain<char*> {
+struct _get_at : private contain<char*> {
     using func_family = top_tag;
 
-    constexpr get_at() = delete;
+    constexpr _get_at() = delete;
 
     template<typename T>
-    explicit constexpr get_at(T *ptr) : contain<char *>(reinterpret_cast<char *>(ptr)) {}
+    explicit constexpr _get_at(T *ptr) : contain<char *>(reinterpret_cast<char *>(ptr)) {}
 
 
     template<typename T>
@@ -283,6 +284,16 @@ struct get_at : private contain<char*> {
         return reinterpret_cast<scalar_t<T> &>(*(contain<char *>::template get<0>() + (t | offset())));
     }
 };
+
+template<typename V>
+inline constexpr auto get_at(V *ptr) {
+    return _get_at(ptr);
+}
+
+template<char... Dims, typename V, typename... Ts>
+inline constexpr auto get_at(V *ptr, Ts... ts) {
+    return compose(fix<Dims...>(ts...), _get_at(ptr));
+}
 
 }
 

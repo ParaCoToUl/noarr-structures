@@ -16,7 +16,7 @@ using namespace noarr;
 // same body, two data layouts:
 template<typename AS>
 __global__ void kernel(float *data, AS as) {
-    as | fixs<'y', 'x'>(blockIdx.x, threadIdx.x) | get_at(data) = blockIdx.x * blockDim.x + threadIdx.x;
+    as | fix<'y', 'x'>(blockIdx.x, threadIdx.x) | get_at(data) = blockIdx.x * blockDim.x + threadIdx.x;
 }
 
 __global__ void kernel_handmade(float *data, size_t size) {
