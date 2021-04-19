@@ -6,30 +6,30 @@
 #include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
 
-#include "my_producing_harbor.hpp"
+#include "MyProducingNode.hpp"
 
 using namespace noarr::pipelines;
 
-TEST_CASE("Producing harbor", "[harbor]") {
+TEST_CASE("Producing node", "[node]") {
 
     // create an envelope
     char buffer[1024];
-    auto s = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
+    auto env = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
 
-    // create our producer harbor
-    auto prod = my_producing_harbor("lorem ipsum", 3);
+    // create our producer node
+    auto prod = MyProducingNode("lorem ipsum", 3);
     
     SECTION("it cannot advance without an envelope") {
         REQUIRE(!prod.can_advance());
     }
 
     SECTION("it can advance with an envelope") {
-        prod.output_port.attach_envelope(&s);
+        prod.output_port.attach_envelope(&env);
         REQUIRE(prod.can_advance());
     }
 
     SECTION("it can produce a chunk") {
-        prod.output_port.attach_envelope(&s);
+        prod.output_port.attach_envelope(&env);
         
         prod.scheduler_start();
         prod.scheduler_update([](bool data_advanced){
@@ -37,15 +37,15 @@ TEST_CASE("Producing harbor", "[harbor]") {
         });
         prod.scheduler_post_update(true);
 
-        REQUIRE(s.has_payload);
-        REQUIRE(s.structure == 3);
-        REQUIRE(s.buffer[0] == 'l');
-        REQUIRE(s.buffer[1] == 'o');
-        REQUIRE(s.buffer[2] == 'r');
+        REQUIRE(env.has_payload);
+        REQUIRE(env.structure == 3);
+        REQUIRE(env.buffer[0] == 'l');
+        REQUIRE(env.buffer[1] == 'o');
+        REQUIRE(env.buffer[2] == 'r');
     }
 
     SECTION("it can produce all chunks and stop advancing") {
-        prod.output_port.attach_envelope(&s);
+        prod.output_port.attach_envelope(&env);
         
         prod.scheduler_start();
 
@@ -54,11 +54,11 @@ TEST_CASE("Producing harbor", "[harbor]") {
             REQUIRE(data_advanced);
         });
         prod.scheduler_post_update(true);
-        REQUIRE(s.has_payload);
-        REQUIRE(s.structure == 3);
-        REQUIRE(s.buffer[0] == 'l');
+        REQUIRE(env.has_payload);
+        REQUIRE(env.structure == 3);
+        REQUIRE(env.buffer[0] == 'l');
 
-        s.has_payload = false;
+        env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // chunk 1 "em "
@@ -66,11 +66,11 @@ TEST_CASE("Producing harbor", "[harbor]") {
             REQUIRE(data_advanced);
         });
         prod.scheduler_post_update(true);
-        REQUIRE(s.has_payload);
-        REQUIRE(s.structure == 3);
-        REQUIRE(s.buffer[0] == 'e');
+        REQUIRE(env.has_payload);
+        REQUIRE(env.structure == 3);
+        REQUIRE(env.buffer[0] == 'e');
 
-        s.has_payload = false;
+        env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // chunk 2 "ips"
@@ -78,11 +78,11 @@ TEST_CASE("Producing harbor", "[harbor]") {
             REQUIRE(data_advanced);
         });
         prod.scheduler_post_update(true);
-        REQUIRE(s.has_payload);
-        REQUIRE(s.structure == 3);
-        REQUIRE(s.buffer[0] == 'i');
+        REQUIRE(env.has_payload);
+        REQUIRE(env.structure == 3);
+        REQUIRE(env.buffer[0] == 'i');
 
-        s.has_payload = false;
+        env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // chunk 3 "um"
@@ -90,11 +90,11 @@ TEST_CASE("Producing harbor", "[harbor]") {
             REQUIRE(data_advanced);
         });
         prod.scheduler_post_update(true);
-        REQUIRE(s.has_payload);
-        REQUIRE(s.structure == 2);
-        REQUIRE(s.buffer[0] == 'u');
+        REQUIRE(env.has_payload);
+        REQUIRE(env.structure == 2);
+        REQUIRE(env.buffer[0] == 'u');
 
-        s.has_payload = false;
+        env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // done
@@ -103,7 +103,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
         });
         prod.scheduler_post_update(false);
 
-        REQUIRE(!s.has_payload);
+        REQUIRE(!env.has_payload);
         REQUIRE(!prod.output_port.envelope_processed);
     }
 }

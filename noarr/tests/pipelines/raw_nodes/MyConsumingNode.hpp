@@ -3,17 +3,17 @@
 
 #include <noarr/pipelines/Port.hpp>
 #include <noarr/pipelines/UntypedPort.hpp>
-#include <noarr/pipelines/harbor.hpp>
+#include <noarr/pipelines/Node.hpp>
 
 using namespace noarr::pipelines;
 
-class my_consuming_harbor : public harbor {
+class MyConsumingNode : public Node {
 public:
     Port<std::size_t, char> input_port;
 
     std::string received_string;
 
-    my_consuming_harbor() {
+    MyConsumingNode() {
         this->received_string.clear();
     }
 

@@ -1,5 +1,5 @@
-#ifndef NOARR_PIPELINES_HARBOR_HPP
-#define NOARR_PIPELINES_HARBOR_HPP
+#ifndef NOARR_PIPELINES_NODE_HPP
+#define NOARR_PIPELINES_NODE_HPP
 
 #include <cstddef>
 #include <functional>
@@ -8,7 +8,7 @@
 namespace noarr {
 namespace pipelines {
 
-class harbor {
+class Node {
 public:
 
     /**
@@ -21,7 +21,7 @@ public:
     /**
      * Called by the scheduler when possible,
      * guaranteed to not be called when another
-     * update of this harbor is still running
+     * update of this node is still running
      * 
      * @param callback Call when the async operation finishes,
      * pass true if data was advanced and false if nothing happened
@@ -66,7 +66,7 @@ protected:
     virtual bool can_advance() = 0;
 
     /**
-     * Called to advance the proggress of data through the harbor
+     * Called to advance the proggress of data through the node
      */
     virtual void advance(std::function<void()> callback) = 0;
 

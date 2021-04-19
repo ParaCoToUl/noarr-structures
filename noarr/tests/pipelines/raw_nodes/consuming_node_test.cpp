@@ -6,24 +6,24 @@
 #include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
 
-#include "my_consuming_harbor.hpp"
+#include "MyConsumingNode.hpp"
 
 using namespace noarr::pipelines;
 
-TEST_CASE("Consuming harbor", "[harbor]") {
+TEST_CASE("Consuming node", "[node]") {
 
     // create an envelope
     char buffer[1024];
     auto env = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
 
     // create our consumer harbor
-    auto cons = my_consuming_harbor();
+    auto cons = MyConsumingNode();
 
-    SECTION("it cannot advance without a ship") {
+    SECTION("it cannot advance without an envelope") {
         REQUIRE(!cons.can_advance());
     }
 
-    SECTION("it can advance with a ship") {
+    SECTION("it can advance with an envelope") {
         cons.input_port.attach_envelope(&env);
         REQUIRE(cons.can_advance());
     }

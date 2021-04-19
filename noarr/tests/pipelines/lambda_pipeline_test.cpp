@@ -8,8 +8,8 @@
 #include <noarr/pipelines/Envelope.hpp>
 #include <noarr/pipelines/scheduler.hpp>
 
-#include "harbors/my_producing_harbor.hpp"
-#include "harbors/my_consuming_harbor.hpp"
+#include "raw_nodes/MyProducingNode.hpp"
+#include "raw_nodes/MyConsumingNode.hpp"
 
 /*
     This is a playground for developing a lambda-based API for pipeline building

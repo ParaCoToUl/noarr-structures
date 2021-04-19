@@ -3,15 +3,15 @@
 
 #include <noarr/pipelines/Port.hpp>
 #include <noarr/pipelines/UntypedPort.hpp>
-#include <noarr/pipelines/harbor.hpp>
+#include <noarr/pipelines/Node.hpp>
 
 using namespace noarr::pipelines;
 
-class my_producing_harbor : public harbor {
+class MyProducingNode : public Node {
 public:
     Port<std::size_t, char> output_port;
 
-    my_producing_harbor(std::string data, std::size_t chunk_size) {
+    MyProducingNode(std::string data, std::size_t chunk_size) {
         this->data = data;
         this->chunk_size = chunk_size;
         this->at_index = 0;

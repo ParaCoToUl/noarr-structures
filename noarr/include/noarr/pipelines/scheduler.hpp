@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <exception>
-#include "harbor.hpp"
+#include "Node.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -15,19 +15,19 @@ class scheduler {
 public:
 
     /**
-     * Registers a harbor to be updated by the scheduler
+     * Registers a node to be updated by the scheduler
      */
-    void add(harbor* h) {
-        this->harbors.push_back(h);
+    void add(Node* h) {
+        this->nodes.push_back(h);
     }
 
     /**
-     * Runs the pipeline until no harbors can be advanced.
+     * Runs the pipeline until no nodes can be advanced.
      */
     void run() {
         
-        // call the start method on each harbor
-        for (harbor* h : this->harbors)
+        // call the start method on each node
+        for (Node* h : this->nodes)
             h->scheduler_start();
         
         /*
@@ -37,12 +37,12 @@ public:
                 and host computation
          */
 
-        bool some_harbor_was_advanced = true;
+        bool some_node_was_advanced = true;
         do
         {
-            some_harbor_was_advanced = false;
+            some_node_was_advanced = false;
 
-            for (harbor* h : this->harbors)
+            for (Node* h : this->nodes)
             {
                 bool data_was_advanced;
 
@@ -58,24 +58,24 @@ public:
                 h->scheduler_post_update(data_was_advanced);
                 
                 if (data_was_advanced)
-                    some_harbor_was_advanced = true;
+                    some_node_was_advanced = true;
             }
         }
-        while (some_harbor_was_advanced);
+        while (some_node_was_advanced);
     }
 
 private:
 
     /**
-     * Harbors that the scheduler periodically updates
+     * Nodes that the scheduler periodically updates
      */
-    std::vector<harbor*> harbors;
+    std::vector<Node*> nodes;
 
     ///////////////////////////
     // Synchronization logic //
     ///////////////////////////
 
-    // This is a dummy implementation that only supports synchronous harbors.
+    // This is a dummy implementation that only supports synchronous nodes.
     // TODO: Add a proper synchronization primitive on which the scheduler
     // thread can wait and let the callback_was_called method (or its
     // quivalent) be callable from any thread.
@@ -84,7 +84,7 @@ private:
     bool _callback_was_called;
 
     /**
-     * Call this before starting a harbor update
+     * Call this before starting a node update
      */
     void callback_will_be_called() {
         if (this->_expecting_callback)
@@ -97,7 +97,7 @@ private:
     }
 
     /**
-     * Call this from the harbor callback
+     * Call this from the node callback
      */
     void callback_was_called() {
         this->_callback_was_called = true;
@@ -114,7 +114,7 @@ private:
 
         if (!this->_callback_was_called)
             throw std::runtime_error(
-                "TODO: Asynchronous harbors are not implemented yet."
+                "TODO: Asynchronous nodes are not implemented yet."
             );
 
         this->_expecting_callback = false;
