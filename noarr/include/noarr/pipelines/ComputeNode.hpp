@@ -9,7 +9,7 @@ namespace pipelines {
 /**
  * Represents a node that performs some computation
  */
-class compute_node {
+class ComputeNode {
     // ...
 };
 
