@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-#include <noarr/pipelines/memory_device.hpp>
+#include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
 #include <noarr/pipelines/scheduler.hpp>
 

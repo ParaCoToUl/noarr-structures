@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include <noarr/pipelines/memory_device.hpp>
+#include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
 
 #include "my_producing_harbor.hpp"
@@ -14,7 +14,7 @@ TEST_CASE("Producing harbor", "[harbor]") {
 
     // create an envelope
     char buffer[1024];
-    auto s = Envelope<std::size_t, char>(memory_device(-1), buffer, 1024);
+    auto s = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
 
     // create our producer harbor
     auto prod = my_producing_harbor("lorem ipsum", 3);

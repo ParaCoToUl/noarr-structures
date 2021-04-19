@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <exception>
-#include "memory_device.hpp"
+#include "Device.hpp"
 #include "UntypedEnvelope.hpp"
 
 namespace noarr {
@@ -24,6 +24,7 @@ public:
 
     /**
      * Possible states of the dock
+     * TODO: move to "DockState"
      */
     enum state : unsigned char {
         /**
@@ -88,7 +89,7 @@ public:
     /**
      * The device on which the dock exists
      */
-    memory_device device;
+    Device device;
 
     UntypedEnvelope* attached_envelope = nullptr;
     

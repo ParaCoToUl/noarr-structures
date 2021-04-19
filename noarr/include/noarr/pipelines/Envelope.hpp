@@ -24,7 +24,7 @@ public:
      * Constructs a new ship from an existing buffer
      */
     Envelope(
-        memory_device device,
+        Device device,
         void* existing_buffer,
         std::size_t buffer_size
     ) : UntypedEnvelope(device, existing_buffer, buffer_size) {

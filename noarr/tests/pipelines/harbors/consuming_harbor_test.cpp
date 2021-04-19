@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <iostream>
 
-#include <noarr/pipelines/memory_device.hpp>
+#include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
 
 #include "my_consuming_harbor.hpp"
@@ -14,7 +14,7 @@ TEST_CASE("Consuming harbor", "[harbor]") {
 
     // create an envelope
     char buffer[1024];
-    auto env = Envelope<std::size_t, char>(memory_device(-1), buffer, 1024);
+    auto env = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
 
     // create our consumer harbor
     auto cons = my_consuming_harbor();

@@ -2,7 +2,7 @@
 #define NOARR_PIPELINES_UNTYPED_ENVELOPE_HPP
 
 #include <cstddef>
-#include "memory_device.hpp"
+#include "Device.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -27,10 +27,10 @@ public:
     /**
      * What device this ship lives on
      */
-    memory_device device;
+    Device device;
 
     UntypedEnvelope(
-        memory_device device,
+        Device _device,
         void* existing_buffer,
         std::size_t buffer_size
     ) {
