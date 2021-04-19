@@ -1,10 +1,11 @@
 #include <catch2/catch.hpp>
 
-#include <cstddef>
 #include <iostream>
+#include <string>
 
 #include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
+#include <noarr/pipelines/DebuggingScheduler.hpp>
 
 #include "MyConsumingNode.hpp"
 
@@ -18,6 +19,10 @@ TEST_CASE("Consuming node", "[node]") {
 
     // create our consumer node
     auto cons = MyConsumingNode();
+
+    // setup a scheduler
+    auto scheduler = DebuggingScheduler();
+    scheduler.add(cons);
 
     SECTION("it cannot advance without an envelope") {
         REQUIRE(!cons.can_advance());
@@ -37,12 +42,7 @@ TEST_CASE("Consuming node", "[node]") {
         
         cons.input_port.attach_envelope(&env);
         
-        cons.scheduler_start();
-        cons.scheduler_update([](bool data_advanced){
-            REQUIRE(data_advanced);
-        });
-        cons.scheduler_post_update(true);
-
+        REQUIRE(scheduler.update_next_node());
         REQUIRE(!env.has_payload);
         REQUIRE(cons.received_string == "lor");
     }

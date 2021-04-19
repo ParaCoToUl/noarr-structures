@@ -1,10 +1,11 @@
 #include <catch2/catch.hpp>
 
-#include <cstddef>
 #include <iostream>
+#include <string>
 
 #include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
+#include <noarr/pipelines/DebuggingScheduler.hpp>
 
 #include "MyProducingNode.hpp"
 
@@ -18,6 +19,10 @@ TEST_CASE("Producing node", "[node]") {
 
     // create our producer node
     auto prod = MyProducingNode("lorem ipsum", 3);
+
+    // setup a scheduler
+    auto scheduler = DebuggingScheduler();
+    scheduler.add(prod);
     
     SECTION("it cannot advance without an envelope") {
         REQUIRE(!prod.can_advance());
@@ -31,78 +36,54 @@ TEST_CASE("Producing node", "[node]") {
     SECTION("it can produce a chunk") {
         prod.output_port.attach_envelope(&env);
         
-        prod.scheduler_start();
-        prod.scheduler_update([](bool data_advanced){
-            REQUIRE(data_advanced);
-        });
-        prod.scheduler_post_update(true);
+        REQUIRE(scheduler.update_next_node());
 
         REQUIRE(env.has_payload);
         REQUIRE(env.structure == 3);
-        REQUIRE(env.buffer[0] == 'l');
-        REQUIRE(env.buffer[1] == 'o');
-        REQUIRE(env.buffer[2] == 'r');
+        REQUIRE(std::string(env.buffer, 3) == "lor");
     }
 
     SECTION("it can produce all chunks and stop advancing") {
         prod.output_port.attach_envelope(&env);
         
-        prod.scheduler_start();
-
         // chunk 0 "lor"
-        prod.scheduler_update([](bool data_advanced){
-            REQUIRE(data_advanced);
-        });
-        prod.scheduler_post_update(true);
+        REQUIRE(scheduler.update_next_node());
         REQUIRE(env.has_payload);
         REQUIRE(env.structure == 3);
-        REQUIRE(env.buffer[0] == 'l');
+        REQUIRE(std::string(env.buffer, 3) == "lor");
 
         env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // chunk 1 "em "
-        prod.scheduler_update([](bool data_advanced){
-            REQUIRE(data_advanced);
-        });
-        prod.scheduler_post_update(true);
+        REQUIRE(scheduler.update_next_node());
         REQUIRE(env.has_payload);
         REQUIRE(env.structure == 3);
-        REQUIRE(env.buffer[0] == 'e');
+        REQUIRE(std::string(env.buffer, 3) == "em ");
 
         env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // chunk 2 "ips"
-        prod.scheduler_update([](bool data_advanced){
-            REQUIRE(data_advanced);
-        });
-        prod.scheduler_post_update(true);
+        REQUIRE(scheduler.update_next_node());
         REQUIRE(env.has_payload);
         REQUIRE(env.structure == 3);
-        REQUIRE(env.buffer[0] == 'i');
+        REQUIRE(std::string(env.buffer, 3) == "ips");
 
         env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // chunk 3 "um"
-        prod.scheduler_update([](bool data_advanced){
-            REQUIRE(data_advanced);
-        });
-        prod.scheduler_post_update(true);
+        REQUIRE(scheduler.update_next_node());
         REQUIRE(env.has_payload);
         REQUIRE(env.structure == 2);
-        REQUIRE(env.buffer[0] == 'u');
+        REQUIRE(std::string(env.buffer, 2) == "um");
 
         env.has_payload = false;
         prod.output_port.envelope_processed = false;
 
         // done
-        prod.scheduler_update([](bool data_advanced){
-            REQUIRE(!data_advanced);
-        });
-        prod.scheduler_post_update(false);
-
+        REQUIRE(!scheduler.update_next_node());
         REQUIRE(!env.has_payload);
         REQUIRE(!prod.output_port.envelope_processed);
     }
