@@ -32,7 +32,7 @@ TEST_CASE("Sizes", "[sizes]") {
 
 TEST_CASE("Resize", "[transform]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
-	auto vs = v | noarr::resize<'x'>(10); // transform
+	auto vs = v | noarr::set_length<'x'>(10); // transform
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs)>::value);
@@ -45,7 +45,7 @@ TEST_CASE("Resize", "[transform]") {
 
 TEST_CASE("Resize 2", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	auto vs2 = v2 | noarr::resize<'x'>(20); // transform
+	auto vs2 = v2 | noarr::set_length<'x'>(20); // transform
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs2)>::value);
@@ -80,7 +80,7 @@ TEST_CASE("Resize 2", "[Resizing]") {
 
 TEST_CASE("Resize 3", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	auto vs2 = v2 | noarr::resize<'x'>(20); // transform
+	auto vs2 = v2 | noarr::set_length<'x'>(20); // transform
 	auto vs3 = v2 | noarr::cresize<'x', 10>(); // transform
 
 	SECTION("check is_cube") {
@@ -104,7 +104,7 @@ TEST_CASE("Resize 4", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
 	// tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
-	auto vs4 = pipe(v2, noarr::cresize<'y', 10>(), noarr::resize<'x'>(l)); // transform
+	auto vs4 = pipe(v2, noarr::cresize<'y', 10>(), noarr::set_length<'x'>(l)); // transform
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs4)>::value);
@@ -120,7 +120,7 @@ TEST_CASE("Resize 4", "[Resizing]") {
 
 	sizeof(t);
 
-	auto ts = t | noarr::resize<'x'>(20);
+	auto ts = t | noarr::set_length<'x'>(20);
 
 	SECTION("check is_cube") {
 		REQUIRE(!noarr::is_cube<decltype(ts)>::value);
@@ -135,6 +135,6 @@ TEST_CASE("Resize 4", "[Resizing]") {
 	ts.size();
 
 	//print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
-	//print_struct(std::cout, t2 | resize<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;
+	//print_struct(std::cout, t2 | set_length<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;
 	//print_struct(std::cout, t2 | reassemble<'x', 'x'>()) << " t2;" << std::endl;
 }
