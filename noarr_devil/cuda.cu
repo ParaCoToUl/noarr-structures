@@ -31,7 +31,7 @@ int main() {
 
     const auto av = array<'y', SIZE_CONSTANT, vector<'x', scalar<float>>>();
     volatile std::size_t s = 20;
-    const auto avr = av | resize<'x'>(s);
+    const auto avr = av | set_length<'x'>(s);
     kernel<<<SIZE_CONSTANT, 20>>>(data, avr);
     //kernel_handmade<<<SIZE_CONSTANT, 20>>>(data, 20);
     

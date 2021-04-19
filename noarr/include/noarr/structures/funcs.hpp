@@ -5,8 +5,6 @@
 #include "struct_traits.hpp"
 #include "core.hpp"
 
-// TODO: rename resize to set_length
-
 namespace noarr {
 
 template<typename F, typename G>
@@ -27,9 +25,9 @@ inline constexpr auto compose(F f, G g) {
 }
 
 template<char Dim>
-struct resize {
+struct set_length {
     using func_family = transform_tag;
-    explicit constexpr resize(std::size_t length) : length(length) {}
+    explicit constexpr set_length(std::size_t length) : length(length) {}
 
     template<typename T>
     constexpr auto operator()(vector<Dim, T> v) const {
@@ -42,6 +40,17 @@ struct resize {
 
 private:
     std::size_t length;
+};
+
+template<char Dim>
+struct get_length {
+    using func_family = get_tag;
+    explicit constexpr get_length() {}
+
+    template<typename T>
+    constexpr auto operator()(T t) const -> remove_cvref<decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), std::size_t())> {
+        return t.length();
+    }
 };
 
 template<char Dim>
