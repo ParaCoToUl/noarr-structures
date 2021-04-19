@@ -5,6 +5,7 @@
 #include <exception>
 #include "Device.hpp"
 #include "UntypedEnvelope.hpp"
+#include "PortState.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -23,35 +24,14 @@ class UntypedPort {
 public:
 
     /**
-     * Possible states of the port
-     * TODO: move to "PortState"
-     */
-    enum state : unsigned char {
-        /**
-         * No envelope attached
-         */
-        empty = 0,
-
-        /**
-         * A envelope has been attached but hasn't been processed yet
-         */
-        arrived = 1,
-
-        /**
-         * The envelope has been processed and is ready to leave
-         */
-        processed = 2
-    };
-
-    /**
      * Returns the state of the port
      */
-    state get_state() {
+    PortState get_state() {
         if (this->attached_envelope == nullptr)
-            return state::empty;
+            return PortState::empty;
         if (this->envelope_processed)
-            return state::processed;
-        return state::arrived;
+            return PortState::processed;
+        return PortState::arrived;
     }
 
     /**

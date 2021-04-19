@@ -1,6 +1,7 @@
 #include <string>
 #include <functional>
 
+#include <noarr/pipelines/PortState.hpp>
 #include <noarr/pipelines/Port.hpp>
 #include <noarr/pipelines/UntypedPort.hpp>
 #include <noarr/pipelines/Node.hpp>
@@ -27,7 +28,7 @@ public:
             return false;
         
         // true, if we have an empty envelope available
-        return this->output_port.get_state() == UntypedPort::state::arrived;
+        return this->output_port.get_state() == PortState::arrived;
     }
 
     void advance(std::function<void()> callback) override {

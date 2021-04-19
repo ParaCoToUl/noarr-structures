@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <functional>
+#include "PortState.hpp"
 #include "UntypedPort.hpp"
 
 namespace noarr {
@@ -98,13 +99,13 @@ private:
     void send_envelopes() {
         for (UntypedPort* d : this->registered_ports)
         {
-            if (d->get_state() != UntypedPort::state::processed)
+            if (d->get_state() != PortState::processed)
                 continue;
 
             if (d->envelope_target == nullptr)
                 continue;
 
-            if (d->envelope_target->get_state() != UntypedPort::state::empty)
+            if (d->envelope_target->get_state() != PortState::empty)
                 continue;
 
             UntypedEnvelope* env = d->attached_envelope;

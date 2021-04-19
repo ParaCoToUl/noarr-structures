@@ -1,6 +1,7 @@
 #include <string>
 #include <functional>
 
+#include <noarr/pipelines/PortState.hpp>
 #include <noarr/pipelines/Port.hpp>
 #include <noarr/pipelines/UntypedPort.hpp>
 #include <noarr/pipelines/Node.hpp>
@@ -23,7 +24,7 @@ public:
 
     bool can_advance() override {
         // true, if we have a full ship available
-        return this->input_port.get_state() == UntypedPort::state::arrived;
+        return this->input_port.get_state() == PortState::arrived;
     }
 
     void advance(std::function<void()> callback) override {
