@@ -127,7 +127,7 @@ public:
 
         // === send processed envelopes ===
 
-        // TODO: send envelopes and log their movement
+        this->send_processed_envelopes(node);
 
         // === move to next node ===
         
@@ -188,6 +188,35 @@ private:
             this->logger->say("Pipeline finalized.");
     }
 
+    /**
+     * Send all processed envelopes of a node
+     */
+    void send_processed_envelopes(Node* node) {
+        for (UntypedPort* port : node->ports)
+        {
+            if (port->get_state() != PortState::processed)
+                continue;
+
+            if (port->envelope_target == nullptr)
+                continue;
+
+            if (port->envelope_target->get_state() != PortState::empty)
+                continue;
+
+            UntypedEnvelope* env = port->attached_envelope;
+            port->attached_envelope = nullptr;
+            port->envelope_target->attach_envelope(env);
+
+            if (this->logger) {
+                this->logger->after_envelope_sent(
+                    *node,
+                    *port->envelope_target->parent_node,
+                    *env
+                );
+            }
+        }
+    }
+
     ///////////////////////////
     // Synchronization logic //
     ///////////////////////////
@@ -197,8 +226,8 @@ private:
     // quivalent) be callable from any thread.
 
 private:
-    bool _expecting_callback;
-    bool _callback_was_called;
+    bool _expecting_callback = false;
+    bool _callback_was_called = false;
 
     /**
      * Call this before starting a node update

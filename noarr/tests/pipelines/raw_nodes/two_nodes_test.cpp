@@ -30,7 +30,7 @@ TEST_CASE("Two nodes", "[node]") {
     prod.output_port.attach_envelope(&s);
 
     // setup a scheduler
-    auto scheduler = DebuggingScheduler(std::cout);
+    auto scheduler = DebuggingScheduler();
     scheduler.add(prod);
     scheduler.add(cons);
     

@@ -16,7 +16,7 @@ TEST_CASE("Consuming node", "[node]") {
     char buffer[1024];
     auto env = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
 
-    // create our consumer harbor
+    // create our consumer node
     auto cons = MyConsumingNode();
 
     SECTION("it cannot advance without an envelope") {

@@ -13,6 +13,11 @@ namespace pipelines {
 class Node {
 public:
     /**
+     * Ports that have been registered on startup as belonging to the node
+     */
+    std::vector<UntypedPort*> ports;
+
+    /**
      * Label that can be used in logging and error messages
      */
     std::string label;
@@ -58,8 +63,6 @@ public:
     void scheduler_post_update(bool data_was_advanced) {
         if (data_was_advanced)
             this->post_advance();
-
-        this->send_envelopes();
     }
 
 protected:
@@ -89,38 +92,16 @@ protected:
 
 private:
 
-    std::vector<UntypedPort*> registered_ports;
-
     /**
      * Calls the register_ports method
      */
     void perform_port_registration() {
-        this->registered_ports.clear();
+        this->ports.clear();
         
         this->register_ports([&](UntypedPort* d) {
-            this->registered_ports.push_back(d);
+            d->parent_node = this;
+            this->ports.push_back(d);
         });
-    }
-
-    /**
-     * Sends envelopes that are ready to leave
-     */
-    void send_envelopes() {
-        for (UntypedPort* d : this->registered_ports)
-        {
-            if (d->get_state() != PortState::processed)
-                continue;
-
-            if (d->envelope_target == nullptr)
-                continue;
-
-            if (d->envelope_target->get_state() != PortState::empty)
-                continue;
-
-            UntypedEnvelope* env = d->attached_envelope;
-            d->attached_envelope = nullptr;
-            d->envelope_target->attach_envelope(env);
-        }
     }
 };
 

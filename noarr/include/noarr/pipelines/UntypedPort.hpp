@@ -20,8 +20,16 @@ namespace pipelines {
         -> checks and updates envelope's payload presence flag
  */
 
+// forward declaration for the reference to the parent node to compile
+class Node;
+
 class UntypedPort {
 public:
+    /**
+     * The node that this port belongs to
+     * (set during port registration from within the Node class)
+     */
+    Node* parent_node;
 
     /**
      * Returns the state of the port
