@@ -11,7 +11,7 @@ template<typename Structure, typename BufferItem = void>
 class Envelope : public UntypedEnvelope {
 public:
     /**
-     * The structure of data contained on the ship
+     * The structure of data contained in the envelope
      */
     Structure structure;
 
@@ -21,7 +21,7 @@ public:
     BufferItem* buffer;
 
     /**
-     * Constructs a new ship from an existing buffer
+     * Constructs a new envelope from an existing buffer
      */
     Envelope(
         Device device,

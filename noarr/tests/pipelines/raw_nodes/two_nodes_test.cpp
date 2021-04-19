@@ -5,7 +5,7 @@
 
 #include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
-#include <noarr/pipelines/scheduler.hpp>
+#include <noarr/pipelines/DebuggingScheduler.hpp>
 
 #include "MyProducingNode.hpp"
 #include "MyConsumingNode.hpp"
@@ -30,13 +30,13 @@ TEST_CASE("Two nodes", "[node]") {
     prod.output_port.attach_envelope(&s);
 
     // setup a scheduler
-    auto sched = scheduler();
-    sched.add(&prod);
-    sched.add(&cons);
+    auto scheduler = DebuggingScheduler(std::cout);
+    scheduler.add(prod);
+    scheduler.add(cons);
     
     SECTION("they can cycle an envelope") {
         // run the pipeline to completion
-        sched.run();
+        scheduler.run();
         
         // assert the string has been transfered
         REQUIRE(cons.received_string == "lorem ipsum");

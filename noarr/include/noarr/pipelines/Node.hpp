@@ -1,8 +1,9 @@
 #ifndef NOARR_PIPELINES_NODE_HPP
 #define NOARR_PIPELINES_NODE_HPP
 
-#include <cstddef>
+#include <string>
 #include <functional>
+
 #include "PortState.hpp"
 #include "UntypedPort.hpp"
 
@@ -11,6 +12,14 @@ namespace pipelines {
 
 class Node {
 public:
+    /**
+     * Label that can be used in logging and error messages
+     */
+    std::string label;
+
+    Node() : label(std::to_string((unsigned long)this)) { }
+
+    Node(const std::string& label) : label(label) { }
 
     /**
      * Called by the scheduler before the pipeline starts running

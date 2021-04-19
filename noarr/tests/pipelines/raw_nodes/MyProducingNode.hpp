@@ -9,14 +9,17 @@
 using namespace noarr::pipelines;
 
 class MyProducingNode : public Node {
+private:
+    std::string data;
+    std::size_t chunk_size;
+    std::size_t at_index;
+
 public:
     Port<std::size_t, char> output_port;
 
-    MyProducingNode(std::string data, std::size_t chunk_size) {
-        this->data = data;
-        this->chunk_size = chunk_size;
-        this->at_index = 0;
-    }
+    MyProducingNode(const std::string& data, std::size_t chunk_size)
+        : Node(typeid(MyProducingNode).name()),
+        data(data), chunk_size(chunk_size), at_index(0) { }
 
     virtual void register_ports(std::function<void(UntypedPort*)> register_port) {
         register_port(&this->output_port);
@@ -53,9 +56,4 @@ public:
         // computation is done
         callback();
     }
-
-private:
-    std::string data;
-    std::size_t chunk_size;
-    std::size_t at_index;
 };

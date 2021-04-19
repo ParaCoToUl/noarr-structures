@@ -6,7 +6,7 @@
 
 #include <noarr/pipelines/Device.hpp>
 #include <noarr/pipelines/Envelope.hpp>
-#include <noarr/pipelines/scheduler.hpp>
+#include <noarr/pipelines/DebuggingScheduler.hpp>
 
 #include "raw_nodes/MyProducingNode.hpp"
 #include "raw_nodes/MyConsumingNode.hpp"

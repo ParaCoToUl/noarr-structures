@@ -14,7 +14,7 @@ public:
 
     std::string received_string;
 
-    MyConsumingNode() {
+    MyConsumingNode() : Node(typeid(MyConsumingNode).name()) {
         this->received_string.clear();
     }
 

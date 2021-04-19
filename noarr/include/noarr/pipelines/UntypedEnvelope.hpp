@@ -1,7 +1,8 @@
 #ifndef NOARR_PIPELINES_UNTYPED_ENVELOPE_HPP
 #define NOARR_PIPELINES_UNTYPED_ENVELOPE_HPP
 
-#include <cstddef>
+#include <string>
+
 #include "Device.hpp"
 
 namespace noarr {
@@ -25,19 +26,21 @@ public:
     std::size_t size;
 
     /**
-     * What device this ship lives on
+     * What device this envelope lives on
      */
     Device device;
 
+    /**
+     * Label that can be used in logging and error messages
+     */
+    std::string label;
+
     UntypedEnvelope(
-        Device _device,
+        Device device,
         void* existing_buffer,
         std::size_t buffer_size
-    ) {
-        this->device = device;
-        this->untyped_buffer = existing_buffer;
-        this->size = buffer_size;
-    }
+    ) : device(device), untyped_buffer(existing_buffer), size(buffer_size),
+        label(std::to_string((unsigned long)this)) { }
 
 protected:
     // virtual method needed for polymorphism..
