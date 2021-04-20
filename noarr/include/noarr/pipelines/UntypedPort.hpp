@@ -45,8 +45,8 @@ public:
     /**
      * Set the target port, to which processed envelopes are sent
      */
-    void send_processed_envelopes_to(UntypedPort* target) {
-        this->envelope_target = target;
+    void send_processed_envelopes_to(UntypedPort& target) {
+        this->envelope_target = &target;
     }
 
     /**

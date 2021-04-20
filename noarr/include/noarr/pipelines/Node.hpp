@@ -27,6 +27,15 @@ public:
     Node(const std::string& label) : label(label) { }
 
     /**
+     * Helper method to link two ports together so that processed
+     * envelopes from one go to the other and vice versa
+     */
+    static void link_ports(UntypedPort& a, UntypedPort& b) {
+        a.send_processed_envelopes_to(b);
+        b.send_processed_envelopes_to(a);
+    }
+
+    /**
      * Called by the scheduler before the pipeline starts running
      */
     void scheduler_start() {

@@ -23,8 +23,7 @@ TEST_CASE("Two nodes", "[node]") {
     auto cons = MyConsumingNode();
 
     // link those nodes together
-    prod.output_port.send_processed_envelopes_to(&cons.input_port);
-    cons.input_port.send_processed_envelopes_to(&prod.output_port);
+    Node::link_ports(cons.input_port, prod.output_port);
 
     // put the envelope into the producer
     prod.output_port.attach_envelope(&s);
