@@ -1,12 +1,15 @@
 #ifndef NOARR_PIPELINES_HUB_HPP
 #define NOARR_PIPELINES_HUB_HPP
 
-#include <cstddef>
+#include <vector>
 
-#include "noarr/pipelines/UntypedPort.hpp"
-#include "noarr/pipelines/Device.hpp"
+#include "UntypedPort.hpp"
+#include "Device.hpp"
+#include "CompositeNode.hpp"
 
-#include "noarr/pipelines/Hub_BufferPool.hpp"
+#include "Hub_Link.hpp"
+#include "Hub_BufferPool.hpp"
+#include "Hub_WriteQueue.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -18,24 +21,73 @@ namespace pipelines {
  * - moving data between devices
  * It is the glue between compute nodes.
  */
-template<typename Structure, typename BufferItem = void>
-class Hub {
+template<typename Structure, typename BufferItem>
+class Hub : public CompositeNode {
+public:
+    using Link = hub::Link<Structure, BufferItem>;
+
+    /**
+     * Holds empty buffers and distributes them to write links
+     */
+    hub::BufferPool<Structure, BufferItem> buffer_pool;
+
+    /**
+     * Holds freshly produced envelopes, as they arrive into the hub
+     * TODO: merge with the DistributeQueue and rename to it
+     */
+    hub::WriteQueue<Structure, BufferItem> write_queue;
+
+    // TODO: construction API to be figured out
+    Hub() : buffer_pool() {
+        this->register_constituent_node(this->buffer_pool);
+    }
+
+    ///////////////////////
+    // Link creation API //
+    ///////////////////////
+
 private:
-    std::size_t buffer_size;
+    std::vector<Link> links;
+
+    Link& create_link(Device::index_t device_index, hub::LinkFlags flags) {
+        auto link = Link(*this, flags, device_index, [&](
+            Link& l, Port<Structure, BufferItem>& p
+        ){
+            this->attach_link_to_node_port(l, p);
+        });
+
+        this->links.push_back(std::move(link));
+
+        return this->links.back();
+    }
+
+    void attach_link_to_node_port(Link& link, Port<Structure, BufferItem>& node_port) {
+        hub::LinkFlags flags = link.flags();
+        Device::index_t dev = link.device_index();
+        
+        if (flags == hub::LinkFlags::write) {
+            auto& source_port = this->buffer_pool.get_output_port(dev);
+            auto& target_port = this->write_queue.get_input_port(dev);
+            source_port.send_processed_envelopes_to(node_port);
+            node_port.send_processed_envelopes_to(target_port);
+            return;
+        }
+
+        // TODO: implement all the possible link types
+
+        assert(false && "Given link type is unknown");
+    }
 
 public:
-    // TODO: construction API to be figured out
-    Hub(std::size_t buffer_count, std::size_t buffer_size) {
-        this->buffer_size = buffer_size;
+    Link& write(Device::index_t device_index) {
+        return this->create_link(device_index, hub::LinkFlags::write);
     }
 
-    UntypedPort& write_port(Device dev) {
-        // TODO: placeholder method
+    Link& read(Device::index_t device_index) {
+        return this->create_link(device_index, hub::LinkFlags::read);
     }
 
-    UntypedPort& read_port(Device dev) {
-        // TODO: placeholder method
-    }
+    // TODO: readwrite(...), read_peek(...), readwrite_peek(...)
 };
 
 } // pipelines namespace

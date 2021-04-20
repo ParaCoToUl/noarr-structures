@@ -3,5 +3,5 @@
  */
 
 #include "noarr/pipelines/ComputeNode.hpp"
-#include "noarr/pipelines/EnvelopeManager.hpp"
+#include "noarr/pipelines/Hub.hpp"
 // TODO ...
