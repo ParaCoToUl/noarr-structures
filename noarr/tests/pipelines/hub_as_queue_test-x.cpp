@@ -24,7 +24,7 @@ using namespace noarr::pipelines;
  * Tests the envelope hub in the messaging queue setup,
  * when it performs memory transfer and/or double buffering
  */
-TEST_CASE("Hub as queue", "[.][hub]") { // TEST IS SKIPPED: [.]
+TEST_CASE("Hub as queue", "[.][hub]") { // TEST IS SKIPPED: [.] and suffixed -x to not compile
 
     // create a hub (buffer count, buffer size)
     auto hub = Hub<std::size_t, char>(2, 1024);

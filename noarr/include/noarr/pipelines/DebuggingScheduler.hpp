@@ -252,7 +252,7 @@ private:
     /**
      * Call this to synchronously wait for the callback
      */
-    bool wait_for_callback() {
+    void wait_for_callback() {
         if (!this->_expecting_callback)
             throw std::runtime_error(
                 "Cannot wait for callback without first expecting it."
