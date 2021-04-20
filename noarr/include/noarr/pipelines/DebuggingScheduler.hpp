@@ -209,24 +209,25 @@ private:
     void send_processed_envelopes(Node* node) {
         for (UntypedPort* port : node->ports)
         {
-            if (port->get_state() != PortState::processed)
+            if (port->state() != PortState::processed)
                 continue;
 
-            if (port->envelope_target == nullptr)
+            if (!port->has_target())
                 continue;
 
-            if (port->envelope_target->get_state() != PortState::empty)
+            UntypedPort& target_port = port->target();
+
+            if (target_port.state() != PortState::empty)
                 continue;
 
-            UntypedEnvelope* env = port->attached_envelope;
-            port->attached_envelope = nullptr;
-            port->envelope_target->attach_envelope(env);
+            UntypedEnvelope& env = port->detach_envelope();
+            target_port.attach_envelope(env, false);
 
             if (this->logger) {
                 this->logger->after_envelope_sent(
                     *node,
-                    *port->envelope_target->parent_node,
-                    *env
+                    *(target_port.parent_node),
+                    env
                 );
             }
         }

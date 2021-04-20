@@ -14,9 +14,9 @@ public:
 
     std::string received_string;
 
-    MyConsumingNode() : Node(typeid(MyConsumingNode).name()) {
-        this->received_string.clear();
-    }
+    MyConsumingNode() :
+        Node(typeid(MyConsumingNode).name()),
+        input_port(Device::HOST_INDEX) { }
 
     virtual void register_ports(std::function<void(UntypedPort*)> register_port) {
         register_port(&this->input_port);
@@ -24,17 +24,17 @@ public:
 
     bool can_advance() override {
         // true, if we have a full ship available
-        return this->input_port.get_state() == PortState::arrived;
+        return this->input_port.state() == PortState::arrived;
     }
 
     void advance(std::function<void()> callback) override {
         // get the ship to be filled up
-        auto& env = this->input_port.get_envelope();
+        auto& env = this->input_port.envelope();
 
         // move the chunk from ship into the accumulator
         this->received_string.append(env.buffer, env.structure);
         env.has_payload = false;
-        this->input_port.envelope_processed = true;
+        this->input_port.set_processed();
 
         // computation is done
         callback();

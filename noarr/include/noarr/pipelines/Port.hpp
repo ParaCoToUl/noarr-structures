@@ -12,12 +12,14 @@ template<typename Structure, typename BufferItem = void>
 class Port : public UntypedPort {
 public:
 
+    Port(Device::index_t device_index) : UntypedPort(device_index) { }
+
     /**
      * Returns a reference to the attached envelope
      */
-    Envelope<Structure, BufferItem>& get_envelope() {
+    Envelope<Structure, BufferItem>& envelope() {
         return dynamic_cast<Envelope<Structure, BufferItem>&>(
-            this->get_untyped_envelope()
+            UntypedPort::envelope()
         );
     }
 };

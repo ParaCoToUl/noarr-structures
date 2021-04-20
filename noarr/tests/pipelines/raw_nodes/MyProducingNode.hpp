@@ -19,7 +19,8 @@ public:
 
     MyProducingNode(const std::string& data, std::size_t chunk_size)
         : Node(typeid(MyProducingNode).name()),
-        data(data), chunk_size(chunk_size), at_index(0) { }
+        data(data), chunk_size(chunk_size), at_index(0),
+        output_port(Device::HOST_INDEX) { }
 
     virtual void register_ports(std::function<void(UntypedPort*)> register_port) {
         register_port(&this->output_port);
@@ -31,12 +32,12 @@ public:
             return false;
         
         // true, if we have an empty envelope available
-        return this->output_port.get_state() == PortState::arrived;
+        return this->output_port.state() == PortState::arrived;
     }
 
     void advance(std::function<void()> callback) override {
         // get the envelope to be filled up
-        auto& envelope = this->output_port.get_envelope();
+        auto& envelope = this->output_port.envelope();
 
         // compute the size of the next chunk
         std::size_t items_to_take = std::min(
@@ -48,7 +49,7 @@ public:
         this->data.copy(envelope.buffer, items_to_take, this->at_index);
         envelope.structure = items_to_take;
         envelope.has_payload = true;
-        this->output_port.envelope_processed = true;
+        this->output_port.set_processed();
 
         // update our state
         this->at_index += items_to_take;

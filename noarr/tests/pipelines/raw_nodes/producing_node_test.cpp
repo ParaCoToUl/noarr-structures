@@ -29,12 +29,12 @@ TEST_CASE("Producing node", "[node]") {
     }
 
     SECTION("it can advance with an envelope") {
-        prod.output_port.attach_envelope(&env);
+        prod.output_port.attach_envelope(env);
         REQUIRE(prod.can_advance());
     }
 
     SECTION("it can produce a chunk") {
-        prod.output_port.attach_envelope(&env);
+        prod.output_port.attach_envelope(env);
         
         REQUIRE(scheduler.update_next_node());
 
@@ -44,7 +44,7 @@ TEST_CASE("Producing node", "[node]") {
     }
 
     SECTION("it can produce all chunks and stop advancing") {
-        prod.output_port.attach_envelope(&env);
+        prod.output_port.attach_envelope(env);
         
         // chunk 0 "lor"
         REQUIRE(scheduler.update_next_node());
@@ -53,7 +53,7 @@ TEST_CASE("Producing node", "[node]") {
         REQUIRE(std::string(env.buffer, 3) == "lor");
 
         env.has_payload = false;
-        prod.output_port.envelope_processed = false;
+        prod.output_port.set_processed(false);
 
         // chunk 1 "em "
         REQUIRE(scheduler.update_next_node());
@@ -62,7 +62,7 @@ TEST_CASE("Producing node", "[node]") {
         REQUIRE(std::string(env.buffer, 3) == "em ");
 
         env.has_payload = false;
-        prod.output_port.envelope_processed = false;
+        prod.output_port.set_processed(false);
 
         // chunk 2 "ips"
         REQUIRE(scheduler.update_next_node());
@@ -71,7 +71,7 @@ TEST_CASE("Producing node", "[node]") {
         REQUIRE(std::string(env.buffer, 3) == "ips");
 
         env.has_payload = false;
-        prod.output_port.envelope_processed = false;
+        prod.output_port.set_processed(false);
 
         // chunk 3 "um"
         REQUIRE(scheduler.update_next_node());
@@ -80,11 +80,11 @@ TEST_CASE("Producing node", "[node]") {
         REQUIRE(std::string(env.buffer, 2) == "um");
 
         env.has_payload = false;
-        prod.output_port.envelope_processed = false;
+        prod.output_port.set_processed(false);
 
         // done
         REQUIRE(!scheduler.update_next_node());
         REQUIRE(!env.has_payload);
-        REQUIRE(!prod.output_port.envelope_processed);
+        REQUIRE(prod.output_port.state() != PortState::processed);
     }
 }

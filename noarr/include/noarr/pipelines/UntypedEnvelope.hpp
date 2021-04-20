@@ -12,6 +12,7 @@ class UntypedEnvelope {
 public:
     /**
      * Flag that determines whether the envelope is considered full or empty
+     * TODO: this flag may be redundant, try to remove it
      */
     bool has_payload = false;
 
@@ -39,7 +40,10 @@ public:
         Device device,
         void* existing_buffer,
         std::size_t buffer_size
-    ) : device(device), untyped_buffer(existing_buffer), size(buffer_size),
+    ) :
+        untyped_buffer(existing_buffer),
+        size(buffer_size),
+        device(device),
         label(std::to_string((unsigned long)this)) { }
 
 protected:

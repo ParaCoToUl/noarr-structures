@@ -16,7 +16,7 @@ TEST_CASE("Two nodes", "[node]") {
 
     // create an envelope
     char buffer[1024];
-    auto s = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
+    auto env = Envelope<std::size_t, char>(Device(-1), buffer, 1024);
 
     // create our nodes
     auto prod = MyProducingNode("lorem ipsum", 3);
@@ -26,7 +26,7 @@ TEST_CASE("Two nodes", "[node]") {
     Node::link_ports(cons.input_port, prod.output_port);
 
     // put the envelope into the producer
-    prod.output_port.attach_envelope(&s);
+    prod.output_port.attach_envelope(env);
 
     // setup a scheduler
     auto scheduler = DebuggingScheduler();
