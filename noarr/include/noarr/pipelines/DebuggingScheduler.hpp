@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <string>
-#include <exception>
+#include <cassert>
 #include <vector>
 
 #include "Node.hpp"
@@ -108,11 +108,11 @@ public:
      * @return True if data was advanced
      */
     bool update_next_node() {
-        if (this->nodes.size() == 0)
-            throw std::runtime_error("Pipeline is empty so cannot be advanced");
+        assert(this->nodes.size() != 0
+            && "Pipeline is empty so cannot be advanced");
 
-        if (this->pipeline_finalized)
-            throw std::runtime_error("Pipeline is already finalized");
+        assert(!this->pipeline_finalized
+            && "Pipeline is already finalized");
 
         // pipeline starting
         if (!this->pipeline_started)
@@ -176,8 +176,8 @@ private:
      * Called automatically before the first node is updated
      */
     void start_pipeline() {
-        if (this->pipeline_started)
-            throw std::runtime_error("Pipeline was already started");
+        assert(!this->pipeline_started
+            && "Pipeline was already started");
 
         for (Node* node : this->nodes)
             node->scheduler_start();
@@ -192,8 +192,8 @@ private:
      * Called automatically after the pipeline detects stopping condition
      */
     void finalize_pipeline() {
-        if (this->pipeline_finalized)
-            throw std::runtime_error("Pipeline was already finalized");
+        assert(!this->pipeline_finalized
+            && "Pipeline was already finalized");
 
         // TODO: implement any finalization logic here
 
@@ -249,10 +249,8 @@ private:
      * Call this before starting a node update
      */
     void callback_will_be_called() {
-        if (this->_expecting_callback)
-            throw std::runtime_error(
-                "Cannot expect a callback when the previous didn't finish."
-            );
+        assert(!this->_expecting_callback
+            && "Cannot expect a callback when the previous didn't finish.");
 
         this->_expecting_callback = true;
         this->_callback_was_called = false;
@@ -269,15 +267,12 @@ private:
      * Call this to synchronously wait for the callback
      */
     void wait_for_callback() {
-        if (!this->_expecting_callback)
-            throw std::runtime_error(
-                "Cannot wait for callback without first expecting it."
-            );
+        assert(this->_expecting_callback
+            && "Cannot wait for callback without first expecting it.");
 
-        if (!this->_callback_was_called)
-            throw std::runtime_error(
-                "TODO: Asynchronous nodes are not implemented yet."
-            );
+        // TODO: perform the actual wait here
+        assert(this->_callback_was_called
+            && "TODO: Asynchronous nodes are not implemented yet.");
 
         this->_expecting_callback = false;
     }

@@ -2,8 +2,8 @@
 #define NOARR_PIPELINES_COMPOSITE_NODE_HPP
 
 #include <vector>
-#include <exception>
 #include <string>
+#include <cassert>
 
 #include "Node.hpp"
 
@@ -31,22 +31,14 @@ protected:
      * Registers a node as a part of this composite node
      */
     void register_constituent_node(Node& node) {
-        if (this->registered_in_scheduler)
-            throw std::runtime_error(
-                "Cannot add node when the composite node has "
-                "been already registered in a scheduler"
-            );
+        assert(!this->registered_in_scheduler
+            && "Cannot add node when the composite node has "
+            "been already registered in a scheduler");
 
-        for (Node* n : this->nodes) {
-            if (n == &node) {
-                throw std::runtime_error(
-                    "Cannot register a composite node twice"
-                );
-            }
-        }
+        for (Node* n : this->nodes)
+            assert(n != &node && "Cannot register a composite node twice");
 
-        node.label = this->label + "::" + node.label;
-        
+        node.label = this->label + "::" + node.label;        
         this->nodes.push_back(&node);
     }
 

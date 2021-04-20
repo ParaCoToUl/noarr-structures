@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <string>
-#include <exception>
 
 #include "Node.hpp"
 #include "Envelope.hpp"

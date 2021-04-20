@@ -1,8 +1,7 @@
 #ifndef NOARR_PIPELINES_UNTYPED_PORT_HPP
 #define NOARR_PIPELINES_UNTYPED_PORT_HPP
 
-#include <optional>
-#include <exception>
+#include <cassert>
 
 #include "Device.hpp"
 #include "UntypedEnvelope.hpp"
@@ -90,8 +89,8 @@ public:
      * Returns reference to the target port
      */
     UntypedPort& target() {
-        if (this->envelope_target == nullptr)
-            throw std::runtime_error("The port has no target");
+        assert(this->envelope_target != nullptr
+            && "The port has no target");
 
         return *this->envelope_target;
     }
@@ -107,11 +106,9 @@ public:
      * Set the target port, to which processed envelopes are sent
      */
     void send_processed_envelopes_to(UntypedPort& target) {
-        // validate type signature
-        if (this->structure_type != target.structure_type
-            || this->buffer_item_type != target.buffer_item_type) {
-            throw std::runtime_error("Given target has different type signature");
-        }
+        assert(this->structure_type == target.structure_type
+            && this->buffer_item_type == target.buffer_item_type
+            && "Given target has different type signature");
         
         this->envelope_target = &target;
     }
@@ -121,8 +118,8 @@ public:
      * (or not, if the argument is false)
      */
     void set_processed(bool value = true) {
-        if (this->attached_envelope == nullptr)
-            throw std::runtime_error("There's no envelope attached");
+        assert(this->attached_envelope != nullptr
+            && "There's no envelope to attached");
         
         this->envelope_processed = value;
     }
@@ -131,8 +128,8 @@ public:
      * Returns a reference to the attached envelope
      */
     UntypedEnvelope& envelope() {
-        if (this->attached_envelope == nullptr)
-            throw std::runtime_error("There's no envelope attached");
+        assert(this->attached_envelope != nullptr
+            && "There's no envelope to attached");
 
         return *this->attached_envelope;
     }
@@ -142,18 +139,15 @@ public:
      * @param processed To what value should be the processed flag set
      */
     void attach_envelope(UntypedEnvelope& env, bool processed = false) {
-        if (this->attached_envelope != nullptr)
-            throw std::runtime_error("There's an envelope already attached");
+        assert(this->attached_envelope == nullptr
+            && "There's an envelope already attached");
 
-        // check device
-        if (env.device.device_index != this->_device_index)
-            throw std::runtime_error("The envelope belongs to a different device");
-        
-        // check type signature
-        if (this->structure_type != env.structure_type
-            || this->buffer_item_type != env.buffer_item_type) {
-            throw std::runtime_error("The envelope has different type signature");
-        }
+        assert(env.device.device_index == this->_device_index
+            && "The envelope belongs to a different device");
+
+        assert(this->structure_type == env.structure_type
+            && this->buffer_item_type == env.buffer_item_type
+            && "The envelope has different type signature");
 
         // attach
         this->attached_envelope = &env;
@@ -164,8 +158,8 @@ public:
      * Detaches and returns the attached envelope
      */
     UntypedEnvelope& detach_envelope() {
-        if (this->attached_envelope == nullptr)
-            throw std::runtime_error("There's no envelope to be detached");
+        assert(this->attached_envelope != nullptr
+            && "There's no envelope to be detached");
 
         UntypedEnvelope* ret = this->attached_envelope;
         this->attached_envelope = nullptr;
