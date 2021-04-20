@@ -27,7 +27,13 @@ public:
         Device device,
         void* existing_buffer,
         std::size_t buffer_size
-    ) : UntypedEnvelope(device, existing_buffer, buffer_size) {
+    ) : UntypedEnvelope(
+            device,
+            existing_buffer,
+            buffer_size,
+            typeid(Structure),
+            typeid(BufferItem)
+    ) {
         this->buffer = (BufferItem*) existing_buffer;
     }
 

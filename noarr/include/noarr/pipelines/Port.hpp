@@ -12,7 +12,11 @@ template<typename Structure, typename BufferItem = void>
 class Port : public UntypedPort {
 public:
 
-    Port(Device::index_t device_index) : UntypedPort(device_index) { }
+    Port(Device::index_t device_index) : UntypedPort(
+        device_index,
+        typeid(Structure),
+        typeid(BufferItem)
+    ) { }
 
     /**
      * Returns a reference to the attached envelope

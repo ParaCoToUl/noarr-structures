@@ -42,6 +42,16 @@ private:
      */
     UntypedPort* envelope_target = nullptr;
 
+    /**
+     * Type of the structure value
+     */
+    const std::type_index structure_type;
+
+    /**
+     * Type of the buffer pointer
+     */
+    const std::type_index buffer_item_type;
+
 public:
     /**
      * The node that this port belongs to
@@ -49,7 +59,14 @@ public:
      */
     Node* parent_node = nullptr;
 
-    UntypedPort(Device::index_t device_index) : _device_index(device_index) { }
+    UntypedPort(
+        Device::index_t device_index,
+        const std::type_index structure_type,
+        const std::type_index buffer_item_type
+    ) :
+        _device_index(device_index),
+        structure_type(structure_type),
+        buffer_item_type(buffer_item_type) { }
 
     /**
      * Returns the state of the port
@@ -90,7 +107,11 @@ public:
      * Set the target port, to which processed envelopes are sent
      */
     void send_processed_envelopes_to(UntypedPort& target) {
-        // TODO: validate type signature
+        // validate type signature
+        if (this->structure_type != target.structure_type
+            || this->buffer_item_type != target.buffer_item_type) {
+            throw std::runtime_error("Given target has different type signature");
+        }
         
         this->envelope_target = &target;
     }
@@ -126,10 +147,13 @@ public:
 
         // check device
         if (env.device.device_index != this->_device_index)
-            throw std::runtime_error("The envelope belongs to a different device.");
-
+            throw std::runtime_error("The envelope belongs to a different device");
+        
         // check type signature
-        // TODO ...
+        if (this->structure_type != env.structure_type
+            || this->buffer_item_type != env.buffer_item_type) {
+            throw std::runtime_error("The envelope has different type signature");
+        }
 
         // attach
         this->attached_envelope = &env;
