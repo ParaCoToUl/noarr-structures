@@ -18,6 +18,10 @@ class CompositeNode {
 public:
     std::string label;
 
+    CompositeNode() : label(std::to_string((unsigned long)this)) { }
+
+    CompositeNode(const std::string& label) : label(label) { }
+
 private:
     bool registered_in_scheduler = false;
     std::vector<Node*> nodes;

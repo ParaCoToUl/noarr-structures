@@ -9,13 +9,15 @@ namespace pipelines {
  * (host cpu or a gpu device)
  */
 struct Device {
-    unsigned char device_index = -1;
+    using index_t = unsigned char;
+
+    index_t device_index = -1;
 
     Device() {
         //
     }
 
-    Device(unsigned char device_index) {
+    Device(index_t device_index) {
         this->device_index = device_index;
     }
 };

@@ -6,6 +6,8 @@
 #include "noarr/pipelines/UntypedPort.hpp"
 #include "noarr/pipelines/Device.hpp"
 
+#include "noarr/pipelines/Hub_BufferPool.hpp"
+
 namespace noarr {
 namespace pipelines {
 
