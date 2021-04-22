@@ -4,6 +4,7 @@
 #include "noarr/structures/funcs.hpp"
 #include "noarr/structures/io.hpp"
 #include "noarr/structures/struct_traits.hpp"
+#include "noarr/structures/wrapper.hpp"
 
 using namespace noarr;
 
@@ -15,6 +16,7 @@ int main() {
     tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
 
     tuple<'t', scalar<int>, scalar<int>> t3;
+
 
     std::cout << "pipe(t3, fix<'t'>(1_idx), offset()): " << pipe(t3, fix<'t'>(1_idx), offset()) << std::endl;
 
@@ -78,7 +80,27 @@ int main() {
     std::cout << "vs4 | get_length<'y'>(): " << (vs4 | get_length<'y'>()) << std::endl;
     std::cout << "sizeof(vs4): " << sizeof(vs4) << std::endl << std::endl;
 
+    auto wvs2 = wrap(vs2); // wrap
+    static_assert(std::is_pod<decltype(wvs2)>::value, "a struct has to be a podtype");
+    std::cout << "wvs2 = wrap(vs2): " << typeid(wvs2).name() << std::endl;
+    std::cout << "wvs2.get_size(): " << wvs2.get_size() << std::endl;
+    std::cout << "sizeof(wvs2): " << sizeof(wvs2) << std::endl;
+    std::cout << "wvs2.fix<'x'>(5):" << typeid(wvs2.fix<'x'>(5)).name() << std::endl;
+    std::cout << "wvs2.fix<'x'>(5).fix<'y'>(6):" << typeid(wvs2.fix<'x'>(5).fix<'y'>(6)).name() << std::endl;
+    std::cout << "wvs2.fix<'x', 'y'>(5, 6):" << typeid(wvs2.fix<'x', 'y'>(5, 6)).name() << std::endl;
+    std::cout << "wvs2.fix<'x', 'y'>(5, 6).offset():" << (wvs2.fix<'x', 'y'>(5, 6).offset()) << std::endl;
+    std::cout << "wvs2.fix<'y', 'x'>(6, 5).offset():" << (wvs2.fix<'y', 'x'>(6, 5).offset()) << std::endl;
+    std::cout << "wvs2.offset<'x', 'y'>(5, 6):" << (wvs2.offset<'x', 'y'>(5, 6)) << std::endl;
+    std::cout << "wvs2.offset<'y', 'x'>(6, 5):" << (wvs2.offset<'y', 'x'>(6, 5)) << std::endl;
+    std::cout << "wvs2.offset<'y', 'x'>(5, 6):" << (wvs2.offset<'y', 'x'>(5, 6)) << std::endl;
+
     std::cout << "sizeof(t): " << sizeof(t) << std::endl;
+    auto wvs4 = wrap(vs4);
+    static_assert(std::is_pod<decltype(wvs4)>::value, "wvs4 has to be a podtype");
+    std::cout << "wvs4 = wrap(vs4): " << typeid(wvs4).name() << std::endl;
+    std::cout << "wvs4.get_size(): " << wvs4.get_size() << std::endl;
+    std::cout << "wvs4.get_length<'y'>(): " << (wvs4.get_length<'y'>()) << std::endl;
+    std::cout << "sizeof(wvs4): " << sizeof(wvs4) << std::endl << std::endl;
 
     auto ts = t | set_length<'x'>(20);
     static_assert(!is_cube<decltype(ts)>::value, "ts must not be a cube");
