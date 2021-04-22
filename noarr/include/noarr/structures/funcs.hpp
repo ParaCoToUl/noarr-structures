@@ -160,11 +160,6 @@ struct _sfix {
     }
 };
 
-template<char Dim, std::size_t Idx>
-inline constexpr auto sfix(std::integral_constant<std::size_t, Idx>) {
-    return _sfix<Dim, Idx>();
-}
-
 template<typename... Tuples>
 struct _fixs;
 
@@ -183,11 +178,11 @@ struct _fixs<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : priv
 };
 
 template<char Dim, typename T>
-struct _fixs<std::tuple<std::integral_constant<char, Dim>, T>> : _fix<Dim> { using _fix<Dim>::_fix; using _fix<Dim>::operator(); };
+struct _fixs<std::tuple<std::integral_constant<char, Dim>, T>> : private _fix<Dim> { using _fix<Dim>::_fix; using _fix<Dim>::operator(); };
 
 
 template<char Dim, std::size_t Idx, typename... Tuples>
-struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : contain<_sfix<Dim, Idx>, _fixs<Tuples...>> {
+struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : private contain<_sfix<Dim, Idx>, _fixs<Tuples...>> {
     using base = contain<_sfix<Dim, Idx>, _fixs<Tuples...>>;
     constexpr _fixs() = default;
     
@@ -201,10 +196,20 @@ struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constan
 };
 
 template<char Dim, std::size_t Idx>
-struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : _sfix<Dim, Idx> {
+struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : private _sfix<Dim, Idx> {
     constexpr _fixs() = default;
     constexpr _fixs(std::integral_constant<std::size_t, Idx>) : _sfix<Dim,Idx>() {}
     using _sfix<Dim, Idx>::operator();
+};
+
+template<>
+struct _fixs<> {
+    constexpr _fixs() = default;
+
+    template<typename T>
+    constexpr auto operator()(T t) const {
+        return t;
+    }
 };
 
 template<char... Dims, typename... Ts>
