@@ -6,6 +6,14 @@
 namespace noarr {
 
 template<typename Structure>
+struct wrapper;
+
+template<typename T>
+struct _is_cube<wrapper<T>> {
+    using type = is_cube<T>;
+};
+
+template<typename Structure>
 struct wrapper : private Structure {
     constexpr wrapper() = default;
     explicit constexpr wrapper(Structure s) : Structure(s) {}
