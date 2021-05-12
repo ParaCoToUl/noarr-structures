@@ -49,7 +49,7 @@ struct wrapper : private Structure {
 };
 
 template<typename Structure> 
-inline constexpr auto wrap(Structure s) {
+inline constexpr wrapper<Structure> wrap(Structure s) {
     return wrapper<Structure>(s);
 }
 

@@ -71,20 +71,25 @@ struct _is_point<T, std::enable_if_t<(std::is_same<typename get_struct_desc_t<T>
 };
 
 template<typename T, typename = void>
-struct _is_cube {
+struct _is_cube_int {
     using type = std::false_type;
+};
+
+template<typename T>
+struct _is_cube {
+    using type = typename _is_cube_int<T>::type;
 };
 
 template<typename T>
 using is_cube = typename _is_cube<remove_cvref<T>>::type;
 
 template<typename T>
-struct _is_cube<T, std::enable_if_t<!std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value>> {
+struct _is_cube_int<T, std::enable_if_t<!std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value>> {
     using type = std::conditional_t<is_dynamic_dimension<T>::value, std::true_type, std::false_type>;
 };
 
 template<typename T>
-struct _is_cube<T, std::enable_if_t<std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value>> {
+struct _is_cube_int<T, std::enable_if_t<std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value>> {
     using type = std::true_type;
 };
 
