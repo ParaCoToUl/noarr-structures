@@ -236,6 +236,7 @@ template<typename Structure>
 struct Bag
 {
 	noarr::wrapper<Structure> layout;
+	std::vector<char> b;
 	char* blob;
 
 	/*public void ZeroMemory()
@@ -252,7 +253,7 @@ auto GetBag(Structure s)
 	auto wraper = noarr::wrap(s);
 	std::vector<char> b(wraper.get_size());
 	char* blob_p = (char*)b.data();
-	return Bag<Structure>{ wraper, blob_p };
+	return Bag<Structure>{ wraper, std::move(b), blob_p };
 }
 
 
