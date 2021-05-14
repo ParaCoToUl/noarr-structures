@@ -252,7 +252,7 @@ TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
 		int y_size = image.get_length<'y'>();
 		for (int j = 0; j < y_size; j++)
 		{
-			// or image.fix<'x'>(i).fix<'y'>(j).offset();
+			// image.fix<'x'>(i).fix<'y'>(j) vs x_fixed.fix<'y'>(j)
 			std::size_t image_offset = x_fixed.fix<'y'>(j).offset();
 			int& pixel_value = *((int*)(image_blob + image_offset));
 
