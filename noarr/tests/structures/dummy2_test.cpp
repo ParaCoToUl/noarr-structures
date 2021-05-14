@@ -274,15 +274,18 @@ TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
 		int y_size = image.layout.get_length<'y'>();
 		for (int j = 0; j < y_size; j++)
 		{
-			int pixel_value = x_fixed.get_at<'y'>(image.blob, j);
+			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
+			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
+			int pixel_value = x_fixed.get_at<'y'>(image.blob, j); // v3
+
 			int histogram_value = histogram.layout.get_at<'x'>(histogram.blob, pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
 }
 
-			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob));
-			//int& histogram_value = *((int*)(histogram.layout.fix<'x'>(pixel_value).get_at(histogram.blob)));
-			//std::size_t image_offset = x_fixed.fix<'y'>(j).offset();
-			//int& pixel_value = *((int*)(image.blob + image_offset));
+
+
+
 			//int& histogram_value = *((int*)(histogram.blob + histogram.layout.fix<'x'>(pixel_value).offset()));
+			//int& histogram_value = *((int*)(histogram.layout.fix<'x'>(pixel_value).get_at(histogram.blob)));
