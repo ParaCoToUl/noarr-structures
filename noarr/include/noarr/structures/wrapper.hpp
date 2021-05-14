@@ -43,7 +43,7 @@ struct wrapper : private Structure {
     }
 
     template<char... Dims, typename V, typename... Ts>
-    constexpr auto get_at(V *ptr, Ts... ts) const {
+    constexpr decltype(auto) get_at(V *ptr, Ts... ts) const {
         return static_cast<const Structure &>(*this) | noarr::get_at<Dims...>(ptr, ts...);
     }
 };
