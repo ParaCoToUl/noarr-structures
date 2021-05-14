@@ -37,29 +37,6 @@ TEST_CASE("Image", "[image]") {
 	}
 }
 
-
-/*TEST_CASE("Image", "[image]") {
-	std::array<float, 300> data;
-
-	vector<'x', scalar<float>> v;
-	array<'y', 20000, vector<'x', scalar<float>>> v2;
-	tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
-	tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
-
-	SECTION("check is_cube") {
-		REQUIRE(!is_cube<decltype(v)>::value);
-		REQUIRE(!is_cube<decltype(t)>::value);
-		REQUIRE(!is_cube<decltype(t2)>::value);
-	}
-
-	SECTION("check is_pod") {
-		REQUIRE(std::is_pod<decltype(v)>::value);
-		REQUIRE(std::is_pod<decltype(v2)>::value);
-		REQUIRE(std::is_pod<decltype(t)>::value);
-	}
-}*/
-
-
 TEST_CASE("Pipes Vector", "[resizing]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
@@ -253,3 +230,35 @@ TEST_CASE("Array", "[is_trivial]")
 
 
 
+
+
+
+TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
+{
+	noarr::array<'x', 1920, noarr::array<'y', 1920, noarr::scalar<int>>> image_p;
+	auto image = noarr::wrap(image_p);
+	std::vector<char> image_blob_p(image.get_size());
+	char* image_blob = (char*)image_blob_p.data();
+
+	noarr::array<'x', 256, noarr::scalar<int>> histogram_p;
+	auto histogram = noarr::wrap(histogram_p);
+	std::vector<char> histogram_blob_p(histogram.get_size());
+	char* histogram_blob = (char*)histogram_blob_p.data();
+
+	int x_size = image.get_length<'x'>();
+	for (int i = 0; i < x_size; i++)
+	{
+		auto x_fixed = image.fix<'x'>(i);
+		int y_size = image.get_length<'y'>();
+		for (int j = 0; j < y_size; j++)
+		{
+			// or image.fix<'x'>(i).fix<'y'>(j).offset();
+			std::size_t image_offset = x_fixed.fix<'y'>(j).offset();
+			int& pixel_value = *((int*)(image_blob + image_offset));
+
+			int& histogram_value = *((int*)(histogram_blob + histogram.fix<'x'>(pixel_value).offset()));
+			histogram_value = histogram_value + 1;
+		}
+	}
+
+}
