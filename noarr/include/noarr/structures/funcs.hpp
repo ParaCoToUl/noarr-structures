@@ -14,7 +14,7 @@ struct _compose : contain<F, G> {
     constexpr _compose(F f, G g) : base(f, g) {}
 
     template<typename T>
-    constexpr auto operator()(T t) const {
+    constexpr decltype(auto) operator()(T t) const {
         return pipe(t, base::template get<0>(), base::template get<1>());
     }
 };
