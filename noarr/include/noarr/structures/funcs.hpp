@@ -300,12 +300,12 @@ struct _get_at : private contain<char*> {
 };
 
 template<typename V>
-inline constexpr decltype(auto) get_at(V *ptr) {
+inline constexpr auto get_at(V *ptr) {
     return _get_at(ptr);
 }
 
 template<char... Dims, typename V, typename... Ts>
-inline constexpr decltype(auto) get_at(V *ptr, Ts... ts) {
+inline constexpr auto get_at(V *ptr, Ts... ts) {
     return compose(fix<Dims...>(ts...), _get_at(ptr));
 }
 
