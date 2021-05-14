@@ -10,6 +10,10 @@
 #include "noarr/structures/struct_traits.hpp"
 #include "noarr/structures/wrapper.hpp"
 
+#include <tuple>
+
+//#include "funcs.hpp"
+
 TEST_CASE("Image", "[image]") {
 	//noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::tuple<'p', noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>>>> image;
 
@@ -228,37 +232,57 @@ TEST_CASE("Array", "[is_trivial]")
 	}
 }
 
+template<typename Structure>
+struct Bag
+{
+	noarr::wrapper<Structure> layout;
+	char* blob;
 
+	/*public void ZeroMemory()
+	{
+		auto size_ = layout.get_size();
+		for (int i = 0; i < size_; i++)
+			blob[i] = 0;
+	}*/
+};
 
-
+template<typename Structure>
+auto GetBag(Structure s)
+{
+	auto wraper = noarr::wrap(s);
+	std::vector<char> b(wraper.get_size());
+	char* blob_p = (char*)b.data();
+	return Bag<Structure>{ wraper, blob_p };
+}
 
 
 TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
 {
-	noarr::array<'x', 1920, noarr::array<'y', 1920, noarr::scalar<int>>> image_p;
-	auto image = noarr::wrap(image_p);
-	std::vector<char> image_blob_p(image.get_size());
-	char* image_blob = (char*)image_blob_p.data();
+	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::scalar<int>>> image_p;
+	auto image = GetBag(image_p);
 
 	noarr::array<'x', 256, noarr::scalar<int>> histogram_p;
-	auto histogram = noarr::wrap(histogram_p);
-	std::vector<char> histogram_blob_p(histogram.get_size());
-	char* histogram_blob = (char*)histogram_blob_p.data();
+	auto histogram = GetBag(histogram_p);
 
-	int x_size = image.get_length<'x'>();
+	//image.ZeroMemory();
+	//histogram.ZeroMemory();
+
+	int x_size = image.layout.get_length<'x'>();
 	for (int i = 0; i < x_size; i++)
 	{
-		auto x_fixed = image.fix<'x'>(i);
-		int y_size = image.get_length<'y'>();
+		auto x_fixed = image.layout.fix<'x'>(i);
+		int y_size = image.layout.get_length<'y'>();
 		for (int j = 0; j < y_size; j++)
 		{
-			// image.fix<'x'>(i).fix<'y'>(j) vs x_fixed.fix<'y'>(j)
-			std::size_t image_offset = x_fixed.fix<'y'>(j).offset();
-			int& pixel_value = *((int*)(image_blob + image_offset));
-
-			int& histogram_value = *((int*)(histogram_blob + histogram.fix<'x'>(pixel_value).offset()));
+			int pixel_value = x_fixed.get_at<'y'>(image.blob, j);
+			int histogram_value = histogram.layout.get_at<'x'>(histogram.blob, pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
-
 }
+
+			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob));
+			//int& histogram_value = *((int*)(histogram.layout.fix<'x'>(pixel_value).get_at(histogram.blob)));
+			//std::size_t image_offset = x_fixed.fix<'y'>(j).offset();
+			//int& pixel_value = *((int*)(image.blob + image_offset));
+			//int& histogram_value = *((int*)(histogram.blob + histogram.layout.fix<'x'>(pixel_value).offset()));
