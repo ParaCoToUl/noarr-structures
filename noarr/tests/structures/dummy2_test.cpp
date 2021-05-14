@@ -279,7 +279,7 @@ TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
 			int pixel_value = x_fixed.get_at<'y'>(image.blob, j); // v3
 
-			int histogram_value = histogram.layout.get_at<'x'>(histogram.blob, pixel_value);
+			int& histogram_value = histogram.layout.get_at<'x'>(histogram.blob, pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
