@@ -10,6 +10,10 @@
 #include "noarr/structures/struct_traits.hpp"
 #include "noarr/structures/wrapper.hpp"
 
+#include <tuple>
+
+//#include "funcs.hpp"
+
 TEST_CASE("Image", "[image]") {
 	//noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::tuple<'p', noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>>>> image;
 
@@ -36,29 +40,6 @@ TEST_CASE("Image", "[image]") {
 		//float& value_ref = image | fix<'x'>(0) | fix<'y'>(0) | fix<'p'>(2) | offset();
 	}
 }
-
-
-/*TEST_CASE("Image", "[image]") {
-	std::array<float, 300> data;
-
-	vector<'x', scalar<float>> v;
-	array<'y', 20000, vector<'x', scalar<float>>> v2;
-	tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
-	tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
-
-	SECTION("check is_cube") {
-		REQUIRE(!is_cube<decltype(v)>::value);
-		REQUIRE(!is_cube<decltype(t)>::value);
-		REQUIRE(!is_cube<decltype(t2)>::value);
-	}
-
-	SECTION("check is_pod") {
-		REQUIRE(std::is_pod<decltype(v)>::value);
-		REQUIRE(std::is_pod<decltype(v2)>::value);
-		REQUIRE(std::is_pod<decltype(t)>::value);
-	}
-}*/
-
 
 TEST_CASE("Pipes Vector", "[resizing]")
 {
@@ -251,5 +232,57 @@ TEST_CASE("Array", "[is_trivial]")
 	}
 }
 
+template<typename Structure>
+struct Bag
+{
+	noarr::wrapper<Structure> layout;
+	char* blob;
+
+	/*public void ZeroMemory()
+	{
+		auto size_ = layout.get_size();
+		for (int i = 0; i < size_; i++)
+			blob[i] = 0;
+	}*/
+};
+
+template<typename Structure>
+auto GetBag(Structure s)
+{
+	auto wraper = noarr::wrap(s);
+	std::vector<char> b(wraper.get_size());
+	char* blob_p = (char*)b.data();
+	return Bag<Structure>{ wraper, blob_p };
+}
 
 
+TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
+{
+	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::scalar<int>>> image_p;
+	auto image = GetBag(image_p);
+
+	noarr::array<'x', 256, noarr::scalar<int>> histogram_p;
+	auto histogram = GetBag(histogram_p);
+
+	//image.ZeroMemory();
+	//histogram.ZeroMemory();
+
+	int x_size = image.layout.get_length<'x'>();
+	for (int i = 0; i < x_size; i++)
+	{
+		auto x_fixed = image.layout.fix<'x'>(i);
+		int y_size = image.layout.get_length<'y'>();
+		for (int j = 0; j < y_size; j++)
+		{
+			int pixel_value = x_fixed.get_at<'y'>(image.blob, j);
+			int histogram_value = histogram.layout.get_at<'x'>(histogram.blob, pixel_value);
+			histogram_value = histogram_value + 1;
+		}
+	}
+}
+
+			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob));
+			//int& histogram_value = *((int*)(histogram.layout.fix<'x'>(pixel_value).get_at(histogram.blob)));
+			//std::size_t image_offset = x_fixed.fix<'y'>(j).offset();
+			//int& pixel_value = *((int*)(image.blob + image_offset));
+			//int& histogram_value = *((int*)(histogram.blob + histogram.layout.fix<'x'>(pixel_value).offset()));
