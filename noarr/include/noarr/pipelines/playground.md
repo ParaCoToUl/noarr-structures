@@ -142,3 +142,174 @@ void main() {
 
 }
 ```
+
+
+
+# K-means
+
+```cpp
+struct point_t {
+    float x, y;
+}
+
+
+///////////////
+// Attempt 1 //
+///////////////
+
+void kmeans(
+    const std::vector<point_t> given_points,
+    std::size_t k,
+    std::size_t refinements
+) {
+    Hub<std::size_t, point_t> points_hub;
+    Hub<std::size_t, std::uint8> assignments_hub;
+    Hub<std::size_t, point_t> centroids_hub;
+
+    bool initialized = false;
+
+    auto initializer = noarr::structures::compute_node()
+        .link(points_hub.write(Device::HOST_INDEX))
+        .link(assignments_hub.write(Device::HOST_INDEX))
+        .link(centroids_hub.write(Device::HOST_INDEX))
+        .can_advance([&](){
+            return !initialized;
+        })
+        .advance([&](
+            callback callback,
+            Link<std::size_t, point_t> points,
+            Link<std::size_t, std::uint8> assignments,
+            Link<std::size_t, point_t> centroids,
+        ){
+            points.envelope.structure = given_points.size();
+            for (std::size_t i = 0; i < given_points.size(); ++i)
+                points.envelope.buffer[i] = given_points[i];
+
+            // pseudo: initialize_assignments_to_random()
+
+            // pseudo: initialize_centroids_to_random()
+
+            initialized = true;
+            callback();
+        });
+
+    // at the beginning, move the latest data to the device
+    points_hub.set_dataflow_strategy.to_link(the_write_link_variable);
+
+    // OLD code:
+
+    centroids = ....;
+
+    for (refinemets) {
+        updateCentroidsKernel(pts, assignments, centroids);
+        assignCentroidsKernel(pts, assignments, centroids);
+    }
+
+    cudaSynchronize(cudaStream);
+}
+
+
+///////////////
+// Attempt 2 //
+///////////////
+
+void kmeans(
+    const std::vector<point_t> given_points,
+    std::size_t k,
+    std::size_t refinements
+) {
+    //auto pipeline = noarr::pipelines::pipeline;
+
+    Hub<std::size_t, point_t> points_hub;
+    Hub<std::size_t, std::uint8> assignments_hub;
+    Hub<std::size_t, point_t> centroids_hub;
+
+    // global state
+    bool initialized = false;
+    std::size_t next_iteration = 0;
+
+    auto initializer = noarr::structures::compute_node([&](builder node){
+        auto points = node.link(points_hub.write(Device::HOST_INDEX));
+        auto assignments = node.link(assignments_hub.write(Device::HOST_INDEX));
+        auto centroids = node.link(centroids_hub.write(Device::HOST_INDEX));
+
+        node.can_advance([&](){
+            return !initialized;
+        });
+
+        node.advance([&](){
+            points.envelope.structure = given_points.size();
+            for (std::size_t i = 0; i < given_points.size(); ++i)
+                points.envelope.buffer[i] = given_points[i];
+
+            // pseudo: initialize_assignments_to_random()
+
+            // pseudo: initialize_centroids_to_random()
+
+            initialized = true;
+            node.callback();
+        });
+    });
+
+    auto finalizer = noarr::structures::compute_node([&](builder node){
+        auto points = node.link(points_hub.read(Device::HOST_INDEX));
+        auto assignments = node.link(assignments_hub.read(Device::HOST_INDEX));
+        auto centroids = node.link(centroids_hub.read(Device::HOST_INDEX));
+
+        node.can_advance([&](){
+            return true;
+        });
+
+        node.advance([&](){
+            // pseudo: write_envelope_values_to_output_arguments()
+
+            node.callback();
+        });
+    });
+
+    auto iterator = noarr::structures::cuda_compute_node([&](builder node) {
+        auto points = node.link(points_hub.readwrite(Device::DEVICE_INDEX));
+        auto assignments = node.link(assignments_hub.readwrite(Device::DEVICE_INDEX));
+        auto centroids = node.link(centroids_hub.readwrite(Device::DEVICE_INDEX));
+
+        node.can_advance([&](){
+            return initialized && next_iteration < refinements;
+        });
+
+        node.advance([&](){
+            // pseudo: update_centroids_kernel(points, centroids)
+            // pseudo: assign_centroids_kernel(points, assignments, centroids)
+
+            cudaSynchronize(node.cuda_stream, node.calback);
+        });
+
+        node.finalize([&](){
+            ++next_iteration;
+
+            // after last iteration swith dataflow back to the host
+            if (next_iteration >= refinements) {
+                points_hub.set_dataflow_strategy.to_link(finalizer);
+                assignments_hub.set_dataflow_strategy.to_link(finalizer);
+                centroids_hub.set_dataflow_strategy.to_link(finalizer);
+            }
+        });
+    });
+
+    // at the beginning, move the latest data to the device
+    points_hub.set_dataflow_strategy.to_link(iterator);
+    assignments_hub.set_dataflow_strategy.to_link(iterator);
+    centroids_hub.set_dataflow_strategy.to_link(iterator);
+
+    // setup scheduler
+    auto sched = noarr::pipelines::scheduler();
+    sched.add(points_hub);
+    sched.add(assignments_hub);
+    sched.add(centroids_hub);
+    sched.add(initializer);
+    sched.add(iterator);
+    sched.add(finalizer);
+
+    // run
+    sched.run();
+}
+```
