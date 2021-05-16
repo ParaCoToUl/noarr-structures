@@ -104,3 +104,41 @@ auto consumer = my_consumer(env);
 // setup scheduler
 // ...
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+# Example program to ...
+
+Jenom lehkej wrapper kolem cudy....
+
+```cpp
+void kmeans(const Points points, std::size_t k, std::size_t refinements) {
+    Envelope<...> pts;
+    Envelope<...> assignments;
+    Envelope<...> centroids;
+
+    pts.initialize_from(points, cudaStream);
+
+    centroids = ....;
+
+    for (refinemets) {
+        updateCentroidsKernel(pts, assignments, centroids);
+        assignCentroidsKernel(pts, assignments, centroids);
+    }
+
+    cudaSynchronize(cudaStream);
+}
+
+void main() {
+
+}
+```

@@ -71,7 +71,7 @@ public:
     /**
      * Creates a new port that will provide you with empty envelopes to use
      */
-    Port<Structure, BufferItem>& get_output_port(Device::index_t device_index) {
+    Port<Structure, BufferItem>& create_output_port(Device::index_t device_index) {
         this->output_ports.push_back(Port<Structure, BufferItem>(device_index));
         return this->output_ports.back();
     }

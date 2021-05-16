@@ -5,11 +5,12 @@
 
 #include "UntypedPort.hpp"
 #include "Device.hpp"
-#include "CompositeNode.hpp"
+#include "Node.hpp"
 
 #include "Hub_Link.hpp"
+#include "Hub_Chunk.hpp"
 #include "Hub_BufferPool.hpp"
-#include "Hub_WriteQueue.hpp"
+#include "Hub_ChunkQueue.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -22,9 +23,10 @@ namespace pipelines {
  * It is the glue between compute nodes.
  */
 template<typename Structure, typename BufferItem>
-class Hub : public CompositeNode {
+class Hub : public Node {
 public:
     using Link = hub::Link<Structure, BufferItem>;
+    using Chunk = hub::Chunk<Structure, BufferItem>;
 
     /**
      * Holds empty buffers and distributes them to write links
@@ -35,11 +37,47 @@ public:
      * Holds freshly produced envelopes, as they arrive into the hub
      * TODO: merge with the DistributeQueue and rename to it
      */
-    hub::WriteQueue<Structure, BufferItem> write_queue;
+    hub::ChunkQueue<Structure, BufferItem> chunk_queue;
 
     // TODO: construction API to be figured out
-    Hub() : buffer_pool() {
-        this->register_constituent_node(this->buffer_pool);
+    Hub() : Node(typeid(Hub).name()), buffer_pool() { }
+
+    //////////////
+    // Node API //
+    //////////////
+
+    virtual void register_ports(std::function<void(UntypedPort*)> register_port) {
+        this->chunk_queue.register_ports(register_port);
+    };
+
+    bool can_advance() override {
+        // check all chunk queue stages
+        if (this->chunk_queue.can_accept_chunk())
+            return true;
+
+        if (this->chunk_queue.can_distribute_chunk())
+            return true;
+        
+        if (this->chunk_queue.can_send_chunk())
+            return true;
+        
+        // nothing to do
+        return false;
+    }
+
+    void advance(std::function<void()> callback) override {
+        // perform simple synchronous tasks
+        this->chunk_queue.try_accept_chunk();
+        this->chunk_queue.try_send_chunk();
+
+        // try to start asynchronous operations
+        if (this->chunk_queue.can_distribute_chunk()) {
+            this->chunk_queue.distribute_chunk(callback);
+            return;
+        }
+
+        // computation is done, since no asynchronous operation was launched
+        callback();
     }
 
     ///////////////////////
@@ -66,8 +104,8 @@ private:
         Device::index_t dev = link.device_index();
         
         if (flags == hub::LinkFlags::write) {
-            auto& source_port = this->buffer_pool.get_output_port(dev);
-            auto& target_port = this->write_queue.get_input_port(dev);
+            auto& source_port = this->buffer_pool.create_output_port(dev);
+            auto& target_port = this->chunk_queue.create_input_port(dev);
             source_port.send_processed_envelopes_to(node_port);
             node_port.send_processed_envelopes_to(target_port);
             return;

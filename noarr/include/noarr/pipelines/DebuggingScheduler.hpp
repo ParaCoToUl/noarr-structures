@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "Node.hpp"
-#include "CompositeNode.hpp"
 #include "SchedulerLogger.hpp"
 
 namespace noarr {
@@ -56,19 +55,6 @@ public:
 
         if (logger)
             logger->after_node_added(node);
-    }
-
-    /**
-     * Registers a composite node to be updated by the scheduler
-     */
-    void add(CompositeNode& comp) {
-        if (logger)
-            logger->say("Adding composite node: " + comp.label + " ...");
-        
-        std::vector<Node*>& nodes = comp.scheduler_get_constituent_nodes();
-        
-        for (Node* n : nodes)
-            this->add(*n);
     }
 
     ///////////////////
