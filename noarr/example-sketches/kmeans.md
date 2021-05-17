@@ -65,7 +65,7 @@ void kmeans(
         auto centroids = node.link(centroids_hub.read(Device::HOST_INDEX));
 
         node.can_advance([&](){
-            return true;
+            return true; // conditioned by having a chunk of data to process
         });
 
         node.advance([&](){
