@@ -21,3 +21,23 @@
 
 - Maybe we want two nodes to produce one chunk in a shared hub (shared write)
     ...Support it in a similar way to shared read
+
+- Moving envelopes between hubs MAKES EVERYTHING WAY MORE COMPLICATED
+    ...Instead let's allow two envelopes of the same size and device
+    "swap contents" by swapping their internal pointers. That will do the trick.
+
+- An envelope more and more looks like the original *bag* idea. And hub looks
+    more and more like the original *envelope* idea.
+
+- Dataflow strategy could be implicitly infered in many cases (e.g. one read, one write link)
+
+- can_advance(return true) is present often, should be a default when omitted.
+
+
+# ENVELOPE HUB - how it works?
+
+Queue of chunks. Link looks at a chunk (an envelope specifically). The chunk may just be being created, consumed, modified, or read (=peeked). Some links always produce/consume chunks. Some only peek/modify. If a link creates/consumes only sometimes, the consumption has be done manually by a function call during the node execution.
+
+Dataflow strategy tells the hub, how to transfer chunks between devices. It's basically a set of devices where the chunks need to be present.
+
+Write can happen only to a chunk that resides on one device (since we don't know how to merge changes).
