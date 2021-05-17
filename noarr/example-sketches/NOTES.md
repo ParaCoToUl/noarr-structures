@@ -18,3 +18,6 @@
     ...Define a pipeline object that will act as a factory of these things
     and will contain a scheduler
     and will make sure no compute node is deleted when it shouldn't
+
+- Maybe we want two nodes to produce one chunk in a shared hub (shared write)
+    ...Support it in a similar way to shared read

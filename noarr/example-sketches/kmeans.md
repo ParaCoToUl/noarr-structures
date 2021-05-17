@@ -37,9 +37,9 @@ void kmeans(
     std::size_t next_iteration = 0;
 
     auto initializer = noarr::structures::compute_node([&](builder node){
-        auto points = node.link(points_hub.write(Device::HOST_INDEX));
-        auto assignments = node.link(assignments_hub.write(Device::HOST_INDEX));
-        auto centroids = node.link(centroids_hub.write(Device::HOST_INDEX));
+        auto& points = node.link(points_hub.write(Device::HOST_INDEX));
+        auto& assignments = node.link(assignments_hub.write(Device::HOST_INDEX));
+        auto& centroids = node.link(centroids_hub.write(Device::HOST_INDEX));
 
         node.can_advance([&](){
             return !initialized;
@@ -60,9 +60,9 @@ void kmeans(
     });
 
     auto finalizer = noarr::structures::compute_node([&](builder node){
-        auto points = node.link(points_hub.read(Device::HOST_INDEX));
-        auto assignments = node.link(assignments_hub.read(Device::HOST_INDEX));
-        auto centroids = node.link(centroids_hub.read(Device::HOST_INDEX));
+        auto& points = node.link(points_hub.read(Device::HOST_INDEX));
+        auto& assignments = node.link(assignments_hub.read(Device::HOST_INDEX));
+        auto& centroids = node.link(centroids_hub.read(Device::HOST_INDEX));
 
         node.can_advance([&](){
             return true; // conditioned by having a chunk of data to process
@@ -78,9 +78,9 @@ void kmeans(
     });
 
     auto iterator = noarr::structures::cuda_compute_node([&](builder node) {
-        auto points = node.link(points_hub.readwrite(Device::DEVICE_INDEX));
-        auto assignments = node.link(assignments_hub.readwrite(Device::DEVICE_INDEX));
-        auto centroids = node.link(centroids_hub.readwrite(Device::DEVICE_INDEX));
+        auto& points = node.link(points_hub.readwrite(Device::DEVICE_INDEX));
+        auto& assignments = node.link(assignments_hub.readwrite(Device::DEVICE_INDEX));
+        auto& centroids = node.link(centroids_hub.readwrite(Device::DEVICE_INDEX));
 
         node.can_advance([&](){
             return initialized && next_iteration < refinements;

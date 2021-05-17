@@ -36,7 +36,7 @@ bool bitcoin(
     std::size_t performed_tries = 0;
 
     auto initializer = noarr::structures::compute_node([&](builder node){
-        auto message = node.link(message_hub.write(Device::HOST_INDEX));
+        auto& message = node.link(message_hub.write(Device::HOST_INDEX));
 
         node.can_advance([&](){
             return !initialized;
@@ -60,8 +60,8 @@ bool bitcoin(
         std::size_t THREADS_PER_DEVICE = 1024;
 
         auto miner = noarr::structures::cuda_compute_node([&](builder node){
-            auto message = node.link(message_hub.readpeek(device_index));
-            auto salt = node.link(salt_hub.conditionalwrite(device_index));
+            auto& message = node.link(message_hub.readpeek(device_index));
+            auto& salt = node.link(salt_hub.conditionalwrite(device_index));
 
             node.can_advance([&](){
                 return initialized && !salt_found && performed_tries < max_tries;
@@ -91,7 +91,7 @@ bool bitcoin(
     }
 
     auto finalizer = noarr::structures::compute_node([&](builder node){
-        auto salt = node.link(salt_hub.read(Device::HOST_INDEX));
+        auto& salt = node.link(salt_hub.read(Device::HOST_INDEX));
 
         node.can_advance([&](){
             return true; // conditioned by having a chunk of data to process
