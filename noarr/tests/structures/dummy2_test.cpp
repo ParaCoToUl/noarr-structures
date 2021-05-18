@@ -277,15 +277,15 @@ TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
 	histogram.clear();
 
 	int x_size = image.layout().get_length<'x'>();
+	int y_size = image.layout().get_length<'y'>();
+
 	for (int i = 0; i < x_size; i++)
 	{
-		auto x_fixed = image.layout().fix<'x'>(i);
-		int y_size = image.layout().get_length<'y'>();
 		for (int j = 0; j < y_size; j++)
 		{
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
-			int pixel_value = x_fixed.get_at<'y'>(image.data(), j); // v3
+			int pixel_value = image.layout().get_at<'x','y'>(image.data(), i, j); // v3
 
 			int& histogram_value = histogram.layout().get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
