@@ -136,8 +136,8 @@ struct _array_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam T substructure type
  */
 template<char Dim, std::size_t L, typename T>
-struct array : private T {
-    constexpr std::tuple<T> sub_structures() const { return std::tuple<T>(static_cast<const T&>(*this)); }
+struct array : private contain<T> {
+    constexpr std::tuple<T> sub_structures() const { return std::tuple<T>(contain<T>::template get<0>()); }
     using description = struct_description<
         char_pack<'a', 'r', 'r', 'a', 'y'>,
         dims_impl<Dim>,
@@ -149,14 +149,14 @@ struct array : private T {
     using get_t = typename _array_get_t<T, KS...>::type;
 
     constexpr array() = default;
-    explicit constexpr array(T sub_structure) : T(sub_structure) {}
+    explicit constexpr array(T sub_structure) : contain<T>(sub_structure) {}
     template<typename T2>
     static constexpr auto construct(T2 sub_structure) {
         return array<Dim, L, T2>(sub_structure);
     }
 
-    constexpr std::size_t size() const { return static_cast<const T&>(*this).size() * L; }
-    constexpr std::size_t offset(std::size_t i) const { return static_cast<const T&>(*this).size() * i; }
+    constexpr std::size_t size() const { return contain<T>::template get<0>().size() * L; }
+    constexpr std::size_t offset(std::size_t i) const { return contain<T>::template get<0>().size() * i; }
     template<std::size_t I>
     constexpr std::size_t offset() const { return std::get<0>(sub_structures()).size() * I; }
     static constexpr std::size_t length() { return L; }
@@ -169,8 +169,8 @@ struct array : private T {
  * @tparam T substructure type
  */
 template<char Dim, typename T>
-struct vector : private T {
-    constexpr std::tuple<T> sub_structures() const { return std::tuple<T>(static_cast<const T&>(*this)); }
+struct vector : private contain<T> {
+    constexpr std::tuple<T> sub_structures() const { return std::tuple<T>(contain<T>::template get<0>()); }
     using description = struct_description<
         char_pack<'v', 'e', 'c', 't', 'o', 'r'>,
         dims_impl<Dim>,
@@ -178,7 +178,7 @@ struct vector : private T {
         type_param<T>>;
 
     constexpr vector() = default;
-    explicit constexpr vector(T sub_structure) : T(sub_structure) {}
+    explicit constexpr vector(T sub_structure) : contain<T>(sub_structure) {}
     template<typename T2>
     static constexpr auto construct(T2 sub_structure) {
         return vector<Dim, T2>(sub_structure);
@@ -265,11 +265,11 @@ struct _is_static_construct<T, decltype(&T::construct, void())> {
  * @tparam T substructure type
  */
 template<char Dim, typename T, std::size_t Idx>
-struct sfixed_dim : private T {
+struct sfixed_dim : private contain<T> {
     /* e.g. sub_structures of a sfixed tuple are the same as the substructures of the tuple
      *(otherwise we couldn't have the right offset after an item with Idx2 < Idx in the tuple changes)
      */
-    constexpr auto sub_structures() const { return static_cast<const T &>(*this).sub_structures(); }
+    constexpr auto sub_structures() const { return contain<T>::template get<0>().sub_structures(); }
     using description = struct_description<
         char_pack<'s', 'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
         dims_impl<>,
@@ -281,16 +281,16 @@ struct sfixed_dim : private T {
     using get_t = typename _sfixed_dim_get_t<T, Idx, KS...>::type;
 
     constexpr sfixed_dim() = default;
-    constexpr sfixed_dim(T sub_structure) : T(sub_structure) {}
+    explicit constexpr sfixed_dim(T sub_structure) : contain<T>(sub_structure) {}
     
     template<typename T2, typename... T2s>
     constexpr auto construct(T2 ss, T2s... sss) const {
         return sfixed_dim<Dim, decltype(std::declval<T>().construct(ss, sss...)), Idx>(
-            static_cast<const T &>(*this).construct(ss, sss...));
+            contain<T>::template get<0>().construct(ss, sss...));
     }
 
-    constexpr std::size_t size() const { return static_cast<const T &>(*this).size(); }
-    constexpr std::size_t offset() const { return static_cast<const T &>(*this).template offset<Idx>(); }
+    constexpr std::size_t size() const { return contain<T>::template get<0>().size(); }
+    constexpr std::size_t offset() const { return contain<T>::template get<0>().template offset<Idx>(); }
     constexpr std::size_t length() const { return 0; }
 };
 
