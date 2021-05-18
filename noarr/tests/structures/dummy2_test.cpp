@@ -245,11 +245,11 @@ public:
 		: layout_(noarr::wrap(s)),
 		data_(std::make_unique<char[]>(layout().get_size())) { }
 
-	const noarr::wrapper<Structure> &layout() const noexcept { return layout_; }
+	constexpr const noarr::wrapper<Structure> &layout() const noexcept { return layout_; }
 	
 	// noarr::wrapper<Structure> &layout() noexcept { return layout_; } // this version should reallocate the blob (maybe only if it doesn't fit)
 
-	char *data() const noexcept { return data_.get(); }
+	constexpr char *data() const noexcept { return data_.get(); }
 
 	void clear()
 	{
@@ -260,7 +260,7 @@ public:
 };
 
 template<typename Structure>
-auto GetBag(Structure s)
+constexpr auto GetBag(Structure s)
 {
 	return Bag<Structure>(s);
 }
@@ -269,14 +269,14 @@ auto GetBag(Structure s)
 template<std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
+	constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
 	auto &&image = GetBag(image_p);
 	CHECK(image.layout().get_size() == width * height * sizeof(int));
 
 	int y_size = image.layout().template get_length<'y'>();
 	CHECK(y_size == height);
 
-	noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p;
+	constexpr noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p;
 	auto &&histogram = GetBag(histogram_p);
 	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
 
