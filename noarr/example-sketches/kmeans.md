@@ -78,7 +78,7 @@ void kmeans(
     });
 
     auto iterator = noarr::structures::cuda_compute_node([&](builder node) {
-        auto& points = node.link(points_hub.readwrite(Device::DEVICE_INDEX));
+        auto& points = node.link(points_hub.readpeek(Device::DEVICE_INDEX));
         auto& assignments = node.link(assignments_hub.readwrite(Device::DEVICE_INDEX));
         auto& centroids = node.link(centroids_hub.readwrite(Device::DEVICE_INDEX));
 
