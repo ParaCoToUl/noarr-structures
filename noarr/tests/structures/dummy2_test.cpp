@@ -265,11 +265,12 @@ auto GetBag(Structure s)
 }
 
 
-TEST_CASE("Histogram prototype", "[Histogram prototype]")
+template<std::size_t width, std::size_t height>
+void histogram_template_test()
 {
-	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::scalar<int>>> image_p;
+	noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
 	auto image = GetBag(image_p);
-	REQUIRE(image.layout().get_size() == 1920 * 1080 * sizeof(int));
+	REQUIRE(image.layout().get_size() == width * height * sizeof(int));
 
 	noarr::array<'x', 256, noarr::scalar<int>> histogram_p;
 	auto histogram = GetBag(histogram_p);
@@ -278,11 +279,11 @@ TEST_CASE("Histogram prototype", "[Histogram prototype]")
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.layout().get_length<'x'>();
-	REQUIRE(x_size == 1920);
+	int x_size = image.layout().template get_length<'x'>();
+	REQUIRE(x_size == width);
 
-	int y_size = image.layout().get_length<'y'>();
-	REQUIRE(y_size == 1080);
+	int y_size = image.layout().template get_length<'y'>();
+	REQUIRE(y_size == height);
 
 	for (int i = 0; i < x_size; i++)
 	{
@@ -290,13 +291,28 @@ TEST_CASE("Histogram prototype", "[Histogram prototype]")
 		{
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
-			int pixel_value = image.layout().get_at<'x','y'>(image.data(), i, j); // v3
+			int pixel_value = image.layout().template get_at<'x','y'>(image.data(), i, j); // v3
 			REQUIRE(pixel_value == 0);
 
-			int& histogram_value = histogram.layout().get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.layout().template get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
+}
+
+TEST_CASE("Histogram prototype 720 x 480", "[Histogram prototype]")
+{
+	histogram_template_test<720, 480>();
+}
+
+TEST_CASE("Histogram prototype 1080 x 720", "[Histogram prototype]")
+{
+	histogram_template_test<1080, 720>();
+}
+
+TEST_CASE("Histogram prototype 1920 x 1080", "[Histogram prototype]")
+{
+	histogram_template_test<1920, 1080>();
 }
 
 
