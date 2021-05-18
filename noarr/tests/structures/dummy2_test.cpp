@@ -265,16 +265,16 @@ auto GetBag(Structure s)
 }
 
 
-template<std::size_t width, std::size_t height>
+template<std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
 	noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
 	auto image = GetBag(image_p);
 	REQUIRE(image.layout().get_size() == width * height * sizeof(int));
 
-	noarr::array<'x', 256, noarr::scalar<int>> histogram_p;
+	noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p;
 	auto histogram = GetBag(histogram_p);
-	REQUIRE(histogram.layout().get_size() == 256 * sizeof(int));
+	REQUIRE(histogram.layout().get_size() == pixel_range * sizeof(int));
 
 	image.clear();
 	histogram.clear();
@@ -298,6 +298,11 @@ void histogram_template_test()
 			histogram_value = histogram_value + 1;
 		}
 	}
+}
+
+TEST_CASE("Histogram prototype 720 x 480 with 16 colors", "[Histogram prototype]")
+{
+	histogram_template_test<720, 480, 16>();
 }
 
 TEST_CASE("Histogram prototype 720 x 480", "[Histogram prototype]")
