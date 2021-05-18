@@ -272,6 +272,9 @@ void histogram_template_test()
 	auto image = GetBag(image_p);
 	REQUIRE(image.layout().get_size() == width * height * sizeof(int));
 
+	int y_size = image.layout().template get_length<'y'>();
+	REQUIRE(y_size == height);
+
 	noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p;
 	auto histogram = GetBag(histogram_p);
 	REQUIRE(histogram.layout().get_size() == pixel_range * sizeof(int));
@@ -282,7 +285,7 @@ void histogram_template_test()
 	int x_size = image.layout().template get_length<'x'>();
 	REQUIRE(x_size == width);
 
-	int y_size = image.layout().template get_length<'y'>();
+	y_size = image.layout().template get_length<'y'>();
 	REQUIRE(y_size == height);
 
 	for (int i = 0; i < x_size; i++)
