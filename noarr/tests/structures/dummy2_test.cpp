@@ -265,19 +265,24 @@ auto GetBag(Structure s)
 }
 
 
-TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
+TEST_CASE("Histogram prototype", "[Histogram prototype]")
 {
 	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::scalar<int>>> image_p;
 	auto image = GetBag(image_p);
+	REQUIRE(image.layout().get_size() == 1920 * 1080 * sizeof(int));
 
 	noarr::array<'x', 256, noarr::scalar<int>> histogram_p;
 	auto histogram = GetBag(histogram_p);
+	REQUIRE(histogram.layout().get_size() == 256 * sizeof(int));
 
 	image.clear();
 	histogram.clear();
 
 	int x_size = image.layout().get_length<'x'>();
+	REQUIRE(x_size == 1920);
+
 	int y_size = image.layout().get_length<'y'>();
+	REQUIRE(y_size == 1080);
 
 	for (int i = 0; i < x_size; i++)
 	{
@@ -286,6 +291,7 @@ TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
 			int pixel_value = image.layout().get_at<'x','y'>(image.data(), i, j); // v3
+			REQUIRE(pixel_value == 0);
 
 			int& histogram_value = histogram.layout().get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
