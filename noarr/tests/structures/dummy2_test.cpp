@@ -235,25 +235,33 @@ TEST_CASE("Array", "[is_trivial]")
 template<typename Structure>
 struct Bag
 {
-	noarr::wrapper<Structure> layout;
-	std::vector<char> b;
-	char* blob;
+private:
+	noarr::wrapper<Structure> layout_;
+	std::unique_ptr<char[]> data_;
 
-	/*public void ZeroMemory()
+public:
+	explicit Bag(Structure s)
+		: layout_(wrap(s)),
+		data_(std::make_unique<char[]>(layout().get_size())) { }
+
+	const noarr::wrapper<Structure> &layout() const noexcept { return layout_; }
+	
+	// noarr::wrapper<Structure> &layout() noexcept { return layout_; } // this version should reallocate the blob (maybe only if it doesn't fit)
+
+	char *data() const noexcept { return data_.get(); }
+
+	void clear()
 	{
-		auto size_ = layout.get_size();
+		auto size_ = layout().get_size();
 		for (int i = 0; i < size_; i++)
-			blob[i] = 0;
-	}*/
+			data_[i] = 0;
+	}
 };
 
 template<typename Structure>
 auto GetBag(Structure s)
 {
-	auto wraper = noarr::wrap(s);
-	std::vector<char> b(wraper.get_size());
-	char* blob_p = (char*)b.data();
-	return Bag<Structure>{ wraper, std::move(b), blob_p };
+	return Bag<Structure>(s);
 }
 
 
@@ -265,21 +273,21 @@ TEST_CASE("Histogram prototipe", "[Histogram prototipe]")
 	noarr::array<'x', 256, noarr::scalar<int>> histogram_p;
 	auto histogram = GetBag(histogram_p);
 
-	//image.ZeroMemory();
-	//histogram.ZeroMemory();
+	image.clear();
+	histogram.clear();
 
-	int x_size = image.layout.get_length<'x'>();
+	int x_size = image.layout().get_length<'x'>();
 	for (int i = 0; i < x_size; i++)
 	{
-		auto x_fixed = image.layout.fix<'x'>(i);
-		int y_size = image.layout.get_length<'y'>();
+		auto x_fixed = image.layout().fix<'x'>(i);
+		int y_size = image.layout().get_length<'y'>();
 		for (int j = 0; j < y_size; j++)
 		{
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
-			int pixel_value = x_fixed.get_at<'y'>(image.blob, j); // v3
+			int pixel_value = x_fixed.get_at<'y'>(image.data(), j); // v3
 
-			int& histogram_value = histogram.layout.get_at<'x'>(histogram.blob, pixel_value);
+			int& histogram_value = histogram.layout().get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
