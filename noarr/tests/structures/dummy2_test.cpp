@@ -241,7 +241,7 @@ private:
 
 public:
 	explicit Bag(Structure s)
-		: layout_(wrap(s)),
+		: layout_(noarr::wrap(s)),
 		data_(std::make_unique<char[]>(layout().get_size())) { }
 
 	const noarr::wrapper<Structure> &layout() const noexcept { return layout_; }
