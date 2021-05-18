@@ -37,6 +37,7 @@ TEST_CASE("Image", "[image]") {
 		//std::size_t offset = image | noarr::fix<'x', 'y', 'p'>(0, 0, 2) | noarr::offset();
 		std::size_t offset = grayscale.fix<'x'>(0).fix<'y'>(0).fix<'p'>(2).offset(); // FIXME: this can be rewritten into `grayscale | offset<'x', 'y', 'z'>()`
 		float& value_ref = *((float*)(my_blob + offset));
+		value_ref = 0;
 		//float& value_ref = image | fix<'x'>(0) | fix<'y'>(0) | fix<'p'>(2) | offset();
 	}
 }
@@ -253,7 +254,7 @@ public:
 	void clear()
 	{
 		auto size_ = layout().get_size();
-		for (int i = 0; i < size_; i++)
+		for (std::size_t i = 0; i < size_; i++)
 			data_[i] = 0;
 	}
 };
@@ -270,14 +271,14 @@ void histogram_template_test()
 {
 	noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
 	auto &&image = GetBag(image_p);
-	REQUIRE(image.layout().get_size() == width * height * sizeof(int));
+	CHECK(image.layout().get_size() == width * height * sizeof(int));
 
 	int y_size = image.layout().template get_length<'y'>();
-	REQUIRE(y_size == height);
+	CHECK(y_size == height);
 
 	noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p;
 	auto &&histogram = GetBag(histogram_p);
-	REQUIRE(histogram.layout().get_size() == pixel_range * sizeof(int));
+	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
 
 	image.clear();
 	histogram.clear();
@@ -295,7 +296,9 @@ void histogram_template_test()
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
 			int pixel_value = image.layout().template get_at<'x','y'>(image.data(), i, j); // v3
-			REQUIRE(pixel_value == 0);
+
+			if (pixel_value != 0)
+				FAIL();
 
 			int& histogram_value = histogram.layout().template get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
