@@ -265,17 +265,17 @@ constexpr auto GetBag(Structure s)
 	return Bag<Structure>(s);
 }
 
-enum ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 };
+enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 };
 
-template<typename Structure>
-Structure GetImageStructure(ImageDataLayout layout)
+template<ImageDataLayout layout, std::size_t width, std::size_t height>
+constexpr auto GetImageStructure()
 {
-	if (layout == ImageDataLayout.ArrayOfArrays)
+	if (layout == ImageDataLayout::ArrayOfArrays)
 	{
 		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
 		return image_p;
 	}
-	else if (layout == ImageDataLayout.VectorOfVectors)
+	else if (layout == ImageDataLayout::VectorOfVectors)
 	{
 		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
 		return image_p;
@@ -291,8 +291,7 @@ Structure GetImageStructure(ImageDataLayout layout)
 template<std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
-	//constexpr auto image_p = GetImageStructure<Structure>(ImageDataLayout.ArrayOfArrays);
+	constexpr auto image_p = GetImageStructure<ImageDataLayout::ArrayOfArrays, width, height>();
 	auto &&image = GetBag(image_p);
 	CHECK(image.layout().get_size() == width * height * sizeof(int));
 

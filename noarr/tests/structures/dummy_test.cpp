@@ -11,7 +11,7 @@
 #include "noarr/structures/wrapper.hpp"
 
 TEST_CASE("Pipes Sizes", "[sizes]") {
-	std::array<float, 300> data;
+	// std::array<float, 300> data; <- // FIXME: NEVER USED
 
 	noarr::vector<'x', noarr::scalar<float>> v;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
@@ -81,7 +81,7 @@ TEST_CASE("Pipes Resize 2", "[Resizing]") {
 
 TEST_CASE("Pipes Resize 3", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	auto vs2 = v2 | noarr::set_length<'x'>(20); // transform
+	// auto vs2 = v2 | noarr::set_length<'x'>(20); // transform <- // FIXME: NEVER USED
 	auto vs3 = v2 | noarr::cresize<'x', 10>(); // transform
 
 	SECTION("check is_cube") {
@@ -94,7 +94,7 @@ TEST_CASE("Pipes Resize 3", "[Resizing]") {
 
 	typeid(vs3).name();
 	vs3.size();
-	sizeof(vs3);
+	// sizeof(vs3); <- // FIXME: NO EFFECT
 }
 
 
@@ -117,9 +117,9 @@ TEST_CASE("Pipes Resize 4", "[Resizing]") {
 
 	typeid(vs4).name();
 	vs4.size();
-	sizeof(vs4);
+	// sizeof(vs4); <- // FIXME: NO EFFECT
 
-	sizeof(t);
+	// sizeof(t); <- // FIXME: NO EFFECT
 
 	auto ts = t | noarr::set_length<'x'>(20);
 
@@ -132,7 +132,7 @@ TEST_CASE("Pipes Resize 4", "[Resizing]") {
 	}
 
 	//print_struct(std::cout, ts) << " ts;" << std::endl;
-	sizeof(ts);
+	// sizeof(ts); <- // FIXME: NO EFFECT
 	ts.size();
 
 	//print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
@@ -155,7 +155,7 @@ TEST_CASE("Pipes Resize 4", "[Resizing]") {
 
 
 TEST_CASE("Sizes", "[sizes]") {
-	std::array<float, 300> data;
+	// std::array<float, 300> data; <- // FIXME: NEVER USED
 
 	noarr::vector<'x', noarr::scalar<float>> v;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
