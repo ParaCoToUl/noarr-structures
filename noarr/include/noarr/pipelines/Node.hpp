@@ -4,19 +4,11 @@
 #include <string>
 #include <functional>
 
-#include "PortState.hpp"
-#include "UntypedPort.hpp"
-
 namespace noarr {
 namespace pipelines {
 
 class Node {
 public:
-    /**
-     * Ports that have been registered on startup as belonging to the node
-     */
-    std::vector<UntypedPort*> ports;
-
     /**
      * Label that can be used in logging and error messages
      */
@@ -26,43 +18,45 @@ public:
 
     Node(const std::string& label) : label(label) { }
 
+    ///////////////////
+    // Scheduler API //
+    ///////////////////
+
+private:
+    std::function<void()> advance_callback = nullptr;
+
+public:
+
     /**
-     * Helper method to link two ports together so that processed
-     * envelopes from one go to the other and vice versa
+     * Called by the scheduler before the pipeline starts running.
      */
-    static void link_ports(UntypedPort& a, UntypedPort& b) {
-        a.send_processed_envelopes_to(b);
-        b.send_processed_envelopes_to(a);
+    void scheduler_initialize() {
+        this->initialize();
     }
 
     /**
-     * Called by the scheduler before the pipeline starts running
-     */
-    void scheduler_start() {
-        this->perform_port_registration();
-    }
-
-    /**
-     * Called by the scheduler when possible,
-     * guaranteed to not be called when another
-     * update of this node is still running
+     * Called by the scheduler as often as possible.
      * 
-     * @param callback Call when the async operation finishes,
-     * pass true if data was advanced and false if nothing happened
+     * Guaranteed to not be called when another update of this same
+     * node instance is still running.
+     * 
+     * @param callback Call when the async operation finishes.
+     * Pass true if data was advanced and false if nothing happened.
      */
-    void scheduler_update(std::function<void(bool)> callback) {
+    void scheduler_update(std::function<void(bool)> scheduler_callback) {
         // if the data cannot be advanced, return immediately
-        if (!this->can_advance())
+        if (!this->wrapper_around_can_advance())
         {
-            callback(false);
+            scheduler_callback(false);
             return;
         }
 
         // if the data can be advanced, do it
-        this->advance([&](){
-            // data has been advanced
-            callback(true);
-        });
+        advance_callback = [this, &scheduler_callback](){
+            advance_callback = nullptr;
+            scheduler_callback(true); // data has been advanced
+        };
+        this->advance();
     }
 
     /**
@@ -71,16 +65,52 @@ public:
      */
     void scheduler_post_update(bool data_was_advanced) {
         if (data_was_advanced)
-            this->post_advance();
+            this->wrapper_around_post_advance();
+    }
+
+    /**
+     * Called by the scheduler after the pipeline finishes running.
+     */
+    void scheduler_terminate() {
+        this->terminate();
+    }
+
+    //////////////
+    // Node API //
+    //////////////
+
+public:
+
+    /**
+     * Call this from within the advance method
+     * to signal the end of the computation
+     */
+    void callback() {
+        assert(
+            (advance_callback != nullptr) &&
+            "Cannot call the callback when the node hasn't been advanced"
+        );
+
+        advance_callback();
     }
 
 protected:
 
     /**
-     * This function is called before the pipeline starts
-     * to register all node ports
+     * Called before anything starts happening with the node
      */
-    virtual void register_ports(std::function<void(UntypedPort*)> register_port) = 0;
+    virtual void initialize() {
+        //
+    }
+
+    /**
+     * Wrapper around can_advance that can do additional processing.
+     * This wrapper should always call the paren't version and take account,
+     * the can_advance need not to.
+     */
+    virtual bool wrapper_around_can_advance() {
+        return can_advance();
+    }
 
     /**
      * Called to test, whether the advance method can be called
@@ -90,7 +120,16 @@ protected:
     /**
      * Called to advance the proggress of data through the node
      */
-    virtual void advance(std::function<void()> callback) = 0;
+    virtual void advance() = 0;
+
+    /**
+     * Wrapper around post_advance that should alway call its base
+     * implementation. Exists only so that the final user can override
+     * can_advance and forget to call the base implementation and not get roasted.
+     */
+    virtual void wrapper_around_post_advance() {
+        post_advance();
+    }
 
     /**
      * Called after the data advancement
@@ -99,18 +138,11 @@ protected:
         //
     }
 
-private:
-
     /**
-     * Calls the register_ports method
+     * Called after all the computation finishes
      */
-    void perform_port_registration() {
-        this->ports.clear();
-        
-        this->register_ports([&](UntypedPort* d) {
-            d->parent_node = this;
-            this->ports.push_back(d);
-        });
+    virtual void terminate() {
+        //
     }
 };
 

@@ -65,12 +65,12 @@ public:
      * Runs the pipeline until no nodes can be advanced.
      */
     void run() {
-        this->start_pipeline(); // need not be called explicitly
+        this->initialize_pipeline(); // NOTE: need not be called explicitly
 
-        while (!this->pipeline_finalized) {
+        while (!this->pipeline_terminated) {
             this->update_next_node();
             
-            // NOTE: finalization is called automatically
+            // NOTE: termination is performed automatically
         }
     }
 
@@ -79,8 +79,8 @@ public:
     /////////////////////////////////////////////////////
 
 private:
-    bool pipeline_started = false;
-    bool pipeline_finalized = false;
+    bool pipeline_initialized = false;
+    bool pipeline_terminated = false;
 
     bool generation_advanced_data = false; // did this generation advance any data?
     std::size_t current_generation = 0;
@@ -97,12 +97,12 @@ public:
         assert(this->nodes.size() != 0
             && "Pipeline is empty so cannot be advanced");
 
-        assert(!this->pipeline_finalized
-            && "Pipeline is already finalized");
+        assert(!this->pipeline_terminated
+            && "Pipeline is already terminated");
 
-        // pipeline starting
-        if (!this->pipeline_started)
-            this->start_pipeline();
+        // pipeline initialization
+        if (!this->pipeline_initialized)
+            this->initialize_pipeline();
         
         // === update the node ===
         
@@ -114,27 +114,27 @@ public:
         // update (synchronous)
         bool data_was_advanced;
         this->callback_will_be_called();
-        node->scheduler_update([&](bool adv){
+        node->scheduler_update([this, &data_was_advanced](bool adv){
             data_was_advanced = adv;
-            this->callback_was_called();
+            callback_was_called();
         });
         this->wait_for_callback(); // here's the synchronicity
 
-        if (data_was_advanced)
+        if (data_was_advanced) {
             this->generation_advanced_data = true;
+
+            if (this->logger)
+                this->logger->say("Node did advance data.");
+        }
 
         // post update
         node->scheduler_post_update(data_was_advanced);
 
-        // === send processed envelopes ===
-
-        this->send_processed_envelopes(node);
-
-        // === move to next node ===
+        // === move to the next node ===
         
         this->next_node++;
 
-        // === move to next generation ===
+        // === move to the next generation ===
 
         if (this->next_node >= this->nodes.size()) {
             if (this->logger) {
@@ -144,9 +144,12 @@ public:
                 );
             }
 
-            // pipeline finalization
+            // pipeline termination
             if (!this->generation_advanced_data) {
-                this->finalize_pipeline();
+                if (this->logger)
+                    this->logger->say("Termination condition met.");
+
+                this->terminate_pipeline();
             }
             
             this->next_node = 0;
@@ -161,62 +164,47 @@ private:
     /**
      * Called automatically before the first node is updated
      */
-    void start_pipeline() {
-        assert(!this->pipeline_started
-            && "Pipeline was already started");
-
-        for (Node* node : this->nodes)
-            node->scheduler_start();
-
-        this->pipeline_started = true;
+    void initialize_pipeline() {
+        assert(!this->pipeline_initialized
+            && "Pipeline was already initialized");
 
         if (this->logger)
-            this->logger->say("Pipeline started.");
-    }
+            this->logger->say("Starting pipeline initialization...");
 
-    /**
-     * Called automatically after the pipeline detects stopping condition
-     */
-    void finalize_pipeline() {
-        assert(!this->pipeline_finalized
-            && "Pipeline was already finalized");
+        for (Node* node : this->nodes) {
+            if (this->logger)
+                this->logger->say("Initializing node " + node->label + " ...");
 
-        // TODO: implement any finalization logic here
-
-        this->pipeline_finalized = true;
-
-        if (this->logger)
-            this->logger->say("Pipeline finalized.");
-    }
-
-    /**
-     * Send all processed envelopes of a node
-     */
-    void send_processed_envelopes(Node* node) {
-        for (UntypedPort* port : node->ports)
-        {
-            if (port->state() != PortState::processed)
-                continue;
-
-            if (!port->has_target())
-                continue;
-
-            UntypedPort& target_port = port->target();
-
-            if (target_port.state() != PortState::empty)
-                continue;
-
-            UntypedEnvelope& env = port->detach_envelope();
-            target_port.attach_envelope(env, false);
-
-            if (this->logger) {
-                this->logger->after_envelope_sent(
-                    *node,
-                    *(target_port.parent_node),
-                    env
-                );
-            }
+            node->scheduler_initialize();
         }
+
+        this->pipeline_initialized = true;
+
+        if (this->logger)
+            this->logger->say("Pipeline initialized.");
+    }
+
+    /**
+     * Called automatically after the pipeline detects the stopping condition
+     */
+    void terminate_pipeline() {
+        assert(!this->pipeline_terminated
+            && "Pipeline was already terminated");
+
+        if (this->logger)
+            this->logger->say("Starting pipeline termination...");
+
+        for (Node* node : this->nodes) {
+            if (this->logger)
+                this->logger->say("Terminating node " + node->label + " ...");
+            
+            node->scheduler_terminate();
+        }
+
+        this->pipeline_terminated = true;
+
+        if (this->logger)
+            this->logger->say("Pipeline terminated.");
     }
 
     ///////////////////////////
@@ -232,7 +220,7 @@ private:
     bool _callback_was_called = false;
 
     /**
-     * Call this before starting a node update
+     * Call this before initializeing a node update
      */
     void callback_will_be_called() {
         assert(!this->_expecting_callback

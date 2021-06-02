@@ -36,21 +36,7 @@ public:
      * Call this just before a node is updated
      */
     void before_node_updated(const Node& node) {
-        say("Node will be updated: " + node.label);
-    }
-
-    /**
-     * Call this after a processed envelope has been moved between nodes
-     */
-    void after_envelope_sent(
-        const Node& from,
-        const Node& to,
-        const UntypedEnvelope& env
-    ) {
-        say(
-            "Envelope is being sent: " +
-            from.label + " --[" + env.label + "]--> " + to.label
-        );
+        say("Updating node " + node.label + " ...");
     }
 };
 
