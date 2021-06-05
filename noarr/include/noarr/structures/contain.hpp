@@ -29,7 +29,7 @@ struct _contain_get<T, 0> {
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain<TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
-    typename<typename, typename...>
+    template<typename, typename...>
     friend struct _contain;
 
     T t;
@@ -56,7 +56,7 @@ private:
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain<TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain<TS...> {
-    typename<typename, typename...>
+    template<typename, typename...>
     friend struct _contain;
 
     T t;
@@ -83,7 +83,7 @@ private:
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain<TS...> {
-    typename<typename, typename...>
+    template<typename, typename...>
     friend struct _contain;
 
     constexpr _contain() = default;
@@ -108,7 +108,7 @@ private:
 
 template<typename T>
 struct _contain<std::enable_if_t<std::is_empty<T>::value>, T> {
-    typename<typename, typename...>
+    template<typename, typename...>
     friend struct _contain;
 
     constexpr _contain() = default;
@@ -127,7 +127,7 @@ private:
 
 template<typename T>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value>, T> {
-    typename<typename, typename...>
+    template<typename, typename...>
     friend struct _contain;
 
     T t;
