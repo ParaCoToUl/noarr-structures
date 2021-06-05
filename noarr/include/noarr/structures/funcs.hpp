@@ -8,6 +8,28 @@
 
 namespace noarr {
 
+    namespace literals {
+
+    template<std::size_t Accum, char... Chars>
+    struct _idx_translate;
+
+    template<std::size_t Accum, char Char, char... Chars>
+    struct _idx_translate<Accum, Char, Chars...> {
+        using type = typename _idx_translate<Accum * 10 + (std::size_t)(Char - '0'), Chars...>::type;
+    };
+
+    template<std::size_t Accum, char Char>
+    struct _idx_translate<Accum, Char> {
+        using type = std::integral_constant<std::size_t, Accum * 10 + (std::size_t)(Char - '0')>;
+    };
+
+    template<char... Chars>
+    inline constexpr auto operator""_idx() {
+        return typename _idx_translate<0, Chars...>::type();
+    }
+
+    }
+
 template<typename F, typename G>
 struct _compose : contain<F, G> {
     using base = contain<F, G>;
@@ -262,24 +284,6 @@ struct _fixs<> {
 template<char... Dims, typename... Ts>
 inline constexpr auto fix(Ts... ts) {
     return _fixs<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
-}
-
-template<std::size_t Accum, char... Chars>
-struct _idx_translate;
-
-template<std::size_t Accum, char Char, char... Chars>
-struct _idx_translate<Accum, Char, Chars...> {
-    using type = typename _idx_translate<Accum * 10 + (std::size_t)(Char - '0'), Chars...>::type;
-};
-
-template<std::size_t Accum, char Char>
-struct _idx_translate<Accum, Char> {
-    using type = std::integral_constant<std::size_t, Accum * 10 + (std::size_t)(Char - '0')>;
-};
-
-template<char... Chars>
-inline constexpr auto operator""_idx() {
-    return typename _idx_translate<0, Chars...>::type();
 }
 
 template<char Dim>
