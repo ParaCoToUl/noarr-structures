@@ -6,7 +6,7 @@
 namespace noarr {
 
 template<typename Structure>
-struct wrapper;
+class wrapper;
 
 template<typename T>
 struct _is_cube<wrapper<T>> {
