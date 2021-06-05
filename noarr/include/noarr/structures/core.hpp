@@ -5,14 +5,30 @@
 #include "struct_decls.hpp"
 #include "is_struct.hpp"
 
-// TODO?: rework fmapper and getter to check not only if the function is applicable but also whether it returns some bad type (define it as void or bad_value_t or something...)
-// TODO: add dim checking (+ for consume_dims(s))
 // TODO: add loading and storing to files (binary, json?, xml?, ...)
-// TODO: the piping mechanism should understand dimensions so we don't abuse template sfinae so much
-// TODO?: use std::integer_sequence and std::index_sequence wherever applicable
 // TODO: add a method for structures that configures the struct => this will be reflected by 2nd serialization
 
 namespace noarr {
+
+template<typename F, typename S, typename = void>
+struct get_applicability {
+    static constexpr bool value = true;
+};
+
+template<typename F, typename S>
+struct get_applicability<F, S, void_t<typename F::template can_apply<S>>> {
+    static constexpr bool value = F::template can_apply<S>::value;
+};
+
+template<typename S, typename F, typename = void>
+struct can_apply {
+    static constexpr bool value = false;
+};
+
+template<typename F, typename S>
+struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
+    static constexpr bool value = get_applicability<F, S>::value;
+};
 
 template<typename S, typename F, typename = void>
 struct fmapper;

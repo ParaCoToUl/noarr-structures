@@ -1,6 +1,7 @@
 #ifndef NOARR_STRUCTURES_FUNCS_HPP
 #define NOARR_STRUCTURES_FUNCS_HPP
 
+#include "std_ext.hpp"
 #include "structs.hpp"
 #include "struct_traits.hpp"
 #include "core.hpp"
@@ -11,6 +12,9 @@ template<typename F, typename G>
 struct _compose : contain<F, G> {
     using base = contain<F, G>;
     using func_family = typename func_trait<F>::type;
+
+    template<typename T>
+    using can_apply = get_applicability<F, T>;
 
     constexpr _compose(F f, G g) : base(f, g) {}
 
@@ -25,11 +29,29 @@ inline constexpr auto compose(F f, G g) {
     return _compose<F, G>(f, g);
 }
 
+template<char Dim, typename T>
+struct _set_length_can_apply {
+    static constexpr bool value = false;
+};
+
+template<char Dim, typename T>
+struct _set_length_can_apply<Dim, vector<Dim, T>> {
+    static constexpr bool value = true;
+};
+
+template<char Dim, typename T>
+struct _set_length_can_apply<Dim, sized_vector<Dim, T>> {
+    static constexpr bool value = true;
+};
+
 template<char Dim>
-struct set_length {
+struct _set_length {
     using func_family = transform_tag;
 
-    explicit constexpr set_length(std::size_t length) : length(length) {}
+    template<typename T>
+    using can_apply = _set_length_can_apply<Dim, T>;
+
+    explicit constexpr _set_length(std::size_t length) : length(length) {}
 
     template<typename T>
     constexpr auto operator()(vector<Dim, T> v) const {
@@ -45,14 +67,47 @@ private:
     std::size_t length;
 };
 
+template<char Dim, std::size_t L>
+struct _sset_length {
+    constexpr _sset_length() = default;
+
+    template<typename T>
+    constexpr auto operator()(vector<Dim, T> v) const {
+        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
+    }
+
+    template<typename T>
+    constexpr auto operator()(sized_vector<Dim, T> v) const {
+        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
+    }
+
+    template<typename T, std::size_t L2>
+    constexpr auto operator()(array<Dim, L2, T> v) const {
+        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
+    }
+};
+
+template<char Dim>
+inline constexpr auto set_length(std::size_t length) {
+    return _set_length<Dim>(length);
+}
+
+template<char Dim, std::size_t Length>
+inline constexpr auto set_length(std::integral_constant<std::size_t, Length>) {
+    return _sset_length<Dim, Length>();
+}
+
 template<char Dim>
 struct get_length {
     using func_family = get_tag;
 
+    template<typename T>
+    using can_apply = typename get_dims<T>::template contains<Dim>;
+
     explicit constexpr get_length() {}
 
     template<typename T>
-    constexpr auto operator()(T t) const -> remove_cvref<decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), std::size_t())> {
+    constexpr std::size_t operator()(T t) const {
         return t.length();
     }
 };
@@ -62,7 +117,7 @@ struct _reassemble_get {
     using func_family = get_tag;
 
     template<typename T>
-    constexpr auto operator()(T t) const -> remove_cvref<decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), t)> {
+    constexpr auto operator()(T t) const -> remove_cvref<decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), t)> {
         return t;
     }
 };
@@ -95,33 +150,13 @@ public:
     using func_family = transform_tag;
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(_reassemble<std::enable_if_t<get_dims<T>::template contains<Dim1>(), char>(Dim2)>(t)) {
+    constexpr auto operator()(T t) const -> decltype(_reassemble<std::enable_if_t<get_dims<T>::template contains<Dim1>::value, char>(Dim2)>(t)) {
         return _reassemble<Dim2>(t);
     }
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(_reassemble<std::enable_if_t<get_dims<T>::template contains<Dim2>() && Dim1 != Dim2, char>(Dim1)>(t)) {
+    constexpr auto operator()(T t) const -> decltype(_reassemble<std::enable_if_t<get_dims<T>::template contains<Dim2>::value && Dim1 != Dim2, char>(Dim1)>(t)) {
         return _reassemble<Dim1>(t);
-    }
-};
-
-template<char Dim, std::size_t L>
-struct cresize {
-    constexpr cresize() = default;
-
-    template<typename T>
-    constexpr auto operator()(vector<Dim, T> v) const {
-        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
-    }
-
-    template<typename T>
-    constexpr auto operator()(sized_vector<Dim, T> v) const {
-        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
-    }
-
-    template<typename T>
-    constexpr auto operator()(array<Dim, L, T> v) const {
-        return array<Dim, L, T>(std::get<0>(v.sub_structures()));
     }
 };
 
@@ -152,7 +187,7 @@ private:
 
 public:
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), fixed_dim<Dim, T>(t, idx)) {
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), fixed_dim<Dim, T>(t, idx)) {
         return fixed_dim<Dim, T>(t, idx);
     }
 };
@@ -164,7 +199,7 @@ struct _sfix {
     constexpr _sfix() = default;
 
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), sfixed_dim<Dim, T, Idx>(t)) {
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), sfixed_dim<Dim, T, Idx>(t)) {
         return sfixed_dim<Dim, T, Idx>(t);
     }
 };
@@ -258,7 +293,7 @@ private:
 
 public:
     template<typename T>
-    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>()>>(), t.offset(idx)) {
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), t.offset(idx)) {
         return t.offset(idx);
     }
 };

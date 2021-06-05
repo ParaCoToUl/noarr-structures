@@ -3,7 +3,7 @@
 
 #include <type_traits>
 
-// TODO: write a better get<..> and refactor
+// TODO: write a better get<..>
 
 namespace noarr {
 
@@ -16,19 +16,22 @@ using contain = _contain<void, TS...>;
 template<typename T, std::size_t I>
 struct _contain_get {
     static constexpr auto get(const T &t) {
-        return t.template get_next_<I>();
+        return t.template _get_next<I>();
     }
 };
 
 template<typename T>
 struct _contain_get<T, 0> {
     static constexpr auto get(const T &t) {
-        return t.get_();
+        return t._get();
     }
 };
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain<TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
+    typename<typename, typename...>
+    friend struct _contain;
+
     T t;
     contain<TS...> ts;
 
@@ -40,18 +43,22 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<cont
         return _contain_get<_contain, I>::get(*this);
     }
 
+private:
     template<std::size_t I>
-    constexpr auto get_next_() const {
+    constexpr auto _get_next() const {
         return ts.template get<I - 1>();
     }
 
-    constexpr auto get_() const {
+    constexpr auto _get() const {
         return t;
     }
 };
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain<TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain<TS...> {
+    typename<typename, typename...>
+    friend struct _contain;
+
     T t;
 
     constexpr _contain() = default;
@@ -63,18 +70,22 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<conta
         return _contain_get<_contain, I>::get(*this);
     }
 
+private:
     template<std::size_t I>
-    constexpr auto get_next_() const {
+    constexpr auto _get_next() const {
         return contain<TS...>::template get<I - 1>();
     }
 
-    constexpr auto get_() const {
+    constexpr auto _get() const {
         return t;
     }
 };
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain<TS...> {
+    typename<typename, typename...>
+    friend struct _contain;
+
     constexpr _contain() = default;
     explicit constexpr _contain(TS... ts) : contain<TS...>(ts...) {}
     explicit constexpr _contain(T, TS... ts) : contain<TS...>(ts...) {}
@@ -84,18 +95,22 @@ struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>
         return _contain_get<_contain, I>::get(*this);
     }
 
+private:
     template<std::size_t I>
-    constexpr auto get_next_() const {
+    constexpr auto _get_next() const {
         return contain<TS...>::template get<I - 1>();
     }
 
-    constexpr auto get_() const {
+    constexpr auto _get() const {
         return T();
     }
 };
 
 template<typename T>
 struct _contain<std::enable_if_t<std::is_empty<T>::value>, T> {
+    typename<typename, typename...>
+    friend struct _contain;
+
     constexpr _contain() = default;
     explicit constexpr _contain(T) {}
 
@@ -104,13 +119,17 @@ struct _contain<std::enable_if_t<std::is_empty<T>::value>, T> {
         return _contain_get<_contain, I>::get(*this);
     }
 
-    constexpr auto get_() const {
+private:
+    constexpr auto _get() const {
         return T();
     }
 };
 
 template<typename T>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value>, T> {
+    typename<typename, typename...>
+    friend struct _contain;
+
     T t;
 
     constexpr _contain() = default;
@@ -121,7 +140,8 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value>, T> {
         return _contain_get<_contain, I>::get(*this);
     }
 
-    constexpr auto get_() const {
+private:
+    constexpr auto _get() const {
         return t;
     }
 };
