@@ -29,8 +29,8 @@ struct _contain_get<T, 0> {
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain<TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
-    template<typename, typename...>
-    friend struct _contain;
+    template<typename, std::size_t>
+    friend struct _contain_get;
 
     T t;
     contain<TS...> ts;
@@ -56,8 +56,8 @@ private:
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain<TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain<TS...> {
-    template<typename, typename...>
-    friend struct _contain;
+    template<typename, std::size_t>
+    friend struct _contain_get;
 
     T t;
 
@@ -83,8 +83,8 @@ private:
 
 template<typename T, typename... TS>
 struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain<TS...> {
-    template<typename, typename...>
-    friend struct _contain;
+    template<typename, std::size_t>
+    friend struct _contain_get;
 
     constexpr _contain() = default;
     explicit constexpr _contain(TS... ts) : contain<TS...>(ts...) {}
@@ -108,8 +108,8 @@ private:
 
 template<typename T>
 struct _contain<std::enable_if_t<std::is_empty<T>::value>, T> {
-    template<typename, typename...>
-    friend struct _contain;
+    template<typename, std::size_t>
+    friend struct _contain_get;
 
     constexpr _contain() = default;
     explicit constexpr _contain(T) {}
@@ -127,8 +127,8 @@ private:
 
 template<typename T>
 struct _contain<std::enable_if_t<!std::is_empty<T>::value>, T> {
-    template<typename, typename...>
-    friend struct _contain;
+    template<typename, std::size_t>
+    friend struct _contain_get;
 
     T t;
 
