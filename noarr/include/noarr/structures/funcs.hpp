@@ -11,6 +11,7 @@ template<typename F, typename G>
 struct _compose : contain<F, G> {
     using base = contain<F, G>;
     using func_family = typename func_trait<F>::type;
+
     constexpr _compose(F f, G g) : base(f, g) {}
 
     template<typename T>
@@ -27,12 +28,14 @@ inline constexpr auto compose(F f, G g) {
 template<char Dim>
 struct set_length {
     using func_family = transform_tag;
+
     explicit constexpr set_length(std::size_t length) : length(length) {}
 
     template<typename T>
     constexpr auto operator()(vector<Dim, T> v) const {
         return sized_vector<Dim, T>(std::get<0>(v.sub_structures()), length);
     }
+
     template<typename T>
     constexpr auto operator()(sized_vector<Dim, T> v) const {
         return sized_vector<Dim, T>(std::get<0>(v.sub_structures()), length);
@@ -45,6 +48,7 @@ private:
 template<char Dim>
 struct get_length {
     using func_family = get_tag;
+
     explicit constexpr get_length() {}
 
     template<typename T>
@@ -65,9 +69,10 @@ struct _reassemble_get {
 
 template<char Dim, typename T, typename T2>
 struct _reassemble_set : private contain<T> {
+    using func_family = transform_tag;
+
     constexpr _reassemble_set() = default;
     explicit constexpr _reassemble_set(T t) : contain<T>(t) {}
-    using func_family = transform_tag;
 
     constexpr auto operator()(T2 t) const {
         return construct(contain<T>::template get<0>(), t.sub_structures());
@@ -81,6 +86,7 @@ private:
     constexpr auto reassemble_2(T t, T2 t2) const {
         return construct(t2, (t | _reassemble_set<Dim, T, remove_cvref<decltype(t2)>>(t)).sub_structures());
     }
+
     template<char Dim, typename T>
     constexpr auto _reassemble(T t) const -> decltype(reassemble_2<Dim>(t, t | _reassemble_get<Dim>())) {
         return reassemble_2<Dim>(t, t | _reassemble_get<Dim>());
@@ -107,10 +113,12 @@ struct cresize {
     constexpr auto operator()(vector<Dim, T> v) const {
         return array<Dim, L, T>(std::get<0>(v.sub_structures()));
     }
+
     template<typename T>
     constexpr auto operator()(sized_vector<Dim, T> v) const {
         return array<Dim, L, T>(std::get<0>(v.sub_structures()));
     }
+
     template<typename T>
     constexpr auto operator()(array<Dim, L, T> v) const {
         return array<Dim, L, T>(std::get<0>(v.sub_structures()));
@@ -152,6 +160,7 @@ public:
 template<char Dim, std::size_t Idx>
 struct _sfix {
     using idx_t = std::integral_constant<std::size_t, Idx>;
+
     constexpr _sfix() = default;
 
     template<typename T>
@@ -166,6 +175,7 @@ struct _fixs;
 template<char Dim, typename T, typename... Tuples>
 struct _fixs<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<_fix<Dim>, _fixs<Tuples...>> {
     using base = contain<_fix<Dim>, _fixs<Tuples...>>;
+
     constexpr _fixs() = default;
     
     template <typename... Ts>
@@ -184,6 +194,7 @@ struct _fixs<std::tuple<std::integral_constant<char, Dim>, T>> : private _fix<Di
 template<char Dim, std::size_t Idx, typename... Tuples>
 struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : private contain<_sfix<Dim, Idx>, _fixs<Tuples...>> {
     using base = contain<_sfix<Dim, Idx>, _fixs<Tuples...>>;
+
     constexpr _fixs() = default;
     
     template <typename... Ts>
@@ -199,6 +210,7 @@ template<char Dim, std::size_t Idx>
 struct _fixs<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : private _sfix<Dim, Idx> {
     constexpr _fixs() = default;
     constexpr _fixs(std::integral_constant<std::size_t, Idx>) : _sfix<Dim,Idx>() {}
+
     using _sfix<Dim, Idx>::operator();
 };
 
@@ -238,6 +250,7 @@ inline constexpr auto operator""_idx() {
 template<char Dim>
 struct get_offset {
     using func_family = get_tag;
+
     explicit constexpr get_offset(std::size_t idx) : idx(idx) {}
 
 private:
