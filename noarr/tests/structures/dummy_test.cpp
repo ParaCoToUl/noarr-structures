@@ -10,6 +10,8 @@
 #include "noarr/structures/struct_traits.hpp"
 #include "noarr/structures/wrapper.hpp"
 
+using namespace noarr::literals;
+
 TEST_CASE("Pipes Sizes", "[sizes]") {
 	// std::array<float, 300> data; <- // FIXME: NEVER USED
 
@@ -82,7 +84,7 @@ TEST_CASE("Pipes Resize 2", "[Resizing]") {
 TEST_CASE("Pipes Resize 3", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	// auto vs2 = v2 | noarr::set_length<'x'>(20); // transform <- // FIXME: NEVER USED
-	auto vs3 = v2 | noarr::cresize<'x', 10>(); // transform
+	auto vs3 = v2 | noarr::set_length<'x'>(10_idx); // transform
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs3)>::value);
@@ -105,7 +107,7 @@ TEST_CASE("Pipes Resize 4", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
 	// tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
-	auto vs4 = pipe(v2, noarr::cresize<'y', 10>(), noarr::set_length<'x'>(l)); // transform
+	auto vs4 = pipe(v2, noarr::set_length<'y'>(10_idx), noarr::set_length<'x'>(l)); // transform
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs4)>::value);
