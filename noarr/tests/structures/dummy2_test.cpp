@@ -270,19 +270,19 @@ enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 
 template<ImageDataLayout layout, std::size_t width, std::size_t height>
 constexpr auto GetImageStructure()
 {
-	if (layout == ImageDataLayout::ArrayOfArrays)
+	if constexpr (layout == ImageDataLayout::ArrayOfArrays)
 	{
-		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
+		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p = {};
 		return image_p;
 	}
-	else if (layout == ImageDataLayout::VectorOfVectors)
+	else if constexpr (layout == ImageDataLayout::VectorOfVectors)
 	{
-		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p;
+		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p = {};
 		return image_p;
 	}
 	else //if (layout == ImageDataLayout.Zcurve)
 	{
-		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p; // TODO!!!
+		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p = {}; // TODO!!!
 		return image_p;
 	}
 }
