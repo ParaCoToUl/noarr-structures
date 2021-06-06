@@ -260,7 +260,7 @@ public:
 };
 
 template<typename Structure>
-constexpr auto GetBag(Structure s)
+auto GetBag(Structure s)
 {
 	return Bag<Structure>(s);
 }
@@ -292,14 +292,14 @@ template<std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
 	constexpr auto image_p = GetImageStructure<ImageDataLayout::ArrayOfArrays, width, height>();
-	auto &&image = GetBag(image_p);
+	auto image = GetBag(image_p);
 	CHECK(image.layout().get_size() == width * height * sizeof(int));
 
 	int y_size = image.layout().template get_length<'y'>();
 	CHECK(y_size == height);
 
-	constexpr noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p;
-	auto &&histogram = GetBag(histogram_p);
+	constexpr noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p = {};
+	auto histogram = GetBag(histogram_p);
 	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
 
 	image.clear();
