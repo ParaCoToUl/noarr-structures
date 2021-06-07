@@ -1,5 +1,4 @@
 #include <catch2/catch.hpp>
-//#include "noarr/structures.hpp"
 
 #include <iostream>
 #include <array>
