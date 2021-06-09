@@ -265,41 +265,54 @@ auto GetBag(Structure s)
 	return Bag<Structure>(s);
 }
 
-enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 };
-
-template<ImageDataLayout layout, std::size_t width, std::size_t height>
-constexpr auto GetImageStructure()
+template<typename Structure>
+auto GetBag(noarr::wrapper<Structure> s)
 {
-	if (layout == ImageDataLayout::ArrayOfArrays)
-	{
-		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p = {};
-		return image_p;
-	}
-	else if (layout == ImageDataLayout::VectorOfVectors)
-	{
-		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p = {};
-		return image_p;
-	}
-	else //if (layout == ImageDataLayout.Zcurve)
-	{
-		constexpr noarr::array<'x', width, noarr::array<'y', height, noarr::scalar<int>>> image_p = {}; // TODO!!!
-		return image_p;
-	}
+	return Bag<Structure>(s.unwrap());
 }
 
+enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 };
 
-template<std::size_t width, std::size_t height, std::size_t pixel_range = 256>
+template<ImageDataLayout layout>
+struct GetImageStructreStructure;
+
+template<>
+struct GetImageStructreStructure<ImageDataLayout::ArrayOfArrays>
+{
+	static constexpr auto GetImageStructure()
+	{
+		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+	}
+};
+
+template<>
+struct GetImageStructreStructure<ImageDataLayout::VectorOfVectors>
+{
+	static constexpr auto GetImageStructure()
+	{
+		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+	}
+};
+
+template<>
+struct GetImageStructreStructure<ImageDataLayout::Zcurve>
+{
+	static constexpr auto GetImageStructure()
+	{
+		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+	}
+};
+
+template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	constexpr auto image_p = GetImageStructure<ImageDataLayout::ArrayOfArrays, width, height>();
-	auto image = GetBag(image_p);
+	auto image = GetBag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
 	CHECK(image.layout().get_size() == width * height * sizeof(int));
 
 	int y_size = image.layout().template get_length<'y'>();
 	CHECK(y_size == height);
 
-	constexpr noarr::array<'x', pixel_range, noarr::scalar<int>> histogram_p = {};
-	auto histogram = GetBag(histogram_p);
+	auto histogram = GetBag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
 	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
 
 	image.clear();
@@ -330,26 +343,44 @@ void histogram_template_test()
 
 TEST_CASE("Histogram prototype 720 x 480 with 16 colors", "[Histogram prototype]")
 {
-	histogram_template_test<720, 480, 16>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 720, 480, 16>();
 }
 
 TEST_CASE("Histogram prototype 720 x 480", "[Histogram prototype]")
 {
-	histogram_template_test<720, 480>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 720, 480>();
 }
 
 TEST_CASE("Histogram prototype 1080 x 720", "[Histogram prototype]")
 {
-	histogram_template_test<1080, 720>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 1080, 720>();
 }
 
 TEST_CASE("Histogram prototype 1920 x 1080", "[Histogram prototype]")
 {
-	histogram_template_test<1920, 1080>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 1920, 1080>();
 }
 
+template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
+void histogram_template_test_clear()
+{
+	auto image = GetBag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height)); // image size 
+	auto histogram = GetBag(noarr::array<'x', pixel_range, noarr::scalar<int>>()); // lets say that every image has 256 pixel_range
 
+	image.clear();
+	histogram.clear();
 
+	int x_size = image.layout().template get_length<'x'>();
+	int y_size = image.layout().template get_length<'y'>();
 
-			//int& histogram_value = *((int*)(histogram.blob + histogram.layout.fix<'x'>(pixel_value).offset()));
-			//int& histogram_value = *((int*)(histogram.layout.fix<'x'>(pixel_value).get_at(histogram.blob)));
+	for (int i = 0; i < x_size; i++)
+	{
+		for (int j = 0; j < y_size; j++)
+		{
+			int pixel_value = image.layout().template get_at<'x', 'y'>(image.data(), i, j);
+
+			int& histogram_value = histogram.layout().template get_at<'x'>(histogram.data(), pixel_value);
+			histogram_value = histogram_value + 1;
+		}
+	}
+}

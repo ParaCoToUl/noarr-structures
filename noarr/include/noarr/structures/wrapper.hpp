@@ -49,6 +49,10 @@ public:
     constexpr decltype(auto) get_at(V *ptr, Ts... ts) const {
         return base::template get<0>() | noarr::get_at<Dims...>(ptr, ts...);
     }
+
+    constexpr decltype(auto) unwrap() const {
+        return base::template get<0>();
+    }
 };
 
 template<typename Structure> 
