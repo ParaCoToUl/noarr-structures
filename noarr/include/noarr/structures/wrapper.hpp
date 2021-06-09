@@ -50,7 +50,7 @@ public:
         return base::template get<0>() | noarr::get_at<Dims...>(ptr, ts...);
     }
 
-    constexpr decltype(auto) unwrap() const {
+    constexpr auto unwrap() const {
         return base::template get<0>();
     }
 };
