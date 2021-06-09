@@ -51,3 +51,17 @@ TEST_CASE("Standard layout", "[low-lvl]") {
     SECTION("fixed_dim sized_vector is is standard layout")
         REQUIRE(std::is_standard_layout<fixed_dim<'x', sized_vector<'x', scalar<int>>>>::value);
 }
+
+TEST_CASE("Literality test", "[low-lvl]") {
+    constexpr auto test_array = array<'x', 100, scalar<int>>();
+    test_array.size();
+    constexpr auto test_vector = vector<'x', scalar<int>>();
+    constexpr auto test_sized_vector = test_vector | set_length<'x'>(100);
+    test_sized_vector.size();
+    constexpr auto test_tuple = tuple<'t', scalar<int>, sized_vector<'x', scalar<int>>, array<'y', 100, scalar<int>>>();
+    test_tuple.size();
+    constexpr auto test_sfixed_dim = sfixed_dim<'x', sized_vector<'x', scalar<int>>, 10>();
+    test_sfixed_dim.size();
+    constexpr auto test_fixed_dim = fixed_dim<'x', sized_vector<'x', scalar<int>>>();
+    test_fixed_dim.size();
+}
