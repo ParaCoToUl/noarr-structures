@@ -1,4 +1,4 @@
-name: Noarr test
+name: Noarr test ubuntu18
 
 on:
   push:
