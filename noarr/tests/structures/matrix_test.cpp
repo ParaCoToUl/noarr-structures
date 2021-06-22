@@ -49,6 +49,9 @@ auto GetBag(noarr::wrapper<Structure> s)
 }
 
 enum class MatrixDataLayout { Rows = 1, Columns = 2, Zcurve = 3 };
+struct RowsStruct {};
+struct ColumnsStruct {};
+struct ZcurveStruct {};
 
 template<MatrixDataLayout layout>
 struct GetMatrixStructreStructure;
@@ -126,7 +129,7 @@ void matrixTranspose(Bag<Structure> matrix1)
 }
 
 template<typename Structure, MatrixDataLayout layout>
-Bag<Structure> matrixClone(Bag<Structure> matrix1)
+auto matrixClone(Bag<Structure> matrix1)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
@@ -138,16 +141,36 @@ Bag<Structure> matrixClone(Bag<Structure> matrix1)
 	return matrix2;
 }
 
-template<typename Structure>
-Bag<Structure> matrixClone(Bag<Structure> matrix1, MatrixDataLayout layout)
+/*template<typename Structure>
+auto matrixClone(Bag<Structure> matrix1, MatrixDataLayout layout)
 {
 	if (layout == MatrixDataLayout.Rows)
-		return matrixClone<MatrixDataLayout.Rows>(matrix1)
+		return matrixClone<MatrixDataLayout.Rows>(matrix1);
 	else if (layout == MatrixDataLayout.Columns)
-		return matrixClone<MatrixDataLayout.Columns>(matrix1)
+		return matrixClone<MatrixDataLayout.Columns>(matrix1);
 	else if (layout == MatrixDataLayout.Zcurve)
-		return matrixClone<MatrixDataLayout.Zcurve>(matrix1)
+		return matrixClone<MatrixDataLayout.Zcurve>(matrix1);
+}*/
+
+template<typename Structure>
+auto matrixClone(Bag<Structure> matrix1, RowsStruct)
+{
+	return matrixClone<MatrixDataLayout::Rows>(matrix1);
 }
+
+template<typename Structure>
+auto matrixClone(Bag<Structure> matrix1, ColumnsStruct)
+{
+	return matrixClone<MatrixDataLayout::Columns>(matrix1);
+}
+
+template<typename Structure>
+auto matrixClone(Bag<Structure> matrix1, ZcurveStruct)
+{
+	return matrixClone<MatrixDataLayout::Zcurve>(matrix1);
+}
+
+
 
 template<MatrixDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
