@@ -1,0 +1,47 @@
+Promises
+--------
+
+https://stackoverflow.com/a/12335206
+
+
+
+INVARIANTY
+----------
+
+- v rámci envelopy mají všechny buffery stejnou velikost
+    (tedy mezi envelopama se mohou buffery přesouvat, jen pokud mají stejnou velikost)
+- každá envelopa má max. jednoho producera
+- každá dvojice node-envelopa má max. 1 link
+- to, co vyprodukuje producer tak sežere konzumer a nikdo jiný na to nešahá
+    (prostě nejsou in-place modifikace)
+    (ty se musí emulovat dequeue a následným enqueue)
+- node se může spustit jen když má všechny linky READY
+- envelopa se snaží posouvat linky do stavu READY
+
+
+Envelope
+--------
+
+Když vyrábíme envelopu, tak specifikujeme:
+- kde je producer (host/device)
+- kde jsou konzumeři (host,devices)
+- jak velké jsou buffery
+- kolik bufferů na začátku alokujeme pro každý device
+- jestli se dělá broadcasting nebo load balancing
+    (jestli se z fronty náklad strčí jednomu nedeterministicky, nebo všem)
+
+Typy linků
+----------
+
+každý chunk dat (náklad lodě) v envelopě má číslo verze
+
+WRITE
+    vyrábí náklady, cpe je na lodě
+
+READ
+    čte náklady z lodí
+
+READWRITE
+    při zpětném zápisu se buffer strčí jako write do původní envelopy, a nebo jako
+    write do jiné envelopy. Abychom mohli "in-place" propagovat jeden buffer
+    skrz fáze pipeline.
