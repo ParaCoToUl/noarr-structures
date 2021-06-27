@@ -10,6 +10,7 @@
 #include "noarr/structures/io.hpp"
 #include "noarr/structures/struct_traits.hpp"
 #include "noarr/structures/wrapper.hpp"
+#include "noarr/structures/bag.hpp"
 
 #include <tuple>
 
@@ -45,51 +46,21 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve>
 	}
 };
 
-
-
-
-
-template<typename Structure>
-struct Bag
-{
-private:
-	noarr::wrapper<Structure> layout_;
-	std::unique_ptr<char[]> data_;
-
-public:
-	explicit Bag(Structure s)
-		: layout_(noarr::wrap(s)),
-		data_(std::make_unique<char[]>(layout().get_size())) { }
-
-	constexpr const noarr::wrapper<Structure>& layout() const noexcept { return layout_; }
-
-	// noarr::wrapper<Structure> &layout() noexcept { return layout_; } // this version should reallocate the blob (maybe only if it doesn't fit)
-
-	constexpr char* data() const noexcept { return data_.get(); }
-
-	void clear()
-	{
-		auto size_ = layout().get_size();
-		for (std::size_t i = 0; i < size_; i++)
-			data_[i] = 0;
-	}
-};
-
 template<typename Structure>
 auto GetBag(Structure s)
 {
-	return Bag<Structure>(s);
+	return noarr::bag<Structure>(s);
 }
 
 template<typename Structure>
 auto GetBag(noarr::wrapper<Structure> s)
 {
-	return Bag<Structure>(s.unwrap());
+	return noarr::bag<Structure>(s.unwrap());
 }
 
 
 template<typename Structure1, typename Structure2>
-void matrix_copy(Bag<Structure1>& matrix1, Bag<Structure2>& matrix2)
+void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
@@ -106,7 +77,7 @@ void matrix_copy(Bag<Structure1>& matrix1, Bag<Structure2>& matrix2)
 }
 
 template<typename Structure>
-void matrix_transpose(Bag<Structure>& matrix1)
+void matrix_transpose(noarr::bag<Structure>& matrix1)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
@@ -123,7 +94,7 @@ void matrix_transpose(Bag<Structure>& matrix1)
 }
 
 template<typename Structure1, typename Structure2, typename Structure3>
-void matrix_add(Bag<Structure1>& matrix1, Bag<Structure2>& matrix2, Bag<Structure3>& matrix3)
+void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
@@ -144,7 +115,7 @@ void matrix_add(Bag<Structure1>& matrix1, Bag<Structure2>& matrix2, Bag<Structur
 }
 
 template<typename Structure>
-void matrix_scalar_multiplication(Bag<Structure>& matrix1, int scalar)
+void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
@@ -155,7 +126,7 @@ void matrix_scalar_multiplication(Bag<Structure>& matrix1, int scalar)
 }
 
 template<typename Structure1, typename Structure2, typename Structure3>
-void matrix_multiply(Bag<Structure1>& matrix1, Bag<Structure2>& matrix2, Bag<Structure3>& matrix3)
+void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
 {
 	int x1_size = matrix1.layout().template get_length<'x'>();
 	int y1_size = matrix1.layout().template get_length<'y'>();
@@ -227,7 +198,7 @@ TEST_CASE("Small matrix multimplication Zcurve", "[Small matrix multimplication 
 
 
 
-// sèítání, násobit matice, násobit scalárem, 
+// sï¿½ï¿½tï¿½nï¿½, nï¿½sobit matice, nï¿½sobit scalï¿½rem, 
 
 /*struct MatrixStruct {
 	virtual ~MatrixStruct() noexcept = default;
@@ -275,7 +246,7 @@ static constexpr auto GetMatrixStructure(ZcurveStruct)
 /*template<typename Structure>
 auto GetBag(noarr::wrapper<Structure> s, MatrixDataLayout l)
 {
-	return Bag<Structure>(s.unwrap(), l);
+	return noarr::bag<Structure>(s.unwrap(), l);
 }
 
 template<typename Structure, typename layout>
@@ -289,7 +260,7 @@ auto GetMatrix(int x_size, int y_size)
 
 
 /*template<typename Structure>
-auto matrix_transpose(Bag<Structure>& matrix)
+auto matrix_transpose(noarr::bag<Structure>& matrix)
 {
 	MatrixDataLayout layout = matrix.dataLayout();
 
@@ -302,7 +273,7 @@ auto matrix_transpose(Bag<Structure>& matrix)
 }
 
 template<typename Structure1, typename targetLayout>
-auto matrix_clone(Bag<Structure1>& matrix1)
+auto matrix_clone(noarr::bag<Structure1>& matrix1)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
@@ -312,7 +283,7 @@ auto matrix_clone(Bag<Structure1>& matrix1)
 }
 
 template<typename Structure>
-auto matrix_clone(Bag<Structure>& matrix, MatrixDataLayout targetLayout)
+auto matrix_clone(noarr::bag<Structure>& matrix, MatrixDataLayout targetLayout)
 {
 	MatrixDataLayout layout = matrix.dataLayout();
 
