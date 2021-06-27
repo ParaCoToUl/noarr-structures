@@ -234,18 +234,6 @@ TEST_CASE("Array", "[is_trivial]")
 	}
 }
 
-template<typename Structure>
-auto GetBag(Structure s)
-{
-	return noarr::bag<Structure>(s);
-}
-
-template<typename Structure>
-auto GetBag(noarr::wrapper<Structure> s)
-{
-	return noarr::bag<Structure>(s.unwrap());
-}
-
 enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 };
 
 template<ImageDataLayout layout>
@@ -281,13 +269,13 @@ struct GetImageStructreStructure<ImageDataLayout::Zcurve>
 template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	auto image = GetBag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
+	auto image = noarr::bag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
 	CHECK(image.layout().get_size() == width * height * sizeof(int));
 
 	int y_size = image.layout().template get_length<'y'>();
 	CHECK(y_size == height);
 
-	auto histogram = GetBag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
+	auto histogram = noarr::bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
 	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
 
 	image.clear();

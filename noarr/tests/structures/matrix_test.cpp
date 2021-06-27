@@ -46,19 +46,6 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve>
 	}
 };
 
-template<typename Structure>
-auto GetBag(Structure s)
-{
-	return noarr::bag<Structure>(s);
-}
-
-template<typename Structure>
-auto GetBag(noarr::wrapper<Structure> s)
-{
-	return noarr::bag<Structure>(s.unwrap());
-}
-
-
 template<typename Structure1, typename Structure2>
 void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2)
 {
@@ -160,9 +147,9 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 template<MatrixDataLayout layout>
 void matrix_template_test(int size)
 {
-	auto m1 = GetBag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m2 = GetBag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m3 = GetBag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m2 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m3 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 
 	matrix_multiply(m1, m2, m3);
 }
@@ -244,7 +231,7 @@ static constexpr auto GetMatrixStructure(ZcurveStruct)
 
 
 /*template<typename Structure>
-auto GetBag(noarr::wrapper<Structure> s, MatrixDataLayout l)
+auto noarr::bag(noarr::wrapper<Structure> s, MatrixDataLayout l)
 {
 	return noarr::bag<Structure>(s.unwrap(), l);
 }
@@ -252,7 +239,7 @@ auto GetBag(noarr::wrapper<Structure> s, MatrixDataLayout l)
 template<typename Structure, typename layout>
 auto GetMatrix(int x_size, int y_size)
 {
-	return GetBag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure(), layout).template set_length<'x'>(x_size).template set_length<'y'>(y_size));
+	return noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure(), layout).template set_length<'x'>(x_size).template set_length<'y'>(y_size));
 }*/
 
 
@@ -320,13 +307,13 @@ auto matrix_clone(noarr::bag<Structure>& matrix, MatrixDataLayout targetLayout)
 /*template<MatrixDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	auto image = GetBag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
+	auto image = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
 	CHECK(image.layout().get_size() == width * height * sizeof(int));
 
 	int y_size = image.layout().template get_length<'y'>();
 	CHECK(y_size == height);
 
-	auto histogram = GetBag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
+	auto histogram = noarr::bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
 	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
 
 	image.clear();
@@ -378,8 +365,8 @@ TEST_CASE("Matrix prototype 1920 x 1080", "[Matrix prototype]")
 template<MatrixDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test_clear()
 {
-	auto image = GetBag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height)); // image size 
-	auto histogram = GetBag(noarr::array<'x', pixel_range, noarr::scalar<int>>()); // lets say that every image has 256 pixel_range
+	auto image = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height)); // image size 
+	auto histogram = noarr::bag(noarr::array<'x', pixel_range, noarr::scalar<int>>()); // lets say that every image has 256 pixel_range
 
 	image.clear();
 	histogram.clear();
