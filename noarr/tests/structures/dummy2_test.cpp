@@ -9,6 +9,7 @@
 #include "noarr/structures/io.hpp"
 #include "noarr/structures/struct_traits.hpp"
 #include "noarr/structures/wrapper.hpp"
+#include "noarr/structures/bag.hpp"
 
 #include <tuple>
 
@@ -234,41 +235,15 @@ TEST_CASE("Array", "[is_trivial]")
 }
 
 template<typename Structure>
-struct Bag
-{
-private:
-	noarr::wrapper<Structure> layout_;
-	std::unique_ptr<char[]> data_;
-
-public:
-	explicit Bag(Structure s)
-		: layout_(noarr::wrap(s)),
-		data_(std::make_unique<char[]>(layout().get_size())) { }
-
-	constexpr const noarr::wrapper<Structure> &layout() const noexcept { return layout_; }
-	
-	// noarr::wrapper<Structure> &layout() noexcept { return layout_; } // this version should reallocate the blob (maybe only if it doesn't fit)
-
-	constexpr char *data() const noexcept { return data_.get(); }
-
-	void clear()
-	{
-		auto size_ = layout().get_size();
-		for (std::size_t i = 0; i < size_; i++)
-			data_[i] = 0;
-	}
-};
-
-template<typename Structure>
 auto GetBag(Structure s)
 {
-	return Bag<Structure>(s);
+	return noarr::bag<Structure>(s);
 }
 
 template<typename Structure>
 auto GetBag(noarr::wrapper<Structure> s)
 {
-	return Bag<Structure>(s.unwrap());
+	return noarr::bag<Structure>(s.unwrap());
 }
 
 enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 };
