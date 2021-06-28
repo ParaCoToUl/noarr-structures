@@ -279,7 +279,7 @@ void matrix_demo_template(int size)
 
 	matrix* m4 noarr_matrix_to_clasic(n3);
 
-	REQUIRE(are_equal_matrices(m3, m3));
+	REQUIRE(are_equal_matrices(m3, m4));
 }
 
 void matrix_demo(MatrixDataLayout layout, int size)
