@@ -167,22 +167,24 @@ void matrix_template_test_runtime(MatrixDataLayout layout, int size)
 
 struct matrix
 {
-	matrix(int X, int Y, int* Ary) : x(X), y(Y), ary(Ary) {};
+	matrix(int X, int Y, std::vector<int>&& Ary) : x(X), y(Y), ary(std::move(Ary)) {};
 
 	int x;
 	int y;
-	int* ary;
+	std::vector<int> ary;
+
+	int& at(int x_, int y_) { return ary[x_ + y_ * x]; }
+	const int& at(int x_, int y_) const { return ary[x_ + y_ * x]; }
 };
 
-// srand(time(NULL));
-matrix* get_clasic_matrix(int x, int y)
+matrix get_clasic_matrix(int x, int y)
 {
 	const int length = x * y;
-	int* ary = new int[length];
+	std::vector<int> ary;
 	for (int i = 0; i < length; i++)
-		ary[i] = rand() % 10;
+		ary.push_back(rand() % 10);
 
-	return new matrix(x, y, ary);
+	return matrix(x, y, std::move(ary));
 }
 
 bool are_equal_matrices(matrix& m1, matrix& m2)
@@ -201,31 +203,29 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 }
 
 template<typename Structure>
-matrix* noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
+matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
 
-	matrix* m = get_clasic_matrix(x_size, y_size);
+	matrix m = get_clasic_matrix(x_size, y_size);
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			m.arr[i + j * x_size] = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j);
+			m.at(i, j) = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j);
 
 	return m;
 }
 
 template<typename Structure>
-int* clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
+void clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
 {
 	int x_size = matrix1.layout().template get_length<'x'>();
 	int y_size = matrix1.layout().template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j) = m.ary[i + j * x_size];
-
-	return m;
+			matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j) = m1.at(i, j);
 }
 
 void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
@@ -249,12 +249,12 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 
 			for (int k = 0; k < x1_size; k++)
 			{
-				int& value1 = m1.ary[k + j * m1.x]; //matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), k, j);
-				int& value2 = m2.ary[i + k * m2.x]; // matrix2.layout().template get_at<'x', 'y'>(matrix2.data(), i, k);
+				int& value1 = m1.at(k, j);
+				int& value2 = m2.at(i, k);
 				sum += value1 * value2;
 			}
 
-			m3.ary[i + j * m3.x] = sum;// matrix3.layout().template get_at<'x', 'y'>(matrix3.data(), i, j) = sum;
+			m3.at(i, j) = sum;
 		}
 	}
 }
@@ -263,9 +263,9 @@ template<MatrixDataLayout layout>
 void matrix_demo_template(int size)
 {
 
-	matrix* m1 = get_clasic_matrix(size, size);
-	matrix* m2 = get_clasic_matrix(size, size);
-	matrix* m3 = get_clasic_matrix(size, size);
+	matrix m1 = get_clasic_matrix(size, size);
+	matrix m2 = get_clasic_matrix(size, size);
+	matrix m3 = get_clasic_matrix(size, size);
 
 	auto n1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 	auto n2 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
@@ -277,7 +277,7 @@ void matrix_demo_template(int size)
 	clasic_matrix_multiply(m1, m2, m3);
 	matrix_multiply(n1, n2, n3);
 
-	matrix* m4 noarr_matrix_to_clasic(n3);
+	matrix m4 = noarr_matrix_to_clasic(n3);
 
 	REQUIRE(are_equal_matrices(m3, m4));
 }
@@ -295,6 +295,11 @@ void matrix_demo(MatrixDataLayout layout, int size)
 TEST_CASE("Small matrix demo", "[Small matrix demo]")
 {
 	matrix_demo(MatrixDataLayout::Rows, 10);
+}
+
+TEST_CASE("Small matrix demo 2", "[Small matrix demo 2]")
+{
+	matrix_demo(MatrixDataLayout::Rows, 20);
 }
 
 TEST_CASE("Small matrix multimplication Rows", "[Small matrix multimplication Rows]")
