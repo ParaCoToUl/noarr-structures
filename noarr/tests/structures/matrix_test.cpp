@@ -154,7 +154,6 @@ void matrix_template_test(int size)
 	matrix_multiply(m1, m2, m3);
 }
 
-
 void matrix_template_test_runtime(MatrixDataLayout layout, int size)
 {
 	if (layout == MatrixDataLayout::Rows)
@@ -163,6 +162,139 @@ void matrix_template_test_runtime(MatrixDataLayout layout, int size)
 		matrix_template_test<MatrixDataLayout::Columns>(size);
 	else if (layout == MatrixDataLayout::Zcurve)
 		matrix_template_test<MatrixDataLayout::Zcurve>(size);
+}
+
+
+struct matrix
+{
+	matrix(int X, int Y, int* Ary) : x(X), y(Y), ary(Ary) {};
+
+	int x;
+	int y;
+	int* ary;
+};
+
+// srand(time(NULL));
+matrix* get_clasic_matrix(int x, int y)
+{
+	const int length = x * y;
+	int* ary = new int[length];
+	for (int i = 0; i < length; i++)
+		ary[i] = rand() % 10;
+
+	return new matrix(x, y, ary);
+}
+
+bool are_equal_matrices(matrix& m1, matrix& m2)
+{
+	if (m1.x != m2.x)
+		return false;
+	if (m1.y != m2.y)
+		return false;
+
+	const int length = m1.x * m1.y;
+	for (int i = 0; i < length; i++)
+		if (m1.ary[i] != m2.ary[i])
+			return false;
+
+	return true;
+}
+
+template<typename Structure>
+matrix* noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
+{
+	int x_size = matrix1.layout().template get_length<'x'>();
+	int y_size = matrix1.layout().template get_length<'y'>();
+
+	matrix* m = get_clasic_matrix(x_size, y_size);
+
+	for (int i = 0; i < x_size; i++)
+		for (int j = 0; j < y_size; j++)
+			m.arr[i + j * x_size] = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j);
+
+	return m;
+}
+
+template<typename Structure>
+int* clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
+{
+	int x_size = matrix1.layout().template get_length<'x'>();
+	int y_size = matrix1.layout().template get_length<'y'>();
+
+	for (int i = 0; i < x_size; i++)
+		for (int j = 0; j < y_size; j++)
+			matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j) = m.ary[i + j * x_size];
+
+	return m;
+}
+
+void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
+{
+	int x1_size = m1.x;
+	int y1_size = m1.y;
+	int x2_size = m2.x;
+	int y2_size = m2.y;
+	int x3_size = m3.x;
+	int y3_size = m3.y;
+
+	REQUIRE(x1_size == y2_size);
+	REQUIRE(y1_size == y3_size);
+	REQUIRE(x2_size == x3_size);
+
+	for (int i = 0; i < x3_size; i++)
+	{
+		for (int j = 0; j < y3_size; j++)
+		{
+			int sum = 0;
+
+			for (int k = 0; k < x1_size; k++)
+			{
+				int& value1 = m1.ary[k + j * m1.x]; //matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), k, j);
+				int& value2 = m2.ary[i + k * m2.x]; // matrix2.layout().template get_at<'x', 'y'>(matrix2.data(), i, k);
+				sum += value1 * value2;
+			}
+
+			m3.ary[i + j * m3.x] = sum;// matrix3.layout().template get_at<'x', 'y'>(matrix3.data(), i, j) = sum;
+		}
+	}
+}
+
+template<MatrixDataLayout layout>
+void matrix_demo_template(int size)
+{
+
+	matrix* m1 = get_clasic_matrix(size, size);
+	matrix* m2 = get_clasic_matrix(size, size);
+	matrix* m3 = get_clasic_matrix(size, size);
+
+	auto n1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n2 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n3 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+
+	clasic_matrix_to_naorr(m1, n1);
+	clasic_matrix_to_naorr(m2, n2);
+
+	clasic_matrix_multiply(m1, m2, m3);
+	matrix_multiply(n1, n2, n3);
+
+	matrix* m4 noarr_matrix_to_clasic(n3);
+
+	REQUIRE(are_equal_matrices(m3, m3));
+}
+
+void matrix_demo(MatrixDataLayout layout, int size)
+{
+	if (layout == MatrixDataLayout::Rows)
+		matrix_demo_template<MatrixDataLayout::Rows>(size);
+	else if (layout == MatrixDataLayout::Columns)
+		matrix_demo_template<MatrixDataLayout::Columns>(size);
+	else if (layout == MatrixDataLayout::Zcurve)
+		matrix_demo_template<MatrixDataLayout::Zcurve>(size);
+}
+
+TEST_CASE("Small matrix demo", "[Small matrix demo]")
+{
+	matrix_demo(MatrixDataLayout::Rows, 10);
 }
 
 TEST_CASE("Small matrix multimplication Rows", "[Small matrix multimplication Rows]")
