@@ -4,7 +4,7 @@ on:
   push:
     paths:
     - 'noarr/**'
-    - '.github/**'
+    - '.github/workflows/noarr_test_win.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -43,7 +43,7 @@ jobs:
       run: cmake --build . --config $Env:BUILD_TYPE
 
     - name: Test
-      working-directory: ${{github.workspace}}\noarr\build\$Env:BUILD_TYPE
+      working-directory: ${{github.workspace}}\noarr\build\Debug
       shell: powershell
       # Execute tests defined by the CMake configuration.  
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail

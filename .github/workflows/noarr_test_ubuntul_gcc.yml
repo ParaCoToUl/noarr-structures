@@ -4,7 +4,7 @@ on:
   push:
     paths:
     - 'noarr/**'
-    - '.github/**'
+    - '.github/workflows/noarr_test_ubuntul_gcc.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
