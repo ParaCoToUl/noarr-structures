@@ -1,4 +1,4 @@
-name: Noarr test ubuntul
+name: Noarr test ubuntu-latest - clang
 
 on:
   push:
