@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Install gcc
+    - name: Install clang
       shell: bash
       run: sudo apt update && sudo apt install clang-12
 
