@@ -129,7 +129,7 @@ struct get_length {
     explicit constexpr get_length() {}
 
     template<typename T>
-    constexpr std::size_t operator()(T t) const {
+    constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), std::size_t()) {
         return t.length();
     }
 };
