@@ -12,11 +12,15 @@ private:
 
 public:
 	explicit bag(Structure s)
-		: layout_(noarr::wrap(s)),
-		data_(std::make_unique<char[]>(layout().get_size())) { }
+		: layout_(noarr::wrap(s))
+		{ 
+			data_ = std::make_unique<char[]>(layout().get_size());
+		}
 	explicit bag(noarr::wrapper<Structure> s)
-		: layout_(s),
-		data_(std::make_unique<char[]>(layout().get_size())) { }
+		: layout_(s)
+		{
+			data_ = std::make_unique<char[]>(layout().get_size());
+		}
 
 	constexpr const noarr::wrapper<Structure>& layout() const noexcept { return layout_; }
 
