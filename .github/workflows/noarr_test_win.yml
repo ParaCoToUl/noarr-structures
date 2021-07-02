@@ -4,6 +4,7 @@ on:
   push:
     paths:
     - 'noarr/**'
+    - '.github/**'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
