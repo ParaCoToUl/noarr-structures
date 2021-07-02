@@ -15,14 +15,14 @@ using contain = _contain<void, TS...>;
 
 template<typename T, std::size_t I>
 struct _contain_get {
-    static constexpr auto get(const T &t) {
+    static constexpr decltype(auto) get(const T &t) {
         return t.template _get_next<I>();
     }
 };
 
 template<typename T>
 struct _contain_get<T, 0> {
-    static constexpr auto get(const T &t) {
+    static constexpr decltype(auto) get(const T &t) {
         return t._get();
     }
 };
@@ -39,13 +39,13 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<cont
     explicit constexpr _contain(T t, TS... ts) : t(t), ts(ts...) {}
 
     template<std::size_t I>
-    constexpr auto get() const {
+    constexpr decltype(auto) get() const {
         return _contain_get<_contain, I>::get(*this);
     }
 
 private:
     template<std::size_t I>
-    constexpr auto _get_next() const {
+    constexpr decltype(auto) _get_next() const {
         return ts.template get<I - 1>();
     }
 
@@ -66,13 +66,13 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<conta
     explicit constexpr _contain(T t, TS...) : t(t) {}
 
     template<std::size_t I>
-    constexpr auto get() const {
+    constexpr decltype(auto) get() const {
         return _contain_get<_contain, I>::get(*this);
     }
 
 private:
     template<std::size_t I>
-    constexpr auto _get_next() const {
+    constexpr decltype(auto) _get_next() const {
         return contain<TS...>::template get<I - 1>();
     }
 
@@ -91,13 +91,13 @@ struct _contain<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>
     explicit constexpr _contain(T, TS... ts) : contain<TS...>(ts...) {}
 
     template<std::size_t I>
-    constexpr auto get() const {
+    constexpr decltype(auto) get() const {
         return _contain_get<_contain, I>::get(*this);
     }
 
 private:
     template<std::size_t I>
-    constexpr auto _get_next() const {
+    constexpr decltype(auto) _get_next() const {
         return contain<TS...>::template get<I - 1>();
     }
 
@@ -115,7 +115,7 @@ struct _contain<std::enable_if_t<std::is_empty<T>::value>, T> {
     explicit constexpr _contain(T) {}
 
     template<std::size_t I>
-    constexpr auto get() const {
+    constexpr decltype(auto) get() const {
         return _contain_get<_contain, I>::get(*this);
     }
 
@@ -136,7 +136,7 @@ struct _contain<std::enable_if_t<!std::is_empty<T>::value>, T> {
     explicit constexpr _contain(T t) : t(t) {}
 
     template<std::size_t I>
-    constexpr auto get() const {
+    constexpr decltype(auto) get() const {
         return _contain_get<_contain, I>::get(*this);
     }
 
