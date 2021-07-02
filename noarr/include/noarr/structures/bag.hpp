@@ -7,8 +7,8 @@ template<typename Structure>
 struct bag
 {
 private:
-	noarr::wrapper<Structure> layout_;
 	std::unique_ptr<char[]> data_;
+	noarr::wrapper<Structure> layout_;
 
 public:
 	explicit bag(Structure s)
