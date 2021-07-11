@@ -6,7 +6,7 @@
 #include <noarr/pipelines/Envelope.hpp>
 #include <noarr/pipelines/Hub.hpp>
 #include <noarr/pipelines/DebuggingScheduler.hpp>
-#include <noarr/pipelines/build_compute_node.hpp>
+#include <noarr/pipelines/LambdaComputeNode.hpp>
 
 #include "WorldSimulatorNode.hpp"
 
@@ -52,7 +52,7 @@ void world_simulation_via_builder(
         }
     );
 
-    auto simulator_node = build_compute_node([&](ComputeNodeBuilder& node){
+    auto simulator_node = LambdaComputeNode([&](auto& node){
         auto& world_link = node.link(world_hub.to_modify(Device::HOST_INDEX));
 
         node.initialize([&](){

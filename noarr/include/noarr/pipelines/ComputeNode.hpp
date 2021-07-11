@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "noarr/pipelines/Node.hpp"
+#include "noarr/pipelines/Link.hpp"
 
 namespace noarr {
 namespace pipelines {
