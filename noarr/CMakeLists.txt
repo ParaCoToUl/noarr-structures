@@ -15,6 +15,9 @@ FetchContent_Declare(
   GIT_TAG        v2.13.1)
 FetchContent_MakeAvailable(Catch2)
 
+# use threading library
+find_package(Threads REQUIRED)
+
 # setup the test runner executable
 file(GLOB_RECURSE tests_source_files CONFIGURE_DEPENDS
     "tests/*_test.hpp"
@@ -23,6 +26,7 @@ file(GLOB_RECURSE tests_source_files CONFIGURE_DEPENDS
 add_executable(test-runner tests/main_test.cpp ${tests_source_files})
 target_include_directories(test-runner PUBLIC include)
 target_link_libraries(test-runner PRIVATE Catch2::Catch2)
+target_link_libraries(test-runner PRIVATE Threads::Threads)
 
 if(MSVC)
   target_compile_options(test-runner PRIVATE /W4)

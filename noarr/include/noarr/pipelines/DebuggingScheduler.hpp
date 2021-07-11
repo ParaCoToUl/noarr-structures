@@ -5,6 +5,8 @@
 #include <string>
 #include <cassert>
 #include <vector>
+#include <mutex>
+#include <condition_variable>
 
 #include "Node.hpp"
 #include "SchedulerLogger.hpp"
@@ -16,9 +18,6 @@ namespace pipelines {
     TODO: implement a proper "Scheduler" class that will do parallelism
 
     A naive scheduler implementation with no parallelism.
-
-    TODO: parallelize memory transfers, device computation
-        and host computation
  */
 
 /**
@@ -211,11 +210,9 @@ private:
     // Synchronization logic //
     ///////////////////////////
 
-    // TODO: Add a proper synchronization primitive on which the scheduler
-    // thread can wait and let the callback_was_called method (or its
-    // quivalent) be callable from any thread.
-
 private:
+    std::mutex _callback_mutext; // protects the following variables
+    std::condition_variable _callback_cv; // lets us wait and notify
     bool _expecting_callback = false;
     bool _callback_was_called = false;
 
@@ -223,6 +220,9 @@ private:
      * Call this before initializeing a node update
      */
     void callback_will_be_called() {
+        // this method body is executed only when we acquire the lock
+        std::lock_guard<std::mutex> lock(this->_callback_mutext);
+        
         assert(!this->_expecting_callback
             && "Cannot expect a callback when the previous didn't finish.");
 
@@ -234,21 +234,44 @@ private:
      * Call this from the node callback
      */
     void callback_was_called() {
-        this->_callback_was_called = true;
+        {
+            // this code scope is executed only when we acquire the lock
+            std::lock_guard<std::mutex> lock(this->_callback_mutext);
+            
+            // we have the lock, set the variable
+            this->_callback_was_called = true;
+        }
+
+        // notify the waiting thread
+        this->_callback_cv.notify_one();
     }
 
     /**
      * Call this to synchronously wait for the callback
      */
     void wait_for_callback() {
-        assert(this->_expecting_callback
-            && "Cannot wait for callback without first expecting it.");
+        // check that we are actually expecting a callback
+        {
+            // this code scope is executed only when we acquire the lock
+            std::lock_guard<std::mutex> lock(this->_callback_mutext);
+            
+            assert(this->_expecting_callback
+                && "Cannot wait for callback without first expecting it.");
+        }
 
-        // TODO: perform the actual wait here
-        assert(this->_callback_was_called
-            && "TODO: Asynchronous nodes are not implemented yet.");
+        // wait for someone else to set "_callback_was_called" to true
+        {
+            // this code scope will get locked when the "wait" call exists
+            std::unique_lock<std::mutex> lock(this->_callback_mutext);
+            this->_callback_cv.wait(lock, [&](){
+                return this->_callback_was_called;
+            });
 
-        this->_expecting_callback = false;
+            // we nolonger expect a callback
+            // (we can access the variable here, since we still own the lock
+            // thanks to the previous "wait" method call)
+            this->_expecting_callback = false;
+        }
     }
 
 };

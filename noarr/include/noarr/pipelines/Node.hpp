@@ -31,7 +31,7 @@ public:
      * Called by the scheduler before the pipeline starts running.
      */
     void scheduler_initialize() {
-        this->initialize();
+        this->__internal__initialize();
     }
 
     /**
@@ -45,7 +45,7 @@ public:
      */
     void scheduler_update(std::function<void(bool)> scheduler_callback) {
         // if the data cannot be advanced, return immediately
-        if (!this->wrapper_around_can_advance())
+        if (!this->__internal__can_advance())
         {
             scheduler_callback(false);
             return;
@@ -56,7 +56,7 @@ public:
             advance_callback = nullptr;
             scheduler_callback(true); // data has been advanced
         };
-        this->advance();
+        this->__internal__advance();
     }
 
     /**
@@ -65,14 +65,14 @@ public:
      */
     void scheduler_post_update(bool data_was_advanced) {
         if (data_was_advanced)
-            this->wrapper_around_post_advance();
+            this->__internal__post_advance();
     }
 
     /**
      * Called by the scheduler after the pipeline finishes running.
      */
     void scheduler_terminate() {
-        this->terminate();
+        this->__internal__terminate();
     }
 
     //////////////
@@ -88,11 +88,67 @@ public:
     void callback() {
         assert(
             (advance_callback != nullptr) &&
-            "Cannot call the callback when the node hasn't been advanced"
+            "Callback can be called only once and only after the 'advance' method has started"
         );
 
         advance_callback();
     }
+
+    /**
+     * Returns true, if the "callback()" method can be called.
+     * Anotherwords the "advance" method has started and "callback"
+     * hasn't been called yet.
+     */
+    bool can_call_callback() {
+        return advance_callback != nullptr;
+    }
+
+    ///////////////////////
+    // Internal Node API //
+    ///////////////////////
+
+    /*
+        Represents the same concepts as the external node API,
+        but is meant to be used by classes that extend the logic
+        (e.g. ComputeNode, AsyncComputeNode, ...)
+
+        The end user might override can_advance, for example, and forget to
+        call the base class implementation. Which might break the base class
+        logic if it needs to act during this event. Therefore the internal API
+        is meant for internal node logic and it MUST CALL PARENT IMPLEMENTATIONS.
+        Whereas the external API are the final methods called and they don't need
+        to wory about inheritance.
+    */
+
+protected:
+
+    virtual void __internal__initialize() {
+        initialize();
+    }
+
+    virtual bool __internal__can_advance() {
+        return can_advance();
+    }
+
+    virtual void __internal__advance() {
+        advance();
+    }
+
+    virtual void __internal__post_advance() {
+        post_advance();
+    }
+
+    virtual void __internal__terminate() {
+        terminate();
+    }
+
+    ///////////////////////
+    // External Node API //
+    ///////////////////////
+
+    /*
+        The following event functions are meant to be overriden by the end user.
+    */
 
 protected:
 
@@ -104,31 +160,17 @@ protected:
     }
 
     /**
-     * Wrapper around can_advance that can do additional processing.
-     * This wrapper should always call the paren't version and take account,
-     * the can_advance need not to.
-     */
-    virtual bool wrapper_around_can_advance() {
-        return can_advance();
-    }
-
-    /**
      * Called to test, whether the advance method can be called
      */
-    virtual bool can_advance() = 0;
+    virtual bool can_advance() {
+        return false;
+    }
 
     /**
      * Called to advance the proggress of data through the node
      */
-    virtual void advance() = 0;
-
-    /**
-     * Wrapper around post_advance that should alway call its base
-     * implementation. Exists only so that the final user can override
-     * can_advance and forget to call the base implementation and not get roasted.
-     */
-    virtual void wrapper_around_post_advance() {
-        post_advance();
+    virtual void advance() {
+        this->callback();
     }
 
     /**

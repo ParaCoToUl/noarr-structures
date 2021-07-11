@@ -17,6 +17,9 @@ namespace pipelines {
 class ComputeNode : public Node {
 public:
 
+    ComputeNode() : Node() { }
+    ComputeNode(const std::string& label) : Node(label) { }
+
     /**
      * All the links attached to this compute node
      */
@@ -54,39 +57,14 @@ public:
     }
 
 protected:
-    /**
-     * Called before anything starts happening with the node
-     */
-    virtual void initialize() override {
-        //
-    }
 
-    /**
-     * Wrapper around can_advance that can do additional processing.
-     * This wrapper should always call the paren't version and take account,
-     * the can_advance need not to.
-     */
-    virtual bool wrapper_around_can_advance() {
+    virtual bool __internal__can_advance() {
         // a compute node cannot start, unless it has envelopes on all links
         if (!are_links_ready())
             return false;
         
         // then do the usual "can_advance" logic
-        return Node::wrapper_around_can_advance();
-    }
-
-    /**
-     * Called before advancement to check the data can be advanced
-     */
-    virtual bool can_advance() override {
-        return true;
-    }
-
-    /**
-     * Called on the scheduler thread to advance the data processing
-     */
-    virtual void advance() override {
-        this->callback();
+        return Node::__internal__can_advance();
     }
 
     /**
@@ -94,24 +72,10 @@ protected:
      * implementation. Exists only so that the final user can override
      * can_advance and forget to call the base implementation and not get roasted.
      */
-    virtual void wrapper_around_post_advance() override {
-        Node::wrapper_around_post_advance(); // call "post_advance"
+    virtual void __internal__post_advance() override {
+        Node::__internal__post_advance(); // call "post_advance"
 
         finalize_links_after_advance();
-    }
-
-    /**
-     * Called after advancement on the scheduler thread
-     */
-    virtual void post_advance() override {
-        //
-    }
-
-    /**
-     * Called after all the computation finishes
-     */
-    virtual void terminate() override {
-        //
     }
 };
 
