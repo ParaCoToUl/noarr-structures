@@ -21,6 +21,9 @@ public:
     AsyncComputeNode() : ComputeNode() { }
     AsyncComputeNode(const std::string& label) : ComputeNode(label) { }
 
+    // TODO: recycle a thread instead of starting a new one for each invocation,
+    // that should help performance-wise
+
     void __internal__advance() override {
         ComputeNode::__internal__advance(); // call the standard "advance"
 
