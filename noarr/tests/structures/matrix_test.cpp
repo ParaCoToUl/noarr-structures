@@ -349,6 +349,26 @@ uint64_t calcZOrder64(uint32_t x, uint32_t y)
 	return x | (y << 1);
 }
 
+struct RowBlocks
+{
+	uint32_t dim_x = 1024;
+	uint32_t dim_y = 1024;
+	uint32_t size = 8;
+
+	uint64_t calcRowBlocks(uint32_t x, uint32_t y)
+	{
+		uint32_t block_column = x / size;
+		uint32_t bloc_x = x % size;
+
+		uint32_t block_row = y / size;
+		uint32_t block_y = y % size;
+
+		return block_row * dim_x * size
+			+ block_column * size * size
+			+ block_y * size
+			+ bloc_x;
+	}
+};
 
 // s��t�n�, n�sobit matice, n�sobit scal�rem, 
 
