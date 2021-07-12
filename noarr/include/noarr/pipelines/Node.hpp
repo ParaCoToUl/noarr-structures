@@ -24,6 +24,7 @@ public:
 
 private:
     std::function<void()> advance_callback = nullptr;
+    std::function<void(bool)> scheduler_callback = nullptr;
 
 public:
 
@@ -43,18 +44,24 @@ public:
      * @param callback Call when the async operation finishes.
      * Pass true if data was advanced and false if nothing happened.
      */
-    void scheduler_update(std::function<void(bool)> scheduler_callback) {
+    void scheduler_update(std::function<void(bool)> _scheduler_callback) {
+        // store the scheduler callback in a field, because the
+        // argument "_scheduler_callback" has too short of a lifespan
+        // and so cannot be referenced from within the implementation of
+        // the "advance_callback"
+        scheduler_callback = _scheduler_callback;
+        
         // if the data cannot be advanced, return immediately
         if (!this->__internal__can_advance())
         {
-            scheduler_callback(false);
+            this->scheduler_callback(false);
             return;
         }
 
         // if the data can be advanced, do it
-        advance_callback = [this, &scheduler_callback](){
-            advance_callback = nullptr;
-            scheduler_callback(true); // data has been advanced
+        this->advance_callback = [this](){
+            this->advance_callback = nullptr;
+            this->scheduler_callback(true); // data has been advanced
         };
         this->__internal__advance();
     }
