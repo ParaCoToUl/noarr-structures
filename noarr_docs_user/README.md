@@ -80,45 +80,26 @@ int main() {
 ```
 
 
-#### Allocating and accessing a blob
+#### Allocating and accessing a bag
 
-Now that we have a structure defined, we can allocate a blob to store the data:
+Now that we have a structure defined, we can create a bag to store the data:
 
 ```cpp
 // we have our structure
 auto my_structure = create_my_structure();
 
-// allocate some bytes
-std::vector<char> my_blob_buffer(my_structure % noarr::get_size{});
-
-// get a blob pointer
-char* my_blob = (char*)my_blob_buffer.data();
+int size = 1024;
+auto bag = noarr::bag(noarr::wrap(my_structure).template set_length<'x'>(size).template set_length<'y'>(size));
 ```
-
-The `noarr::get_size{}` functor returns the size of the structure in bytes. Which is the size of the blob we need.
 
 Now, with a blob that holds the values, we can access these values by computing their offset in the blob:
 
 ```cpp
-// get the byte offset
-std::size_t offset = my_structure
-    % noarr::fix<'v'>{1}
-    % noarr::fix<'a'>{4}
-    % noarr::offset{};
-
-// calculate the value reference
-float& value_ref = *((float*)(my_blob + offset));
+// get the reference
+std::size_t value_ref = bag.layout().template get_at<'x', 'y'>(bag.data(), i, j);
 
 // now use the reference to access the value
 value_ref = 42f;
-
-// ---------------------------------
-
-// TODO: replace with something like:
-float& value_ref = my_structure
-    % noarr::fix<'v'>{1}
-    % noarr::fix<'a'>{4}
-    % noarr::get_in{my_blob};
 ```
 
 The `noarr::fix` functor transforms the structure into one, which has the corresponding dimension fixed (it's a way to specify an index for a dimension). The `noarr::offset` functor then returns the offset (in bytes) in the blob, where the corresponding scalar value is located (all dimensions have to be fixed by now).
