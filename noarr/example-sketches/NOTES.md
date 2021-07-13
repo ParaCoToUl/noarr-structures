@@ -1,43 +1,13 @@
-# What I noticed
-
-- The `initializer` compute node repeats. It just puts data into hubs once.
-    Why not do it as part of the hub initialization process?
-    ...Same thing seems to happen at the end, when we just want to pull the value
-    out of a hub after it has been computed (`finalizer`).
-    ...Add helper methods onto the pipeline object that are called before
-    pipeline starts and after pipeline ends
-
-- Sending envelopes by scheduler is maybe not the right approach. A compute node
-    seems to "peek into a hub and look at an envelope" instead of receiving it
-    and sending back. At least that's how concurrent access seems to work.
-
-- Also, compute node may not produce a chunk of data -- keep thinking about
-    chunk streams.
-
-- Who will manage hub and compute node lifecycle?
-    ...Define a pipeline object that will act as a factory of these things
-    and will contain a scheduler
-    and will make sure no compute node is deleted when it shouldn't
-
-- Maybe we want two nodes to produce one chunk in a shared hub (shared write)
-    ...Support it in a similar way to shared read
-
-- Moving envelopes between hubs MAKES EVERYTHING WAY MORE COMPLICATED
-    ...Instead let's allow two envelopes of the same size and device
-    "swap contents" by swapping their internal pointers. That will do the trick.
-
-- An envelope more and more looks like the original *bag* idea. And hub looks
-    more and more like the original *envelope* idea.
-
-- Dataflow strategy could be implicitly infered in many cases (e.g. one read, one write link)
-
-- can_advance(return true) is present often, should be a default when omitted.
+# Notes
 
 
-# ENVELOPE HUB - how it works?
+## How envelope hub works - in detail
 
-Queue of chunks. Link looks at a chunk (an envelope specifically). The chunk may just be being created, consumed, modified, or read (=peeked). Some links always produce/consume chunks. Some only peek/modify. If a link creates/consumes only sometimes, the consumption has be done manually by a function call during the node execution.
+A hub contains internally a queue of chunks. A *chunk* is a logical piece of data, located on one or more devices (one or more envelopes). A chunk can only enter the queue by being *produced* by a producing link. Therefore the order of chunks in the queue specifies their order in the logical chunk stream and it is what allows "double-buffering" (pipelining). Chunks at the end of the queue may be *consumed* and this is how they leave the queue. Chunks in the middle of the queue may be *peeked* or *modified*. Chunk may not be consumed when it's still being peeked or modified. Modifying a chunk on one device invalidates (frees up) envelopes of that chunk on other devices.
 
-Dataflow strategy tells the hub, how to transfer chunks between devices. It's basically a set of devices where the chunks need to be present.
+The hub always tries to satisfy all the links that point to it. Producing links may be satistied
+whenever there are empty envelopes available. Peeking, modifying and consuming links are satisfied only if the active dataflow strategy lists them (anotherwords, the user has to specify, which link(s) they want to satisfy now). There may be multiple modifying links in the strategy, but they all have to be on the same device and it's the user's responsibility to prevent race-conditions. There may be multiple peeking links on (possibly) multiple devices. There may even be multiple consuming links, but it's advised for them to be manually comitted and the user has to handle race-conditions. A chunk may not be consumed if it's still being modified (if the strategy was changed, but operations haven't finished yet), but it can be consumed when it's still peeked or consumed. The hub keeps a list of consumed but still used chunks and deletes those chunks only when all operations on them finish.
 
-Write can happen only to a chunk that resides on one device (since we don't know how to merge changes).
+Producing and consuming links have the option of being manually committed. That is, they may not produce/consume a chunk, even though the corresponding comupte node finished. It is needed for production (say, the bitcoin example) and it is needed for consumtion (say, the sobel example). Similarly the production and consumption of chunks may be performed manually, by calling corresponding hub methods.
+
+Dataflow strategy can sometimes be implicitly infered from links.
