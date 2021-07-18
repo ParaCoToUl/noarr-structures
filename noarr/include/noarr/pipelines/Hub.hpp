@@ -9,6 +9,8 @@
 #include "Device.hpp"
 #include "Node.hpp"
 #include "Link.hpp"
+#include "Buffer.hpp"
+#include "HardwareManager.hpp"
 
 #include "Hub_Chunk.hpp"
 
@@ -25,6 +27,8 @@ private:
     using Envelope_t = Envelope<Structure, BufferItem>;
     using Chunk_t = hub::Chunk<Structure, BufferItem>;
     using Link_t = Link<Structure, BufferItem>;
+
+    HardwareManager& hardware_manager;
 
     /**
      * Size of all envelopes in this hub in bytes
@@ -66,33 +70,31 @@ private:
     std::vector<Chunk_t*> consumed_chunks;
 
 public:
-    Hub(
-        std::size_t buffer_size,
-        const std::map<Device::index_t, std::size_t>& buffer_counts
-    ) :
+    Hub(std::size_t buffer_size)
+        : Hub(buffer_size, HardwareManager::default_manager())
+    { }
+
+    Hub(std::size_t buffer_size, HardwareManager& hardware_manager) :
         Node(typeid(Hub).name()),
+        hardware_manager(hardware_manager),
         buffer_size(buffer_size)
-        // buffer_pool()
-    {
-        // allocate envelopes
-        for (auto const& x : buffer_counts) {
-            for (std::size_t i = 0; i < x.second; ++i)
-                this->allocate_envelope(x.first);
-        }
+    { }
+
+    /**
+     * Allocates new envelopes on a given device
+     */
+    void allocate_envelopes(Device::index_t device_index, std::size_t count) {
+        for (std::size_t i = 0; i < count; ++i)
+            this->allocate_envelope(device_index);
     }
 
     /**
      * Allocates a new envelope on the given device
      */
     void allocate_envelope(Device::index_t device_index) {
-        // TODO: use an allocator and allocate on proper device
-        void* buffer = malloc(buffer_size);
-        
         envelopes.push_back(
             std::make_unique<Envelope_t>(
-                Device(device_index),
-                buffer,
-                buffer_size
+                hardware_manager.allocate_buffer(device_index, buffer_size)
             )
         );
         

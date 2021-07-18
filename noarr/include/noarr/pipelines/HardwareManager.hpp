@@ -90,8 +90,8 @@ public:
      * The transfer is asynchronous, so a callback must be provided.
      */
     void transfer_data(
-        Buffer from,
-        Buffer to,
+        const Buffer& from,
+        const Buffer& to,
         std::size_t bytes,
         std::function<void()> callback
     ) {
@@ -131,6 +131,11 @@ public:
      * Returns allocator for a device
      */
     MemoryAllocator& get_allocator_for(Device::index_t device_index) {
+        assert(
+            allocators.count(device_index) == 1
+            && "There is no allocator for the given device index"
+        );
+
         return *allocators[device_index];
     }
 
@@ -148,6 +153,11 @@ public:
      * Returns transferer between two devices
      */
     MemoryTransferer& get_transferer(Device::index_t from, Device::index_t to) {
+        assert(
+            transferers.count(std::make_tuple(from, to)) == 1
+            && "There is no trasferrer between given devices"
+        );
+        
         return *transferers[std::make_tuple(from, to)];
     }
 

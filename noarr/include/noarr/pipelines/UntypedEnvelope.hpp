@@ -5,6 +5,7 @@
 #include <typeindex>
 
 #include "Device.hpp"
+#include "Buffer.hpp"
 
 namespace noarr {
 namespace pipelines {
@@ -16,13 +17,16 @@ namespace pipelines {
  * a template here, but via runtime variables
  */
 class UntypedEnvelope {
-public:
+private:
     /**
-     * Flag that determines whether the envelope is considered full or empty
-     * TODO: this flag may be redundant, try to remove it
+     * The buffer instance that is responsible for memory management.
+     * This is what implements the logic behind envelopes. All the other fields
+     * are only an external API to the user plus a "structure" field.
      */
-    bool has_payload = false;
+    Buffer allocated_buffer_instance;
 
+public:
+    
     /**
      * Pointer to the underlying buffer
      */
@@ -36,12 +40,7 @@ public:
     /**
      * What device this envelope lives on
      */
-    Device device;
-
-    /**
-     * Label that can be used in logging and error messages
-     */
-    std::string label;
+    Device::index_t device_index;
 
     /**
      * Type of the structure value
@@ -53,24 +52,19 @@ public:
      */
     const std::type_index buffer_item_type;
 
+protected:
     UntypedEnvelope(
-        Device device,
-        void* existing_buffer,
-        std::size_t buffer_size,
+        Buffer allocated_buffer,
         const std::type_index structure_type,
         const std::type_index buffer_item_type
     ) :
-        untyped_buffer(existing_buffer),
-        size(buffer_size),
-        device(device),
-        label(std::to_string((unsigned long)this)),
+        allocated_buffer_instance(std::move(allocated_buffer)),
+        untyped_buffer(allocated_buffer_instance.data_pointer),
+        size(allocated_buffer_instance.bytes),
+        device_index(allocated_buffer_instance.device_index),
         structure_type(structure_type),
-        buffer_item_type(buffer_item_type) { }
-
-protected:
-    // virtual method needed for polymorphism..
-    // TODO: implement this class and add some virtual methods
-    virtual void foo() = 0;
+        buffer_item_type(buffer_item_type)
+    { }
 };
 
 } // pipelines namespace

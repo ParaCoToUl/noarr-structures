@@ -36,6 +36,10 @@ public:
         factory(*this);
     }
 
+    LambdaAsyncComputeNode() : LambdaAsyncComputeNode([](LambdaAsyncComputeNode& _){
+        (void)_; // supress "unused variable" warning
+    }) {};
+
 public: // setting implementation
     void initialize(std::function<void()> impl) { __impl__initialize = impl; }
     void can_advance(std::function<bool()> impl) { __impl__can_advance = impl; }

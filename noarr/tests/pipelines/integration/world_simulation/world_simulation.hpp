@@ -16,20 +16,14 @@ void world_simulation_via_inheritance(
     std::vector<std::int32_t>& world_data,
     std::size_t target_iterations
 ) {
-    auto world_hub = Hub<std::size_t, std::int32_t>(
-        sizeof(std::int32_t) * world_data.size(),
-        {
-            {Device::HOST_INDEX, 2},
-            {Device::DEVICE_INDEX, 1},
-        }
-    );
+    auto world_hub = Hub<std::size_t, std::int32_t>(sizeof(std::int32_t) * world_data.size());
+    world_hub.allocate_envelopes(Device::HOST_INDEX, 1);
+
     auto simulator_node = WorldSimulatorNode(
         target_iterations,
         world_data,
         world_hub
     );
-
-    // world_hub.set_dataflow_strategy.to_link(simulator_node);
 
     auto scheduler = DebuggingScheduler();
     scheduler.add(world_hub);
@@ -44,13 +38,8 @@ void world_simulation_via_builder(
 ) {
     std::size_t finished_iterations = 0;
 
-    auto world_hub = Hub<std::size_t, std::int32_t>(
-        sizeof(std::int32_t) * world_data.size(),
-        {
-            {Device::HOST_INDEX, 2},
-            {Device::DEVICE_INDEX, 1},
-        }
-    );
+    auto world_hub = Hub<std::size_t, std::int32_t>(sizeof(std::int32_t) * world_data.size());
+    world_hub.allocate_envelopes(Device::HOST_INDEX, 1);
 
     auto simulator_node = LambdaComputeNode([&](auto& node){
         auto& world_link = node.link(world_hub.to_modify(Device::HOST_INDEX));
@@ -93,8 +82,6 @@ void world_simulation_via_builder(
             }
         });
     });
-
-    // world_hub.set_dataflow_strategy.to_link(simulator_node);
 
     auto scheduler = DebuggingScheduler();
     scheduler.add(world_hub);
