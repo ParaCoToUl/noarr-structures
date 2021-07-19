@@ -72,7 +72,7 @@ int main() {
 
     // create a structure of proper dimensions
     auto my_structure = create_structure<USED_POLICY>()
-        % noarr::resize<'v'>{size};
+        | noarr::resize<'v'>(size);
         // you could set sizes of all dynamic dimensions here;
     
     // ... work with the structure ...
