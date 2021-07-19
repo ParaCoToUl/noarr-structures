@@ -63,7 +63,7 @@ public:
     void terminate() override {
         // pull the data from the hub back to the variable
 
-        Envelope<std::size_t, std::int32_t>& env = world_hub.peek_latest_chunk();
+        Envelope<std::size_t, std::int32_t>& env = world_hub.peek_top_chunk();
 
         world_data.resize(env.structure);
         for (std::size_t i = 0; i < world_data.size(); ++i) {

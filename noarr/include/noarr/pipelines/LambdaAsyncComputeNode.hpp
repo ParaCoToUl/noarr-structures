@@ -24,21 +24,19 @@ private:
     std::function<void()> __impl__terminate;
 
 public:
-    // constructor factory
-    LambdaAsyncComputeNode(std::function<void(LambdaAsyncComputeNode&)> factory) :
+    LambdaAsyncComputeNode(const std::string& label) :
+        AsyncComputeNode(label),
         __impl__initialize([](){}),
-        __impl__can_advance([](){ return false; }),
+        __impl__can_advance([](){ return true; }),
         __impl__advance([&](){}),
         __impl__advance_async([&](){ this->callback(); }),
         __impl__post_advance([](){}),
         __impl__terminate([](){})
-    {
-        factory(*this);
-    }
+    { }
 
-    LambdaAsyncComputeNode() : LambdaAsyncComputeNode([](LambdaAsyncComputeNode& _){
-        (void)_; // supress "unused variable" warning
-    }) {};
+    LambdaAsyncComputeNode() :
+        LambdaAsyncComputeNode(typeid(LambdaAsyncComputeNode).name())
+    { };
 
 public: // setting implementation
     void initialize(std::function<void()> impl) { __impl__initialize = impl; }

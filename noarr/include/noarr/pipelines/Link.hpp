@@ -46,6 +46,16 @@ enum LinkState : unsigned char {
 class UntypedLink { // abstract class
 public:
     /**
+     * The node serving envelopes
+     */
+    Node* host_node;
+
+    /**
+     * The node receiving envelopes
+     */
+    Node* guest_node = nullptr;
+
+    /**
      * Type of this link
      */
     LinkType type;
@@ -82,17 +92,27 @@ public:
     UntypedEnvelope* untyped_envelope = nullptr;
 
     UntypedLink(
+        Node* host_node,
         LinkType type,
         Device::index_t device_index,
         bool autocommit
     ) :
+        host_node(host_node),
         type(type),
         device_index(device_index),
         autocommit(autocommit)
     {}
 
     /**
-     * Host commits the link
+     * Should be called by the guest when they receive the link instance
+     * (so that the link properly binds the two nodes)
+     */
+    void set_guest_node(Node* node) {
+        guest_node = node;
+    }
+
+    /**
+     * Guest commits the link
      */
     void commit() {
         was_committed = true;
@@ -119,10 +139,11 @@ public:
     Envelope<Structure, BufferItem>* envelope;
 
     Link(
+        Node* host_node,
         LinkType type,
         Device::index_t device_index,
         bool autocommit
-    ) : UntypedLink(type, device_index, autocommit), envelope(nullptr) { }
+    ) : UntypedLink(host_node, type, device_index, autocommit), envelope(nullptr) { }
 
     /**
      * The host provides an envelope to the link for the guest to access

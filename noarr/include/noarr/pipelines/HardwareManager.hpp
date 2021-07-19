@@ -12,6 +12,7 @@
 #include "noarr/pipelines/Buffer.hpp"
 #include "noarr/pipelines/MemoryAllocator.hpp"
 #include "noarr/pipelines/HostAllocator.hpp"
+#include "noarr/pipelines/DummyGpuAllocator.hpp"
 #include "noarr/pipelines/MemoryTransferer.hpp"
 #include "noarr/pipelines/HostTransferer.hpp"
 
@@ -61,7 +62,7 @@ public:
     void register_dummy_gpu() {
         set_allocator_for(
             Device::DUMMY_GPU_INDEX,
-            std::make_unique<HostAllocator>()
+            std::make_unique<DummyGpuAllocator>()
         );
         set_transferer_for(
             Device::DUMMY_GPU_INDEX, Device::DUMMY_GPU_INDEX,
@@ -146,6 +147,11 @@ public:
         Device::index_t device_index,
         std::unique_ptr<MemoryAllocator> allocator
     ) {
+        assert(
+            allocator->device_index() == device_index
+            && "Given allocator allocated for different device"
+        );
+        
         allocators[device_index] = std::move(allocator);
     }
 

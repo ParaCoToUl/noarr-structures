@@ -17,15 +17,13 @@ namespace pipelines {
  * a template here, but via runtime variables
  */
 class UntypedEnvelope {
-private:
+public:
     /**
      * The buffer instance that is responsible for memory management.
      * This is what implements the logic behind envelopes. All the other fields
      * are only an external API to the user plus a "structure" field.
      */
     Buffer allocated_buffer_instance;
-
-public:
     
     /**
      * Pointer to the underlying buffer

@@ -29,26 +29,26 @@ TEST_CASE("Memory transfer", "[pipelines][unit][memory_transfer]") {
 
     bool transfer_completed = false;
 
-    auto async_node = LambdaComputeNode([&](auto& node){
-        node.can_advance([&](){
+    auto async_node = LambdaComputeNode(); {
+        async_node.can_advance([&](){
             return !transfer_completed;
         });
 
-        node.advance([&](){
+        async_node.advance([&](){
             transferer.transfer(
                 src_buffer.data_pointer,
                 dst_buffer.data_pointer,
                 1024,
-                [&node](){
-                    node.callback();
+                [&async_node](){
+                    async_node.callback();
                 }
             );
         });
 
-        node.post_advance([&](){
+        async_node.post_advance([&](){
             transfer_completed = true;
         });
-    });
+    }
 
     auto scheduler = DebuggingScheduler();
     scheduler.add(async_node);

@@ -23,20 +23,18 @@ private:
     std::function<void()> __impl__terminate;
 
 public:
-    // constructor factory
-    LambdaComputeNode(std::function<void(LambdaComputeNode&)> factory) :
+    LambdaComputeNode(const std::string& label) :
+        ComputeNode(label),
         __impl__initialize([](){}),
-        __impl__can_advance([](){ return false; }),
+        __impl__can_advance([](){ return true; }),
         __impl__advance([&](){ this->callback(); }),
         __impl__post_advance([](){}),
         __impl__terminate([](){})
-    {
-        factory(*this);
-    }
+    { }
 
-    LambdaComputeNode() : LambdaComputeNode([](LambdaComputeNode& _){
-        (void)_; // supress "unused variable" warning
-    }) {};
+    LambdaComputeNode() :
+        LambdaComputeNode(typeid(LambdaComputeNode).name())
+    { }
 
 public: // setting implementation
     void initialize(std::function<void()> impl) { __impl__initialize = impl; }

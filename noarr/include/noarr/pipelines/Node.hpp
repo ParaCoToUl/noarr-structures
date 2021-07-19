@@ -170,6 +170,8 @@ protected:
      * Called to test, whether the advance method can be called
      */
     virtual bool can_advance() {
+        // NOTE: generic node has default to false,
+        // but compute node has default to true, because it is conditioned by links
         return false;
     }
 

@@ -31,6 +31,7 @@ public:
     template<typename TLink>
     TLink& link(TLink& link) {
         links.push_back(&link);
+        link.set_guest_node(this);
         return link;
     }
 
@@ -65,6 +66,12 @@ protected:
         
         // then do the usual "can_advance" logic
         return Node::__internal__can_advance();
+    }
+
+    virtual bool can_advance() override {
+        // NOTE: generic node has default to false,
+        // but compute node has default to true, because it is conditioned by links
+        return true;
     }
 
     /**
