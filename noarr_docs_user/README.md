@@ -25,29 +25,29 @@ Noarr framework distinguishes two types of mutidimensional data - smooth and jag
 
 Smooth data has the advantage of occupying one continuous stretch of memory. When working with it, you work with two object:
 
-1. **Structures:** A small, tree-like object, that represents the structure of the data. It doesn't contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
-2. **Blobs:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *structure* object.
+1. **Layout:** A small, tree-like object, that represents the structure of the data. It doesn't contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
+2. **Data:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *layout* object.
+3. **Bag:** Wraper object, which combines *layout* and *data* together.
 
+#### Creating a layout
 
-#### Creating a structure
-
-To represent a list of floats, you create the following *structure* object:
-
-```cpp
-noarr::vector<'i', noarr::scalar<float>> my_structure;
-```
-
-The only dimension of this structure has the label `i` and it has to be specified in order to access individual scalar values. But currently the structure has no size, we need to make room for 10 items:
+To represent a list of floats, you create the following *layout* object:
 
 ```cpp
-auto my_structure_of_ten = my_structure % noarr::resize<'i'>{10};
+noarr::vector<'i', noarr::scalar<float>> my_layout;
 ```
 
-A *structure* object is immutable. The `%` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
+The only dimension of this *layout* has the label `i` and it has to be specified in order to access individual scalar values. But currently the layout has no size, we need to make room for 10 items:
 
-> The pipe operator is the preffered way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label.
+```cpp
+auto my_layout_of_ten = my_layout | noarr::resize<'i'>(10);
+```
 
-The reason we specify the size later is that it allows us to decouple the *structure* layout from the resizing action. The resizing action specifies a dimension label `i` and it doesn't care, where that dimension is inside the *structure*.
+A *layout* object is immutable. The `%` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
+
+> The pipe operator is the preffered way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label (in compile time).
+
+The reason we specify the size later is that it allows us to decouple the *layout* layout from the resizing action. The resizing action specifies a dimension label `i` and it doesn't care, where that dimension is inside the *layout*.
 
 Here's how we would create a vector of arrays, that can either be in SoA or AoS, based on a constant we can vary to benchmark different physical layouts:
 
@@ -80,7 +80,7 @@ int main() {
 ```
 
 
-#### Allocating and accessing a bag
+#### Allocating and accessing *data* and *bag*
 
 Now that we have a structure defined, we can create a bag to store the data:
 
@@ -92,7 +92,7 @@ int size = 1024;
 auto bag = noarr::bag(noarr::wrap(my_structure).template set_length<'x'>(size).template set_length<'y'>(size));
 ```
 
-Now, with a blob that holds the values, we can access these values by computing their offset in the blob:
+Now, with a *data* that holds the values, we can access these values by computing their offset in the *bag*:
 
 ```cpp
 // get the reference
