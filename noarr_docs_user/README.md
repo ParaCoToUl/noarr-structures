@@ -108,8 +108,8 @@ We will create a templated matrix. And also set size in runtime like this:
 
 ```cpp
 template<MatrixDataLayout layout>
-void matrix_template_test(int size) {
-	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+void matrix_template_test(int x, int y) {
+	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(x).template set_length<'y'>(y));
 }
 ```
 
@@ -118,14 +118,14 @@ We set the size in runtime because size can be any int.
 We can call in runtime different templated layouts.
 
 ```cpp
-void matrix_template_test_runtime(MatrixDataLayout layout, int size)
+void matrix_template_test_runtime(MatrixDataLayout layout, int x, int y)
 {
 	if (layout == MatrixDataLayout::Rows)
-		matrix_template_test<MatrixDataLayout::Rows>(size);
+		matrix_template_test<MatrixDataLayout::Rows>(x, y);
 	else if (layout == MatrixDataLayout::Columns)
-		matrix_template_test<MatrixDataLayout::Columns>(size);
+		matrix_template_test<MatrixDataLayout::Columns>(x, y);
 	else if (layout == MatrixDataLayout::Zcurve)
-		matrix_template_test<MatrixDataLayout::Zcurve>(size);
+		matrix_template_test<MatrixDataLayout::Zcurve>(x, y);
 }
 ```
 
