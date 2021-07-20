@@ -174,7 +174,7 @@ To showcase easy extendability we implemented Z-curve and block layout:
 noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
 ```
 
-We can use `get_at<>` to fix in the following ways
+We can use `get_at<>` in the following ways
 
 ```cpp
 get_at<'i', 'j'>(1, 2);
