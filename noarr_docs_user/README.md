@@ -153,10 +153,10 @@ tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y',
 tuple<'t', scalar<int>, scalar<int>> t3;
 ```
 
-To get the first element of the tuple we use `fix` in the following way:
+To get the first element of the tuple we use `get_at` in the following way:
 
 ```cpp
-fix<'t'>(1_idx);
+get_at<'t'>(1_idx);
 ```
 
 
@@ -174,8 +174,8 @@ To showcase easy extendability we implemented Z-curve and block layout:
 noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
 ```
 
-We can use `fix<>` to fix in the following ways
+We can use `get_at<>` to fix in the following ways
 
 ```cpp
-fix<'i', 'j'>(1, 2);
+get_at<'i', 'j'>(1, 2);
 ```
