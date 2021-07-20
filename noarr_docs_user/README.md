@@ -177,6 +177,5 @@ noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
 We can use `fix<>` to fix in the following ways
 
 ```cpp
-    fix<'i'>(1).fix<'j'>(2); // fix coordinates one by one
-    fix<'i', 'j'>(1, 2); // fix both at the same time
+    fix<'i', 'j'>(1, 2);
 ```
