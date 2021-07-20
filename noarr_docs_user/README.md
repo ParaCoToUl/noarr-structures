@@ -137,7 +137,7 @@ Noarr is designed to be easily extendable, we implemented basic ones and some si
 
 ```cpp
 noarr::vector<'i', noarr::scalar<float>> my_vector;
-noarr::array<'i', 10, noarr::scalar<float>> my_array; //TODO: ???
+noarr::array<'i', 10, noarr::scalar<float>> my_array;
 ```
 
 ##### Scalars
