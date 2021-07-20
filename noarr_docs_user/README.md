@@ -174,7 +174,7 @@ To showcase easy extendability we implemented Z-curve and block layout:
 noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
 ```
 
-We can use `fix<>` to fix in following ways:
+We can use `fix<>` to fix in the following ways
 
 ```cpp
     fix<'i'>(1).fix<'j'>(2); // fix coordinates one by one
