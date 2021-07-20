@@ -74,7 +74,7 @@ value_ref = 42f;
 <a name="changing-data-layouts"></a>
 #### Changing data layout (*structure*)
 
-Now we want to change the data layout. Noarr needs to know the structure in compile time (for performance). So the right approach is to template all functions and then select between compiled versions. We define different structures like this:
+Now we want to change the data layout. Noarr needs to know the structure at compile time (for performance). So the right approach is to template all functions and then select between compiled versions. We define different structures like this:
 
 ```cpp
 enum MatrixDataLayout { Rows = 0, Columns = 1, Zcurve = 2 };
@@ -104,7 +104,7 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve> {
 };
 ```
 
-We will create a templated matrix. And also set size in runtime like this:
+We will create a templated matrix. And also set size at runtime like this:
 
 ```cpp
 template<MatrixDataLayout layout>
@@ -113,9 +113,9 @@ void matrix_template_test(int x, int y) {
 }
 ```
 
-We set the size in runtime because size can be any int.
+We set the size at runtime because size can be any int.
 
-We can call in runtime different templated layouts.
+We can call at runtime different templated layouts.
 
 ```cpp
 void matrix_template_test_runtime(MatrixDataLayout layout, int x, int y)
