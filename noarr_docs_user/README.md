@@ -134,10 +134,16 @@ Noarr is designed to be easily extandable, we implemented basic ones and some si
 
 ```cpp
 noarr::vector<'i', noarr::scalar<float>> my_vector;
-noarr::vector<'i', 10, noarr::scalar<float>> my_array; //TODO: ???
+noarr::array<'i', 10, noarr::scalar<float>> my_array; //TODO: ???
 ```
 
-You will model matrix in a following way:
+##### Tuples
+
+
+
+##### Matrices/Cubes
+
+We will shorly discuss higher dimmentsional data. You will model matrix in a following way:
 
 ```cpp
 noarr::vector<'i', noarr::vector<'j', noarr::scalar<float>>> my_matrix;
