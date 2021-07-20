@@ -109,7 +109,8 @@ We will create a templated matrix. And also set size at runtime like this:
 ```cpp
 template<MatrixDataLayout layout>
 void matrix_template_test(int x, int y) {
-	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(x).template set_length<'y'>(y));
+	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure())
+		.template set_length<'x'>(x).template set_length<'y'>(y));
 }
 ```
 
