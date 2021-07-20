@@ -23,7 +23,7 @@ Noarr framework distinguishes two types of mutidimensional data - smooth and jag
 <a name="smooth-data-modelling"></a>
 ### Smooth data modelling
 
-Smooth data has the advantage of occupying one continuous stretch of memory. When working with it, you work with two object:
+Smooth data has the advantage of occupying one continuous stretch of memory. When working with it, you work with three objects:
 
 1. **Structure:** A small, tree-like object, that represents the structure of the data. It doesn't contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
 2. **Data:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *Structure* object.
