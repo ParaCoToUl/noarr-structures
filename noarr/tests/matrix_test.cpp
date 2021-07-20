@@ -49,33 +49,33 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve>
 template<typename Structure1, typename Structure2>
 void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2)
 {
-	int x_size = matrix1.layout().template get_length<'x'>();
-	int y_size = matrix1.layout().template get_length<'y'>();
+	int x_size = matrix1.structure().template get_length<'x'>();
+	int y_size = matrix1.structure().template get_length<'y'>();
 
-	REQUIRE(x_size == matrix2.layout().template get_length<'x'>());
-	REQUIRE(y_size == matrix2.layout().template get_length<'y'>());
+	REQUIRE(x_size == matrix2.structure().template get_length<'x'>());
+	REQUIRE(y_size == matrix2.structure().template get_length<'y'>());
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
 		{
-			int& value2 = matrix2.layout().template get_at<'x', 'y'>(matrix2.data(), i, j);
-			value2 = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j);
+			int& value2 = matrix2.structure().template get_at<'x', 'y'>(matrix2.data(), i, j);
+			value2 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
 		}
 }
 
 template<typename Structure>
 void matrix_transpose(noarr::bag<Structure>& matrix1)
 {
-	int x_size = matrix1.layout().template get_length<'x'>();
-	int y_size = matrix1.layout().template get_length<'y'>();
+	int x_size = matrix1.structure().template get_length<'x'>();
+	int y_size = matrix1.structure().template get_length<'y'>();
 
 	REQUIRE(x_size == y_size);
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
 		{
-			int& value1 = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j);
-			int& value2 = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), j, i);
+			int& value1 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
+			int& value2 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), j, i);
 			std::swap(value1, value2);
 		}
 }
@@ -83,20 +83,20 @@ void matrix_transpose(noarr::bag<Structure>& matrix1)
 template<typename Structure1, typename Structure2, typename Structure3>
 void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
 {
-	int x_size = matrix1.layout().template get_length<'x'>();
-	int y_size = matrix1.layout().template get_length<'y'>();
+	int x_size = matrix1.structure().template get_length<'x'>();
+	int y_size = matrix1.structure().template get_length<'y'>();
 
-	REQUIRE(x_size == matrix2.layout().template get_length<'x'>());
-	REQUIRE(y_size == matrix2.layout().template get_length<'y'>());
-	REQUIRE(x_size == matrix3.layout().template get_length<'x'>());
-	REQUIRE(y_size == matrix3.layout().template get_length<'y'>());
+	REQUIRE(x_size == matrix2.structure().template get_length<'x'>());
+	REQUIRE(y_size == matrix2.structure().template get_length<'y'>());
+	REQUIRE(x_size == matrix3.structure().template get_length<'x'>());
+	REQUIRE(y_size == matrix3.structure().template get_length<'y'>());
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
 		{
-			int& value1 = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j);
-			int& value2 = matrix2.layout().template get_at<'x', 'y'>(matrix2.data(), i, j);
-			int& value3 = matrix3.layout().template get_at<'x', 'y'>(matrix3.data(), i, j);
+			int& value1 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
+			int& value2 = matrix2.structure().template get_at<'x', 'y'>(matrix2.data(), i, j);
+			int& value3 = matrix3.structure().template get_at<'x', 'y'>(matrix3.data(), i, j);
 			value3 = value1 + value2;
 		}
 }
@@ -104,23 +104,23 @@ void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2
 template<typename Structure>
 void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 {
-	int x_size = matrix1.layout().template get_length<'x'>();
-	int y_size = matrix1.layout().template get_length<'y'>();
+	int x_size = matrix1.structure().template get_length<'x'>();
+	int y_size = matrix1.structure().template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
-			matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j) *= scalar;
+			matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j) *= scalar;
 }
 
 template<typename Structure1, typename Structure2, typename Structure3>
 void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
 {
-	int x1_size = matrix1.layout().template get_length<'x'>();
-	int y1_size = matrix1.layout().template get_length<'y'>();
-	int x2_size = matrix2.layout().template get_length<'x'>();
-	int y2_size = matrix2.layout().template get_length<'y'>();
-	int x3_size = matrix3.layout().template get_length<'x'>();
-	int y3_size = matrix3.layout().template get_length<'y'>();
+	int x1_size = matrix1.structure().template get_length<'x'>();
+	int y1_size = matrix1.structure().template get_length<'y'>();
+	int x2_size = matrix2.structure().template get_length<'x'>();
+	int y2_size = matrix2.structure().template get_length<'y'>();
+	int x3_size = matrix3.structure().template get_length<'x'>();
+	int y3_size = matrix3.structure().template get_length<'y'>();
 
 	REQUIRE(x1_size == y2_size);
 	REQUIRE(y1_size == y3_size);
@@ -134,12 +134,12 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 
 			for (int k = 0; k < x1_size; k++)
 			{
-				int& value1 = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), k, j);
-				int& value2 = matrix2.layout().template get_at<'x', 'y'>(matrix2.data(), i, k);
+				int& value1 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), k, j);
+				int& value2 = matrix2.structure().template get_at<'x', 'y'>(matrix2.data(), i, k);
 				sum += value1 * value2;
 			}
 
-			matrix3.layout().template get_at<'x', 'y'>(matrix3.data(), i, j) = sum;
+			matrix3.structure().template get_at<'x', 'y'>(matrix3.data(), i, j) = sum;
 		}
 	}
 }
@@ -205,14 +205,14 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 template<typename Structure>
 matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 {
-	int x_size = matrix1.layout().template get_length<'x'>();
-	int y_size = matrix1.layout().template get_length<'y'>();
+	int x_size = matrix1.structure().template get_length<'x'>();
+	int y_size = matrix1.structure().template get_length<'y'>();
 
 	matrix m = get_clasic_matrix(x_size, y_size);
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			m.at(i, j) = matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j);
+			m.at(i, j) = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
 
 	return m;
 }
@@ -220,12 +220,12 @@ matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 template<typename Structure>
 void clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
 {
-	int x_size = matrix1.layout().template get_length<'x'>();
-	int y_size = matrix1.layout().template get_length<'y'>();
+	int x_size = matrix1.structure().template get_length<'x'>();
+	int y_size = matrix1.structure().template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			matrix1.layout().template get_at<'x', 'y'>(matrix1.data(), i, j) = m1.at(i, j);
+			matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j) = m1.at(i, j);
 }
 
 void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
@@ -447,8 +447,8 @@ auto matrix_transpose(noarr::bag<Structure>& matrix)
 template<typename Structure1, typename targetLayout>
 auto matrix_clone(noarr::bag<Structure1>& matrix1)
 {
-	int x_size = matrix1.layout().template get_length<'x'>();
-	int y_size = matrix1.layout().template get_length<'y'>();
+	int x_size = matrix1.structure().template get_length<'x'>();
+	int y_size = matrix1.structure().template get_length<'y'>();
 	auto matrix2 = GetMatrix<targetLayout>(x_size, y_size);
 	matrix_copy(matrix1, matrix2);
 	return matrix2;
@@ -493,21 +493,21 @@ auto matrix_clone(noarr::bag<Structure>& matrix, MatrixDataLayout targetLayout)
 void histogram_template_test()
 {
 	auto image = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
-	CHECK(image.layout().get_size() == width * height * sizeof(int));
+	CHECK(image.structure().get_size() == width * height * sizeof(int));
 
-	int y_size = image.layout().template get_length<'y'>();
+	int y_size = image.structure().template get_length<'y'>();
 	CHECK(y_size == height);
 
 	auto histogram = noarr::bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
-	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
+	CHECK(histogram.structure().get_size() == pixel_range * sizeof(int));
 
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.layout().template get_length<'x'>();
+	int x_size = image.structure().template get_length<'x'>();
 	REQUIRE(x_size == width);
 
-	y_size = image.layout().template get_length<'y'>();
+	y_size = image.structure().template get_length<'y'>();
 	REQUIRE(y_size == height);
 
 	for (int i = 0; i < x_size; i++)
@@ -516,12 +516,12 @@ void histogram_template_test()
 		{
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
-			int pixel_value = image.layout().template get_at<'x','y'>(image.data(), i, j); // v3
+			int pixel_value = image.structure().template get_at<'x','y'>(image.data(), i, j); // v3
 
 			if (pixel_value != 0)
 				FAIL();
 
-			int& histogram_value = histogram.layout().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
@@ -556,16 +556,16 @@ void histogram_template_test_clear()
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.layout().template get_length<'x'>();
-	int y_size = image.layout().template get_length<'y'>();
+	int x_size = image.structure().template get_length<'x'>();
+	int y_size = image.structure().template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 	{
 		for (int j = 0; j < y_size; j++)
 		{
-			int pixel_value = image.layout().template get_at<'x', 'y'>(image.data(), i, j);
+			int pixel_value = image.structure().template get_at<'x', 'y'>(image.data(), i, j);
 
-			int& histogram_value = histogram.layout().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}

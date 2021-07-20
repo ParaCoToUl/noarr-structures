@@ -8,27 +8,33 @@
 
 namespace noarr {
 
-    namespace literals {
+namespace literals {
 
-    template<std::size_t Accum, char... Chars>
-    struct _idx_translate;
+template<std::size_t Accum, char... Chars>
+struct _idx_translate;
 
-    template<std::size_t Accum, char Char, char... Chars>
-    struct _idx_translate<Accum, Char, Chars...> {
-        using type = typename _idx_translate<Accum * 10 + (std::size_t)(Char - '0'), Chars...>::type;
-    };
+template<std::size_t Accum, char Char, char... Chars>
+struct _idx_translate<Accum, Char, Chars...> {
+    using type = typename _idx_translate<Accum * 10 + (std::size_t)(Char - '0'), Chars...>::type;
+};
 
-    template<std::size_t Accum, char Char>
-    struct _idx_translate<Accum, Char> {
-        using type = std::integral_constant<std::size_t, Accum * 10 + (std::size_t)(Char - '0')>;
-    };
+template<std::size_t Accum, char Char>
+struct _idx_translate<Accum, Char> {
+    using type = std::integral_constant<std::size_t, Accum * 10 + (std::size_t)(Char - '0')>;
+};
 
-    template<char... Chars>
-    inline constexpr auto operator""_idx() {
-        return typename _idx_translate<0, Chars...>::type();
-    }
+/**
+ * @brief Converts an integer literal into a corresponding std::integral_constant<std::size_t, ...>
+ * 
+ * @tparam Chars the digits of the integer literal
+ * @return constexpr auto the corresponding std::integral_constant
+ */
+template<char... Chars>
+inline constexpr auto operator""_idx() {
+    return typename _idx_translate<0, Chars...>::type();
+}
 
-    }
+}
 
 template<typename F, typename G>
 struct _compose : contain<F, G> {
@@ -46,8 +52,14 @@ struct _compose : contain<F, G> {
     }
 };
 
+/**
+ * @brief composes functions `F` and `G` together
+ * 
+ * @param f: the inner function
+ * @param g: the outer function
+ */
 template<typename F, typename G>
-inline constexpr auto compose(F f, G g) {
+inline constexpr decltype(auto) compose(F f, G g) {
     return _compose<F, G>(f, g);
 }
 
@@ -109,16 +121,33 @@ struct _sset_length {
     }
 };
 
+/**
+ * @brief sets the length of a `vector`, `sized_vector` or an `array` specified by the dimension name
+ * 
+ * @tparam Dim: the dimension name of the transformed structure
+ * @param length: the desired length
+ */
 template<char Dim>
 inline constexpr auto set_length(std::size_t length) {
     return _set_length<Dim>(length);
 }
 
+/**
+ * @brief sets the length of a `vector`, `sized_vector` or an `array` specified by the dimension name
+ * 
+ * @tparam Dim: the dimension name of the transformed structure
+ * @param length: the desired length
+ */
 template<char Dim, std::size_t Length>
 inline constexpr auto set_length(std::integral_constant<std::size_t, Length>) {
     return _sset_length<Dim, Length>();
 }
 
+/**
+ * @brief returns the number of indices in the structure specified by the dimension name
+ * 
+ * @tparam Dim: the dimension name of the desired structure
+ */
 template<char Dim>
 struct get_length {
     using func_family = get_tag;
@@ -156,6 +185,12 @@ struct _reassemble_set : private contain<T> {
     }
 };
 
+/**
+ * @brief swaps two structures given by their dimension names in the substructure tree of a structure
+ * 
+ * @tparam Dim1: the dimension name of the first structure
+ * @tparam Dim2: the dimension name of the second structure
+ */
 template<char Dim1, char Dim2>
 struct reassemble {
 private:
@@ -281,11 +316,22 @@ struct _fixs<> {
     }
 };
 
+/**
+ * @brief fixes an index (or indices) given by dimension name(s) in a structure
+ * 
+ * @tparam Dims: the dimension names
+ * @param ts: parameters for fixing the indices
+ */
 template<char... Dims, typename... Ts>
 inline constexpr auto fix(Ts... ts) {
     return _fixs<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
 }
 
+/**
+ * @brief returns the offset of a substructure given by a dimension name in a structure
+ * 
+ * @tparam Dim: the dimension name
+ */
 template<char Dim>
 struct get_offset {
     using func_family = get_tag;
@@ -321,6 +367,13 @@ inline constexpr auto offset() {
     return _offset();
 }
 
+/**
+ * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item 
+ * 
+ * @tparam Dims: the dimension names of fixed indices
+ * @param ts: parameters for fixing the indices
+ * @return constexpr auto 
+ */
 template<char... Dims, typename... Ts>
 inline constexpr auto offset(Ts... ts) {
     return compose(fix<Dims...>(ts...), _offset());
@@ -351,13 +404,23 @@ struct _get_at : private contain<char*> {
     }
 };
 
+/**
+ * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure
+ * 
+ * @param ptr: the pointer to blob structure
+ */
 template<typename V>
-inline constexpr auto get_at(V *ptr) {
+inline constexpr decltype(auto) get_at(V *ptr) {
     return _get_at(ptr);
 }
 
+/**
+ * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure with some fixed indices (see `fix`)
+ * @tparam Dims: the dimension names of the fixed dimensions
+ * @param ptr: the pointer to blob structure
+ */
 template<char... Dims, typename V, typename... Ts>
-inline constexpr auto get_at(V *ptr, Ts... ts) {
+inline constexpr decltype(auto) get_at(V *ptr, Ts... ts) {
     return compose(fix<Dims...>(ts...), _get_at(ptr));
 }
 

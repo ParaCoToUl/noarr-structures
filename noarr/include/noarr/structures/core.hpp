@@ -10,6 +10,13 @@
 
 namespace noarr {
 
+/**
+ * @brief returns whether the function `F` is applicable to the structure `S` according to its `::can_apply<S>::value` (defaults to true if not present)
+ * 
+ * @tparam F: the tested function
+ * @tparam S: the structure
+ * @tparam typename: placeholder type
+ */
 template<typename F, typename S, typename = void>
 struct get_applicability {
     static constexpr bool value = true;
@@ -20,6 +27,13 @@ struct get_applicability<F, S, void_t<typename F::template can_apply<S>>> {
     static constexpr bool value = F::template can_apply<S>::value;
 };
 
+/**
+ * @brief returns whether the function `F` is applicable to the structure `S`, also honoring `get_applicability`
+ * 
+ * @tparam S: the structure
+ * @tparam F: the tested function
+ * @tparam typename: placeholder type
+ */
 template<typename S, typename F, typename = void>
 struct can_apply {
     static constexpr bool value = false;
@@ -30,6 +44,13 @@ struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
     static constexpr bool value = get_applicability<F, S>::value;
 };
 
+/**
+ * @brief applies the function `F` to the structure `S` or, if not possible, attempts to do so on its substructures recursively
+ * 
+ * @tparam S: the structure to be mapped
+ * @tparam F: the mapping function
+ * @tparam typename: placeholder type
+ */
 template<typename S, typename F, typename = void>
 struct fmapper;
 
@@ -37,6 +58,15 @@ template<typename S, typename F, typename = void>
 struct _fmapper_cond_helper {
     static constexpr bool value = false;
 };
+
+/**
+ * @brief A function used in `fmapper` which reconstructs the *unmapped* structure `S` (with mapped substructures) according to the mapping described by the function `F`
+ * 
+ * @tparam S: the structure to be reconstructed after the substructures are mapped
+ * @tparam F: the mapping function
+ * @tparam Max: the ceiling of iteration throught substructures in the `construct` function
+ * @tparam I: the iterating variable which iterates throught substructures 
+ */
 template<typename S, typename F, std::size_t Max = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = Max>
 struct construct_builder;
 
@@ -92,7 +122,13 @@ struct fmapper<S, F, std::enable_if_t<can_apply<F, S>::value>> {
     }
 };
 
-// TODO: add context
+/**
+ * @brief gets a value from the structure `S` using a function `F`. If `F` cannot be applied to `S`, application to substructures is attempted (stopping at the first structure `F` is applicable to). If there are multiple branches throught the substructure tree ending in application the getter fails
+ * 
+ * @tparam S: the structure
+ * @tparam F: the function which retrieves a value from the structure
+ * @tparam typename: a placeholder type
+ */
 template<typename S, typename F, typename = void>
 struct getter;
 
@@ -140,12 +176,32 @@ struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, 
 
 
 /* func families */
+/**
+ * @brief this family is for functions that map structures to another structures by performing transformations of certain substructures
+ * 
+ */
+
 struct transform_tag;
+/**
+ * @brief this family is for functions that retrieve a value from a structure
+ * 
+ */
 struct get_tag;
+
+/**
+ * @brief this family is for functions that map structures to another structures by performing a transformation of the topmost structure (opposing `transform_tag`)
+ * 
+ */
 struct top_tag;
 
 using default_trait = transform_tag;
 
+/**
+ * @brief retrieves a family tag from a function `F`
+ * 
+ * @tparam F: the function 
+ * @tparam typename 
+ */
 template<typename F, typename = void>
 struct func_trait {
     using type = default_trait;
@@ -172,6 +228,10 @@ using func_trait_t = typename func_trait<F>::type;
 template<typename F, typename = void>
 struct pipe_decider;
 
+/**
+ * @brief decided whether perform `fmapper`, `getter` or simple application according to `func_trait`
+ * 
+ */
 template<typename F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, transform_tag>::value>> {
     template<typename S>
@@ -190,6 +250,15 @@ struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::
     static constexpr decltype(auto) operate(S s, F f) { return f(s);  }
 };
 
+/**
+ * @brief performs a `fmapper::fmap`, `getter::get` or a simple application of `F` to `S` according to `pipe_decider`
+ * 
+ * @tparam S: the structure type
+ * @tparam F: the function type
+ * @param s: the structure
+ * @param f: the function
+ * @return the result of the piping
+ */
 template<typename S, typename F>
 inline constexpr auto operator|(S s, F f) ->
 std::enable_if_t<is_structoid<std::enable_if_t<std::is_class<S>::value, S>>::value, decltype(pipe_decider<F>::template operate<S>(std::declval<S>(), std::declval<F>()))> {
@@ -205,8 +274,7 @@ struct piper;
 template<typename S, typename F, typename... FS>
 struct piper<S, F, FS...> {
     static constexpr decltype(auto) pipe(S s, F func, FS... funcs) {
-        auto s1 = s | func;
-        return piper<remove_cvref<decltype(s1)>, FS...>::pipe(s1, funcs...);
+        return piper<remove_cvref<decltype(s | func)>, FS...>::pipe(s | func, funcs...);
     }
 };
 
@@ -217,6 +285,15 @@ struct piper<S, F> {
     }
 };
 
+/**
+ * @brief performs a `fmapper::fmap`, `getter::get` or a simple application of `F` and subsequent `FS` to `S` according to `pipe_decider`
+ * 
+ * @tparam S 
+ * @tparam FS 
+ * @param s 
+ * @param funcs 
+ * @return constexpr decltype(auto) 
+ */
 template<typename S, typename... FS>
 inline constexpr decltype(auto) pipe(S s, FS... funcs) {
     return piper<S, FS...>::pipe(s, funcs...);

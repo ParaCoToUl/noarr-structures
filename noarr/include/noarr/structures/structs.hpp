@@ -128,12 +128,11 @@ struct _array_get_t<T, std::integral_constant<std::size_t, K>> {
     using type = T;
 };
 
-// TODO: finish array description
 /**
- * @brief array
+ * @brief a structure representing an array with a dynamicly specifiable index (all indices point to the same substructure, with a different offset)
  * 
- * @tparam Dim dimmension added by the structure
- * @tparam T substructure type
+ * @tparam Dim: the dimmension name added by the array
+ * @tparam T: the type of the substructure the array contains
  */
 template<char Dim, std::size_t L, typename T>
 struct array : private contain<T> {
@@ -165,8 +164,8 @@ struct array : private contain<T> {
 /**
  * @brief unsized vector ready to be resized to the desired size, this vector doesn't have size yet
  * 
- * @tparam Dim dimmension added by the structure
- * @tparam T substructure type
+ * @tparam Dim: the dimmension name added by the vector
+ * @tparam T: type of the substructure the vector contains
  */
 template<char Dim, typename T>
 struct vector : private contain<T> {
@@ -204,10 +203,10 @@ struct _sized_vector_get_t<T, std::integral_constant<std::size_t, K>> {
 };
 
 /**
- * @brief sized vector (size reassignable by the resize function)
+ * @brief sized vector (size reassignable by the resize function), see `vector`
  * 
- * @tparam Dim dimmension added by the structure
- * @tparam T substructure type
+ * @tparam Dim: the dimmension name added by the sized vector
+ * @tparam T: the type of the substructure the sized vector consists of
  */
 template<char Dim, typename T>
 struct sized_vector : private contain<vector<Dim, T>, std::size_t> {
@@ -262,7 +261,7 @@ struct _is_static_construct<T, decltype(&T::construct, void())> {
 /**
  * @brief constant fixed dimension, carries a single sub_structure with a statically fixed index
  * 
- * @tparam T substructure type
+ * @tparam T: substructure type
  */
 template<char Dim, typename T, std::size_t Idx>
 struct sfixed_dim : private contain<T> {
@@ -310,7 +309,7 @@ struct _fixed_dim_get_t<T, void> {
 /**
  * @brief fixed dimension, carries a single sub_structure with a fixed index
  * 
- * @tparam T substructure type
+ * @tparam T: substructure type
  */
 template<char Dim, typename T>
 struct fixed_dim : private contain<T, std::size_t> {

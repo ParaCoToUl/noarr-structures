@@ -5,6 +5,11 @@
 
 namespace noarr {
 
+/**
+ * @brief wraps 
+ * 
+ * @tparam Structure 
+ */
 template<typename Structure>
 class wrapper;
 

@@ -270,21 +270,21 @@ template<ImageDataLayout layout, std::size_t width, std::size_t height, std::siz
 void histogram_template_test()
 {
 	auto image = noarr::bag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
-	CHECK(image.layout().get_size() == width * height * sizeof(int));
+	CHECK(image.structure().get_size() == width * height * sizeof(int));
 
-	int y_size = image.layout().template get_length<'y'>();
+	int y_size = image.structure().template get_length<'y'>();
 	CHECK(y_size == height);
 
 	auto histogram = noarr::bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
-	CHECK(histogram.layout().get_size() == pixel_range * sizeof(int));
+	CHECK(histogram.structure().get_size() == pixel_range * sizeof(int));
 
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.layout().template get_length<'x'>();
+	int x_size = image.structure().template get_length<'x'>();
 	REQUIRE(x_size == width);
 
-	y_size = image.layout().template get_length<'y'>();
+	y_size = image.structure().template get_length<'y'>();
 	REQUIRE(y_size == height);
 
 	for (int i = 0; i < x_size; i++)
@@ -293,12 +293,12 @@ void histogram_template_test()
 		{
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
-			int pixel_value = image.layout().template get_at<'x','y'>(image.data(), i, j); // v3
+			int pixel_value = image.structure().template get_at<'x','y'>(image.data(), i, j); // v3
 
 			if (pixel_value != 0)
 				FAIL();
 
-			int& histogram_value = histogram.layout().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
@@ -333,16 +333,16 @@ void histogram_template_test_clear()
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.layout().template get_length<'x'>();
-	int y_size = image.layout().template get_length<'y'>();
+	int x_size = image.structure().template get_length<'x'>();
+	int y_size = image.structure().template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 	{
 		for (int j = 0; j < y_size; j++)
 		{
-			int pixel_value = image.layout().template get_at<'x', 'y'>(image.data(), i, j);
+			int pixel_value = image.structure().template get_at<'x', 'y'>(image.data(), i, j);
 
-			int& histogram_value = histogram.layout().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}

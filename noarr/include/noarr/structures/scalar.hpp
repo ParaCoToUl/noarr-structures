@@ -21,7 +21,7 @@ struct _scalar_get_t<T, void> {
 };
 
 /**
- * @brief The ground structure
+ * @brief The ground structure for stored data
  * 
  * @tparam T the stored type
  */
