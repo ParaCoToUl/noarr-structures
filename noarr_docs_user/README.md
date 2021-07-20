@@ -56,9 +56,6 @@ The reason we specify the size later is that it allows us to decouple the *struc
 Now that we have a structure defined, we can create a bag to store the data:
 
 ```cpp
-// we have some structure
-auto my_structure_of_ten = ...;
-
 // we will create a bag
 auto bag = noarr::bag(noarr::wrap(my_structure_of_ten));
 ```
