@@ -149,9 +149,9 @@ Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double
 We declare tuple like this:
 
 ```cpp
-tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
-tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
-tuple<'t', scalar<int>, scalar<int>> t3;
+tuple<'t', scalar<int>, scalar<float>> t;
+tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t2;
+tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t3;
 ```
 
 To get the first element of the tuple we use `get_at` in the following way:
