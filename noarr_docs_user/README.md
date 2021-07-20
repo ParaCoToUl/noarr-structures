@@ -148,15 +148,15 @@ Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double
 We declare tuple like this:
 
 ```cpp
-    tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
-    tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
-    tuple<'t', scalar<int>, scalar<int>> t3;
+tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
+tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
+tuple<'t', scalar<int>, scalar<int>> t3;
 ```
 
 To get the first element of the tuple we use `fix` in the following way:
 
 ```cpp
-    fix<'t'>(1_idx);
+fix<'t'>(1_idx);
 ```
 
 
@@ -177,5 +177,5 @@ noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
 We can use `fix<>` to fix in the following ways
 
 ```cpp
-    fix<'i', 'j'>(1, 2);
+fix<'i', 'j'>(1, 2);
 ```
