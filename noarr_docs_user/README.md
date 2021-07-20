@@ -128,5 +128,24 @@ void matrix_template_test_runtime(MatrixDataLayout layout, int size)
 		matrix_template_test<MatrixDataLayout::Zcurve>(size);
 }
 ```
+#### Our supported layouts (*structures*)
 
+Noarr is designed to be easily extandable, we implemented basic ones and some simple 2D layouts.
+
+```cpp
+noarr::vector<'i', noarr::scalar<float>> my_vector;
+noarr::vector<'i', 10, noarr::scalar<float>> my_array; //TODO: ???
+```
+
+You will model matrix in a following way:
+
+```cpp
+noarr::vector<'i', noarr::vector<'j', noarr::scalar<float>>> my_matrix;
+```
+
+To showcase easy extendability we implemented Z-curve and block layout:
+
+```cpp
+noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix; //TODO: ???
+```
 
