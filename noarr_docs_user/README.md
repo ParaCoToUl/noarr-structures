@@ -137,6 +137,10 @@ noarr::vector<'i', noarr::scalar<float>> my_vector;
 noarr::array<'i', 10, noarr::scalar<float>> my_array; //TODO: ???
 ```
 
+##### Scalars
+
+Noarr supports all scalars, for example: `float`, `int`, `double`, `long`, `std::size_t`...
+
 ##### Tuples
 
 
