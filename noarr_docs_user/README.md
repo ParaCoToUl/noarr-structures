@@ -132,6 +132,7 @@ void matrix_template_test_runtime(MatrixDataLayout layout, int x, int y)
 
 <a name="supported-layouts"></a>
 #### Our supported layouts (*structures*)
+##### Containers
 
 Noarr is designed to be easily extendable, we implemented basic ones and some simple 2D layouts.
 
