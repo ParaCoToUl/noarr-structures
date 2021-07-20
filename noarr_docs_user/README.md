@@ -45,7 +45,7 @@ auto my_structure_of_ten = my_structure | noarr::resize<'i'>(10);
 
 A *structure* object is immutable. The `|` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
 
-> The pipe operator is the preffered way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label (in compile time).
+> The pipe operator is the preferred way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label (in compile time).
 
 The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it doesn't care, where that dimension is inside the *structure*.
 
@@ -71,10 +71,10 @@ std::size_t value_ref = bag.structure().template get_at<'i'>(bag.data(), 5);
 value_ref = 42f;
 ```
 
-
+<a name="changing-data-layouts"></a>
 #### Changing data layout (*structure*)
 
-Now we want to change the data layout. Noarr neeeds to know the structure in compile time (for performance). So the right approach is to template all funtions and then select between compiled versions. We define diferent structures like this:
+Now we want to change the data layout. Noarr needs to know the structure in compile time (for performance). So the right approach is to template all functions and then select between compiled versions. We define different structures like this:
 
 ```cpp
 enum MatrixDataLayout { Rows = 0, Columns = 1, Zcurve = 2 };
@@ -104,7 +104,7 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve> {
 };
 ```
 
-We will create templated matrix. And also set size in runtime like this:
+We will create a templated matrix. And also set size in runtime like this:
 
 ```cpp
 template<MatrixDataLayout layout>
@@ -113,9 +113,9 @@ void matrix_template_test(int size) {
 }
 ```
 
-We set the size in runtime, because size can be any int.
+We set the size in runtime because size can be any int.
 
-We can calling runtime different templated layouts.
+We can call in runtime different templated layouts.
 
 ```cpp
 void matrix_template_test_runtime(MatrixDataLayout layout, int size)
@@ -128,9 +128,11 @@ void matrix_template_test_runtime(MatrixDataLayout layout, int size)
 		matrix_template_test<MatrixDataLayout::Zcurve>(size);
 }
 ```
+
+<a name="supported-layouts"></a>
 #### Our supported layouts (*structures*)
 
-Noarr is designed to be easily extandable, we implemented basic ones and some simple 2D layouts.
+Noarr is designed to be easily extendable, we implemented basic ones and some simple 2D layouts.
 
 ```cpp
 noarr::vector<'i', noarr::scalar<float>> my_vector;
@@ -139,15 +141,28 @@ noarr::array<'i', 10, noarr::scalar<float>> my_array; //TODO: ???
 
 ##### Scalars
 
-Noarr supports all scalars, for example: `float`, `int`, `double`, `long`, `std::size_t`...
+Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`...
 
 ##### Tuples
 
+We declare tuple like this:
+
+```cpp
+    tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t;
+    tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t2;
+    tuple<'t', scalar<int>, scalar<int>> t3;
+```
+
+To get the first element of the tuple we use `fix` in the following way:
+
+```cpp
+    fix<'t'>(1_idx);
+```
 
 
 ##### Matrices/Cubes
 
-We will shorly discuss higher dimmentsional data. You will model matrix in a following way:
+We will shortly discuss higher-dimensional data. You will model the matrix in the following way:
 
 ```cpp
 noarr::vector<'i', noarr::vector<'j', noarr::scalar<float>>> my_matrix;
@@ -156,6 +171,12 @@ noarr::vector<'i', noarr::vector<'j', noarr::scalar<float>>> my_matrix;
 To showcase easy extendability we implemented Z-curve and block layout:
 
 ```cpp
-noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix; //TODO: ???
+noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
 ```
 
+We can use `fix<>` to fix in following ways:
+
+```cpp
+    fix<'i'>(1).fix<'j'>(2); // fix coordinates one by one
+    fix<'i', 'j'>(1, 2); // fix both at the same time
+```
