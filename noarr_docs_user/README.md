@@ -13,7 +13,7 @@ Noarr framework aims to help with certain aspects of performant GPU algorithm de
 
 Data modelling is the process of describing the structure of your data, so that an algorithm can be written to processes the data. Noarr lets you model your data in an abstract, multidimensional space, abstracting away any underlying physical structure.
 
-Noarr framework distinguishes two types of mutidimensional data - smooth and jagged.
+Noarr framework distinguishes two types of mutidimensional data - uniform and jagged.
 
 **Jagged data** can be thought of as a vector of vectors, each having different size. This means the dimensions of such data need to be stored within the data itself, requiring the use of pointers and making processing of such data inefficient. Noarr supports this type of data only at the highest abstraction levels of your data model.
 
