@@ -33,6 +33,6 @@ struct scalar_name<T, std::enable_if_t<std::is_floating_point<T>::value>> {
     using type = integral_pack_concat<char_pack<'f'>, mangle_value<int, 8 * sizeof(T)>>;
 };
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_SCALAR_NAMES_HPP

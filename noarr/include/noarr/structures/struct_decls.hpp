@@ -10,6 +10,14 @@ namespace noarr {
 // TODO: add a way to get Params
 // TODO: split type_param into struct_param and scalar_param (or regular type param, idk)
 
+/**
+ * @brief a struct that describes a structure
+ * 
+ * @tparam Name: the name of the structure
+ * @tparam Dims: the dimensions the structure introduces
+ * @tparam ADims: the dimensions the structure consumes
+ * @tparam Params: template parameters of the structure
+ */
 template<typename Name, typename Dims, typename ADims, typename... Params>
 struct struct_description {
     using name = Name;
@@ -24,6 +32,12 @@ struct type_param;
 template<typename T, T V>
 struct value_param;
 
+/**
+ * @brief returns the `struct_description` of a structure
+ * 
+ * @tparam T: the structure
+ * @tparam typename: a placeholder type
+ */
 template<typename T, typename = void>
 struct get_struct_desc;
 
@@ -113,16 +127,28 @@ struct _construct<T, 0> {
     }
 };
 
+/**
+ * @brief constructs a structure using a prototype `t` and substructures `ts`
+ * 
+ * @param t: the prototype for constructing the structure
+ * @param ts: the desired substructures
+ */
 template<typename T, typename... TS>
 inline constexpr auto construct(T t, TS... ts) {
     return t.construct(ts...);
 }
 
+/**
+ * @brief constructs a structure using a prototype `t` and substructures `ts` contained in a `std::tuple`
+ * 
+ * @param t: the prototype for constructing the structure
+ * @param ts: the desired substructures contained in a `std::tuple`
+ */
 template<typename T, typename... TS>
 inline constexpr auto construct(T t, std::tuple<TS...> ts) {
     return _construct<T>::construct(t, ts);
 }
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_STRUCT_DECLS_HPP

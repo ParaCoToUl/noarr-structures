@@ -299,6 +299,6 @@ inline constexpr decltype(auto) pipe(S s, FS... funcs) {
     return piper<S, FS...>::pipe(s, funcs...);
 }
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_CORE_HPP

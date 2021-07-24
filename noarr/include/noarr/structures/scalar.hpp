@@ -46,6 +46,6 @@ struct scalar {
     static constexpr std::size_t length() { return 0; }
 };
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_SCALAR_HPP

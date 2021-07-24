@@ -89,6 +89,6 @@ inline constexpr std::ostream &stream_unlift(std::ostream &out, scalar<Type>, ch
     return out << *reinterpret_cast<Type*>(offset);
 }
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_STREAM_LIFTING_HPP

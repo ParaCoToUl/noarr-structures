@@ -32,6 +32,6 @@ struct _mangle_value<T, V, std::enable_if_t<std::is_integral<T>::value>> {
     using type = mangle_integral<T, V>;
 };
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_MANGLE_VALUE_HPP

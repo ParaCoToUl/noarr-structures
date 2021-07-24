@@ -12,6 +12,11 @@ using void_t = void;
 template<class T>
 using remove_cvref = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
+/**
+ * @brief The field `::value` contains whether the given type is a C-array
+ * 
+ * @tparam T: the type
+ */
 template<class T>
 struct is_array {
     using value_type = bool;
@@ -24,12 +29,24 @@ struct is_array<T[N]> {
     static constexpr value_type value = true;
 };
 
+/**
+ * @brief Contains multiple values of a certain type
+ * 
+ * @tparam T: the type of the values
+ * @tparam VS: the values
+ */
 template<class T, T... VS>
 struct integral_pack;
 
 template<class T, T V, class Pack, typename = void>
 struct _integral_pack_contains;
 
+/**
+ * @brief returns whether an integral pack contains a certain value
+ * 
+ * @tparam Pack: the hay pack
+ * @tparam V: the needle value
+ */
 template<class Pack, typename Pack::value_type V>
 using integral_pack_contains = _integral_pack_contains<typename Pack::value_type, V, Pack>;
 
@@ -75,6 +92,11 @@ struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1.
     using type = integral_pack<T, vs1...>;
 };
 
+/**
+ * @brief concatenates multiple integral packs
+ * 
+ * @tparam Packs 
+ */
 template<class... Packs>
 using integral_pack_concat = typename _integral_pack_concat<Packs...>::type;
 
@@ -96,9 +118,19 @@ struct _integral_pack_contains<T, V, integral_pack<T>> {
     static constexpr bool value = false;
 };
 
+/**
+ * @brief an alias for integral_pack<char, ...>
+ * 
+ * @tparam VS: the contained values
+ */
 template<char... VS>
 using char_pack = integral_pack<char, VS...>;
 
+/**
+ * @brief used for lazily retrieving a false `::value`
+ * 
+ * @tparam T: the type preceding the value
+ */
 template<typename T>
 struct template_false {
     static constexpr bool value = false;
@@ -119,6 +151,12 @@ struct _tuple_forall<Function, std::tuple<>> {
     static constexpr bool value = true;
 };
 
+/**
+ * @brief checks whether a type function applied to all elements of a tuple contains always true `::value`
+ * 
+ * @tparam Function: the applied type function
+ * @tparam Tuple: the tuple containing the set of inputs for the function
+ */
 template<template<typename> class Function, typename Tuple>
 using tuple_forall = _tuple_forall<Function, Tuple>;
 

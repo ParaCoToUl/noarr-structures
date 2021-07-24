@@ -379,6 +379,10 @@ inline constexpr auto offset(Ts... ts) {
     return compose(fix<Dims...>(ts...), _offset());
 }
 
+/**
+ * @brief returns the size (in bytes) of the structure
+ * 
+ */
 struct get_size {
     using func_family = top_tag;
     constexpr get_size() = default;
@@ -424,6 +428,6 @@ inline constexpr decltype(auto) get_at(V *ptr, Ts... ts) {
     return compose(fix<Dims...>(ts...), _get_at(ptr));
 }
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_FUNCS_HPP

@@ -53,9 +53,19 @@ struct _is_dynamic_dimension<T, void_t<decltype(std::declval<T>().offset(std::de
     using type = std::true_type;
 };
 
+/**
+ * @brief returns whether the structure has a static dimension (accepts static indices)
+ * 
+ * @tparam T: the structure
+ */
 template<typename T>
 using is_static_dimension = std::conditional_t<_has_static_offset<T, 0>::value, typename _is_static_dimension<T>::type, std::false_type>;
 
+/**
+ * @brief returns whether the structure has a dynamic dimension (accepts dynamic indices)
+ * 
+ * @tparam T: the structure
+ */
 template<typename T>
 using is_dynamic_dimension = std::conditional_t<_has_dynamic_offset<T>::value, typename _is_dynamic_dimension<T>::type, std::false_type>;
 
@@ -80,6 +90,11 @@ struct _is_cube {
     using type = typename _is_cube_int<T>::type;
 };
 
+/**
+ * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all dynamic)
+ * 
+ * @tparam T: the structure
+ */
 template<typename T>
 using is_cube = typename _is_cube<remove_cvref<T>>::type;
 
@@ -98,6 +113,11 @@ struct _is_scalar {
     using type = std::false_type;
 };
 
+/**
+ * @brief returns whether a structure is a `scalar<...>`
+ * 
+ * @tparam T: the structure
+ */
 template<typename T>
 using is_scalar = typename _is_scalar<T>::type;
 
@@ -122,6 +142,6 @@ struct _scalar_t<scalar<T>> {
     using type = T;
 };
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_STRUCT_TRAITS_HPP

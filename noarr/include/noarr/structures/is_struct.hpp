@@ -83,6 +83,6 @@ struct _is_struct<T, std::enable_if_t<is_structoid<T>::value && has_get_t<T>::va
     using type = std::true_type;
 };
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_IS_STRUCT_HPP

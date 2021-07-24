@@ -338,6 +338,6 @@ struct fixed_dim : private contain<T, std::size_t> {
     constexpr std::size_t length() const { return 0; }
 };
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_STRUCTS_HPP

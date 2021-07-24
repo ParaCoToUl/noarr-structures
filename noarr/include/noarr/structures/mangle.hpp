@@ -12,9 +12,19 @@ namespace noarr {
 template<typename T, typename Pre = char_pack<>, typename Post = char_pack<>>
 struct _mangle;
 
+/**
+ * @brief Returns a textual representation of the type of a structure using `char_pack` 
+ * 
+ * @tparam T: the structure
+ */
 template<typename T>
 using mangle = typename _mangle<T>::type;
 
+/**
+ * @brief returns a textual representation of a scalar type using `char_pack`
+ * 
+ * @tparam T: the scalar type
+ */
 template<typename T>
 struct scalar_name<T, void_t<get_struct_desc_t<T>>> {
     using type = mangle<T>;
@@ -80,6 +90,6 @@ struct _mangle<std::tuple<>, Pre, Post> {
     using type = integral_pack_concat<Pre, Post>;
 };
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_MANGLE_HPP

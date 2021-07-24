@@ -170,6 +170,6 @@ struct contain_impl<void> {};
 template<typename... TS>
 using contain = helpers::contain_impl<void, TS...>;
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_CONTAIN_HPP

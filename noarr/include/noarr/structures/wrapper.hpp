@@ -6,9 +6,9 @@
 namespace noarr {
 
 /**
- * @brief wraps 
+ * @brief wraps the structure and offers the `.` notation instead of the `|` notation in applying functions to a structure (structure always on the left side)
  * 
- * @tparam Structure 
+ * @tparam Structure: the underlying structure
  */
 template<typename Structure>
 class wrapper;
@@ -65,6 +65,6 @@ inline constexpr wrapper<Structure> wrap(Structure s) {
     return wrapper<Structure>(s);
 }
 
-}
+} // namespace noarr
 
 #endif // NOARR_STRUCTURES_WRAPPER_HPP
