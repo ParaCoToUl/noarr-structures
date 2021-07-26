@@ -1,7 +1,5 @@
-# Matrix README
-
-## Instalation
+# Instalation
 (reference to other README I guess)
-## Description
-
-## Some functions implementation
+# Usage
+Run the compiled programm and all info will 
+# Some functions implementation
