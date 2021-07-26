@@ -16,37 +16,9 @@
 
 #include <tuple>
 
-enum MatrixDataLayout { Rows = 0, Columns = 1, Zcurve = 2 };
-
-template<MatrixDataLayout layout>
-struct GetMatrixStructreStructure;
-
-template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Rows>
-{
-	static constexpr auto GetMatrixStructure()
-	{
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
-	}
-};
-
-template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Columns>
-{
-	static constexpr auto GetMatrixStructure()
-	{
-		return noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>>();
-	}
-};
-
-template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve>
-{
-	static constexpr auto GetMatrixStructure()
-	{
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
-	}
-};
+using matrix_rows = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+using matrix_columns = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+using matrix_zcurve = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
 
 template<typename Structure1, typename Structure2>
 void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2)
@@ -146,26 +118,6 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 	}
 }
 
-template<MatrixDataLayout layout>
-void matrix_template_test(int size)
-{
-	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m2 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m3 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-
-	matrix_multiply(m1, m2, m3);
-}
-
-void matrix_template_test_runtime(MatrixDataLayout layout, int size)
-{
-	if (layout == MatrixDataLayout::Rows)
-		matrix_template_test<MatrixDataLayout::Rows>(size);
-	else if (layout == MatrixDataLayout::Columns)
-		matrix_template_test<MatrixDataLayout::Columns>(size);
-	else if (layout == MatrixDataLayout::Zcurve)
-		matrix_template_test<MatrixDataLayout::Zcurve>(size);
-}
-
 
 struct matrix
 {
@@ -261,17 +213,17 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 	}
 }
 
-template<MatrixDataLayout layout>
-void matrix_demo_template(int size)
+template<typename Structure>
+void matrix_demo(int size)
 {
 
 	matrix m1 = get_clasic_matrix(size, size);
 	matrix m2 = get_clasic_matrix(size, size);
 	matrix m3 = get_clasic_matrix(size, size);
 
-	auto n1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n2 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n3 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n1 = noarr::bag(noarr::wrap(Structure).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n2 = noarr::bag(noarr::wrap(Structure).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n3 = noarr::bag(noarr::wrap(Structure).template set_length<'x'>(size).template set_length<'y'>(size));
 
 	clasic_matrix_to_naorr(m1, n1);
 	clasic_matrix_to_naorr(m2, n2);
@@ -284,34 +236,22 @@ void matrix_demo_template(int size)
 	assert(are_equal_matrices(m3, m4));
 }
 
-void matrix_demo(MatrixDataLayout layout, int size)
+void main()
 {
-	if (layout == MatrixDataLayout::Rows)
-		matrix_demo_template<MatrixDataLayout::Rows>(size);
-	else if (layout == MatrixDataLayout::Columns)
-		matrix_demo_template<MatrixDataLayout::Columns>(size);
-	else if (layout == MatrixDataLayout::Zcurve)
-		matrix_demo_template<MatrixDataLayout::Zcurve>(size);
-}
-
-void printHelp()
-{
-	std::cout << "Input 2 parameters separated by a newline:" << std::endl;
-	std::cout << "First parameter:" << std::endl;
-	std::cout << "1 - rows" << std::endl;
-	std::cout << "2 - columns" << std::endl;
-	std::cout << "3 - zcurve" << std::endl;
-	std::cout << "4 - exit programm" << std::endl;
-	std::cout << "The second parameter is the size of the matrix (we chose square matrix for this example, to simplify)" << std::endl;
-
 
 }
 
-int main()
+/*int main()
 {
 	while (true)
 	{
-		printHelp();
+		std::cout << "Input 2 parameters separated by a newline:" << std::endl;
+		std::cout << "First parameter:" << std::endl;
+		std::cout << "1 - rows" << std::endl;
+		std::cout << "2 - columns" << std::endl;
+		std::cout << "3 - zcurve" << std::endl;
+		std::cout << "4 - exit programm" << std::endl;
+		std::cout << "The second parameter is the size of the matrix (we chose square matrix for this example, to simplify)" << std::endl;
 
 		int layout;
 		std::cin >> layout;
@@ -323,7 +263,12 @@ int main()
 		if (size < 1)
 			return -1;
 
-		matrix_demo((MatrixDataLayout)(layout - 1), size);
+		if (layout == 1)
+			matrix_demo<matrix_rows>(size);
+		else if (layout == 2)
+			matrix_demo<matrix_columns>(size);
+		else if (layout == 3)
+			matrix_demo<matrix_zcurve>(size);
 	}
-}
+}*/
 
