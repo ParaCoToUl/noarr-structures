@@ -13,7 +13,7 @@ find_package(Threads REQUIRED)
 
 # setup the test runner executable
 add_executable(matrix matrix.cpp)
-target_include_directories(matrix PUBLIC ../../include)
+target_include_directories(matrix PUBLIC ../../noarr/include)
 target_link_libraries(matrix PRIVATE Threads::Threads)
 
 if(MSVC)
