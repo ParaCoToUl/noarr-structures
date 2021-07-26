@@ -294,7 +294,36 @@ void matrix_demo(MatrixDataLayout layout, int size)
 		matrix_demo_template<MatrixDataLayout::Zcurve>(size);
 }
 
-void main()
+void printHelp()
 {
-	matrix_demo(MatrixDataLayout::Rows, 10);
+	std::cout << "Input 2 parameters separated by a newline:" << std::endl;
+	std::cout << "First parameter:" << std::endl;
+	std::cout << "1 - rows" << std::endl;
+	std::cout << "2 - columns" << std::endl;
+	std::cout << "3 - zcurve" << std::endl;
+	std::cout << "4 - exit programm" << std::endl;
+	std::cout << "The second parameter is the size of the matrix (we chose square matrix for this example, to simplify)" << std::endl;
+
+
 }
+
+int main()
+{
+	while (true)
+	{
+		printHelp();
+
+		int layout;
+		std::cin >> layout;
+		if (layout == 4)
+			return 0;
+
+		int size;
+		std::cin >> size;
+		if (size < 1)
+			return -1;
+
+		matrix_demo((MatrixDataLayout)(layout - 1), size);
+	}
+}
+
