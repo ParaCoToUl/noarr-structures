@@ -1,9 +1,11 @@
-#include <catch2/catch.hpp>
+//#include <catch2/catch.hpp>
 //#include "noarr/structures.hpp"
 
 #include <iostream>
 #include <array>
 #include <utility>
+#include <vector>
+#include <cassert>
 
 #include "noarr/structures/structs.hpp"
 #include "noarr/structures/funcs.hpp"
@@ -122,9 +124,9 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 	int x3_size = matrix3.structure().template get_length<'x'>();
 	int y3_size = matrix3.structure().template get_length<'y'>();
 
-	REQUIRE(x1_size == y2_size);
-	REQUIRE(y1_size == y3_size);
-	REQUIRE(x2_size == x3_size);
+	assert(x1_size == y2_size);
+	assert(y1_size == y3_size);
+	assert(x2_size == x3_size);
 
 	for (int i = 0; i < x3_size; i++)
 	{
@@ -237,9 +239,9 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 	int x3_size = m3.x;
 	int y3_size = m3.y;
 
-	REQUIRE(x1_size == y2_size);
-	REQUIRE(y1_size == y3_size);
-	REQUIRE(x2_size == x3_size);
+	assert(x1_size == y2_size);
+	assert(y1_size == y3_size);
+	assert(x2_size == x3_size);
 
 	for (int i = 0; i < x3_size; i++)
 	{
@@ -279,7 +281,7 @@ void matrix_demo_template(int size)
 
 	matrix m4 = noarr_matrix_to_clasic(n3);
 
-	REQUIRE(are_equal_matrices(m3, m4));
+	assert(are_equal_matrices(m3, m4));
 }
 
 void matrix_demo(MatrixDataLayout layout, int size)
@@ -290,4 +292,9 @@ void matrix_demo(MatrixDataLayout layout, int size)
 		matrix_demo_template<MatrixDataLayout::Columns>(size);
 	else if (layout == MatrixDataLayout::Zcurve)
 		matrix_demo_template<MatrixDataLayout::Zcurve>(size);
+}
+
+void main()
+{
+	matrix_demo(MatrixDataLayout::Rows, 10);
 }
