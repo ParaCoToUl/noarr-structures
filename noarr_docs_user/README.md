@@ -55,10 +55,11 @@ The reason we specify the size later is that it allows us to decouple the *struc
 #### Wrapper
 It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `naorr::wrapper` first.
 
-TODO
-
-
-
+```cpp
+	auto piped = my_structure_of_ten | noarr::set_length<'i'>(10);
+	// now version with wrapper
+	auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(10);
+```
 
 #### Allocating and accessing *data* and *bag*
 
