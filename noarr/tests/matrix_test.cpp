@@ -130,6 +130,7 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 			{
 				int& value1 = matrix1.template at<'x', 'y'>(k, j);
 				int& value2 = matrix2.template at<'x', 'y'>(i, k);
+
 				sum += value1 * value2;
 			}
 
@@ -175,6 +176,7 @@ matrix get_clasic_matrix(int x, int y)
 {
 	const int length = x * y;
 	std::vector<int> ary;
+
 	for (int i = 0; i < length; i++)
 		ary.push_back(rand() % 10);
 
@@ -245,6 +247,7 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 			{
 				int& value1 = m1.at(k, j);
 				int& value2 = m2.at(i, k);
+
 				sum += value1 * value2;
 			}
 
