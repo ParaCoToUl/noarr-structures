@@ -9,6 +9,7 @@ namespace noarr {
 
 // TODO: add a way to get Params
 // TODO: split type_param into struct_param and scalar_param (or regular type param, idk)
+// TODO: make sub_structures a regular function, use in places where .sub_structures is used
 
 /**
  * @brief a struct that describes a structure

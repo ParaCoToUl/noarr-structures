@@ -332,6 +332,69 @@ uint32_t calcZOrder32(uint16_t x, uint16_t y)
 	return x | (y << 1);
 }
 
+namespace noarr {
+
+template<char Dim>
+struct z_curve_bottom {
+	using description = struct_description<
+		char_pack<'z','_','c','u','r','v','e','_','b','o','t','t','o','m'>,
+		dims_impl<Dim>,
+		dims_impl<>>;
+
+	constexpr z_curve_bottom() = default;
+
+	static constexpr auto construct() {
+		return z_curve_bottom<Dim>();
+	}
+
+	static  constexpr std::size_t size() { return 0; }
+	static constexpr std::size_t offset(std::uint16_t i) {
+		i = (i | (i << 8)) & 0x00FF00FF;
+		i = (i | (i << 4)) & 0x0F0F0F0F;
+		i = (i | (i << 2)) & 0x33333333;
+		i = (i | (i << 1)) & 0x55555555;
+
+		return i;
+	}
+};
+
+template<typename T, typename TH1, typename TH2>
+struct z_curve_top : private contain<T, TH1, TH2> {
+	using base = contain<T, TH1, TH2>;
+	constexpr auto sub_structures() const { 
+		return std::tuple_cat(base::template get<0>().sub_structures(), std::make_tuple(base::template get<1>(), base::template get<2>()));
+	}
+
+	using description = struct_description<
+		char_pack<'z','_','c','u','r','v','e','_','t','o','p'>,
+		dims_impl<>,
+		dims_impl<>,
+		type_param<T>,
+		type_param<TH1>,
+		type_param<TH2>>;
+	
+	template<typename... KS>
+	using get_t = void; // TODO
+
+	constexpr z_curve_top() = default;
+	explicit constexpr z_curve_top(T sub_structure, TH1 sub_structure1, TH2 sub_structure2) : base(sub_structure, sub_structure1, sub_structure2) {}
+
+	template<typename T2, typename TH3, typename TH4>
+	constexpr auto construct(T2 sub_structure, TH3 sub_structure1, TH4 sub_structure2) const {
+		return z_curve_top<decltype(base::template get<0>().construct(sub_structure)), TH3, TH4>(base::template get<0>().construct(sub_structure), sub_structure1, sub_structure2);
+	}
+
+	constexpr std::size_t size() const { return base::template get<0>().size(); }
+	constexpr std::size_t offset() const {
+		return base::template get<1>().offset() | (base::template get<2>().offset() << 1);
+	}
+};
+
+template<char Dim1, char Dim2, typename T>
+using z_curve = z_curve_top<T, z_curve_bottom<Dim1>, z_curve_bottom<Dim2>>;
+
+}
+
 uint64_t calcZOrder64(uint32_t x, uint32_t y)
 {
 	x = (x | (x << 16)) & 0x0000FFFF0000FFFF;
@@ -617,4 +680,20 @@ static constexpr auto GetMatrixStructure(ZcurveStruct)
 }*/
 
 
+TEST_CASE("Z curve", "[Matrix prototype]")
+{
+	noarr::z_curve<'x','y', noarr::array<'a', 32, noarr::scalar<int>>> curve;
+
+	REQUIRE((curve | noarr::offset<'x','y'>(1,0)) == 0b1);
+	REQUIRE((curve | noarr::offset<'y','x'>(0,1)) == 0b1);
+
+	REQUIRE((curve | noarr::offset<'x','y'>(0,1)) == 0b10);
+	REQUIRE((curve | noarr::offset<'y','x'>(1,0)) == 0b10);
+
+	REQUIRE((curve | noarr::offset<'x','y'>(2,2)) == 0b1100);
+	REQUIRE((curve | noarr::offset<'x','y'>(5,5)) == 0b110011);
+
+	REQUIRE((curve | noarr::offset<'x','y'>(7,0)) == 0b10101);
+	REQUIRE((curve | noarr::offset<'x','y'>(0,7)) == 0b101010);
+}
 
