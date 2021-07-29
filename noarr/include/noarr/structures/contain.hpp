@@ -3,8 +3,6 @@
 
 #include <type_traits>
 
-// TODO: write a better get<..>
-
 namespace noarr {
 
 namespace helpers {
