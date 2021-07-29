@@ -314,7 +314,7 @@ struct _fixed_dim_get_t<T, void> {
 template<char Dim, typename T>
 struct fixed_dim : private contain<T, std::size_t> {
     using base = contain<T, std::size_t>;
-    constexpr auto sub_structures() const { return noarr::sub_structures<decltype(base::template get<0>())>(base::template get<0>()).value; }
+    constexpr auto sub_structures() const { return noarr::sub_structures<decltype(this->base::template get<0>())>(base::template get<0>()).value; }
     using description = struct_description<
         char_pack<'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
         dims_impl<>,
