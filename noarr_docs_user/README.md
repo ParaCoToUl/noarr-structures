@@ -1,11 +1,11 @@
 # User documentation for Noarr
 
-Noarr framework aims to help with certain aspects of performant GPU algorithm development:
+~~Noarr framework aims to help with certain aspects of performant GPU algorithm development:
 
-1. [Data modelling](#data-modelling)
-2. Data serialization
-3. Algorithm benchmarking and optimization
-4. Algorithm packaging (exporting a library for C++, Python and R)
+~~1. [Data modelling](#data-modelling)
+~~2. Data serialization
+~~3. Algorithm benchmarking and optimization
+~4. Algorithm packaging (exporting a library for C++, Python and R)
 
 
 <a name="data-modelling"></a>
@@ -51,7 +51,15 @@ A *structure* object is immutable. The `|` operator (the pipe) is used to create
 
 The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it doesn't care, where that dimension is inside the *structure*.
 
+<a name="wrapper"></a>
+#### Wrapper
+It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `naorr::wrapper` first.
 
+```cpp
+	auto piped = my_structure_of_ten | noarr::set_length<'i'>(10);
+	// now version with wrapper
+	auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(10);
+```
 
 #### Allocating and accessing *data* and *bag*
 
@@ -59,7 +67,7 @@ Now that we have a structure defined, we can create a bag to store the data. Bag
 
 ```cpp
 // we will create a bag
-auto bag = noarr::bag(noarr::wrap(my_structure_of_ten));
+auto bag = noarr::bag(my_structure_of_ten);
 ```
 
 
@@ -79,40 +87,21 @@ value_ref = 42f;
 Now we want to change the data layout. Noarr needs to know the structure at compile time (for performance). So the right approach is to template all functions and then select between compiled versions. We define different structures like this:
 
 ```cpp
-enum MatrixDataLayout { Rows = 0, Columns = 1, Zcurve = 2 };
-
-template<MatrixDataLayout layout>
-struct GetMatrixStructreStructure;
-
-template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Rows> {
-	static constexpr auto GetMatrixStructure() {
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
-	}
-};
-
-template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Columns> {
-	static constexpr auto GetMatrixStructure() {
-		return noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>>();
-	}
-};
-
-template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve> {
-	static constexpr auto GetMatrixStructure() {
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
-	}
-};
+// layout declaration
+using matrix_rows = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
+using matrix_columns = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
 ```
 
 We will create a templated matrix. And also set size at runtime like this:
 
 ```cpp
-template<MatrixDataLayout layout>
-void matrix_template_test(int x, int y) {
-	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure())
-		.template set_length<'x'>(x).template set_length<'y'>(y));
+// function which does some logic templated by different structures
+template<typename Structure>
+void matrix_demo(int size) {
+	// dot version
+	auto n1 = noarr::bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	// pipe version (both are valid syntax and produce the same result)
+	auto n2 = noarr::bag(Structure() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
 }
 ```
 
@@ -121,14 +110,16 @@ We set the size at runtime because size can be any int.
 We can call at runtime different templated layouts.
 
 ```cpp
-void matrix_template_test_runtime(MatrixDataLayout layout, int x, int y)
-{
-	if (layout == MatrixDataLayout::Rows)
-		matrix_template_test<MatrixDataLayout::Rows>(x, y);
-	else if (layout == MatrixDataLayout::Columns)
-		matrix_template_test<MatrixDataLayout::Columns>(x, y);
-	else if (layout == MatrixDataLayout::Zcurve)
-		matrix_template_test<MatrixDataLayout::Zcurve>(x, y);
+// we select the layout in runtime
+void main() {
+	int layout;
+	std::cin >> layout;
+	
+	if (layout == 1)
+		matrix_demo<matrix_rows>(size);
+	else if (layout == 2)
+		matrix_demo<matrix_columns>(size);
+	// and so on
 }
 ```
 
@@ -152,9 +143,9 @@ Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double
 We declare tuple like this:
 
 ```cpp
-tuple<'t', scalar<int>, scalar<float>> t;
-tuple<'t', array<'x', 10, scalar<float>>, vector<'x', scalar<int>>> t2;
-tuple<'t', array<'y', 20000, vector<'x', scalar<float>>>, vector<'x', array<'y', 20, scalar<int>>>> t3;
+noarr::tuple<'t', noarr::scalar<int>, noarr::scalar<float>> t;
+noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t2;
+noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
 ```
 
 To get the first element of the tuple we use `get_at` in the following way:
