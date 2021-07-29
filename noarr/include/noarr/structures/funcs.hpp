@@ -61,7 +61,7 @@ struct _compose : contain<F, G> {
  * @param g: the outer function
  */
 template<typename F, typename G>
-inline constexpr decltype(auto) compose(F f, G g) {
+inline constexpr auto compose(F f, G g) {
     return _compose<F, G>(f, g);
 }
 
@@ -416,7 +416,7 @@ struct _get_at : private contain<char*> {
  * @param ptr: the pointer to blob structure
  */
 template<typename V>
-inline constexpr decltype(auto) get_at(V *ptr) {
+inline constexpr auto get_at(V *ptr) {
     return _get_at(ptr);
 }
 
@@ -426,7 +426,7 @@ inline constexpr decltype(auto) get_at(V *ptr) {
  * @param ptr: the pointer to blob structure
  */
 template<char... Dims, typename V, typename... Ts>
-inline constexpr decltype(auto) get_at(V *ptr, Ts... ts) {
+inline constexpr auto get_at(V *ptr, Ts... ts) {
     return compose(fix<Dims...>(ts...), _get_at(ptr));
 }
 

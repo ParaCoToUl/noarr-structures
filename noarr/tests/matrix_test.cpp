@@ -378,7 +378,7 @@ struct z_curve_top : private contain<T, TH1, TH2> {
 
 	template<typename T2, typename TH3, typename TH4>
 	constexpr auto construct(T2 sub_structure, TH3 sub_structure1, TH4 sub_structure2) const {
-		return z_curve_top<decltype(base::template get<0>().construct(sub_structure)), TH3, TH4>(base::template get<0>().construct(sub_structure), sub_structure1, sub_structure2);
+		return z_curve_top<decltype(this->base::template get<0>().construct(sub_structure)), TH3, TH4>(base::template get<0>().construct(sub_structure), sub_structure1, sub_structure2);
 	}
 
 	constexpr std::size_t size() const { return base::template get<0>().size(); }
