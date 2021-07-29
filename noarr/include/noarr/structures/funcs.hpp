@@ -8,6 +8,8 @@
 
 namespace noarr {
 
+// TODO: function that returns the topmost dimension
+
 namespace literals {
 
 template<std::size_t Accum, char... Chars>
