@@ -27,6 +27,11 @@ public:
 
 	constexpr char* data() const noexcept { return data_.get(); }
 
+	template<char... Dims, typename... Ts>
+	constexpr decltype(auto) at(Ts... ts) const {
+		return structure().template get_at<Dims...>(data(), ts...);
+	}
+
 	void clear() {
 		auto size_ = structure().get_size();
 

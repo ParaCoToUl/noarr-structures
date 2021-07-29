@@ -57,10 +57,7 @@ void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-		{
-			int& value2 = matrix2.structure().template get_at<'x', 'y'>(matrix2.data(), i, j);
-			value2 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
-		}
+			matrix2.template at<'x', 'y'>(i, j) = matrix1.template at<'x', 'y'>(i, j);
 }
 
 template<typename Structure>
@@ -73,11 +70,7 @@ void matrix_transpose(noarr::bag<Structure>& matrix1)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
-		{
-			int& value1 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
-			int& value2 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), j, i);
-			std::swap(value1, value2);
-		}
+			std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
 }
 
 template<typename Structure1, typename Structure2, typename Structure3>
@@ -94,9 +87,10 @@ void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
 		{
-			int& value1 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
-			int& value2 = matrix2.structure().template get_at<'x', 'y'>(matrix2.data(), i, j);
-			int& value3 = matrix3.structure().template get_at<'x', 'y'>(matrix3.data(), i, j);
+			int& value1 = matrix1.template at<'x', 'y'>(i, j);
+			int& value2 = matrix2.template at<'x', 'y'>(i, j);
+			int& value3 = matrix3.template at<'x', 'y'>(i, j);
+
 			value3 = value1 + value2;
 		}
 }
@@ -109,7 +103,7 @@ void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
-			matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j) *= scalar;
+			matrix1.template at<'x', 'y'>(i, j) *= scalar;
 }
 
 template<typename Structure1, typename Structure2, typename Structure3>
@@ -134,12 +128,12 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 
 			for (int k = 0; k < x1_size; k++)
 			{
-				int& value1 = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), k, j);
-				int& value2 = matrix2.structure().template get_at<'x', 'y'>(matrix2.data(), i, k);
+				int& value1 = matrix1.template at<'x', 'y'>(k, j);
+				int& value2 = matrix2.template at<'x', 'y'>(i, k);
 				sum += value1 * value2;
 			}
 
-			matrix3.structure().template get_at<'x', 'y'>(matrix3.data(), i, j) = sum;
+			matrix3.template at<'x', 'y'>(i, j) = sum;
 		}
 	}
 }
@@ -212,7 +206,7 @@ matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			m.at(i, j) = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
+			m.at(i, j) = matrix1.template at<'x', 'y'>(i, j);
 
 	return m;
 }
@@ -225,7 +219,7 @@ void clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j) = m1.at(i, j);
+			matrix1.template at<'x', 'y'>(i, j) = m1.at(i, j);
 }
 
 void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
@@ -579,12 +573,12 @@ void histogram_template_test()
 		{
 			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
 			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
-			int pixel_value = image.structure().template get_at<'x','y'>(image.data(), i, j); // v3
+			int pixel_value = image.template at<'x','y'>(i, j); // v3
 
 			if (pixel_value != 0)
 				FAIL();
 
-			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.template at<'x'>(pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
@@ -626,9 +620,9 @@ void histogram_template_test_clear()
 	{
 		for (int j = 0; j < y_size; j++)
 		{
-			int pixel_value = image.structure().template get_at<'x', 'y'>(image.data(), i, j);
+			int pixel_value = image.template at<'x', 'y'>(i, j);
 
-			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.template at<'x'>(pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
