@@ -3,6 +3,8 @@
 
 namespace noarr {
 
+// TODO: add the same shortcuts there are in the bag implementation
+
 /**
  * @brief A bag is an abstraction of a structure combined with data of a corresponding size.
  * 
