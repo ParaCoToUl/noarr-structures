@@ -3,8 +3,6 @@
 
 namespace noarr {
 
-// TODO: add the same shortcuts there are in the bag implementation
-
 /**
  * @brief A bag is an abstraction of a structure combined with data of a corresponding size.
  * 
@@ -29,17 +27,31 @@ public:
 
 	constexpr char* data() const noexcept { return data_.get(); }
 
-	template<char... Dims, typename... Ts>
-	constexpr decltype(auto) at(Ts... ts) const {
-		return structure().template get_at<Dims...>(data(), ts...);
-	}
-
 	void clear() {
 		auto size_ = structure().get_size();
 
 		for (std::size_t i = 0; i < size_; ++i)
 			data_[i] = 0;
 	}
+
+	template<char... Dims, typename... Ts>
+	constexpr decltype(auto) at(Ts... ts) const {
+		return structure().template get_at<Dims...>(data(), ts...);
+	}
+
+    template<char... Dims, typename... Ts>
+    constexpr auto offset(Ts... ts) const {
+        return structure().template offset<Dims...>(ts...);
+    }
+
+    template<char Dim>
+    constexpr auto get_length() const {
+        return structure().template get_length<Dim>();
+    }
+
+    constexpr auto get_size() const {
+        return structure().template get_size();
+    }
 };
 
 } // namespace noarr

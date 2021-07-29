@@ -49,11 +49,11 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve>
 template<typename Structure1, typename Structure2>
 void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2)
 {
-	int x_size = matrix1.structure().template get_length<'x'>();
-	int y_size = matrix1.structure().template get_length<'y'>();
+	int x_size = matrix1.template get_length<'x'>();
+	int y_size = matrix1.template get_length<'y'>();
 
-	REQUIRE(x_size == matrix2.structure().template get_length<'x'>());
-	REQUIRE(y_size == matrix2.structure().template get_length<'y'>());
+	REQUIRE(x_size == matrix2.template get_length<'x'>());
+	REQUIRE(y_size == matrix2.template get_length<'y'>());
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
@@ -63,8 +63,8 @@ void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix
 template<typename Structure>
 void matrix_transpose(noarr::bag<Structure>& matrix1)
 {
-	int x_size = matrix1.structure().template get_length<'x'>();
-	int y_size = matrix1.structure().template get_length<'y'>();
+	int x_size = matrix1.template get_length<'x'>();
+	int y_size = matrix1.template get_length<'y'>();
 
 	REQUIRE(x_size == y_size);
 
@@ -76,13 +76,13 @@ void matrix_transpose(noarr::bag<Structure>& matrix1)
 template<typename Structure1, typename Structure2, typename Structure3>
 void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
 {
-	int x_size = matrix1.structure().template get_length<'x'>();
-	int y_size = matrix1.structure().template get_length<'y'>();
+	int x_size = matrix1.template get_length<'x'>();
+	int y_size = matrix1.template get_length<'y'>();
 
-	REQUIRE(x_size == matrix2.structure().template get_length<'x'>());
-	REQUIRE(y_size == matrix2.structure().template get_length<'y'>());
-	REQUIRE(x_size == matrix3.structure().template get_length<'x'>());
-	REQUIRE(y_size == matrix3.structure().template get_length<'y'>());
+	REQUIRE(x_size == matrix2.template get_length<'x'>());
+	REQUIRE(y_size == matrix2.template get_length<'y'>());
+	REQUIRE(x_size == matrix3.template get_length<'x'>());
+	REQUIRE(y_size == matrix3.template get_length<'y'>());
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
@@ -98,8 +98,8 @@ void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2
 template<typename Structure>
 void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 {
-	int x_size = matrix1.structure().template get_length<'x'>();
-	int y_size = matrix1.structure().template get_length<'y'>();
+	int x_size = matrix1.template get_length<'x'>();
+	int y_size = matrix1.template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
@@ -109,12 +109,12 @@ void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 template<typename Structure1, typename Structure2, typename Structure3>
 void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
 {
-	int x1_size = matrix1.structure().template get_length<'x'>();
-	int y1_size = matrix1.structure().template get_length<'y'>();
-	int x2_size = matrix2.structure().template get_length<'x'>();
-	int y2_size = matrix2.structure().template get_length<'y'>();
-	int x3_size = matrix3.structure().template get_length<'x'>();
-	int y3_size = matrix3.structure().template get_length<'y'>();
+	int x1_size = matrix1.template get_length<'x'>();
+	int y1_size = matrix1.template get_length<'y'>();
+	int x2_size = matrix2.template get_length<'x'>();
+	int y2_size = matrix2.template get_length<'y'>();
+	int x3_size = matrix3.template get_length<'x'>();
+	int y3_size = matrix3.template get_length<'y'>();
 
 	REQUIRE(x1_size == y2_size);
 	REQUIRE(y1_size == y3_size);
@@ -201,8 +201,8 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 template<typename Structure>
 matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 {
-	int x_size = matrix1.structure().template get_length<'x'>();
-	int y_size = matrix1.structure().template get_length<'y'>();
+	int x_size = matrix1.template get_length<'x'>();
+	int y_size = matrix1.template get_length<'y'>();
 
 	matrix m = get_clasic_matrix(x_size, y_size);
 
@@ -216,8 +216,8 @@ matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 template<typename Structure>
 void clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
 {
-	int x_size = matrix1.structure().template get_length<'x'>();
-	int y_size = matrix1.structure().template get_length<'y'>();
+	int x_size = matrix1.template get_length<'x'>();
+	int y_size = matrix1.template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
@@ -507,8 +507,8 @@ auto matrix_transpose(noarr::bag<Structure>& matrix)
 template<typename Structure1, typename targetLayout>
 auto matrix_clone(noarr::bag<Structure1>& matrix1)
 {
-	int x_size = matrix1.structure().template get_length<'x'>();
-	int y_size = matrix1.structure().template get_length<'y'>();
+	int x_size = matrix1.template get_length<'x'>();
+	int y_size = matrix1.template get_length<'y'>();
 	auto matrix2 = GetMatrix<targetLayout>(x_size, y_size);
 	matrix_copy(matrix1, matrix2);
 	return matrix2;
@@ -553,21 +553,21 @@ auto matrix_clone(noarr::bag<Structure>& matrix, MatrixDataLayout targetLayout)
 void histogram_template_test()
 {
 	auto image = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
-	CHECK(image.structure().get_size() == width * height * sizeof(int));
+	CHECK(image.get_size() == width * height * sizeof(int));
 
-	int y_size = image.structure().template get_length<'y'>();
+	int y_size = image.template get_length<'y'>();
 	CHECK(y_size == height);
 
 	auto histogram = noarr::bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
-	CHECK(histogram.structure().get_size() == pixel_range * sizeof(int));
+	CHECK(histogram.get_size() == pixel_range * sizeof(int));
 
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.structure().template get_length<'x'>();
+	int x_size = image.template get_length<'x'>();
 	REQUIRE(x_size == width);
 
-	y_size = image.structure().template get_length<'y'>();
+	y_size = image.template get_length<'y'>();
 	REQUIRE(y_size == height);
 
 	for (int i = 0; i < x_size; i++)
@@ -616,8 +616,8 @@ void histogram_template_test_clear()
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.structure().template get_length<'x'>();
-	int y_size = image.structure().template get_length<'y'>();
+	int x_size = image.template get_length<'x'>();
+	int y_size = image.template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 	{
