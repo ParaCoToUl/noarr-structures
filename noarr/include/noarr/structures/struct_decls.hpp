@@ -61,6 +61,7 @@ template<typename T, typename = void>
 struct sub_structures {
     explicit constexpr sub_structures() = default;
     explicit constexpr sub_structures(T) {}
+
     using value_type = std::tuple<>;
     static constexpr std::tuple<> value = std::tuple<>();
 };
@@ -80,6 +81,7 @@ template<typename T>
 struct sub_structures<T, std::enable_if_t<_sub_structures_is_static<T>::value>> {
     explicit constexpr sub_structures() = default;
     explicit constexpr sub_structures(T) {}
+
     using value_type = remove_cvref<decltype(T::sub_structures())>;
     static constexpr value_type value = T::sub_structures();
 };
@@ -88,6 +90,7 @@ template<typename T>
 struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, void_t<decltype(std::declval<T>().sub_structures())>>> {
     explicit constexpr sub_structures() = delete;
     explicit constexpr sub_structures(T t) : value(t.sub_structures()) {}
+
     using value_type = remove_cvref<decltype(std::declval<T>().sub_structures())>;
     value_type value;
 };
