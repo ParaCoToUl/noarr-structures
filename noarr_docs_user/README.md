@@ -17,7 +17,7 @@ Noarr framework distinguishes two types of mutidimensional data - uniform and ja
 
 **Jagged data** can be thought of as a vector of vectors, each having different size. This means the dimensions of such data need to be stored within the data itself, requiring the use of pointers and making processing of such data inefficient. Noarr supports this type of data only at the highest abstraction levels of your data model.
 
-**Uniform data** can be though of as a multidimensional cube of values. It's like a vector of same-sized vectors, but it also supports tuples and other structures. This lets us store the dimensions separately from the data, letting us freely change the order of specification of dimensions - completely separating the physical data layout from the data model.
+**Uniform data** can be though of as a multidimensional cube of values. It is like a vector of same-sized vectors, but it also supports tuples and other structures. This lets us store the dimensions separately from the data, letting us freely change the order of specification of dimensions - completely separating the physical data layout from the data model.
 
 
 <a name="data-modelling-in-noarr"></a>
@@ -25,7 +25,7 @@ Noarr framework distinguishes two types of mutidimensional data - uniform and ja
 
 *Noarr structures* was designed to support uniform data. Uniform data has the advantage of occupying one continuous stretch of memory. When working with it, you work with three objects:
 
-1. **Structure:** A small, tree-like object, that represents the structure of the data. It doesn't contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
+1. **Structure:** A small, tree-like object, that represents the structure of the data. It does not contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
 2. **Data:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *Structure* object.
 3. **Bag:** Wraper object, which combines *structure* and *data* together.
 
@@ -49,7 +49,7 @@ A *structure* object is immutable. The `|` operator (the pipe) is used to create
 
 > The pipe operator is the preferred way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label (in compile time).
 
-The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it doesn't care, where that dimension is inside the *structure*.
+The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it does not care, where that dimension is inside the *structure*.
 
 <a name="wrapper"></a>
 #### Wrapper
@@ -79,6 +79,12 @@ float& value_ref = bag.structure().template get_at<'i'>(bag.data(), 5);
 
 // now use the reference to access the value
 value_ref = 42f;
+```
+
+As discussed earlier, there is a good reason to separate *structure* and *data*. But in the case of *bag*, there is the following shortcut:
+
+```cpp
+bag.at<'i'>(5) = 42f;
 ```
 
 <a name="changing-data-layouts"></a>
