@@ -10,6 +10,56 @@
 
 namespace noarr {
 
+/* func families */
+/**
+ * @brief this family is for functions that map structures to another structures by performing transformations of certain substructures
+ * 
+ */
+
+struct transform_tag;
+/**
+ * @brief this family is for functions that retrieve a value from a structure
+ * 
+ */
+struct get_tag;
+
+/**
+ * @brief this family is for functions that map structures to another structures by performing a transformation of the topmost structure (opposing `transform_tag`)
+ * 
+ */
+struct top_tag;
+
+using default_trait = transform_tag;
+
+/**
+ * @brief retrieves a family tag from a function `F`
+ * 
+ * @tparam F: the function 
+ * @tparam typename 
+ */
+template<typename F, typename = void>
+struct func_trait {
+    using type = default_trait;
+};
+
+template<typename F>
+struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, transform_tag>::value>> {
+    using type = transform_tag;
+};
+
+template<typename F>
+struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, get_tag>::value>> {
+    using type = get_tag;
+};
+
+template<typename F>
+struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, top_tag>::value>> {
+    using type = top_tag;
+};
+
+template<typename F>
+using func_trait_t = typename func_trait<F>::type;
+
 /**
  * @brief returns whether the function `F` is applicable to the structure `S` according to its `::can_apply<S>::value` (defaults to true if not present)
  * 
@@ -44,6 +94,8 @@ struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
     static constexpr bool value = get_applicability<F, S>::value;
 };
 
+namespace helpers {
+
 /**
  * @brief applies the function `F` to the structure `S` or, if not possible, attempts to do so on its substructures recursively
  * 
@@ -65,8 +117,6 @@ struct fmapper;
 template<typename S, typename F, std::size_t Max = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = Max>
 struct construct_builder;
 
-namespace helpers {
-
 template<typename S, typename F, typename = void>
 struct fmapper_cond_helper {
     static constexpr bool value = false;
@@ -76,8 +126,6 @@ template<typename S, typename F>
 struct fmapper_cond_helper<S, F, void_t<decltype(construct_builder<S, F>::construct_build(std::declval<S>(), std::declval<F>()))>> {
     static constexpr bool value = true;
 };
-
-} // namespace helpers
 
 template<typename S, typename F, std::size_t Max, std::size_t I>
 struct construct_builder {
@@ -113,7 +161,7 @@ struct construct_builder<S, F, 0, 0> {
 };
 
 template<typename S, typename F>
-struct fmapper<S, F, std::enable_if_t<helpers::fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>>  {
+struct fmapper<S, F, std::enable_if_t<fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>>  {
     static constexpr decltype(auto) fmap(S s, F f) {
         return construct_builder<S, F>::construct_build(s, f);
     }
@@ -178,57 +226,6 @@ struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, 
     static constexpr void get(S, F) {}
 };
 
-
-/* func families */
-/**
- * @brief this family is for functions that map structures to another structures by performing transformations of certain substructures
- * 
- */
-
-struct transform_tag;
-/**
- * @brief this family is for functions that retrieve a value from a structure
- * 
- */
-struct get_tag;
-
-/**
- * @brief this family is for functions that map structures to another structures by performing a transformation of the topmost structure (opposing `transform_tag`)
- * 
- */
-struct top_tag;
-
-using default_trait = transform_tag;
-
-/**
- * @brief retrieves a family tag from a function `F`
- * 
- * @tparam F: the function 
- * @tparam typename 
- */
-template<typename F, typename = void>
-struct func_trait {
-    using type = default_trait;
-};
-
-template<typename F>
-struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, transform_tag>::value>> {
-    using type = transform_tag;
-};
-
-template<typename F>
-struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, get_tag>::value>> {
-    using type = get_tag;
-};
-
-template<typename F>
-struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, top_tag>::value>> {
-    using type = top_tag;
-};
-
-template<typename F>
-using func_trait_t = typename func_trait<F>::type;
-
 template<typename F, typename = void>
 struct pipe_decider;
 
@@ -254,6 +251,8 @@ struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::
     static constexpr decltype(auto) operate(S s, F f) { return f(s);  }
 };
 
+} // namespace helpers
+
 /**
  * @brief performs a `fmapper::fmap`, `getter::get` or a simple application of `F` to `S` according to `pipe_decider`
  * 
@@ -265,12 +264,11 @@ struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::
  */
 template<typename S, typename F>
 inline constexpr auto operator|(S s, F f) ->
-std::enable_if_t<is_structoid<std::enable_if_t<std::is_class<S>::value, S>>::value, decltype(pipe_decider<F>::template operate<S>(std::declval<S>(), std::declval<F>()))> {
-    return pipe_decider<F>::template operate<S>(s, f);
+std::enable_if_t<is_structoid<std::enable_if_t<std::is_class<S>::value, S>>::value, decltype(helpers::pipe_decider<F>::template operate<S>(std::declval<S>(), std::declval<F>()))> {
+    return helpers::pipe_decider<F>::template operate<S>(s, f);
 }
 
-template<typename S, typename... FS>
-inline constexpr decltype(auto) pipe(S s, FS... funcs);
+namespace helpers {
 
 template<typename S, typename... FS>
 struct piper;
@@ -289,6 +287,8 @@ struct piper<S, F> {
     }
 };
 
+} // namespace helpers
+
 /**
  * @brief performs a `fmapper::fmap`, `getter::get` or a simple application of `F` and subsequent `FS` to `S` according to `pipe_decider`
  * 
@@ -300,7 +300,7 @@ struct piper<S, F> {
  */
 template<typename S, typename... FS>
 inline constexpr decltype(auto) pipe(S s, FS... funcs) {
-    return piper<S, FS...>::pipe(s, funcs...);
+    return helpers::piper<S, FS...>::pipe(s, funcs...);
 }
 
 } // namespace noarr
