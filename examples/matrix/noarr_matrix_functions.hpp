@@ -56,9 +56,9 @@ void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
 		{
-			int& value1 = matrix1.structure().at<'x', 'y'>(i, j);
-			int& value2 = matrix2.structure().at<'x', 'y'>(i, j);
-			int& value3 = matrix3.structure().at<'x', 'y'>(i, j);
+			int& value1 = matrix1.at<'x', 'y'>(i, j);
+			int& value2 = matrix2.at<'x', 'y'>(i, j);
+			int& value3 = matrix3.at<'x', 'y'>(i, j);
 			value3 = value1 + value2;
 		}
 }
@@ -71,7 +71,7 @@ void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
-			matrix1.structure().at<'x', 'y'>(i, j) *= scalar;
+			matrix1.at<'x', 'y'>(i, j) *= scalar;
 }
 
 template<typename Structure1, typename Structure2, typename Structure3>
@@ -96,12 +96,12 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 
 			for (int k = 0; k < x1_size; k++)
 			{
-				int& value1 = matrix1.structure().at<'x', 'y'>(k, j);
-				int& value2 = matrix2.structure().at<'x', 'y'>(i, k);
+				int& value1 = matrix1.at<'x', 'y'>(k, j);
+				int& value2 = matrix2.at<'x', 'y'>(i, k);
 				sum += value1 * value2;
 			}
 
-			matrix3.structure().at<'x', 'y'>(i, j) = sum;
+			matrix3.at<'x', 'y'>(i, j) = sum;
 		}
 	}
 }
