@@ -38,8 +38,12 @@ struct is_array<T[N]> {
 template<class T, T... VS>
 struct integral_pack;
 
+namespace helpers {
+
 template<class T, T V, class Pack, typename = void>
-struct _integral_pack_contains;
+struct integral_pack_contains_impl;
+
+}
 
 /**
  * @brief returns whether an integral pack contains a certain value
@@ -48,7 +52,7 @@ struct _integral_pack_contains;
  * @tparam V: the needle value
  */
 template<class Pack, typename Pack::value_type V>
-using integral_pack_contains = _integral_pack_contains<typename Pack::value_type, V, Pack>;
+using integral_pack_contains = helpers::integral_pack_contains_impl<typename Pack::value_type, V, Pack>;
 
 template<class T, T... VS>
 struct integral_pack {
@@ -61,36 +65,40 @@ struct integral_pack {
     };
 };
 
+namespace helpers {
+
 template<class... Packs>
-struct _integral_pack_concat;
+struct integral_pack_concat_impl;
 
 template<class T, T... vs1, T... vs2, class...Packs>
-struct _integral_pack_concat<integral_pack<T, vs1...>, integral_pack<T, vs2...>, Packs...> {
-    using type = typename _integral_pack_concat<integral_pack<T, vs1..., vs2...>, Packs...>::type;
+struct integral_pack_concat_impl<integral_pack<T, vs1...>, integral_pack<T, vs2...>, Packs...> {
+    using type = typename integral_pack_concat_impl<integral_pack<T, vs1..., vs2...>, Packs...>::type;
 };
 
 template<class T, T... vs1>
-struct _integral_pack_concat<integral_pack<T, vs1...>> {
+struct integral_pack_concat_impl<integral_pack<T, vs1...>> {
     using type = integral_pack<T, vs1...>;
 };
 
 template<class Sep, class... Packs>
-struct _integral_pack_concat_sep;
+struct integral_pack_concat_sep_impl;
 
 template<class T, T... vs1, T... vs2, T... sep, class...Packs>
-struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1...>, integral_pack<T, vs2...>, Packs...> {
-    using type = typename _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1..., vs2...>, Packs...>::type;
+struct integral_pack_concat_sep_impl<integral_pack<T, sep...>, integral_pack<T, vs1...>, integral_pack<T, vs2...>, Packs...> {
+    using type = typename integral_pack_concat_sep_impl<integral_pack<T, sep...>, integral_pack<T, vs1..., vs2...>, Packs...>::type;
 };
 
 template<class T, T v1, T v2, T... vs1, T... vs2, T... sep, class...Packs>
-struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, v1, vs1...>, integral_pack<T, v2, vs2...>, Packs...> {
-    using type = typename _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, v1, vs1..., sep..., v2, vs2...>, Packs...>::type;
+struct integral_pack_concat_sep_impl<integral_pack<T, sep...>, integral_pack<T, v1, vs1...>, integral_pack<T, v2, vs2...>, Packs...> {
+    using type = typename integral_pack_concat_sep_impl<integral_pack<T, sep...>, integral_pack<T, v1, vs1..., sep..., v2, vs2...>, Packs...>::type;
 };
 
 template<class T, T... vs1, T... sep>
-struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1...>> {
+struct integral_pack_concat_sep_impl<integral_pack<T, sep...>, integral_pack<T, vs1...>> {
     using type = integral_pack<T, vs1...>;
 };
+
+}
 
 /**
  * @brief concatenates multiple integral packs
@@ -98,25 +106,29 @@ struct _integral_pack_concat_sep<integral_pack<T, sep...>, integral_pack<T, vs1.
  * @tparam Packs 
  */
 template<class... Packs>
-using integral_pack_concat = typename _integral_pack_concat<Packs...>::type;
+using integral_pack_concat = typename helpers::integral_pack_concat_impl<Packs...>::type;
 
 template<class... Packs>
-using integral_pack_concat_sep = typename _integral_pack_concat_sep<Packs...>::type;
+using integral_pack_concat_sep = typename helpers::integral_pack_concat_sep_impl<Packs...>::type;
+
+namespace helpers {
 
 template<class T, T V, T... VS>
-struct _integral_pack_contains<T, V, integral_pack<T, V, VS...>> {
+struct integral_pack_contains_impl<T, V, integral_pack<T, V, VS...>> {
     static constexpr bool value = true;
 };
 
 template<class T, T V, T v, T... VS>
-struct _integral_pack_contains<T, V, integral_pack<T, v, VS...>, std::enable_if_t<(V != v)>> {
-    static constexpr bool value = _integral_pack_contains<T, V, integral_pack<T, VS...>>::value;
+struct integral_pack_contains_impl<T, V, integral_pack<T, v, VS...>, std::enable_if_t<(V != v)>> {
+    static constexpr bool value = integral_pack_contains_impl<T, V, integral_pack<T, VS...>>::value;
 };
 
 template<class T, T V>
-struct _integral_pack_contains<T, V, integral_pack<T>> {
+struct integral_pack_contains_impl<T, V, integral_pack<T>> {
     static constexpr bool value = false;
 };
+
+}
 
 /**
  * @brief an alias for integral_pack<char, ...>
@@ -136,20 +148,24 @@ struct template_false {
     static constexpr bool value = false;
 };
 
+namespace helpers {
+
 template<template<typename> class Function, typename Tuple, typename = void>
-struct _tuple_forall {
+struct tuple_forall_impl {
     static constexpr bool value = false;
 };
 
 template<template<typename> class Function, typename T, typename... TS>
-struct _tuple_forall<Function, std::tuple<T, TS...>, std::enable_if_t<Function<T>::value>> {
-    static constexpr bool value = _tuple_forall<Function, std::tuple<TS...>>::value;
+struct tuple_forall_impl<Function, std::tuple<T, TS...>, std::enable_if_t<Function<T>::value>> {
+    static constexpr bool value = tuple_forall_impl<Function, std::tuple<TS...>>::value;
 };
 
 template<template<typename> class Function>
-struct _tuple_forall<Function, std::tuple<>> {
+struct tuple_forall_impl<Function, std::tuple<>> {
     static constexpr bool value = true;
 };
+
+}
 
 /**
  * @brief checks whether a type function applied to all elements of a tuple contains always true `::value`
@@ -158,7 +174,7 @@ struct _tuple_forall<Function, std::tuple<>> {
  * @tparam Tuple: the tuple containing the set of inputs for the function
  */
 template<template<typename> class Function, typename Tuple>
-using tuple_forall = _tuple_forall<Function, Tuple>;
+using tuple_forall = helpers::tuple_forall_impl<Function, Tuple>;
 
 } // namespace noarr
 

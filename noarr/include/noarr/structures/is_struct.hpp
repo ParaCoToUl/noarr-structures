@@ -8,80 +8,88 @@
 
 namespace noarr {
 
+namespace helpers {
+
 template<typename T, typename = void>
-struct _is_struct {
+struct is_struct_impl {
     using type = std::false_type;
 };
 
 template<typename T, typename = void>
-struct _is_structoid {
+struct is_structoid_impl {
     using type = std::false_type;
 };
 
 template<typename T, typename = void>
-struct _has_construct {
-    using type = std::false_type;
-};
-
-template<typename T>
-using has_construct = typename _has_construct<T>::type;
-
-template<typename T, typename = void>
-struct _has_get_t {
-    using type = std::false_type;
-};
-
-template<typename T>
-using has_get_t = typename _has_get_t<T>::type;
-
-template<typename T, typename = void>
-struct _has_get_t1 {
+struct has_construct_impl {
     using type = std::false_type;
 };
 
 template<typename T, typename = void>
-struct _has_get_t2 {
+struct has_get_t_impl {
     using type = std::false_type;
 };
 
 template<typename T, typename = void>
-struct _has_size;
+struct has_get_t1_impl {
+    using type = std::false_type;
+};
+
+template<typename T, typename = void>
+struct has_get_t2_impl {
+    using type = std::false_type;
+};
+
+template<typename T, typename = void>
+struct has_size_impl;
+
+} // namespace helpers
 
 template<typename T>
-using is_struct = typename _is_struct<T>::type;
+using has_construct = typename helpers::has_construct_impl<T>::type;
 
 template<typename T>
-using is_structoid = typename _is_structoid<T>::type;
+using has_get_t = typename helpers::has_get_t_impl<T>::type;
 
 template<typename T>
-struct _has_construct<T, void_t<decltype(construct(std::declval<T>(), std::declval<typename sub_structures<T>::value_type>()))>> {
+using is_struct = typename helpers::is_struct_impl<T>::type;
+
+template<typename T>
+using is_structoid = typename helpers::is_structoid_impl<T>::type;
+
+namespace helpers {
+
+template<typename T>
+struct has_construct_impl<T, void_t<decltype(construct(std::declval<T>(), std::declval<typename sub_structures<T>::value_type>()))>> {
     using type = std::true_type;
 };
 
 template<typename T>
-struct _has_get_t1<T, void_t<typename T::template get_t<>>> {
+struct has_get_t1_impl<T, void_t<typename T::template get_t<>>> {
     using type = std::true_type;
 };
 
 template<typename T>
-struct _has_get_t2<T, void_t<typename T::template get_t<std::integral_constant<std::size_t, 0>>>> {
+struct has_get_t2_impl<T, void_t<typename T::template get_t<std::integral_constant<std::size_t, 0>>>> {
     using type = std::true_type;
 };
 
 template<typename T>
-struct _has_get_t<T, std::enable_if_t<_has_get_t1<T>::type::value || _has_get_t2<T>::type::value>> {
+struct has_get_t_impl<T, std::enable_if_t<has_get_t1_impl<T>::type::value || has_get_t2_impl<T>::type::value>> {
     using type = std::true_type;
 };
 
 template<typename T>
-struct _is_structoid<T, std::enable_if_t<has_construct<T>::value>> {
+struct is_structoid_impl<T, std::enable_if_t<has_construct<T>::value>> {
     using type = std::true_type;
 };
 
 template<typename T>
-struct _is_struct<T, std::enable_if_t<is_structoid<T>::value && has_get_t<T>::value>> {
+struct is_struct_impl<T, std::enable_if_t<is_structoid<T>::value && has_get_t<T>::value>> {
     using type = std::true_type;
 };
+
+} // namespace helpers
 
 } // namespace noarr
 

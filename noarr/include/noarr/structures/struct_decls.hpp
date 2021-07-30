@@ -9,7 +9,6 @@ namespace noarr {
 
 // TODO: add a way to get Params
 // TODO: split type_param into struct_param and scalar_param (or regular type param, idk)
-// TODO: make sub_structures a regular function, use in places where .sub_structures is used
 
 /**
  * @brief a struct that describes a structure
@@ -66,19 +65,23 @@ struct sub_structures {
     static constexpr std::tuple<> value = std::tuple<>();
 };
 
+namespace helpers {
+
 template<typename T, typename = void>
-struct _sub_structures_is_static {
+struct sub_structures_are_static {
     static constexpr bool value = false;
 };
 
 template<typename T>
-struct _sub_structures_is_static<T, void_t<decltype(T::sub_structures())>> {
+struct sub_structures_are_static<T, void_t<decltype(T::sub_structures())>> {
     static constexpr bool value = true;
 };
 
+}
+
 // TODO: check if tuple
 template<typename T>
-struct sub_structures<T, std::enable_if_t<_sub_structures_is_static<T>::value>> {
+struct sub_structures<T, std::enable_if_t<helpers::sub_structures_are_static<T>::value>> {
     explicit constexpr sub_structures() = default;
     explicit constexpr sub_structures(T) {}
 
@@ -87,7 +90,7 @@ struct sub_structures<T, std::enable_if_t<_sub_structures_is_static<T>::value>> 
 };
 
 template<typename T>
-struct sub_structures<T, std::enable_if_t<!_sub_structures_is_static<T>::value, void_t<decltype(std::declval<T>().sub_structures())>>> {
+struct sub_structures<T, std::enable_if_t<!helpers::sub_structures_are_static<T>::value, void_t<decltype(std::declval<T>().sub_structures())>>> {
     explicit constexpr sub_structures() = delete;
     explicit constexpr sub_structures(T t) : value(t.sub_structures()) {}
 
@@ -107,19 +110,21 @@ template<typename T>
 using get_dims = typename T::description::dims;
 // TODO: implement the recursive version using sub_structures
 
+namespace helpers {
+
 template<typename T, std::size_t I = std::tuple_size<typename sub_structures<T>::value_type>::value>
-struct _construct;
+struct construct_impl;
 
 template<typename T, std::size_t I>
-struct _construct {
+struct construct_impl {
     template<std::size_t... IS, typename... TS>
     static constexpr auto construct(T t, std::tuple<TS...> sub_structures){
-        return _construct<T, I - 1>::template construct<I - 1, IS...>(t, sub_structures);
+        return construct_impl<T, I - 1>::template construct<I - 1, IS...>(t, sub_structures);
     }
 };
 
 template<typename T>
-struct _construct<T, 0> {
+struct construct_impl<T, 0> {
     template<std::size_t... IS, typename... TS>
     static constexpr auto construct(T t, std::tuple<TS...> sub_structures) {
         return t.construct(std::get<IS>(sub_structures)...);
@@ -130,6 +135,8 @@ struct _construct<T, 0> {
         return t.construct();
     }
 };
+
+}
 
 /**
  * @brief constructs a structure using a prototype `t` and substructures `ts`
@@ -150,7 +157,7 @@ inline constexpr auto construct(T t, TS... ts) {
  */
 template<typename T, typename... TS>
 inline constexpr auto construct(T t, std::tuple<TS...> ts) {
-    return _construct<T>::construct(t, ts);
+    return helpers::construct_impl<T>::construct(t, ts);
 }
 
 } // namespace noarr

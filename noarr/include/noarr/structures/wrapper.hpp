@@ -15,10 +15,14 @@ namespace noarr {
 template<typename Structure>
 class wrapper;
 
+namespace helpers {
+
 template<typename T>
-struct _is_cube<wrapper<T>> {
+struct is_cube_impl<wrapper<T>> {
     using type = is_cube<T>;
 };
+
+}
 
 template<typename Structure>
 class wrapper : private contain<Structure> {
