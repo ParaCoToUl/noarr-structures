@@ -19,15 +19,7 @@ Noarr structures is a header-only library, so only include path need to be added
 target_include_directories(<my-app> PUBLIC <cloned-repo-path>/include)
 ```
 
-The library requires C++ 17 and the threading library.
-
-```cmake
-# tell CMake to use the threading library
-find_package(Threads REQUIRED)
-
-# and then link it to your app
-target_link_libraries(<my-app> PRIVATE Threads::Threads)
-```
+The library requires C++ 17.
 
 
 ## Running tests and examples
