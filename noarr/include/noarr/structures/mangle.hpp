@@ -9,8 +9,15 @@
 
 namespace noarr {
 
+namespace helpers {
+
 template<typename T, typename Pre = char_pack<>, typename Post = char_pack<>>
-struct _mangle;
+struct mangle_impl;
+
+template<typename Dims>
+struct transform_dims_impl;
+
+}
 
 /**
  * @brief Returns a textual representation of the type of a structure using `char_pack` 
@@ -18,44 +25,38 @@ struct _mangle;
  * @tparam T: the structure
  */
 template<typename T>
-using mangle = typename _mangle<T>::type;
+using mangle = typename helpers::mangle_impl<T>::type;
 
-/**
- * @brief returns a textual representation of a scalar type using `char_pack`
- * 
- * @tparam T: the scalar type
- */
+template<typename Dims>
+using transform_dims = typename helpers::transform_dims_impl<Dims>::type;
+
+namespace helpers {
+
 template<typename T>
 struct scalar_name<T, void_t<get_struct_desc_t<T>>> {
     using type = mangle<T>;
 };
 
 template<typename T, typename Pre, typename Post>
-struct _mangle {
-    using type = typename _mangle<get_struct_desc_t<T>, Pre, Post>::type;
+struct mangle_impl {
+    using type = typename mangle_impl<get_struct_desc_t<T>, Pre, Post>::type;
 };
 
 template<typename T, typename Pre, typename Post>
-struct _mangle_scalar;
-
-template<typename Dims>
-struct _transform_dims;
-
-template<typename Dims>
-using transform_dims = typename _transform_dims<Dims>::type;
+struct mangle_scalar;
 
 template<char Dim>
-struct _transform_dims<dims_impl<Dim>> {
+struct transform_dims_impl<dims_impl<Dim>> {
     using type = char_pack<'\'', Dim, '\''>;
 };
 
 template<>
-struct _transform_dims<dims_impl<>> {
+struct transform_dims_impl<dims_impl<>> {
     using type = dims_impl<>;
 };
 
 template<typename Name, typename Dims, typename ADims, typename... Params, typename Pre, typename Post>
-struct _mangle<struct_description<Name, Dims, ADims, Params...>, Pre, Post> {
+struct mangle_impl<struct_description<Name, Dims, ADims, Params...>, Pre, Post> {
     using type = integral_pack_concat<
         Pre,
         Name,
@@ -66,29 +67,31 @@ struct _mangle<struct_description<Name, Dims, ADims, Params...>, Pre, Post> {
 };
 
 template<typename Name, typename Param, typename Pre, typename Post>
-struct _mangle_scalar<struct_description<Name, dims_impl<>, dims_impl<>, type_param<Param>>, Pre, Post> {
+struct mangle_scalar<struct_description<Name, dims_impl<>, dims_impl<>, type_param<Param>>, Pre, Post> {
     using type = integral_pack_concat<Pre, Name, char_pack<'<'>, scalar_name_t<Param>, char_pack<'>'>, Post>;
 };
 
 template<typename T, typename Pre, typename Post>
-struct _mangle<type_param<T>, Pre, Post> {
+struct mangle_impl<type_param<T>, Pre, Post> {
     using type = integral_pack_concat<Pre, mangle<T>, Post>;
 };
 
 template<typename T, T V, typename Pre, typename Post>
-struct _mangle<value_param<T, V>, Pre, Post> {
+struct mangle_impl<value_param<T, V>, Pre, Post> {
     using type = integral_pack_concat<Pre, char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>, Post>;
 };
 
 template<typename T, typename Pre, typename Post>
-struct _mangle<scalar<T>, Pre, Post> {
-    using type = typename _mangle_scalar<get_struct_desc_t<scalar<T>>, Pre, Post>::type;
+struct mangle_impl<scalar<T>, Pre, Post> {
+    using type = typename mangle_scalar<get_struct_desc_t<scalar<T>>, Pre, Post>::type;
 };
 
 template<typename Pre, typename Post>
-struct _mangle<std::tuple<>, Pre, Post> {
+struct mangle_impl<std::tuple<>, Pre, Post> {
     using type = integral_pack_concat<Pre, Post>;
 };
+
+} // namespace helpers
 
 } // namespace noarr
 

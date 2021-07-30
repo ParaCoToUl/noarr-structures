@@ -7,18 +7,22 @@
 
 namespace noarr {
 
+namespace helpers {
+
 template<typename T, typename... KS>
-struct _scalar_get_t;
+struct scalar_get_t;
 
 template<typename T>
-struct _scalar_get_t<T> {
+struct scalar_get_t<T> {
     using type = T;
 };
 
 template<typename T>
-struct _scalar_get_t<T, void> {
+struct scalar_get_t<T, void> {
     using type = T;
 };
+
+}
 
 /**
  * @brief The ground structure for stored data
@@ -35,7 +39,7 @@ struct scalar {
         type_param<T>>;
 
     template<typename... KS>
-    using get_t = typename _scalar_get_t<T, KS...>::type;
+    using get_t = typename helpers::scalar_get_t<T, KS...>::type;
 
     constexpr scalar() = default;
     static constexpr auto construct() {

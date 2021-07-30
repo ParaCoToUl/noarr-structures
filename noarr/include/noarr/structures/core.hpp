@@ -54,11 +54,6 @@ struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
 template<typename S, typename F, typename = void>
 struct fmapper;
 
-template<typename S, typename F, typename = void>
-struct _fmapper_cond_helper {
-    static constexpr bool value = false;
-};
-
 /**
  * @brief A function used in `fmapper` which reconstructs the *unmapped* structure `S` (with mapped substructures) according to the mapping described by the function `F`
  * 
@@ -69,6 +64,20 @@ struct _fmapper_cond_helper {
  */
 template<typename S, typename F, std::size_t Max = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = Max>
 struct construct_builder;
+
+namespace helpers {
+
+template<typename S, typename F, typename = void>
+struct fmapper_cond_helper {
+    static constexpr bool value = false;
+};
+
+template<typename S, typename F>
+struct fmapper_cond_helper<S, F, void_t<decltype(construct_builder<S, F>::construct_build(std::declval<S>(), std::declval<F>()))>> {
+    static constexpr bool value = true;
+};
+
+} // namespace helpers
 
 template<typename S, typename F, std::size_t Max, std::size_t I>
 struct construct_builder {
@@ -104,12 +113,7 @@ struct construct_builder<S, F, 0, 0> {
 };
 
 template<typename S, typename F>
-struct _fmapper_cond_helper<S, F, void_t<decltype(construct_builder<S, F>::construct_build(std::declval<S>(), std::declval<F>()))>> {
-    static constexpr bool value = true;
-};
-
-template<typename S, typename F>
-struct fmapper<S, F, std::enable_if_t<_fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>>  {
+struct fmapper<S, F, std::enable_if_t<helpers::fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>>  {
     static constexpr decltype(auto) fmap(S s, F f) {
         return construct_builder<S, F>::construct_build(s, f);
     }

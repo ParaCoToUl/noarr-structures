@@ -6,6 +6,13 @@
 
 namespace noarr {
 
+namespace helpers {
+
+/**
+ * @brief returns a textual representation of a scalar type using `char_pack`
+ * 
+ * @tparam T: the scalar type
+ */
 template<typename T, typename = void>
 struct scalar_name;
 
@@ -32,6 +39,8 @@ template<typename T>
 struct scalar_name<T, std::enable_if_t<std::is_floating_point<T>::value>> {
     using type = integral_pack_concat<char_pack<'f'>, mangle_value<int, 8 * sizeof(T)>>;
 };
+
+} // namespace helpers
 
 } // namespace noarr
 
