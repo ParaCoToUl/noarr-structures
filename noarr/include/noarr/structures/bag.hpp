@@ -23,10 +23,20 @@ public:
 		data_ = std::make_unique<char[]>(structure().get_size());
 	}
 
+	/**
+	 * @brief return the wrapped structure which describes the `data` blob
+	 */
 	constexpr const noarr::wrapper<Structure>& structure() const noexcept { return structure_; }
 
+	/**
+	 * @brief returns the underlying data blob
+	 */
 	constexpr char* data() const noexcept { return data_.get(); }
 
+	/**
+	 * @brief sets the `data` to zeros
+	 * 
+	 */
 	void clear() {
 		auto size_ = structure().get_size();
 
@@ -34,16 +44,33 @@ public:
 			data_[i] = 0;
 	}
 
+	/**
+	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
+	 * 
+	 * @tparam Dims: the dimension names
+	 * @param ts: the dimension values
+	 */
 	template<char... Dims, typename... Ts>
 	constexpr decltype(auto) at(Ts... ts) const {
 		return structure().template get_at<Dims...>(data(), ts...);
 	}
 
+	/**
+	 * @brief returns an offset of a value in `data` by fixing dimensions in the `structure`
+	 * 
+	 * @tparam Dims : the dimension names
+	 * @param ts: the dimension values
+	 */
     template<char... Dims, typename... Ts>
     constexpr auto offset(Ts... ts) const {
         return structure().template offset<Dims...>(ts...);
     }
 
+	/**
+	 * @brief gets the length (number of indices) o a dimension in the `structure`
+	 * 
+	 * @tparam Dim: the dimension name
+	 */
     template<char Dim>
     constexpr auto get_length() const {
         return structure().template get_length<Dim>();

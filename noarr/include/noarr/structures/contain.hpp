@@ -158,7 +158,7 @@ private:
 template<>
 struct contain_impl<void> {};
 
-}
+} // namespace helpers
 
 /**
  * @brief A base class that contains the fields given as template arguments. It is similar to a tuple but it is a standard layout.
