@@ -69,7 +69,7 @@ matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			m.at(i, j) = matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j);
+			m.at(i, j) = matrix1.at<'x', 'y'>(i, j);
 
 	return m;
 }
@@ -82,7 +82,7 @@ void clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			matrix1.structure().template get_at<'x', 'y'>(matrix1.data(), i, j) = m1.at(i, j);
+			matrix1.at<'x', 'y'>(i, j) = m1.at(i, j);
 }
 
 void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
