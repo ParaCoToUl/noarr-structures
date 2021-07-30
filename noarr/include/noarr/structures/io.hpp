@@ -31,7 +31,7 @@ struct print_struct_impl<char_pack<Name...>> {
  */
 template<typename T>
 inline constexpr std::ostream &print_struct(std::ostream &out, T) {
-    return print_struct_impl<mangle<T>>::print(out);
+    return helpers::print_struct_impl<mangle<T>>::print(out);
 }
 
 } // namespace noarr
