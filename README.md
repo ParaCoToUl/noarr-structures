@@ -45,8 +45,3 @@ cmake --build .
 # (this step differs by platform, this example is for linux)
 ./matrix || ./test-runner
 ```
-
-
-## TODO
-
-- `[ ]` ?
