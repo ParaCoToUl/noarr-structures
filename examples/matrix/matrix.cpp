@@ -28,8 +28,10 @@ struct matrix
 		{
 			for (int j = 0; j < y; j++)
 				std::cout << at(i, j) << " ";
+
 			std::cout << std::endl;
 		}
+
 		std::cout << std::endl;
 	}
 };
@@ -38,6 +40,7 @@ matrix get_clasic_matrix(int x, int y)
 {
 	const int length = x * y;
 	std::vector<int> ary;
+
 	for (int i = 0; i < length; i++)
 		ary.push_back(rand() % 10);
 
@@ -48,10 +51,12 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 {
 	if (m1.x != m2.x)
 		return false;
+
 	if (m1.y != m2.y)
 		return false;
 
 	const int length = m1.x * m1.y;
+
 	for (int i = 0; i < length; i++)
 		if (m1.ary[i] != m2.ary[i])
 			return false;
@@ -126,6 +131,7 @@ void matrix_demo(int size)
 
 	std::cout << "Matrix 1:" << std::endl;
 	m1.print();
+
 	std::cout << "Matrix 2:" << std::endl;
 	m2.print();
 
@@ -143,6 +149,7 @@ void matrix_demo(int size)
 
 	std::cout << "Classic multiplication:" << std::endl;
 	m3.print();
+
 	std::cout << "Noarr multiplication:" << std::endl;
 	m4.print();
 
@@ -158,14 +165,20 @@ int main()
 		std::cout << "2 - columns" << std::endl;
 		std::cout << "3 - zcurve" << std::endl;
 		std::cout << "4 - exit programm" << std::endl;
+
 		int layout;
+
 		std::cin >> layout;
+
 		if (layout == 4)
 			return 0;
 
 		std::cout << "Please select the size of the matrix (for simplicity, only square matrices are supported):" << std::endl;
+
 		int size;
+
 		std::cin >> size;
+
 		if (size < 1)
 			return -1;
 
