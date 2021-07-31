@@ -11,12 +11,13 @@
 namespace noarr {
 
 /* func families */
+
 /**
  * @brief this family is for functions that map structures to another structures by performing transformations of certain substructures
  * 
  */
-
 struct transform_tag;
+
 /**
  * @brief this family is for functions that retrieve a value from a structure
  * 
