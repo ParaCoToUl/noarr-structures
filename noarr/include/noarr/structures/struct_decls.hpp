@@ -101,11 +101,16 @@ struct sub_structures<T, std::enable_if_t<!helpers::sub_structures_are_static<T>
 /**
  * @brief The type that holds all the dimensions of a structure
  * 
- * @tparam Dims the dimensions
+ * @tparam Dims: the dimensions
  */
 template<char... Dims>
 using dims_impl = char_pack<Dims...>;
 
+/**
+ * @brief returns the dimensions introduced by the structure
+ * 
+ * @tparam T: the structure
+ */
 template<typename T>
 using get_dims = typename T::description::dims;
 // TODO: implement the recursive version using sub_structures

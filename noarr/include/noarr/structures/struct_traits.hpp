@@ -76,6 +76,11 @@ using is_static_dimension = std::conditional_t<helpers::has_static_offset_impl<T
 template<typename T>
 using is_dynamic_dimension = std::conditional_t<helpers::has_dynamic_offset_impl<T>::value, typename helpers::is_dynamic_dimension_impl<T>::type, std::false_type>;
 
+/**
+ * @brief returns whether the structure is a point (a structure with no dimensions, or with all dimensions being fixed)
+ * 
+ * @tparam T: the structure
+ */
 template<typename T>
 using is_point = typename helpers::is_point_impl<remove_cvref<T>>::type;
 
@@ -123,18 +128,6 @@ struct is_scalar_impl {
     using type = std::false_type;
 };
 
-} // namespace helpers
-
-/**
- * @brief returns whether a structure is a `scalar<...>`
- * 
- * @tparam T: the structure
- */
-template<typename T>
-using is_scalar = typename helpers::is_scalar_impl<T>::type;
-
-namespace helpers {
-
 template<typename T>
 struct is_scalar_impl<scalar<T>> {
     using type = std::true_type;
@@ -145,6 +138,19 @@ struct scalar_t_impl;
 
 } // namespace helpers
 
+/**
+ * @brief returns whether a structure is a `scalar<...>`
+ * 
+ * @tparam T: the structure
+ */
+template<typename T>
+using is_scalar = typename helpers::is_scalar_impl<T>::type;
+
+/**
+ * @brief returns the type of the value described by a `scalar<...>`
+ * 
+ * @tparam T: the `scalar<...>`
+ */
 template<typename T>
 using scalar_t = typename helpers::scalar_t_impl<T>::type;
 

@@ -45,15 +45,35 @@ struct has_size_impl;
 
 } // namespace helpers
 
+/**
+ * @brief returns whether the type `T` has a suitable `construct` method
+ * 
+ * @tparam T: the input type
+ */
 template<typename T>
 using has_construct = typename helpers::has_construct_impl<T>::type;
 
+/**
+ * @brief returns whether the type `T` has a `get_t` member typedef
+ * 
+ * @tparam T: the input type
+ */
 template<typename T>
 using has_get_t = typename helpers::has_get_t_impl<T>::type;
 
+/**
+ * @brief returns whether the type `T` meets the criteria for structures
+ * 
+ * @tparam T: the input type
+ */
 template<typename T>
 using is_struct = typename helpers::is_struct_impl<T>::type;
 
+/**
+ * @brief returns whether the type `T` meets the criteria for structoids
+ * 
+ * @tparam T: the input type
+ */
 template<typename T>
 using is_structoid = typename helpers::is_structoid_impl<T>::type;
 

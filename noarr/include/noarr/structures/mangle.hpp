@@ -27,6 +27,11 @@ struct transform_dims_impl;
 template<typename T>
 using mangle = typename helpers::mangle_impl<T>::type;
 
+/**
+ * @brief encloses dimensions in single quotes
+ * 
+ * @tparam Dims: the dimensions to be transformed
+ */
 template<typename Dims>
 using transform_dims = typename helpers::transform_dims_impl<Dims>::type;
 

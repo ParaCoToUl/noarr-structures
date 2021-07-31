@@ -397,6 +397,9 @@ struct offset_impl {
 
 }
 
+/**
+ * @brief returns the offset of the value described by the structure
+ */
 inline constexpr auto offset() {
     return helpers::offset_impl();
 }
@@ -415,7 +418,6 @@ inline constexpr auto offset(Ts... ts) {
 
 /**
  * @brief returns the size (in bytes) of the structure
- * 
  */
 struct get_size {
     using func_family = top_tag;
