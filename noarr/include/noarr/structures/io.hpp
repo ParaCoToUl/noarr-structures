@@ -15,10 +15,10 @@ struct print_struct_impl;
 
 template<char... Name>
 struct print_struct_impl<char_pack<Name...>> {
-    static constexpr std::ostream &print(std::ostream &out) {
-        constexpr const char name[] = {Name..., '\0'};
-        return out << name;
-    }
+	static constexpr std::ostream &print(std::ostream &out) {
+		constexpr const char name[] = {Name..., '\0'};
+		return out << name;
+	}
 };
 
 } // namespace helpers
@@ -31,7 +31,7 @@ struct print_struct_impl<char_pack<Name...>> {
  */
 template<typename T>
 inline constexpr std::ostream &print_struct(std::ostream &out, T) {
-    return helpers::print_struct_impl<mangle<T>>::print(out);
+	return helpers::print_struct_impl<mangle<T>>::print(out);
 }
 
 } // namespace noarr

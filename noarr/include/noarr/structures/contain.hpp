@@ -24,135 +24,135 @@ struct contain_impl;
  */
 template<typename T, std::size_t I>
 struct contain_get {
-    static constexpr decltype(auto) get(const T &t) {
-        return t.template _get_next<I>();
-    }
+	static constexpr decltype(auto) get(const T &t) {
+		return t.template _get_next<I>();
+	}
 };
 
 template<typename T>
 struct contain_get<T, 0> {
-    static constexpr decltype(auto) get(const T &t) {
-        return t._get();
-    }
+	static constexpr decltype(auto) get(const T &t) {
+		return t._get();
+	}
 };
 
 template<typename T, typename... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
-    template<typename, std::size_t>
-    friend struct contain_get;
+	template<typename, std::size_t>
+	friend struct contain_get;
 
-    T t;
-    contain_impl<void, TS...> ts;
+	T t;
+	contain_impl<void, TS...> ts;
 
-    constexpr contain_impl() = default;
-    explicit constexpr contain_impl(T t, TS... ts) : t(t), ts(ts...) {}
+	constexpr contain_impl() = default;
+	explicit constexpr contain_impl(T t, TS... ts) : t(t), ts(ts...) {}
 
-    template<std::size_t I>
-    constexpr decltype(auto) get() const {
-        return contain_get<contain_impl, I>::get(*this);
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) get() const {
+		return contain_get<contain_impl, I>::get(*this);
+	}
 
 private:
-    template<std::size_t I>
-    constexpr decltype(auto) _get_next() const {
-        return ts.template get<I - 1>();
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) _get_next() const {
+		return ts.template get<I - 1>();
+	}
 
-    constexpr auto _get() const {
-        return t;
-    }
+	constexpr auto _get() const {
+		return t;
+	}
 };
 
 template<typename T, typename... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
-    template<typename, std::size_t>
-    friend struct contain_get;
+	template<typename, std::size_t>
+	friend struct contain_get;
 
-    T t;
+	T t;
 
-    constexpr contain_impl() = default;
-    explicit constexpr contain_impl(T t) : t(t) {}
-    explicit constexpr contain_impl(T t, TS...) : t(t) {}
+	constexpr contain_impl() = default;
+	explicit constexpr contain_impl(T t) : t(t) {}
+	explicit constexpr contain_impl(T t, TS...) : t(t) {}
 
-    template<std::size_t I>
-    constexpr decltype(auto) get() const {
-        return contain_get<contain_impl, I>::get(*this);
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) get() const {
+		return contain_get<contain_impl, I>::get(*this);
+	}
 
 private:
-    template<std::size_t I>
-    constexpr decltype(auto) _get_next() const {
-        return contain_impl<void, TS...>::template get<I - 1>();
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) _get_next() const {
+		return contain_impl<void, TS...>::template get<I - 1>();
+	}
 
-    constexpr auto _get() const {
-        return t;
-    }
+	constexpr auto _get() const {
+		return t;
+	}
 };
 
 template<typename T, typename... TS>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
-    template<typename, std::size_t>
-    friend struct contain_get;
+	template<typename, std::size_t>
+	friend struct contain_get;
 
-    constexpr contain_impl() = default;
-    explicit constexpr contain_impl(TS... ts) : contain_impl<void, TS...>(ts...) {}
-    explicit constexpr contain_impl(T, TS... ts) : contain_impl<void, TS...>(ts...) {}
+	constexpr contain_impl() = default;
+	explicit constexpr contain_impl(TS... ts) : contain_impl<void, TS...>(ts...) {}
+	explicit constexpr contain_impl(T, TS... ts) : contain_impl<void, TS...>(ts...) {}
 
-    template<std::size_t I>
-    constexpr decltype(auto) get() const {
-        return contain_get<contain_impl, I>::get(*this);
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) get() const {
+		return contain_get<contain_impl, I>::get(*this);
+	}
 
 private:
-    template<std::size_t I>
-    constexpr decltype(auto) _get_next() const {
-        return contain_impl<void, TS...>::template get<I - 1>();
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) _get_next() const {
+		return contain_impl<void, TS...>::template get<I - 1>();
+	}
 
-    constexpr auto _get() const {
-        return T();
-    }
+	constexpr auto _get() const {
+		return T();
+	}
 };
 
 template<typename T>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
-    template<typename, std::size_t>
-    friend struct contain_get;
+	template<typename, std::size_t>
+	friend struct contain_get;
 
-    constexpr contain_impl() = default;
-    explicit constexpr contain_impl(T) {}
+	constexpr contain_impl() = default;
+	explicit constexpr contain_impl(T) {}
 
-    template<std::size_t I>
-    constexpr decltype(auto) get() const {
-        return contain_get<contain_impl, I>::get(*this);
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) get() const {
+		return contain_get<contain_impl, I>::get(*this);
+	}
 
 private:
-    constexpr auto _get() const {
-        return T();
-    }
+	constexpr auto _get() const {
+		return T();
+	}
 };
 
 template<typename T>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
-    template<typename, std::size_t>
-    friend struct contain_get;
+	template<typename, std::size_t>
+	friend struct contain_get;
 
-    T t;
+	T t;
 
-    constexpr contain_impl() = default;
-    explicit constexpr contain_impl(T t) : t(t) {}
+	constexpr contain_impl() = default;
+	explicit constexpr contain_impl(T t) : t(t) {}
 
-    template<std::size_t I>
-    constexpr decltype(auto) get() const {
-        return contain_get<contain_impl, I>::get(*this);
-    }
+	template<std::size_t I>
+	constexpr decltype(auto) get() const {
+		return contain_get<contain_impl, I>::get(*this);
+	}
 
 private:
-    constexpr auto _get() const {
-        return t;
-    }
+	constexpr auto _get() const {
+		return t;
+	}
 };
 
 template<>

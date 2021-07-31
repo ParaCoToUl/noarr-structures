@@ -61,24 +61,24 @@ public:
 	 * @tparam Dims : the dimension names
 	 * @param ts: the dimension values
 	 */
-    template<char... Dims, typename... Ts>
-    constexpr auto offset(Ts... ts) const {
-        return structure().template offset<Dims...>(ts...);
-    }
+	template<char... Dims, typename... Ts>
+	constexpr auto offset(Ts... ts) const {
+		return structure().template offset<Dims...>(ts...);
+	}
 
 	/**
 	 * @brief gets the length (number of indices) o a dimension in the `structure`
 	 * 
 	 * @tparam Dim: the dimension name
 	 */
-    template<char Dim>
-    constexpr auto get_length() const {
-        return structure().template get_length<Dim>();
-    }
+	template<char Dim>
+	constexpr auto get_length() const {
+		return structure().template get_length<Dim>();
+	}
 
-    constexpr auto get_size() const {
-        return structure().template get_size();
-    }
+	constexpr auto get_size() const {
+		return structure().template get_size();
+	}
 };
 
 } // namespace noarr
