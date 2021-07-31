@@ -37,8 +37,10 @@ struct tuple_get_t<tuple_part<tuple<Dim, T, TS...>, I>, std::integral_constant<s
 template<char Dim, typename T, typename... TS, std::size_t I>
 struct tuple_part<tuple<Dim, T, TS...>, I> : private contain<T, tuple_part<tuple<Dim, TS...>, I + 1>> {
 	using base = contain<T, tuple_part<tuple<Dim, TS...>, I + 1>>;
+
 	constexpr tuple_part() = default;
 	explicit constexpr tuple_part(T t, TS... ts) : base(t, tuple_part<tuple<Dim, TS...>, I + 1>(ts...)) {}
+
 	constexpr auto sub_structures() const {
 		return std::tuple_cat(std::tuple<T>(base::template get<0>()), base::template get<1>().sub_structures());
 	}
@@ -48,6 +50,7 @@ template<char Dim, typename T, std::size_t I>
 struct tuple_part<tuple<Dim, T>, I> : private contain<T> {
 	constexpr tuple_part() = default;
 	explicit constexpr tuple_part(T t) : contain<T>(t) {}
+
 	constexpr auto sub_structures() const {
 		return std::tuple<T>(contain<T>::template get<0>());
 	}
@@ -70,13 +73,16 @@ struct tuple_size_getter<T, 0> {
 	static constexpr std::size_t sum(std::size_t arg, Args... args) {
 		return arg + sum(args...);
 	}
+
 	static constexpr std::size_t sum(std::size_t arg) {
 		return arg;
 	}
+
 	template<std::size_t... IS>
 	static constexpr std::size_t size(T t) {
 		return sum(std::get<IS>(t).size()...);
 	}
+
 	static constexpr std::size_t size(T) {
 		return 0;
 	}
@@ -99,6 +105,7 @@ struct tuple<Dim, T, TS...> : private helpers::tuple_part<tuple<Dim, T, TS...>, 
 
 	constexpr tuple() = default;
 	constexpr tuple(T ss, TS... sss) : helpers::tuple_part<tuple<Dim, T, TS...>, 0>(ss, sss...) {}
+
 	template<typename T2, typename... T2s>
 	static constexpr auto construct(T2 ss, T2s... sss) {
 		return tuple<Dim, T2, T2s...>(ss, sss...);
@@ -157,6 +164,7 @@ struct array : private contain<T> {
 
 	constexpr array() = default;
 	explicit constexpr array(T sub_structure) : contain<T>(sub_structure) {}
+
 	template<typename T2>
 	static constexpr auto construct(T2 sub_structure) {
 		return array<Dim, L, T2>(sub_structure);
@@ -186,6 +194,7 @@ struct vector : private contain<T> {
 
 	constexpr vector() = default;
 	explicit constexpr vector(T sub_structure) : contain<T>(sub_structure) {}
+
 	template<typename T2>
 	static constexpr auto construct(T2 sub_structure) {
 		return vector<Dim, T2>(sub_structure);
@@ -235,6 +244,7 @@ struct sized_vector : private contain<vector<Dim, T>, std::size_t> {
 
 	constexpr sized_vector() = default;
 	constexpr sized_vector(T sub_structure, std::size_t length) : base(vector<Dim, T>(sub_structure), length) {}
+
 	template<typename T2>
 	constexpr auto construct(T2 sub_structure) const {
 		return sized_vector<Dim, T2>(sub_structure, base::template get<1>());
@@ -346,6 +356,7 @@ struct fixed_dim : private contain<T, std::size_t> {
 
 	constexpr fixed_dim() = default;
 	constexpr fixed_dim(T sub_structure, std::size_t idx) : base(sub_structure, idx) {}
+
 	template<typename... T2>
 	constexpr auto construct(T2...sub_structures) const {
 		return fixed_dim<Dim, decltype(std::declval<T>().construct(sub_structures...))>(

@@ -344,7 +344,7 @@ struct z_curve_bottom {
 		return z_curve_bottom<Dim>();
 	}
 
-	static  constexpr std::size_t size() { return 0; }
+	static constexpr std::size_t size() { return 0; }
 	static constexpr std::size_t offset(std::uint16_t i) {
 		i = (i | (i << 8)) & 0x00FF00FF;
 		i = (i | (i << 4)) & 0x0F0F0F0F;
@@ -472,9 +472,6 @@ static constexpr auto GetMatrixStructure(ZcurveStruct)
 	return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
 }*/
 
-
-
-
 /*template<typename Structure>
 auto noarr::bag(noarr::wrapper<Structure> s, MatrixDataLayout l)
 {
@@ -486,10 +483,6 @@ auto GetMatrix(int x_size, int y_size)
 {
 	return noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetImageStructure(), layout).template set_length<'x'>(x_size).template set_length<'y'>(y_size));
 }*/
-
-
-
-
 
 /*template<typename Structure>
 auto matrix_transpose(noarr::bag<Structure>& matrix)
@@ -547,7 +540,6 @@ auto matrix_clone(noarr::bag<Structure>& matrix, MatrixDataLayout targetLayout)
 			return matrix_clone<MatrixDataLayout::Zcurve, MatrixDataLayout::Zcurve>(matrix);
 	}
 }*/
-
 
 /*template<MatrixDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
@@ -630,11 +622,6 @@ void histogram_template_test_clear()
 		}
 	}
 }*/
-
-
-
-
-
 
 /*struct MatrixStruct {
 	virtual ~MatrixStruct() noexcept = default;

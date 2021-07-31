@@ -162,7 +162,7 @@ struct construct_builder<S, F, 0, 0> {
 };
 
 template<typename S, typename F>
-struct fmapper<S, F, std::enable_if_t<fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>>  {
+struct fmapper<S, F, std::enable_if_t<fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>> {
 	static constexpr decltype(auto) fmap(S s, F f) {
 		return construct_builder<S, F>::construct_build(s, f);
 	}
@@ -237,19 +237,19 @@ struct pipe_decider;
 template<typename F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, transform_tag>::value>> {
 	template<typename S>
-	static constexpr decltype(auto) operate(S s, F f) { return fmapper<S, F>::fmap(s, f);  }
+	static constexpr decltype(auto) operate(S s, F f) { return fmapper<S, F>::fmap(s, f); }
 };
 
 template<typename F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, get_tag>::value>> {
 	template<typename S>
-	static constexpr decltype(auto) operate(S s, F f) { return getter<S, F>::get(s, f);  }
+	static constexpr decltype(auto) operate(S s, F f) { return getter<S, F>::get(s, f); }
 };
 
 template<typename F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::value>> {
 	template<typename S>
-	static constexpr decltype(auto) operate(S s, F f) { return f(s);  }
+	static constexpr decltype(auto) operate(S s, F f) { return f(s); }
 };
 
 } // namespace helpers
