@@ -19,7 +19,7 @@ The following example demonstrates the layout-agnostic method of accessing the v
 // creates a 20x30 two-dimensional array
 noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>> foo;
 
-// creates the same structure with different physical layout
+// creates the same structure with A different physical layout
 noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>> bar;
 
 // getting the offset of the value at (x = 5; y = 10):
