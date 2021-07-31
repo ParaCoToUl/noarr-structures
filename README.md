@@ -7,7 +7,7 @@
 
 # Noarr Structures
 
-Library that helps programmer with data serialization independently on underlining design.
+Library that helps programmer with data serialization independently on underlying design.
 
 
 ## Using the library
