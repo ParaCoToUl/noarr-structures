@@ -14,6 +14,7 @@ using matrix_zcurve = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>
 struct matrix
 {
 	matrix(int X, int Y, std::vector<int>&& Ary) : x(X), y(Y), ary(std::move(Ary)) {};
+	matrix(int X, int Y, std::vector<int>& Ary) : x(X), y(Y), ary(Ary) {};
 
 	int x;
 	int y;
@@ -113,6 +114,7 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 			{
 				int& value1 = m1.at(k, j);
 				int& value2 = m2.at(i, k);
+
 				sum += value1 * value2;
 			}
 
