@@ -3,7 +3,7 @@ You can build the example using `CMake` in the same way as described in the main
 
 # Implementation
 In file `noarr_matrix_functions.hpp` are implemented several matrix functions. The important function is:
-```
+```cpp
 void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
 ```
 it is given 3 matrices and it multiplies first two into third one.
