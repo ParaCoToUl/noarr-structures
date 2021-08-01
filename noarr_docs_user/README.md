@@ -161,6 +161,10 @@ To get the first element of the tuple we use `get_at` in the following way:
 get_at<'t'>(1_idx);
 ```
 
+<a name="full-list-of-functions"></a>
+#### Full list of functions
+
+https://github.com/ParaCoToUl/noarr-structures/tree/main/noarr/include/noarr/structures
 
 ##### Matrices/Cubes
 
