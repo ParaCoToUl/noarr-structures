@@ -31,6 +31,16 @@ These are the core pieces of the library which can be used to create the actual 
 
 The library then provides `noarr::bag`, a basic data structure that allocates enough memory for the desired structure and provides the `at` method (used like: `at<'x', 'y'>(5, 10)`), which returns a reference to a value stored in the allocated memory. (see [examples/matrix](examples/matrix "matrix example") for a demo)
 
+You can transpose matrix like this:
+
+```cpp
+template<typename Structure>
+void matrix_transpose(noarr::bag<Structure>& matrix1) {
+	for (int i = 0; i < matrix1.template get_length<'x'>(); i++)
+		for (int j = i; j < matrix1.template get_length<'y'>(); j++)
+			std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
+}
+```
 
 ## Using the library
 
