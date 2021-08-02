@@ -9,7 +9,9 @@
 
 Header-only library that facilitates creation of many data structures and provides a layout-agnostic way of accessing the values stored in them.
 
-**Example:**
+**Data layout modeling:**
+
+> Note that we model data seperately because TODO
 
 The following example demonstrates the layout-agnostic method of accessing the values:
 
@@ -27,11 +29,9 @@ foo | noarr::offset<'x', 'y'>(5, 10);
 bar | noarr::offset<'x', 'y'>(5, 10);
 ```
 
-These are the core pieces of the library which can be used to create the actual data structures.
+**Data accessing:**
 
-The library then provides `noarr::bag`, a basic data structure that allocates enough memory for the desired structure and provides the `at` method (used like: `at<'x', 'y'>(5, 10)`), which returns a reference to a value stored in the allocated memory. (see [examples/matrix](examples/matrix "matrix example") for a demo)
-
-You can transpose matrix like this:
+The library then provides `noarr::bag`, a basic data structure that allocates enough memory for the desired structure and provides the `at` method (used like: `at<'x', 'y'>(5, 10)`), which returns a reference to a value stored in the allocated memory. You can transpose matrix like this:
 
 ```cpp
 template<typename Structure>
@@ -41,6 +41,8 @@ void matrix_transpose(noarr::bag<Structure>& matrix1) {
 			std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
 }
 ```
+
+See [examples/matrix](examples/matrix "matrix example") for a demo.
 
 ## Using the library
 
