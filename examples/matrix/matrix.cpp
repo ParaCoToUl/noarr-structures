@@ -5,11 +5,12 @@
 #include <cassert>
 #include <tuple>
 
+#include "z_curve.hpp"
 #include "noarr_matrix_functions.hpp"
 
 using matrix_rows = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
 using matrix_columns = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
-using matrix_zcurve = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
+using matrix_zcurve = noarr::z_curve<'x', 'y', noarr::sized_vector<'a', noarr::scalar<int>>>;
 
 struct matrix
 {
@@ -75,20 +76,20 @@ matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			m.at(i, j) = matrix1.at<'x', 'y'>(i, j);
+			m.at(i, j) = matrix1.template at<'x', 'y'>(i, j);
 
 	return m;
 }
 
 template<typename Structure>
-void clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
+void clasic_matrix_to_noarr(matrix& m1, noarr::bag<Structure>& matrix1)
 {
 	int x_size = matrix1.structure().template get_length<'x'>();
 	int y_size = matrix1.structure().template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
-			matrix1.at<'x', 'y'>(i, j) = m1.at(i, j);
+			matrix1.template at<'x', 'y'>(i, j) = m1.at(i, j);
 }
 
 void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
@@ -124,9 +125,8 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 }
 
 template<typename Structure>
-void matrix_demo(int size)
+void matrix_demo(int size, Structure structure)
 {
-
 	matrix m1 = get_clasic_matrix(size, size);
 	matrix m2 = get_clasic_matrix(size, size);
 	matrix m3 = get_clasic_matrix(size, size);
@@ -137,12 +137,12 @@ void matrix_demo(int size)
 	std::cout << "Matrix 2:" << std::endl;
 	m2.print();
 
-	auto n1 = noarr::bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n2 = noarr::bag(Structure() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
-	auto n3 = noarr::bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n1 = noarr::bag(structure);
+	auto n2 = noarr::bag(structure);
+	auto n3 = noarr::bag(structure);
 
-	clasic_matrix_to_naorr(m1, n1);
-	clasic_matrix_to_naorr(m2, n2);
+	clasic_matrix_to_noarr(m1, n1);
+	clasic_matrix_to_noarr(m2, n2);
 
 	clasic_matrix_multiply(m1, m2, m3);
 	matrix_multiply(n1, n2, n3);
@@ -165,7 +165,7 @@ int main()
 		std::cout << "Please select matrix layout to be used:" << std::endl;
 		std::cout << "1 - rows" << std::endl;
 		std::cout << "2 - columns" << std::endl;
-		std::cout << "3 - zcurve" << std::endl;
+		std::cout << "3 - zcurve (the size has to be a power of 2)" << std::endl;
 		std::cout << "4 - exit programm" << std::endl;
 
 		int layout;
@@ -185,10 +185,10 @@ int main()
 			return -1;
 
 		if (layout == 1)
-			matrix_demo<matrix_rows>(size);
+			matrix_demo(size, matrix_rows() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
 		else if (layout == 2)
-			matrix_demo<matrix_columns>(size);
+			matrix_demo(size, matrix_columns() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
 		else if (layout == 3)
-			matrix_demo<matrix_zcurve>(size);
+			matrix_demo(size, matrix_zcurve(noarr::sized_vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'x'>(size), noarr::helpers::z_curve_bottom<'y'>(size)));
 	}
 }

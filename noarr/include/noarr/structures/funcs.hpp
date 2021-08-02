@@ -92,14 +92,16 @@ struct set_length_can_apply<Dim, sized_vector<Dim, T>> {
 
 }
 
+namespace helpers {
+
 template<char Dim>
-struct _set_length {
+struct dynamic_set_length {
 	using func_family = transform_tag;
 
 	template<typename T>
 	using can_apply = helpers::set_length_can_apply<Dim, T>;
 
-	explicit constexpr _set_length(std::size_t length) : length(length) {}
+	explicit constexpr dynamic_set_length(std::size_t length) : length(length) {}
 
 	template<typename T>
 	constexpr auto operator()(vector<Dim, T> v) const {
@@ -115,11 +117,9 @@ private:
 	std::size_t length;
 };
 
-namespace helpers {
-
 template<char Dim, std::size_t L>
-struct set_length_impl {
-	constexpr set_length_impl() = default;
+struct static_set_length_impl {
+	constexpr static_set_length_impl() = default;
 
 	template<typename T>
 	constexpr auto operator()(vector<Dim, T> v) const {
@@ -147,7 +147,7 @@ struct set_length_impl {
  */
 template<char Dim>
 inline constexpr auto set_length(std::size_t length) {
-	return _set_length<Dim>(length);
+	return helpers::dynamic_set_length<Dim>(length);
 }
 
 /**
@@ -158,7 +158,7 @@ inline constexpr auto set_length(std::size_t length) {
  */
 template<char Dim, std::size_t Length>
 inline constexpr auto set_length(std::integral_constant<std::size_t, Length>) {
-	return helpers::set_length_impl<Dim, Length>();
+	return helpers::static_set_length_impl<Dim, Length>();
 }
 
 /**

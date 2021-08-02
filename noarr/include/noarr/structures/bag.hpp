@@ -1,6 +1,8 @@
 #ifndef NOARR_BAG_HPP
 #define NOARR_BAG_HPP
 
+#include <memory>
+
 namespace noarr {
 
 /**

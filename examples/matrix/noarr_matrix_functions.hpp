@@ -1,6 +1,8 @@
 #ifndef NOARR_MATRIX_FUNCTIONS_HPP
 #define NOARR_MATRIX_FUNCTIONS_HPP
 
+#include <cassert>
+
 #include "noarr/structures/structs.hpp"
 #include "noarr/structures/funcs.hpp"
 #include "noarr/structures/io.hpp"
@@ -14,14 +16,14 @@ void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
 
-	REQUIRE(x_size == matrix2.template get_length<'x'>());
-	REQUIRE(y_size == matrix2.template get_length<'y'>());
+	assert(x_size == matrix2.template get_length<'x'>());
+	assert(y_size == matrix2.template get_length<'y'>());
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
 		{
-			int& value2 = matrix2.at<'x', 'y'>(i, j);
-			value2 = matrix1.at<'x', 'y'>(i, j);
+			int& value2 = matrix2.template at<'x', 'y'>(i, j);
+			value2 = matrix1.template at<'x', 'y'>(i, j);
 		}
 }
 
@@ -31,13 +33,14 @@ void matrix_transpose(noarr::bag<Structure>& matrix1)
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
 
-	REQUIRE(x_size == y_size);
+	assert(x_size == y_size);
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
 		{
-			int& value1 = matrix1.at<'x', 'y'>(i, j);
-			int& value2 = matrix1.at<'x', 'y'>(j, i);
+			int& value1 = matrix1.template at<'x', 'y'>(i, j);
+			int& value2 = matrix1.template at<'x', 'y'>(j, i);
+
 			std::swap(value1, value2);
 		}
 }
@@ -48,17 +51,18 @@ void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
 
-	REQUIRE(x_size == matrix2.template get_length<'x'>());
-	REQUIRE(y_size == matrix2.template get_length<'y'>());
-	REQUIRE(x_size == matrix3.template get_length<'x'>());
-	REQUIRE(y_size == matrix3.template get_length<'y'>());
+	assert(x_size == matrix2.template get_length<'x'>());
+	assert(y_size == matrix2.template get_length<'y'>());
+	assert(x_size == matrix3.template get_length<'x'>());
+	assert(y_size == matrix3.template get_length<'y'>());
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = 0; j < y_size; j++)
 		{
-			int& value1 = matrix1.at<'x', 'y'>(i, j);
-			int& value2 = matrix2.at<'x', 'y'>(i, j);
-			int& value3 = matrix3.at<'x', 'y'>(i, j);
+			int& value1 = matrix1.template at<'x', 'y'>(i, j);
+			int& value2 = matrix2.template at<'x', 'y'>(i, j);
+			int& value3 = matrix3.template at<'x', 'y'>(i, j);
+
 			value3 = value1 + value2;
 		}
 }
@@ -71,7 +75,7 @@ void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
-			matrix1.at<'x', 'y'>(i, j) *= scalar;
+			matrix1.template at<'x', 'y'>(i, j) *= scalar;
 }
 
 template<typename Structure1, typename Structure2, typename Structure3>
@@ -96,12 +100,13 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 
 			for (int k = 0; k < x1_size; k++)
 			{
-				int& value1 = matrix1.at<'x', 'y'>(k, j);
-				int& value2 = matrix2.at<'x', 'y'>(i, k);
+				int& value1 = matrix1.template at<'x', 'y'>(k, j);
+				int& value2 = matrix2.template at<'x', 'y'>(i, k);
+
 				sum += value1 * value2;
 			}
 
-			matrix3.at<'x', 'y'>(i, j) = sum;
+			matrix3.template at<'x', 'y'>(i, j) = sum;
 		}
 	}
 }

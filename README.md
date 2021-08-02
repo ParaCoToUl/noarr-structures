@@ -56,7 +56,7 @@ The library requires C++ 17.
 
 ## Running tests and examples
 
-Enter the desired folder (`examples/matrix`). In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
+Enter the desired folder ([examples/matrix](examples/matrix "matrix example")). In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
 
 ```sh
 # generates build files for your platform
