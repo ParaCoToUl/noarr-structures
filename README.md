@@ -31,15 +31,18 @@ bar | noarr::offset<'x', 'y'>(5, 10);
 
 **Data accessing:**
 
-The library then provides `noarr::bag`, a basic data structure that allocates enough memory for the desired structure and provides the `at` method (used like: `at<'x', 'y'>(5, 10)`), which returns a reference to a value stored in the allocated memory. You can transpose matrix like this:
+The library then provides `noarr::bag`, a basic data structure that allocates enough memory for the desired structure.
 
 ```cpp
-template<typename Structure>
-void matrix_transpose(noarr::bag<Structure>& matrix1) {
-	for (int i = 0; i < matrix1.template get_length<'x'>(); i++)
-		for (int j = i; j < matrix1.template get_length<'y'>(); j++)
-			std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
-}
+auto matrix1 = noarr::bag(foo);
+```
+
+The `bag` also provides the `at` method, which returns a reference to a value stored in the allocated memory. You can transpose matrix in a floowing way:
+
+```cpp
+for (int i = 0; i < matrix1.get_length<'x'>(); i++)
+	for (int j = i; j < matrix1.get_length<'y'>(); j++)
+		std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
 ```
 
 See [examples/matrix](examples/matrix "matrix example") for a demo.
