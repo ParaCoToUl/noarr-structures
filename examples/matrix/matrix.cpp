@@ -155,37 +155,45 @@ classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& m
 	return output;
 }
 
-
+// !core function of the example!
+// it multiplies classic matrices, same noarr matrices, and checks if the results produced are equal
 template<typename Structure>
 void matrix_demo(int size, Structure structure)
 {
-	classic_matrix m1 = get_clasic_matrix(size, size);
+	// generating random classic matrix 1
+	classic_matrix classic_1 = get_clasic_matrix(size, size);
 	std::cout << "Matrix 1:" << std::endl;
-	m1.print();
+	classic_1.print();
 
-	classic_matrix m2 = get_clasic_matrix(size, size);
+	// generating random classic matrix 2
+	classic_matrix classic_2 = get_clasic_matrix(size, size);
 	std::cout << "Matrix 2:" << std::endl;
-	m2.print();
+	classic_2.print();
 
-	auto n1 = noarr::bag(structure);
-	auto n2 = noarr::bag(structure);
-	auto n3 = noarr::bag(structure);
+	// creating 3 noarr matrices
+	auto noarr_1 = noarr::bag(structure);
+	auto noarr_2 = noarr::bag(structure);
+	auto noarr_result = noarr::bag(structure);
 
-	clasic_matrix_to_noarr(m1, n1);
-	clasic_matrix_to_noarr(m2, n2);
+	// copying 2 classic matrices to 2 noarr matrices
+	clasic_matrix_to_noarr(classic_1, noarr_1);
+	clasic_matrix_to_noarr(classic_2, noarr_2);
 
-	classic_matrix m3 = clasic_matrix_multiply(m1, m2);
+	// multiplying 2 classic matrices into third one
+	classic_matrix classic_result = clasic_matrix_multiply(classic_1, classic_2);
 	std::cout << "Classic multiplication:" << std::endl;
-	m3.print();
+	classic_result.print();
 
-	noarr_matrix_multiply(n1, n2, n3);
-	classic_matrix m4 = noarr_matrix_to_clasic(n3);
+	// multiplying 2 noarr matrices into a third one
+	noarr_matrix_multiply(noarr_1, noarr_2, noarr_result);
 
-
+	// converting noarr result matrix into a classic matrix
+	classic_matrix classic_noarr_result = noarr_matrix_to_clasic(noarr_result);
 	std::cout << "Noarr multiplication:" << std::endl;
-	m4.print();
+	classic_noarr_result.print();
 
-	assert(are_equal_classic_matrices(m3, m4));
+	// check if noarr returned correct result
+	assert(are_equal_classic_matrices(classic_result, classic_noarr_result));
 }
 
 int main()
