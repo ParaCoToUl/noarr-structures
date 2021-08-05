@@ -3,7 +3,7 @@ name: Noarr matrix example test macosl
 on:
   push:
     paths:
-    - 'noarr/**'
+    - 'examples/matrix/**'
     - '.github/workflows/noarr_matrix_example_test_macosl.yml'
 
 env:
