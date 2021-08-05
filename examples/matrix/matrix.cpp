@@ -108,10 +108,13 @@ classic_matrix noarr_matrix_to_clasic(noarr::bag<Structure>& source)
 }
 
 // function converting classic matrix to noarr matrix
-// it takes source classic matrix and target noarr matrix as arguments
+// it takes source classic matrix and target noarr matrix structure (we need to know what structure should be used)
 template<typename Structure>
-void clasic_matrix_to_noarr(classic_matrix& source, noarr::bag<Structure>& target)
+noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
 {
+	// we will allocate target noarr matrix
+	auto target = noarr::bag(structure);
+
 	// we will cache matrix size values
 	int n_size = target.structure().template get_length<'n'>();
 	int m_size = target.structure().template get_length<'m'>();
@@ -120,6 +123,8 @@ void clasic_matrix_to_noarr(classic_matrix& source, noarr::bag<Structure>& targe
 	for (int i = 0; i < n_size; i++)
 		for (int j = 0; j < m_size; j++)
 			target.template at<'n', 'm'>(i, j) = source.at(i, j);
+
+	return target;
 }
 
 // function multiplying classic matrices
@@ -140,7 +145,6 @@ classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& m
 
 	// standart matrix multiplication
 	for (int i = 0; i < n2_size; i++)
-	{
 		for (int j = 0; j < m1_size; j++)
 		{
 			int sum = 0;
@@ -150,7 +154,6 @@ classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& m
 
 			output.at(i, j) = sum;
 		}
-	}
 
 	return output;
 }
@@ -170,14 +173,9 @@ void matrix_demo(int size, Structure structure)
 	std::cout << "Matrix 2:" << std::endl;
 	classic_2.print();
 
-	// creating 3 noarr matrices
-	auto noarr_1 = noarr::bag(structure);
-	auto noarr_2 = noarr::bag(structure);
-	auto noarr_result = noarr::bag(structure);
-
 	// copying 2 classic matrices to 2 noarr matrices
-	clasic_matrix_to_noarr(classic_1, noarr_1);
-	clasic_matrix_to_noarr(classic_2, noarr_2);
+	auto noarr_1 = clasic_matrix_to_noarr(classic_1, structure);
+	auto noarr_2 = clasic_matrix_to_noarr(classic_2, structure);
 
 	// multiplying 2 classic matrices into third one
 	classic_matrix classic_result = clasic_matrix_multiply(classic_1, classic_2);
@@ -185,7 +183,7 @@ void matrix_demo(int size, Structure structure)
 	classic_result.print();
 
 	// multiplying 2 noarr matrices into a third one
-	noarr_matrix_multiply(noarr_1, noarr_2, noarr_result);
+	auto noarr_result = noarr_matrix_multiply(noarr_1, noarr_2, structure);
 
 	// converting noarr result matrix into a classic matrix
 	classic_matrix classic_noarr_result = noarr_matrix_to_clasic(noarr_result);
