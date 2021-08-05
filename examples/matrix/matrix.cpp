@@ -4,6 +4,8 @@
 #include <vector>
 #include <cassert>
 #include <tuple>
+#include <iostream>
+#include <string>
 
 // IMPORTANT:
 // raw c++ matrix implementation is from now on a "classic matrix"
@@ -184,37 +186,48 @@ void matrix_demo(int size, Structure structure)
 	assert(are_equal_classic_matrices(classic_result, classic_noarr_result));
 }
 
-int main()
+// print help function
+void print_help_and_exit()
 {
-	while (true)
-	{
-		std::cout << "Please select matrix layout to be used:" << std::endl;
-		std::cout << "1 - rows" << std::endl;
-		std::cout << "2 - columns" << std::endl;
-		std::cout << "3 - zcurve (the size has to be a power of 2)" << std::endl;
-		std::cout << "4 - exit programm" << std::endl;
+	std::cout << "Programm takes 2 parameters. First, you choose one of the following layouts:" << std::endl;
+	std::cout << "1) rows" << std::endl;
+	std::cout << "2) columns" << std::endl;
+	std::cout << "3) z_curve (the size has to be a power of 2)" << std::endl;
+	std::cout << "Then you input integer matrix size. The size of the matrix have to be at least one (for example simplicity, only square matrices are supported)" << std::endl;
 
-		int layout;
+	// exit the program
+	exit(1);
+}
 
-		std::cin >> layout;
+// main function called from command line
+int main(int argc, char* argv[])
+{
+	// there have to be two arguments
+	if (argc != 2)
+		print_help_and_exit();
 
-		if (layout == 4)
-			return 0;
-
-		std::cout << "Please select the size of the matrix (for simplicity, only square matrices are supported):" << std::endl;
-
-		int size;
-
-		std::cin >> size;
-
-		if (size < 1)
-			return -1;
-
-		if (layout == 1)
-			matrix_demo(size, matrix_rows() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
-		else if (layout == 2)
-			matrix_demo(size, matrix_columns() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
-		else if (layout == 3)
-			matrix_demo(size, matrix_zcurve(noarr::sized_vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'n'>(size), noarr::helpers::z_curve_bottom<'m'>(size)));
+	// parse the second argument (size) into int
+	int size;
+	try {
+		size = std::stoi(argv[1]);
 	}
+	catch (...) {
+		print_help_and_exit();
+	}
+
+	// size has to be at least 1
+	if (size < 1)
+		print_help_and_exit();
+
+	// if the first argument matches some of the supported layouts, run the example, otherwise print help
+	if (argv[0] == "rows")
+		matrix_demo(size, matrix_rows() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
+	else if (argv[0] == "columns")
+		matrix_demo(size, matrix_columns() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
+	else if (argv[0] == "z_curve")
+		matrix_demo(size, matrix_zcurve(noarr::sized_vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'n'>(size), noarr::helpers::z_curve_bottom<'m'>(size)));
+	else
+		print_help_and_exit();
+
+	return 0;
 }
