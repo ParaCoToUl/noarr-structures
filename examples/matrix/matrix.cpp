@@ -17,6 +17,7 @@
 // definitions of basic matrix functions: matrix multiplication, scalar multiplication, copy and matrix transpose
 #include "noarr_matrix_functions.hpp"
 
+// definitions of noarr layouts
 using matrix_rows = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>>;
 using matrix_columns = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>>;
 using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::sized_vector<'a', noarr::scalar<int>>>;
