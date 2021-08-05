@@ -10,10 +10,15 @@
 #include "noarr/structures/wrapper.hpp"
 #include "noarr/structures/bag.hpp"
 
+// read IMPORTANT from matrix.cpp first
+
+
+// function takes 2 noarr matrices and multiplies them
+// it takes 2 source noarr matrices and structure describing structure (layout) of the result matrix
 template<typename Structure1, typename Structure2, typename Structure3>
 noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, Structure3 structure)
 {
-	auto matrix3 = noarr::bag(structure);
+	auto result = noarr::bag(structure);
 
 	int x1_size = matrix1.template get_length<'n'>();
 	int y1_size = matrix1.template get_length<'m'>();
@@ -35,26 +40,26 @@ noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, no
 				sum += value1 * value2;
 			}
 
-			matrix3.template at<'n', 'm'>(i, j) = sum;
+			result.template at<'n', 'm'>(i, j) = sum;
 		}
 
-	return matrix3;
+	return result;
 }
 
+// function takes noarr matrix and multiplies duplicates it
+// it takes source noarr matrix and structure describing structure (layout) of the result matrix
 template<typename Structure1, typename Structure2>
-void noarr_matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2)
+void noarr_matrix_copy(noarr::bag<Structure1>& source, Structure2 structure)
 {
-	int x_size = matrix1.template get_length<'n'>();
-	int y_size = matrix1.template get_length<'m'>();
+	auto result = noarr::bag(structure);
 
-	assert(x_size == matrix2.template get_length<'n'>());
-	assert(y_size == matrix2.template get_length<'m'>());
-
-	for (int i = 0; i < x_size; i++)
-		for (int j = 0; j < y_size; j++)
-			matrix2.template at<'n', 'm'>(i, j) = matrix1.template at<'n', 'm'>(i, j);
+	for (int i = 0; i < source.template get_length<'n'>(); i++)
+		for (int j = 0; j < source.template get_length<'m'>(); j++)
+			result.template at<'n', 'm'>(i, j) = source.template at<'n', 'm'>(i, j);
 }
 
+
+// function takes noarr matrix and transposes it
 template<typename Structure>
 void noarr_matrix_transpose(noarr::bag<Structure>& matrix1)
 {
@@ -73,28 +78,8 @@ void noarr_matrix_transpose(noarr::bag<Structure>& matrix1)
 		}
 }
 
-template<typename Structure1, typename Structure2, typename Structure3>
-void noarr_matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
-{
-	int x_size = matrix1.template get_length<'n'>();
-	int y_size = matrix1.template get_length<'m'>();
-
-	assert(x_size == matrix2.template get_length<'n'>());
-	assert(y_size == matrix2.template get_length<'m'>());
-	assert(x_size == matrix3.template get_length<'n'>());
-	assert(y_size == matrix3.template get_length<'m'>());
-
-	for (int i = 0; i < x_size; i++)
-		for (int j = 0; j < y_size; j++)
-		{
-			int& value1 = matrix1.template at<'n', 'm'>(i, j);
-			int& value2 = matrix2.template at<'n', 'm'>(i, j);
-			int& value3 = matrix3.template at<'n', 'm'>(i, j);
-
-			value3 = value1 + value2;
-		}
-}
-
+// function takes noarr matrix and multiplies dit by scalar
+// it takes noarr matrix and scalar to multiply with matrix
 template<typename Structure>
 void noarr_matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 {

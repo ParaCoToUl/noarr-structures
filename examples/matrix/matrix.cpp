@@ -5,13 +5,14 @@
 #include <cassert>
 #include <tuple>
 
+// IMPORTANT:
 // raw c++ matrix implementation is from now on a "classic matrix"
 // matrix implementation in noarr will be referecend as "noarr matrix"
 // whole example assumes int matrices
 
 // definion of z-curve data stricture
 #include "z_curve.hpp"
-// definitions of basic matrix functions: matrix multiplication, scalar multiplication, copy, matrix transpose and matrix add
+// definitions of basic matrix functions: matrix multiplication, scalar multiplication, copy and matrix transpose
 #include "noarr_matrix_functions.hpp"
 
 using matrix_rows = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>>;
@@ -37,8 +38,11 @@ struct classic_matrix
 	const int& at(int n_, int m_) const { return ary[n_ + m_ * n]; }
 
 	// printing function which prints the whole matrix into the standard output
-	void print()
+	// it takes the name parameter and prints it at the beginning to make input clearer
+	void print(std::string name)
 	{
+		std::cout << name << ":" << std::endl;
+
 		for (int i = 0; i < n; i++)
 		{
 			for (int j = 0; j < m; j++)
@@ -115,13 +119,9 @@ noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure s
 	// we will allocate target noarr matrix
 	auto target = noarr::bag(structure);
 
-	// we will cache matrix size values
-	int n_size = target.structure().template get_length<'n'>();
-	int m_size = target.structure().template get_length<'m'>();
-
-	// we will fo through matrix and copy classic matrix into noarr matrix
-	for (int i = 0; i < n_size; i++)
-		for (int j = 0; j < m_size; j++)
+	// we will go through the classic matrix and copy it into noarr the matrix
+	for (int i = 0; i < source.n; i++)
+		for (int j = 0; j < source.m; j++)
 			target.template at<'n', 'm'>(i, j) = source.at(i, j);
 
 	return target;
@@ -131,31 +131,25 @@ noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure s
 // it takes 2 source classic matrices and returns multiplied matrix
 classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& matrix2)
 {
-	// we will cache matrix size values
-	int n1_size = matrix1.n;
-	int m1_size = matrix1.m;
-	int n2_size = matrix2.n;
-	int m2_size = matrix2.m;
+	// some of the sizes have to be equal
+	assert(matrix1.n == matrix2.m);
 
-	// n1 and m2 have to be equal
-	assert(n1_size == m2_size);
-
-	// we will allocate target classic matrix
-	classic_matrix output = get_clasic_matrix(n2_size, m1_size);
+	// we will allocate result classic matrix
+	classic_matrix result = get_clasic_matrix(matrix2.n, matrix1.m);
 
 	// standart matrix multiplication
-	for (int i = 0; i < n2_size; i++)
-		for (int j = 0; j < m1_size; j++)
+	for (int i = 0; i < matrix2.n; i++)
+		for (int j = 0; j < matrix1.m; j++)
 		{
 			int sum = 0;
 
-			for (int k = 0; k < n1_size; k++)
+			for (int k = 0; k < matrix1.n; k++)
 				sum += matrix1.at(k, j) * matrix2.at(i, k);
 
-			output.at(i, j) = sum;
+			result.at(i, j) = sum;
 		}
 
-	return output;
+	return result;
 }
 
 // !core function of the example!
@@ -165,30 +159,26 @@ void matrix_demo(int size, Structure structure)
 {
 	// generating random classic matrix 1
 	classic_matrix classic_1 = get_clasic_matrix(size, size);
-	std::cout << "Matrix 1:" << std::endl;
-	classic_1.print();
+	classic_1.print("Matrix 1");
 
 	// generating random classic matrix 2
 	classic_matrix classic_2 = get_clasic_matrix(size, size);
-	std::cout << "Matrix 2:" << std::endl;
-	classic_2.print();
+	classic_2.print("Matrix 2");
 
 	// copying 2 classic matrices to 2 noarr matrices
 	auto noarr_1 = clasic_matrix_to_noarr(classic_1, structure);
 	auto noarr_2 = clasic_matrix_to_noarr(classic_2, structure);
 
-	// multiplying 2 classic matrices into third one
+	// multiplying 2 classic matrices, result is classic matrix
 	classic_matrix classic_result = clasic_matrix_multiply(classic_1, classic_2);
-	std::cout << "Classic multiplication:" << std::endl;
-	classic_result.print();
+	classic_result.print("Classic multiplication result");
 
-	// multiplying 2 noarr matrices into a third one
+	// multiplying 2 noarr matrices, result is noarr matrix
 	auto noarr_result = noarr_matrix_multiply(noarr_1, noarr_2, structure);
 
 	// converting noarr result matrix into a classic matrix
 	classic_matrix classic_noarr_result = noarr_matrix_to_clasic(noarr_result);
-	std::cout << "Noarr multiplication:" << std::endl;
-	classic_noarr_result.print();
+	classic_noarr_result.print("Noarr multiplication result");
 
 	// check if noarr returned correct result
 	assert(are_equal_classic_matrices(classic_result, classic_noarr_result));
