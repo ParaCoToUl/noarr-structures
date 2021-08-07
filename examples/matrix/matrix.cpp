@@ -195,7 +195,7 @@ void print_help_and_exit()
 	std::cout << "1) rows" << std::endl;
 	std::cout << "2) columns" << std::endl;
 	std::cout << "3) z_curve (the size has to be a power of 2)" << std::endl;
-	std::cout << "Then you input integer matrix size. The size of the matrix have to be at least one (for example simplicity, only square matrices are supported)" << std::endl;
+	std::cout << "Then you input integer matrix size. The size of the matrix have to be at least one. (for example simplicity, only square matrices are supported)" << std::endl;
 
 	// exit the program
 	exit(1);
