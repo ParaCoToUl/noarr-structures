@@ -2,13 +2,24 @@
 You can build the example using `CMake` in the same way as described in the main README. After compiling the example you will be able to run matrix example and a choose matrix layout and size dynamically.
 
 # Usage
-```cpp
-"Programm takes 2 parameters. First, you choose one of the following layouts:"
-"1) rows"
-"2) columns"
-"3) z_curve (the size has to be a power of 2)"
-"Then you input integer matrix size. The size of the matrix have to be at least one (for example simplicity, only square matrices are supported)"
+```text
+Programm takes 2 parameters. First, you choose one of the following layouts:
+1) rows
+2) columns
+3) z_curve (the size has to be a power of 2)
+Then you input integer matrix size. The size of the matrix have to be at least one. 
+(for example simplicity, only square matrices are supported)
+```
 
+Running the example on Windows:
+```text
+.\matrix.exe rows 7
+```
+
+Running the example on Linux or Mac:
+```text
+./matrix columns 10
+./matrix z_curve 8
 ```
 
 # Implementation
