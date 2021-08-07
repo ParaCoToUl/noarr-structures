@@ -2,7 +2,7 @@
 #define NOARR_STRUCTURES_IS_STRUCT_HPP
 
 #include "std_ext.hpp"
-#include "core.hpp"
+#include "pipes.hpp"
 
 // TODO: is_struct and is_structoid should be more strict
 

@@ -4,7 +4,7 @@
 #include "std_ext.hpp"
 #include "structs.hpp"
 #include "struct_traits.hpp"
-#include "core.hpp"
+#include "pipes.hpp"
 
 namespace noarr {
 
@@ -438,7 +438,6 @@ struct get_at_impl : private contain<char*> {
 
 	template<typename T>
 	explicit constexpr get_at_impl(T *ptr) : contain<char *>(reinterpret_cast<char *>(ptr)) {}
-
 
 	template<typename T>
 	constexpr auto operator()(T t) const -> std::enable_if_t<is_cube<T>::value, scalar_t<T> &> {

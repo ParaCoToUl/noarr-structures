@@ -1,5 +1,5 @@
-#ifndef NOARR_STRUCTURES_CORE_HPP
-#define NOARR_STRUCTURES_CORE_HPP
+#ifndef NOARR_STRUCTURES_PIPES_HPP
+#define NOARR_STRUCTURES_PIPES_HPP
 
 #include "std_ext.hpp"
 #include "struct_decls.hpp"
@@ -128,39 +128,6 @@ struct fmapper_cond_helper<S, F, void_t<decltype(construct_builder<S, F>::constr
 	static constexpr bool value = true;
 };
 
-template<typename S, typename F, std::size_t Max, std::size_t I>
-struct construct_builder {
-	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build(S s, F f) {
-		return construct_builder<S, F, Max, I - 1>::template construct_build<I - 1, IS...>(s, f);
-	}
-};
-
-template<typename S, typename F, std::size_t Max>
-struct construct_builder<S, F, Max, 0> {
-	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build(S s, F f) {
-		return construct_build_last<IS...>(s, f);
-	}
-	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build_last(S s, F f) {
-		return s.construct((std::get<IS>(s.sub_structures()) | f)...);
-	}
-};
-
-// this explicit instance is here because the more general one makes warnings on structures with zero substructures
-template<typename S, typename F>
-struct construct_builder<S, F, 0, 0> {
-	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build(S s, F f) {
-		return construct_build_last<IS...>(s, f);
-	}
-	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build_last(S s, F) {
-		return s.construct();
-	}
-};
-
 template<typename S, typename F>
 struct fmapper<S, F, std::enable_if_t<fmapper_cond_helper<std::enable_if_t<!can_apply<F, S>::value, S>, F>::value>> {
 	static constexpr decltype(auto) fmap(S s, F f) {
@@ -271,6 +238,39 @@ std::enable_if_t<is_structoid<std::enable_if_t<std::is_class<S>::value, S>>::val
 
 namespace helpers {
 
+template<typename S, typename F, std::size_t Max, std::size_t I>
+struct construct_builder {
+	template<std::size_t... IS>
+	static constexpr decltype(auto) construct_build(S s, F f) {
+		return construct_builder<S, F, Max, I - 1>::template construct_build<I - 1, IS...>(s, f);
+	}
+};
+
+template<typename S, typename F, std::size_t Max>
+struct construct_builder<S, F, Max, 0> {
+	template<std::size_t... IS>
+	static constexpr decltype(auto) construct_build(S s, F f) {
+		return construct_build_last<IS...>(s, f);
+	}
+	template<std::size_t... IS>
+	static constexpr decltype(auto) construct_build_last(S s, F f) {
+		return s.construct((std::get<IS>(s.sub_structures()) | f)...);
+	}
+};
+
+// this explicit instance is here because the more general one makes warnings on structures with zero substructures
+template<typename S, typename F>
+struct construct_builder<S, F, 0, 0> {
+	template<std::size_t... IS>
+	static constexpr decltype(auto) construct_build(S s, F f) {
+		return construct_build_last<IS...>(s, f);
+	}
+	template<std::size_t... IS>
+	static constexpr decltype(auto) construct_build_last(S s, F) {
+		return s.construct();
+	}
+};
+
 template<typename S, typename... FS>
 struct piper;
 
@@ -306,4 +306,4 @@ inline constexpr decltype(auto) pipe(S s, FS... funcs) {
 
 } // namespace noarr
 
-#endif // NOARR_STRUCTURES_CORE_HPP
+#endif // NOARR_STRUCTURES_PIPES_HPP

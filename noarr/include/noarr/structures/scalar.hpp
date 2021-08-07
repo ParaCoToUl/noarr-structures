@@ -1,7 +1,7 @@
 #ifndef NOARR_STRUCTURES_SCALAR_HPP
 #define NOARR_STRUCTURES_SCALAR_HPP
 
-#include "core.hpp"
+#include "pipes.hpp"
 #include "struct_decls.hpp"
 #include "contain.hpp"
 
