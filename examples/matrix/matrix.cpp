@@ -221,11 +221,11 @@ int main(int argc, char* argv[])
 		print_help_and_exit();
 
 	// if the first argument matches some of the supported layouts, run the example, otherwise print help
-	if (!argv[0].compare("rows"))
+	if (!strcmp(argv[0], "rows"))
 		matrix_demo(size, matrix_rows() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
-	else if (!argv[0].compare("columns"))
+	else if (!strcmp(argv[0], "columns"))
 		matrix_demo(size, matrix_columns() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
-	else if (!argv[0].compare("z_curve"))
+	else if (!strcmp(argv[0], "z_curve"))
 		matrix_demo(size, matrix_zcurve(noarr::sized_vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'n'>(size), noarr::helpers::z_curve_bottom<'m'>(size)));
 	else
 		print_help_and_exit();
