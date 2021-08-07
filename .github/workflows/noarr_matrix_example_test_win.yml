@@ -3,6 +3,7 @@ name: Noarr matrix example test Win
 on:
   push:
     paths:
+    - 'noarr/**'
     - 'examples/matrix/**'
     - '.github/workflows/noarr_matrix_example_test_win.yml'
 
