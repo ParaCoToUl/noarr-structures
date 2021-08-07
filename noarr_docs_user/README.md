@@ -143,7 +143,9 @@ noarr::array<'i', 10, noarr::scalar<float>> my_array;
 
 ##### Scalars
 
-Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`...
+Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`... 
+
+You can read about supported scalars in detail in [technical documentation](../noarr_docs_tech/README.md "technical documentation").
 
 ##### Tuples
 
@@ -164,7 +166,16 @@ get_at<'t'>(1_idx);
 <a name="full-list-of-functions"></a>
 #### Full list of functions
 
-https://github.com/ParaCoToUl/noarr-structures/tree/main/noarr/include/noarr/structures
+  - `compose`: function composition (honoring the left-associative notation)
+  - `set_length`: changes the length (number of indices) of arrays and vectors
+  - `get_length`: gets the length (number of indices) of a structure
+  - `fix`: fixes an index in a structure
+  - `get_offset`: retrieves offset of a substructure 
+  - `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
+  - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
+  - `contain`: tuple-like struct, and a structured layout, that facilitates creation of new structures and functions
+
+You can read about supported functions in detail in [structures documentation](../noarr/include/noarr/structures/README.md "structures documentation").
 
 ##### Matrices/Cubes
 
