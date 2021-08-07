@@ -3,6 +3,7 @@ name: Noarr matrix example test ubuntu-latest - gcc
 on:
   push:
     paths:
+    - 'noarr/**'
     - 'examples/matrix/**'
     - '.github/workflows/noarr_matrix_example_test_ubuntul_gcc.yml'
 
