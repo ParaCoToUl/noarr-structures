@@ -53,7 +53,11 @@ The following snippet shows how we define a matrix structure and then we use `no
 // physically, the layout is an contiguous array of rows
 noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>> matrix_structure;
 
-auto matrix = noarr::bag(matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT));
+// defining size of the matrix
+auto sized_matrix_structure = matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT);
+
+// data allocation
+auto matrix = noarr::bag(sized_matrix_structure);
 ```
 
 The following snippet then shows how we would transpose the values of the matrix using the `at` method:
