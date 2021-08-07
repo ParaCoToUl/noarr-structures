@@ -116,6 +116,7 @@ We will create a templated matrix. And also set size at runtime like this:
 template<typename Structure>
 void matrix_demo(int size) {
 	// dot version
+	// note template keyword, it is there because the whole function is layout templated
 	auto n1 = noarr::bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
 	// pipe version (both are valid syntax and produce the same result)
 	auto n2 = noarr::bag(Structure() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
