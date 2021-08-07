@@ -6,6 +6,7 @@
 #include <tuple>
 #include <iostream>
 #include <string>
+#include <cstring>
 
 // IMPORTANT:
 // raw c++ matrix implementation is from now on a "classic matrix"
