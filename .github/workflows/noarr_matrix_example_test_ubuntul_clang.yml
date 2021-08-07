@@ -4,7 +4,7 @@ on:
   push:
     paths:
     - 'examples/matrix/**'
-    - '.github/workflows/noarr_test_ubuntul_clang.yml'
+    - '.github/workflows/noarr_matrix_example_test_ubuntul_clang.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
