@@ -1,5 +1,15 @@
 # User documentation for Noarr
 
+```cpp
+#include "noarr/structures.hpp"
+#include "noarr/structures/structs.hpp"
+#include "noarr/structures/funcs.hpp"
+#include "noarr/structures/io.hpp"
+#include "noarr/structures/struct_traits.hpp"
+#include "noarr/structures/wrapper.hpp"
+#include "noarr/structures/bag.hpp"
+```
+
 ~~Noarr framework aims to help with certain aspects of performant GPU algorithm development:
 
 ~~1. [Data modelling](#data-modelling)
@@ -36,8 +46,6 @@ Noarr framework distinguishes two types of mutidimensional data - uniform and ja
 To represent a list of floats, you create the following *structure* object:
 
 ```cpp
-#include "noarr/structures.hpp"
-
 noarr::vector<'i', noarr::scalar<float>> my_structure;
 ```
 
