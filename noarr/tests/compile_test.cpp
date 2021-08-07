@@ -8,6 +8,39 @@
 #include "noarr/structures/wrapper.hpp"
 #include "noarr/structures/bag.hpp"
 
+TEST_CASE("Main example compile test", "[Main example compile test]") {
+	// the following two structures both describe a two-dimensional continuous array (matrix)
+
+	// describes a layout of 20x30 two-dimensional array
+	noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>> foo;
+
+	// describes a similar logical layout with switched dimensions in the physical layout
+	noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>> bar;
+
+	// getting the offset of the value at (x = 5; y = 10):
+	foo | noarr::offset<'x', 'y'>(5, 10);
+	bar | noarr::offset<'x', 'y'>(5, 10);
+
+	// arguments definition
+	int WIDTH = 10;
+	int HEIGHT = 10;
+
+	// defines the structure of the matrix, rows are the 'x' dimension and columns are the 'y' dimension
+	// physically, the layout is an contiguous array of rows
+	noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>> matrix_structure;
+
+	// defining size of the matrix
+	auto sized_matrix_structure = matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT);
+
+	// data allocation
+	auto matrix = noarr::bag(sized_matrix_structure);
+
+	for (int i = 0; i < matrix.get_length<'x'>(); i++)
+		for (int j = i; j < matrix.get_length<'y'>(); j++)
+			std::swap(matrix.at<'x', 'y'>(i, j), matrix.at<'x', 'y'>(j, i));
+}
+
+
 // function which does some logic templated by different structures
 template<typename Structure>
 void matrix_demo(int size) {
@@ -40,6 +73,7 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	using matrix_rows = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
 	using matrix_columns = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
 
+	// arguments definition
 	std::string layout = "rows";
 	int size = 42;
 
