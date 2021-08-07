@@ -36,13 +36,15 @@ Noarr framework distinguishes two types of mutidimensional data - uniform and ja
 To represent a list of floats, you create the following *structure* object:
 
 ```cpp
+#include "noarr/structures.hpp"
+
 noarr::vector<'i', noarr::scalar<float>> my_structure;
 ```
 
 The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values. But currently the structure has no size, we need to make room for 10 items:
 
 ```cpp
-auto my_structure_of_ten = my_structure | noarr::resize<'i'>(10);
+auto my_structure_of_ten = my_structure | noarr::set_length<'i'>(10);
 ```
 
 A *structure* object is immutable. The `|` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
@@ -79,13 +81,13 @@ Now, with a *data* that holds the values, we can access these values by computin
 float& value_ref = bag.structure().template get_at<'i'>(bag.data(), 5);
 
 // now use the reference to access the value
-value_ref = 42f;
+value_ref = 42;
 ```
 
 As discussed earlier, there is a good reason to separate *structure* and *data*. But in the case of *bag*, there is the following shortcut:
 
 ```cpp
-bag.at<'i'>(5) = 42f;
+bag.at<'i'>(5) = 42;
 ```
 
 <a name="changing-data-layouts"></a>
@@ -117,16 +119,14 @@ We set the size at runtime because size can be any int.
 We can call at runtime different templated layouts.
 
 ```cpp
-// we select the layout in runtime
 void main() {
-	int layout;
-	std::cin >> layout;
-	
-	if (layout == 1)
+	...
+	// we select the layout in runtime
+	if (layout == "rows")
 		matrix_demo<matrix_rows>(size);
-	else if (layout == 2)
+	else if (layout == "columns")
 		matrix_demo<matrix_columns>(size);
-	// and so on
+	...
 }
 ```
 
@@ -160,7 +160,7 @@ noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<floa
 To get the first element of the tuple we use `get_at` in the following way:
 
 ```cpp
-get_at<'t'>(1_idx);
+t3.get_at<'t'>(1_idx);
 ```
 
 <a name="full-list-of-functions"></a>
@@ -182,17 +182,17 @@ You can read about supported functions in detail in [structures documentation](.
 We will shortly discuss higher-dimensional data. You will model the matrix in the following way:
 
 ```cpp
-noarr::vector<'i', noarr::vector<'j', noarr::scalar<float>>> my_matrix;
+noarr::vector<'n', noarr::vector<'m', noarr::scalar<float>>> my_matrix;
 ```
 
 To showcase easy extendability we implemented Z-curve and block layout:
 
 ```cpp
-noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
+noarr::zcurve<'n', 'm', noarr::scalar<float>>> my_zcurve_matrix;
 ```
 
 We can use `get_at<>` in the following ways
 
 ```cpp
-get_at<'i', 'j'>(1, 2);
+get_at<'n', 'm'>(1, 2);
 ```
