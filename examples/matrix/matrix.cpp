@@ -205,13 +205,13 @@ void print_help_and_exit()
 int main(int argc, char* argv[])
 {
 	// there have to be two arguments
-	if (argc != 2)
+	if (argc != 3)
 		print_help_and_exit();
 
 	// parse the second argument (size) into int
 	int size;
 	try {
-		size = std::stoi(argv[1]);
+		size = std::stoi(argv[2]);
 	}
 	catch (...) {
 		print_help_and_exit();
@@ -222,11 +222,11 @@ int main(int argc, char* argv[])
 		print_help_and_exit();
 
 	// if the first argument matches some of the supported layouts, run the example, otherwise print help
-	if (!strcmp(argv[0], "rows"))
+	if (!strcmp(argv[1], "rows"))
 		matrix_demo(size, matrix_rows() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
-	else if (!strcmp(argv[0], "columns"))
+	else if (!strcmp(argv[1], "columns"))
 		matrix_demo(size, matrix_columns() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
-	else if (!strcmp(argv[0], "z_curve"))
+	else if (!strcmp(argv[1], "z_curve"))
 		matrix_demo(size, matrix_zcurve(noarr::sized_vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'n'>(size), noarr::helpers::z_curve_bottom<'m'>(size)));
 	else
 		print_help_and_exit();
