@@ -63,7 +63,7 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	auto bag = noarr::bag(my_structure_of_ten);
 
 	// get the reference (we will get 5-th element)
-	float& value_ref = bag.structure().template get_at<'i'>(bag.data(), 5);
+	float& value_ref = bag.structure().get_at<'i'>(bag.data(), 5);
 
 	// now use the reference to access the value
 	value_ref = 42;
