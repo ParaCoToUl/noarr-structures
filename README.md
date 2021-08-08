@@ -1,19 +1,10 @@
-## Noarr tests
+#### Noarr tests
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20test%20ubuntu-latest%20-%20clang/badge.svg)
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20test%20ubuntu-latest%20-%20gcc/badge.svg)
 
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20test%20macosl/badge.svg)
 
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20test%20Win/badge.svg)
-
-## Matrix example tests
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
-
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20macosl/badge.svg)
-
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20Win/badge.svg)
-
 
 # Noarr Structures
 
@@ -62,15 +53,19 @@ The following snippet shows how we define a matrix structure and then we use `no
 // physically, the layout is an contiguous array of rows
 noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>> matrix_structure;
 
-auto matrix1 = noarr::bag(matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT));
+// defining size of the matrix
+auto sized_matrix_structure = matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT);
+
+// data allocation
+auto matrix = noarr::bag(sized_matrix_structure);
 ```
 
 The following snippet then shows how we would transpose the values of the matrix using the `at` method:
 
 ```cpp
-for (int i = 0; i < matrix1.get_length<'x'>(); i++)
-	for (int j = i; j < matrix1.get_length<'y'>(); j++)
-		std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
+for (int i = 0; i < matrix.get_length<'x'>(); i++)
+	for (int j = i; j < matrix.get_length<'y'>(); j++)
+		std::swap(matrix.at<'x', 'y'>(i, j), matrix.at<'x', 'y'>(j, i));
 ```
 
 In this snippet the actual physical layout of the matrix is not relevant to the way it is accessed. If the data were stored, for example, in an (contiguous) array of columns, it could still be accessed the same way. This contrasts with traditional C/C++ data structures.
@@ -85,6 +80,19 @@ target_include_directories(<my-app> PUBLIC <cloned-repo-path>/include)
 ```
 
 The library requires C++ 17.
+
+## Examples
+
+Examples can be found at [examples/matrix](examples/matrix "matrix example").
+
+#### Matrix example tests
+![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
+![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
+
+![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20macosl/badge.svg)
+
+![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20Win/badge.svg)
+
 
 
 ## Running tests

@@ -1,5 +1,15 @@
 # User documentation for Noarr
 
+```cpp
+#include "noarr/structures.hpp"
+#include "noarr/structures/structs.hpp"
+#include "noarr/structures/funcs.hpp"
+#include "noarr/structures/io.hpp"
+#include "noarr/structures/struct_traits.hpp"
+#include "noarr/structures/wrapper.hpp"
+#include "noarr/structures/bag.hpp"
+```
+
 ~~Noarr framework aims to help with certain aspects of performant GPU algorithm development:
 
 ~~1. [Data modelling](#data-modelling)
@@ -23,7 +33,7 @@ Noarr framework distinguishes two types of mutidimensional data - uniform and ja
 <a name="data-modelling-in-noarr"></a>
 ### Data modelling in Noarr
 
-*Noarr structures* was designed to support uniform data. Uniform data has the advantage of occupying one continuous stretch of memory. When working with it, you work with three objects:
+*Noarr structures* was designed to support uniform data. Uniform data has the advantage of occupying one continuous array of memory. When working with it, you work with three objects:
 
 1. **Structure:** A small, tree-like object, that represents the structure of the data. It does not contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
 2. **Data:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *Structure* object.
@@ -42,7 +52,7 @@ noarr::vector<'i', noarr::scalar<float>> my_structure;
 The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values. But currently the structure has no size, we need to make room for 10 items:
 
 ```cpp
-auto my_structure_of_ten = my_structure | noarr::resize<'i'>(10);
+auto my_structure_of_ten = my_structure | noarr::set_length<'i'>(10);
 ```
 
 A *structure* object is immutable. The `|` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
@@ -76,16 +86,16 @@ Now, with a *data* that holds the values, we can access these values by computin
 
 ```cpp
 // get the reference (we will get 5-th element)
-float& value_ref = bag.structure().template get_at<'i'>(bag.data(), 5);
+float& value_ref = bag.structure().get_at<'i'>(bag.data(), 5);
 
 // now use the reference to access the value
-value_ref = 42f;
+value_ref = 42;
 ```
 
 As discussed earlier, there is a good reason to separate *structure* and *data*. But in the case of *bag*, there is the following shortcut:
 
 ```cpp
-bag.at<'i'>(5) = 42f;
+bag.at<'i'>(5) = 42;
 ```
 
 <a name="changing-data-layouts"></a>
@@ -106,6 +116,7 @@ We will create a templated matrix. And also set size at runtime like this:
 template<typename Structure>
 void matrix_demo(int size) {
 	// dot version
+	// note template keyword, it is there because the whole function is layout templated
 	auto n1 = noarr::bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
 	// pipe version (both are valid syntax and produce the same result)
 	auto n2 = noarr::bag(Structure() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
@@ -117,16 +128,14 @@ We set the size at runtime because size can be any int.
 We can call at runtime different templated layouts.
 
 ```cpp
-// we select the layout in runtime
 void main() {
-	int layout;
-	std::cin >> layout;
-	
-	if (layout == 1)
+	...
+	// we select the layout in runtime
+	if (layout == "rows")
 		matrix_demo<matrix_rows>(size);
-	else if (layout == 2)
+	else if (layout == "columns")
 		matrix_demo<matrix_columns>(size);
-	// and so on
+	...
 }
 ```
 
@@ -143,7 +152,9 @@ noarr::array<'i', 10, noarr::scalar<float>> my_array;
 
 ##### Scalars
 
-Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`...
+Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`... 
+
+You can read about supported scalars in detail in [technical documentation](../noarr_docs_tech/README.md "technical documentation").
 
 ##### Tuples
 
@@ -158,30 +169,39 @@ noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<floa
 To get the first element of the tuple we use `get_at` in the following way:
 
 ```cpp
-get_at<'t'>(1_idx);
+t3.get_at<'t'>(1_idx);
 ```
 
 <a name="full-list-of-functions"></a>
 #### Full list of functions
 
-https://github.com/ParaCoToUl/noarr-structures/tree/main/noarr/include/noarr/structures
+  - `compose`: function composition (honoring the left-associative notation)
+  - `set_length`: changes the length (number of indices) of arrays and vectors
+  - `get_length`: gets the length (number of indices) of a structure
+  - `fix`: fixes an index in a structure
+  - `get_offset`: retrieves offset of a substructure 
+  - `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
+  - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
+  - `contain`: tuple-like struct, and a structured layout, that facilitates creation of new structures and functions
+
+You can read about supported functions in detail in [structures documentation](../noarr/include/noarr/structures/README.md "structures documentation").
 
 ##### Matrices/Cubes
 
 We will shortly discuss higher-dimensional data. You will model the matrix in the following way:
 
 ```cpp
-noarr::vector<'i', noarr::vector<'j', noarr::scalar<float>>> my_matrix;
+noarr::vector<'n', noarr::vector<'m', noarr::scalar<float>>> my_matrix;
 ```
 
 To showcase easy extendability we implemented Z-curve and block layout:
 
 ```cpp
-noarr::zcurve<'i', 'j', noarr::scalar<float>>> my_zcurve_matrix;
+noarr::zcurve<'n', 'm', noarr::scalar<float>>> my_zcurve_matrix;
 ```
 
 We can use `get_at<>` in the following ways
 
 ```cpp
-get_at<'i', 'j'>(1, 2);
+get_at<'n', 'm'>(1, 2);
 ```
