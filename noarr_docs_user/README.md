@@ -17,7 +17,7 @@
 
 Data modelling is the process of describing the structure of your data, so that an algorithm can be written to processes the data. Noarr lets you model your data in an abstract, multidimensional space, abstracting away any underlying physical structure.
 
-Noarr framework distinguishes two types of mutidimensional data - uniform and jagged.
+Noarr framework distinguishes two types of multidimensional data - uniform and jagged.
 
 **Jagged data** can be thought of as a vector of vectors, each having different size. This means the dimensions of such data need to be stored within the data itself, requiring the use of pointers and making processing of such data inefficient. Noarr supports this type of data only at the highest abstraction levels of your data model.
 
@@ -31,7 +31,7 @@ Noarr framework distinguishes two types of mutidimensional data - uniform and ja
 
 1. **Structure:** A small, tree-like object, that represents the structure of the data. It does not contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
 2. **Data:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *Structure* object.
-3. **Bag:** Wraper object, which combines *structure* and *data* together.
+3. **Bag:** Wrapper object, which combines *structure* and *data* together.
 
 > Note: in the case of jagged data, you can use *Noarr pipelines* without *Noarr structures*. The architecture of the GPU is designed for uniform data mainly, so it should fit most common cases. Also note, that you can also use several *Noarr structures* in your program.
 
@@ -57,7 +57,7 @@ The reason we specify the size later is that it allows us to decouple the *struc
 
 <a name="wrapper"></a>
 #### Wrapper
-It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `naorr::wrapper` first.
+It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `noarr::wrapper` first.
 
 ```cpp
 // artificially complicated example
