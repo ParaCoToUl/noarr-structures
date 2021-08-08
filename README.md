@@ -87,18 +87,20 @@ target_include_directories(<my-app> PUBLIC <cloned-repo-path>/include)
 The library requires C++ 17.
 
 
-## Running tests and examples
+## Running tests
 
-Enter the desired folder ([examples/matrix](examples/matrix "matrix example")). In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
+Make sure you are in the [noarr](noarr) folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
 
 ```sh
-# generates build files for your platform
-cmake .
+# creates the build directory
+cmake -E make_directory build
 
-# builds the project using previously generated build files
+# enters the build directory
+cd build
+
+# configures the build environment
+cmake ..
+
+# builds the project according to the configuration
 cmake --build .
-
-# run the built executable
-# (this step differs by platform, this example is for linux)
-./matrix || ./test-runner
 ```

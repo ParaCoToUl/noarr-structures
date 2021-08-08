@@ -2,17 +2,23 @@
 
 This folder contains the the Noarr library.
 
-To build the project on linux:
+To build the test project on linux:
 
 ```sh
-# needs to be run to generate the build files
-cmake .
+# creates the build directory
+cmake -E make_directory build
 
-# builds the project from the build files
+# enters the build directory
+cd build
+
+# configures the build environment
+cmake ..
+
+# builds the project according to the configuration
 cmake --build .
 ```
 
-To run tests on linux:
+Then, to run tests on linux/macos:
 
 ```sh
 ./test-runner
