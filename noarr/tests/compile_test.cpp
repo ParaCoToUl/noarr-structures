@@ -1,3 +1,9 @@
+/**
+ * @file compile_test.cpp
+ * @brief This file contains the code snippets from the root README ensuring they are correct
+ * 
+ */
+
 #include <catch2/catch.hpp>
 
 #include "noarr/structures.hpp"
