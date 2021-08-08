@@ -19,7 +19,7 @@ _deps
 # CTest & testing
 /ParseAndAddCatchTests.cmake
 /DartConfiguration.tcl
-/test-runner
+test-runner
 
 # CMake stuff on Windows
 /Debug
