@@ -6,13 +6,7 @@
 
 #include <catch2/catch.hpp>
 
-#include "noarr/structures.hpp"
-#include "noarr/structures/structs.hpp"
-#include "noarr/structures/funcs.hpp"
-#include "noarr/structures/io.hpp"
-#include "noarr/structures/struct_traits.hpp"
-#include "noarr/structures/wrapper.hpp"
-#include "noarr/structures/bag.hpp"
+#include "noarr/structures_extended.hpp"
 
 TEST_CASE("Main example compile test", "[Main example compile test]") {
 	// the following two structures both describe a two-dimensional continuous array (matrix)

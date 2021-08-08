@@ -4,11 +4,7 @@
 #include <iostream>
 #include <array>
 
-#include "noarr/structures/structs.hpp"
-#include "noarr/structures/funcs.hpp"
-#include "noarr/structures/io.hpp"
-#include "noarr/structures/struct_traits.hpp"
-#include "noarr/structures/wrapper.hpp"
+#include "noarr/structures_extended.hpp"
 
 using namespace noarr::literals;
 
