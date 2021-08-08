@@ -36,6 +36,7 @@ struct contain_get<T, 0> {
 	}
 };
 
+// an implementation for the pair (T, TS...) where neither is empty
 template<typename T, typename... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
 	template<typename, std::size_t>
@@ -63,6 +64,7 @@ private:
 	}
 };
 
+// an implementation for the pair (T, TS...) where TS... is empty
 template<typename T, typename... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
 	template<typename, std::size_t>
@@ -90,6 +92,7 @@ private:
 	}
 };
 
+// an implementation for the pair (T, TS...) where T is empty
 template<typename T, typename... TS>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
 	template<typename, std::size_t>
@@ -115,6 +118,7 @@ private:
 	}
 };
 
+// an implementation for an empty T
 template<typename T>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
 	template<typename, std::size_t>
@@ -134,6 +138,7 @@ private:
 	}
 };
 
+// an implementation for an nonempty T
 template<typename T>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 	template<typename, std::size_t>
@@ -155,6 +160,7 @@ private:
 	}
 };
 
+// contains nothing
 template<>
 struct contain_impl<void> {};
 

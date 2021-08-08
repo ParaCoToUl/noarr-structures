@@ -6,9 +6,19 @@
 
 namespace noarr {
 
-template<class... T>
+/**
+ * @brief converts any type(s) to void
+ * 
+ * @tparam T: the converted types
+ */
+template<class... TS>
 using void_t = void;
 
+/**
+ * @brief a shortcut for applying std::remove_cv and std::remove_reference
+ * 
+ * @tparam T 
+ */
 template<class T>
 using remove_cvref = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
 
@@ -54,6 +64,12 @@ struct integral_pack_contains_impl;
 template<class Pack, typename Pack::value_type V>
 using integral_pack_contains = helpers::integral_pack_contains_impl<typename Pack::value_type, V, Pack>;
 
+/**
+ * @brief contains a set of scalar values `VS` of type `T`
+ * 
+ * @tparam T: the scalar type of the values
+ * @tparam VS: the set of the contained values
+ */
 template<class T, T... VS>
 struct integral_pack {
 	using value_type = T;
@@ -101,13 +117,18 @@ struct integral_pack_concat_sep_impl<integral_pack<T, sep...>, integral_pack<T, 
 }
 
 /**
- * @brief concatenates multiple integral packs
+ * @brief concatenates multiple integral `Packs`
  * 
  * @tparam Packs 
  */
 template<class... Packs>
 using integral_pack_concat = typename helpers::integral_pack_concat_impl<Packs...>::type;
 
+/**
+ * @brief concatenates multiple integral packs (the 2nd, 3rd etc. member of `Packs`) pasting the 1st member of `Packs` between each consecutive packs
+ * 
+ * @tparam Packs 
+ */
 template<class... Packs>
 using integral_pack_concat_sep = typename helpers::integral_pack_concat_sep_impl<Packs...>::type;
 

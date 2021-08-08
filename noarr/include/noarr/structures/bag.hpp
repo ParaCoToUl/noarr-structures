@@ -69,7 +69,7 @@ public:
 	}
 
 	/**
-	 * @brief gets the length (number of indices) o a dimension in the `structure`
+	 * @brief gets the length (number of indices) of a dimension in the `structure`
 	 * 
 	 * @tparam Dim: the dimension name
 	 */
@@ -78,6 +78,11 @@ public:
 		return structure().template get_length<Dim>();
 	}
 
+	/**
+	 * @brief gets the size of the data described by the `structure`
+	 * 
+	 * @return constexpr auto 
+	 */
 	constexpr auto get_size() const {
 		return structure().template get_size();
 	}
