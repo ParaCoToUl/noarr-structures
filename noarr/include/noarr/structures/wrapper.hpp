@@ -5,8 +5,6 @@
 
 namespace noarr {
 
-// TODO: comment wrapper insides
-
 /**
  * @brief wraps the structure and offers the `.` notation instead of the `|` notation in applying functions to a structure (structure always on the left side)
  * 
