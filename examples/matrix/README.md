@@ -8,9 +8,21 @@
 
 # Instalation
 
-TODO: Copy instructions from main README when ready!
+Make sure you are in the [examples/matrix](examples/matrix) folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
 
-You can build the example using `CMake` in the same way as described in the main README. After compiling the example you will be able to run matrix example and a choose matrix layout and size dynamically.
+```sh
+# creates the build directory
+cmake -E make_directory build
+
+# enters the build directory
+cd build
+
+# configures the build environment
+cmake ..
+
+# builds the project according to the configuration
+cmake --build .
+```
 
 # Usage
 ```text
