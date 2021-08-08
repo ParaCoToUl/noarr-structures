@@ -19,7 +19,7 @@ _deps
 # CTest & testing
 /ParseAndAddCatchTests.cmake
 /DartConfiguration.tcl
-/matrix
+matrix
 
 # CMake stuff on Windows
 /Debug
