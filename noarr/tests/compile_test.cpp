@@ -94,10 +94,6 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
 
 
-	//noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v;
-	//auto v2 = v | noarr::set_length<'x'>(10_idx);
-
-
 	// tuple declaration
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::array<'x', 20, noarr::scalar<int>>> tuple;
 	// we will create a bag
@@ -107,9 +103,4 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	using namespace noarr::literals;
 	// we index tuple like this
 	float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
-
-
-
-	noarr::vector<'i', noarr::vector<'j', noarr::scalar<float>>> my_matrix;
-
 }
