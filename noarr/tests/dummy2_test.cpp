@@ -6,6 +6,8 @@
 
 #include "noarr/structures_extended.hpp"
 
+// TODO: split into histogram test, cube & point test, and whatever-is-left test 
+
 TEST_CASE("Image", "[image]") {
 	//noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::tuple<'p', noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>>>> image;
 
