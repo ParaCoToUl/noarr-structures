@@ -64,6 +64,12 @@ public:
 		return base::template get<0>() | noarr::offset<Dims...>(ts...);
 	}
 
+	/**
+	 * @brief returns an offset of a substructure with a certain index in a structure given by its dimension name
+	 * 
+	 * @tparam Dim: the dimension name
+	 * @param t: the index of the substructure
+	 */
 	template<char Dim, typename T>
 	constexpr auto get_offset(T t) const {
 		return base::template get<0>() | noarr::get_offset<Dim>(t);

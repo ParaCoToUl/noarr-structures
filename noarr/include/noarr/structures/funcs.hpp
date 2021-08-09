@@ -502,6 +502,9 @@ inline constexpr auto get_at(V *ptr, Ts... ts) {
 	return compose(fix<Dims...>(ts...), helpers::get_at_impl(ptr));
 }
 
+/**
+ * @brief returns the topmost dims of a structure (if the topmost structure in the substructure tree has no dims and it has only one substructure it returns the topmost dims of this substructure, recursively)
+ */
 struct top_dims {
 	using func_family = top_tag;
 

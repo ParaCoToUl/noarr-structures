@@ -60,7 +60,7 @@ public:
 	/**
 	 * @brief returns an offset of a value in `data` by fixing dimensions in the `structure`
 	 * 
-	 * @tparam Dims : the dimension names
+	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
 	template<char... Dims, typename... Ts>
@@ -68,6 +68,12 @@ public:
 		return structure().template offset<Dims...>(ts...);
 	}
 
+	/**
+	 * @brief returns an offset of a substructure with a certain index in a structure given by its dimension name
+	 * 
+	 * @tparam Dim: the dimension name
+	 * @param t: the index of the substructure
+	 */
 	template<char Dim, typename T>
 	constexpr auto get_offset(T t) const {
 		return structure().template get_offset<Dim>(t);
