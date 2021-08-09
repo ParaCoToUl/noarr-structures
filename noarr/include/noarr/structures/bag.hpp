@@ -88,6 +88,16 @@ public:
 	}
 };
 
+template<typename Structure>
+constexpr auto make_bag(Structure s) {
+	return bag<Structure>(s);
+}
+
+template<typename Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s) {
+	return bag<Structure>(s);
+}
+
 } // namespace noarr
 
 #endif // NOARR_BAG_HPP
