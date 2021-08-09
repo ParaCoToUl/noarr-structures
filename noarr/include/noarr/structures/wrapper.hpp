@@ -64,6 +64,11 @@ public:
 		return base::template get<0>() | noarr::offset<Dims...>(ts...);
 	}
 
+	template<char Dim, typename T>
+	constexpr auto get_offset(T t) const {
+		return base::template get<0>() | noarr::get_offset<Dim>(t);
+	}
+
 	/**
 	 * @brief returns the number of indices in the structure specified by the dimension name
 	 * 
