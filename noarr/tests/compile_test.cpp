@@ -60,6 +60,10 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	// now version with wrapper
 	auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(5).set_length<'i'>(10);
 
+	// to remove warnings
+	piped.size();
+	doted.get_size();
+
 	// we will create a bag
 	auto bag = noarr::make_bag(my_structure_of_ten);
 
@@ -85,7 +89,6 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	else if (layout == "columns")
 		matrix_demo<matrix_columns>(size);
 
-
 	noarr::vector<'i', noarr::scalar<float>> my_vector;
 	noarr::array<'i', 10, noarr::scalar<float>> my_array;
 
@@ -93,6 +96,12 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t2;
 	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
 
+	// to remove warnings:
+	my_vector = {};
+	my_array = {};
+	t = {};
+	t2 = {};
+	t3 = {};
 
 	// tuple declaration
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::array<'x', 20, noarr::scalar<int>>> tuple;
@@ -103,4 +112,5 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	using namespace noarr::literals;
 	// we index tuple like this
 	float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
+	value = 0.f;
 }
