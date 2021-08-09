@@ -68,6 +68,11 @@ public:
 		return structure().template offset<Dims...>(ts...);
 	}
 
+	template<char Dim, typename T>
+	constexpr auto get_offset(T t) const {
+		return structure().template get_offset<Dim>(t);
+	}
+
 	/**
 	 * @brief gets the length (number of indices) of a dimension in the `structure`
 	 * 
