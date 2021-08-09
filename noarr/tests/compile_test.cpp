@@ -36,8 +36,8 @@ TEST_CASE("Main example compile test", "[Main example compile test]") {
 	// data allocation
 	auto matrix = noarr::make_bag(sized_matrix_structure);
 
-	for (int i = 0; i < matrix.get_length<'x'>(); i++)
-		for (int j = i; j < matrix.get_length<'y'>(); j++)
+	for (std::size_t i = 0; i < matrix.get_length<'x'>(); i++)
+		for (std::size_t j = i; j < matrix.get_length<'y'>(); j++)
 			std::swap(matrix.at<'x', 'y'>(i, j), matrix.at<'x', 'y'>(j, i));
 }
 
