@@ -9,6 +9,8 @@
 namespace noarr {
 
 // TODO: function that returns the topmost dimension
+// TODO: function that renames dimensions
+// TODO: function that switches independent substructures (fuse with reassemble?) 
 
 namespace literals {
 
@@ -188,7 +190,10 @@ struct reassemble_get {
 	using func_family = get_tag;
 
 	template<typename T>
-	constexpr auto operator()(T t) const -> remove_cvref<decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), t)> {
+	using can_apply = typename get_dims<T>::template contains<Dim>;
+
+	template<typename T>
+	constexpr auto operator()(T t) const {
 		return t;
 	}
 };
@@ -225,6 +230,7 @@ private:
 	constexpr auto add_getter(T t) const -> decltype(add_setter<Dim>(t, t | helpers::reassemble_get<Dim>())) {
 		return add_setter<Dim>(t, t | helpers::reassemble_get<Dim>());
 	}
+
 public:
 	using func_family = transform_tag;
 
@@ -368,12 +374,15 @@ struct get_offset {
 
 	explicit constexpr get_offset(std::size_t idx) : idx(idx) {}
 
+	template<typename T>
+	using can_apply = typename get_dims<T>::template contains<Dim>;
+
 private:
 	std::size_t idx;
 
 public:
 	template<typename T>
-	constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), t.offset(idx)) {
+	constexpr auto operator()(T t) const {
 		return t.offset(idx);
 	}
 };
