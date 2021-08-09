@@ -261,59 +261,55 @@ struct GetImageStructreStructure<ImageDataLayout::Zcurve>
 template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	auto image = noarr::bag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
-	CHECK(image.structure().get_size() == width * height * sizeof(int));
+	auto image = noarr::make_bag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
 
-	int y_size = image.structure().template get_length<'y'>();
-	CHECK(y_size == height);
+	CHECK(image.get_size() == width * height * sizeof(int));
 
-	auto histogram = noarr::bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
-	CHECK(histogram.structure().get_size() == pixel_range * sizeof(int));
+	auto histogram = noarr::make_bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
+	CHECK(histogram.get_size() == pixel_range * sizeof(int));
 
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.structure().template get_length<'x'>();
+	std::size_t x_size = image.template get_length<'x'>();
 	REQUIRE(x_size == width);
 
-	y_size = image.structure().template get_length<'y'>();
+	std::size_t y_size = image.template get_length<'y'>();
 	REQUIRE(y_size == height);
 
-	for (int i = 0; i < x_size; i++)
+	for (std::size_t i = 0; i < x_size; i++)
 	{
-		for (int j = 0; j < y_size; j++)
+		for (std::size_t j = 0; j < y_size; j++)
 		{
-			//int& pixel_value = *((int*)(image.blob + x_fixed.fix<'y'>(j).offset())); // v1
-			//int& pixel_value = *((int*)x_fixed.fix<'y'>(j).get_at(image.blob)); // v2
-			int pixel_value = image.structure().template get_at<'x','y'>(image.data(), i, j); // v3
+			int pixel_value = image.template at<'x','y'>(i, j); // v3
 
 			if (pixel_value != 0)
 				FAIL();
 
-			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.template at<'x'>(pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
 }
 
-TEST_CASE("Histogram prototype 720 x 480 with 16 colors", "[Histogram prototype]")
+TEST_CASE("Histogram prototype 128 x 86 with 16 colors", "[Histogram prototype]")
 {
-	histogram_template_test<ImageDataLayout::ArrayOfArrays, 720, 480, 16>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 128, 86, 16>();
 }
 
-TEST_CASE("Histogram prototype 720 x 480", "[Histogram prototype]")
+TEST_CASE("Histogram prototype 128 x 86", "[Histogram prototype]")
 {
-	histogram_template_test<ImageDataLayout::ArrayOfArrays, 720, 480>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 128, 86>();
 }
 
-TEST_CASE("Histogram prototype 1080 x 720", "[Histogram prototype]")
+TEST_CASE("Histogram prototype 150 x 86", "[Histogram prototype]")
 {
-	histogram_template_test<ImageDataLayout::ArrayOfArrays, 1080, 720>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 150, 86>();
 }
 
-TEST_CASE("Histogram prototype 1920 x 1080", "[Histogram prototype]")
+TEST_CASE("Histogram prototype 64 x 43", "[Histogram prototype]")
 {
-	histogram_template_test<ImageDataLayout::ArrayOfArrays, 1920, 1080>();
+	histogram_template_test<ImageDataLayout::ArrayOfArrays, 64, 43>();
 }
 
 template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>

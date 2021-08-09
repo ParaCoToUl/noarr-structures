@@ -308,8 +308,8 @@ TEST_CASE("Small matrix multimplication Zcurve", "[Small matrix multimplication 
 
 struct RowBlocks
 {
-	uint32_t dim_x = 1024;
-	uint32_t dim_y = 1024;
+	uint32_t dim_x = 128;
+	uint32_t dim_y = 128;
 	uint32_t size = 8;
 
 	uint64_t calcRowBlocks(uint32_t x, uint32_t y)
