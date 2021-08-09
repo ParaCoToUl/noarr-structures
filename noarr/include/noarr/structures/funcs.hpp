@@ -269,9 +269,9 @@ inline constexpr auto safe_get(T t) {
 namespace helpers {
 
 template<char Dim>
-struct fix_dynamic {
-	constexpr fix_dynamic() = default;
-	explicit constexpr fix_dynamic(std::size_t idx) : idx(idx) {}
+struct fix_dynamic_impl {
+	constexpr fix_dynamic_impl() = default;
+	explicit constexpr fix_dynamic_impl(std::size_t idx) : idx(idx) {}
 
 private:
 	std::size_t idx;
@@ -284,10 +284,10 @@ public:
 };
 
 template<char Dim, std::size_t Idx>
-struct fix_static {
+struct fix_static_impl {
 	using idx_t = std::integral_constant<std::size_t, Idx>;
 
-	constexpr fix_static() = default;
+	constexpr fix_static_impl() = default;
 
 	template<typename T>
 	constexpr auto operator()(T t) const -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), sfixed_dim<Dim, T, Idx>(t)) {
@@ -299,13 +299,13 @@ template<typename... Tuples>
 struct fix_impl;
 
 template<char Dim, typename T, typename... Tuples>
-struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<fix_dynamic<Dim>, fix_impl<Tuples...>> {
-	using base = contain<fix_dynamic<Dim>, fix_impl<Tuples...>>;
+struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<fix_dynamic_impl<Dim>, fix_impl<Tuples...>> {
+	using base = contain<fix_dynamic_impl<Dim>, fix_impl<Tuples...>>;
 
 	constexpr fix_impl() = default;
 	
 	template <typename... Ts>
-	constexpr fix_impl(T t, Ts... ts) : base(fix_dynamic<Dim>(t), fix_impl<Tuples...>(ts...)) {}
+	constexpr fix_impl(T t, Ts... ts) : base(fix_dynamic_impl<Dim>(t), fix_impl<Tuples...>(ts...)) {}
 
 	template<typename S>
 	constexpr auto operator()(S s) const {
@@ -314,17 +314,17 @@ struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : p
 };
 
 template<char Dim, typename T>
-struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>> : private fix_dynamic<Dim> { using fix_dynamic<Dim>::fix_dynamic; using fix_dynamic<Dim>::operator(); };
+struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>> : private fix_dynamic_impl<Dim> { using fix_dynamic_impl<Dim>::fix_dynamic_impl; using fix_dynamic_impl<Dim>::operator(); };
 
 
 template<char Dim, std::size_t Idx, typename... Tuples>
-struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : private contain<fix_static<Dim, Idx>, fix_impl<Tuples...>> {
-	using base = contain<fix_static<Dim, Idx>, fix_impl<Tuples...>>;
+struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : private contain<fix_static_impl<Dim, Idx>, fix_impl<Tuples...>> {
+	using base = contain<fix_static_impl<Dim, Idx>, fix_impl<Tuples...>>;
 
 	constexpr fix_impl() = default;
 	
 	template <typename... Ts>
-	constexpr fix_impl(std::integral_constant<std::size_t, Idx>, Ts... ts) : base(fix_static<Dim, Idx>(), fix_impl<Tuples...>(ts...)) {}
+	constexpr fix_impl(std::integral_constant<std::size_t, Idx>, Ts... ts) : base(fix_static_impl<Dim, Idx>(), fix_impl<Tuples...>(ts...)) {}
 
 	template<typename T>
 	constexpr auto operator()(T t) const {
@@ -333,11 +333,11 @@ struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_cons
 };
 
 template<char Dim, std::size_t Idx>
-struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : private fix_static<Dim, Idx> {
+struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : private fix_static_impl<Dim, Idx> {
 	constexpr fix_impl() = default;
-	constexpr fix_impl(std::integral_constant<std::size_t, Idx>) : fix_static<Dim,Idx>() {}
+	constexpr fix_impl(std::integral_constant<std::size_t, Idx>) : fix_static_impl<Dim,Idx>() {}
 
-	using fix_static<Dim, Idx>::operator();
+	using fix_static_impl<Dim, Idx>::operator();
 };
 
 template<>
