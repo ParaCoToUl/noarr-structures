@@ -162,10 +162,18 @@ noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x'
 noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
 ```
 
-To get the first element of the tuple we use `get_at` in the following way:
+We will work with `tuple`s like this:
 
 ```cpp
-t3.get_at<'t'>(1_idx);
+// tuple declaration
+noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::array<'x', 20, noarr::scalar<int>>> tuple;
+// we will create a bag
+auto tuple_bag = noarr::make_bag(tuple);
+// we have to use noarr::literals namespace to be able to index tuples
+// we can put this at the beginning of the file
+using namespace noarr::literals;
+// we index tuple like this
+float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
 
 <a name="full-list-of-functions"></a>
