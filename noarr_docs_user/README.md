@@ -1,9 +1,5 @@
 # User documentation for Noarr
 
-```cpp
-#include "noarr/structures_extended.hpp"
-```
-
 ~~Noarr framework aims to help with certain aspects of performant GPU algorithm development:
 
 ~~1. [Data modelling](#data-modelling)
@@ -36,6 +32,12 @@ Noarr framework distinguishes two types of multidimensional data - uniform and j
 > Note: in the case of jagged data, you can use *Noarr pipelines* without *Noarr structures*. The architecture of the GPU is designed for uniform data mainly, so it should fit most common cases. Also note, that you can also use several *Noarr structures* in your program.
 
 #### Creating a structure
+
+First, we have to `#include` the `noarr` library:
+
+```cpp
+#include "noarr/structures_extended.hpp"
+```
 
 To represent a list of floats, you create the following *structure* object:
 
