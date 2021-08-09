@@ -7,6 +7,8 @@
 #include "struct_decls.hpp"
 #include "scalar.hpp"
 
+// FIXME: is_point returns false for point static dimensions where irrelevant substructures are nonpoint
+
 namespace noarr {
 
 namespace helpers {
