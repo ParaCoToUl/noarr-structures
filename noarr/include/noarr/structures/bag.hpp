@@ -89,7 +89,7 @@ public:
 	 * @return constexpr auto 
 	 */
 	constexpr auto get_size() const {
-		return structure().template get_size();
+		return structure().get_size();
 	}
 };
 
