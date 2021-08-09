@@ -363,16 +363,13 @@ inline constexpr auto fix(Ts... ts) {
 	return helpers::fix_impl<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
 }
 
-/**
- * @brief returns the offset of a substructure given by a dimension name in a structure
- * 
- * @tparam Dim: the dimension name
- */
+namespace helpers {
+
 template<char Dim>
-struct get_offset {
+struct get_offset_dynamic_impl {
 	using func_family = get_tag;
 
-	explicit constexpr get_offset(std::size_t idx) : idx(idx) {}
+	explicit constexpr get_offset_dynamic_impl(std::size_t idx) : idx(idx) {}
 
 	template<typename T>
 	using can_apply = typename get_dims<T>::template contains<Dim>;
@@ -386,6 +383,36 @@ public:
 		return t.offset(idx);
 	}
 };
+
+template<char Dim, std::size_t Idx>
+struct get_offset_static_impl {
+	using func_family = get_tag;
+
+	template<typename T>
+	using can_apply = typename get_dims<T>::template contains<Dim>;
+
+	template<typename T>
+	constexpr auto operator()(T t) const {
+		return t.template offset<Idx>();
+	}
+};
+
+}
+
+/**
+ * @brief returns the offset of a substructure given by a dimension name in a structure
+ * 
+ * @tparam Dim: the dimension name
+ */
+template<char Dim>
+constexpr auto get_offset(std::size_t idx) {
+	return helpers::get_offset_dynamic_impl<Dim>(idx);
+}
+
+template<char Dim, std::size_t Idx>
+constexpr auto get_offset(std::integral_constant<std::size_t, Idx>) {
+	return helpers::get_offset_static_impl<Dim, Idx>();
+}
 
 namespace helpers {
 
