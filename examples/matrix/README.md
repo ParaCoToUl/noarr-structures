@@ -46,7 +46,7 @@ Running the example on Linux or Mac:
 ```
 
 # Implementation
-Implementation is commented on in detail. We recommend starting reading [matrix.cpp](matrix.cpp), following with [noarr_matrix_functions.hpp](noarr_matrix_functions.hpp) and [z_curve.cpp](z_curve.cpp) last.
+Implementation is commented on in detail. We recommend starting reading [matrix.cpp](matrix.cpp), following with [noarr_matrix_functions.hpp](noarr_matrix_functions.hpp) and [z_curve.hpp](z_curve.hpp) last.
 
 In file [matrix.cpp](matrix.cpp) basic matrix is implemented. Example first generates 2 classic matrices. Then it copies them into a noarr version. The example then performs multiplications separately. It then copies the noarr result into a normal version and compares the results if they are equal.
 
