@@ -19,11 +19,13 @@ _deps
 # CTest & testing
 /ParseAndAddCatchTests.cmake
 /DartConfiguration.tcl
-matrix
+/build
 
 # CMake stuff on Windows
 /Debug
+/Release
 /x64
+/x86
 /matrix.dir
 *.vcxproj
 *.vcxproj.filters

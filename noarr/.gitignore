@@ -19,11 +19,13 @@ _deps
 # CTest & testing
 /ParseAndAddCatchTests.cmake
 /DartConfiguration.tcl
-test-runner
+/build
 
 # CMake stuff on Windows
 /Debug
+/Release
 /x64
+/x86
 /test-runner.dir
 *.vcxproj
 *.vcxproj.filters
