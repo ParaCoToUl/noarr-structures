@@ -8,9 +8,8 @@
 
 namespace noarr {
 
-// TODO: function that returns the topmost dimension
-// TODO: function that renames dimensions
-// TODO: function that switches independent substructures (fuse with reassemble?) 
+// TODO: function that renames dimensions -> cannot be done unless structures are reworked or something
+// TODO: function that switches independent substructures (fuse with reassemble?)
 
 namespace literals {
 
@@ -470,7 +469,7 @@ namespace helpers {
 struct get_at_impl : private contain<char*> {
 	using func_family = top_tag;
 
-	constexpr get_at_impl() = delete;
+	constexpr get_at_impl() = delete; // we don't want to access nondeterministic memory
 
 	template<typename T>
 	explicit constexpr get_at_impl(T *ptr) : contain<char *>(reinterpret_cast<char *>(ptr)) {}
@@ -502,6 +501,22 @@ template<char... Dims, typename V, typename... Ts>
 inline constexpr auto get_at(V *ptr, Ts... ts) {
 	return compose(fix<Dims...>(ts...), helpers::get_at_impl(ptr));
 }
+
+struct top_dims {
+	using func_family = top_tag;
+
+	// recursion case for when the topmost structure offers no dims but it has 1 substructure
+	template<typename T>
+	constexpr auto operator()(T t) const -> decltype(std::enable_if_t<std::is_same<get_dims<T>, char_pack<>>::value, typename sub_structures<T>::value_type>(std::get<0>(sub_structures<T>(t).value)) | *this) {
+		return std::get<0>(sub_structures<T>(t).value) | *this;
+	}
+
+	// bottom case
+	template<typename T>
+	constexpr auto operator()(T) const -> std::enable_if_t<!std::is_same<get_dims<T>, char_pack<>>::value, get_dims<T>> {
+		return get_dims<T>();
+	}
+};
 
 } // namespace noarr
 
