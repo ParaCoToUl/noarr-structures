@@ -24,6 +24,7 @@ add_executable(test-runner tests/main_test.cpp ${tests_source_files})
 target_include_directories(test-runner PUBLIC include)
 target_link_libraries(test-runner PRIVATE Catch2::Catch2)
 
+# ask compiler to print maximum warnings
 if(MSVC)
   target_compile_options(test-runner PRIVATE /W4)
 else()

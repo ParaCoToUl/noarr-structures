@@ -12,6 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_executable(matrix matrix.cpp)
 target_include_directories(matrix PUBLIC ../../noarr/include)
 
+# ask compiler to print maximum warnings
 if(MSVC)
   target_compile_options(matrix PRIVATE /W4)
 else()
