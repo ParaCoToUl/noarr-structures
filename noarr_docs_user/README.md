@@ -173,6 +173,7 @@ auto tuple_bag = noarr::make_bag(tuple);
 // we can put this at the beginning of the file
 using namespace noarr::literals;
 // we index tuple like this
+// note that we fix multiple dimentions at one
 float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
 
@@ -190,22 +191,3 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 
 You can read about supported functions in detail in [structures documentation](../noarr/include/noarr/structures/README.md "structures documentation").
 
-##### Matrices/Cubes
-
-We will shortly discuss higher-dimensional data. You will model the matrix in the following way:
-
-```cpp
-noarr::vector<'n', noarr::vector<'m', noarr::scalar<float>>> my_matrix;
-```
-
-To showcase easy extendability we implemented Z-curve and block layout:
-
-```cpp
-noarr::zcurve<'n', 'm', noarr::scalar<float>>> my_zcurve_matrix;
-```
-
-We can use `get_at<>` in the following ways
-
-```cpp
-get_at<'n', 'm'>(1, 2);
-```
