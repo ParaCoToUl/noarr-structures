@@ -1,5 +1,6 @@
-/*
-    This file aggregates includes for the entire "structures" module
+/**
+ * @file structures.hpp
+ * @brief this file aggregates low-level includes for the entire "structures" module
  */
 
 #include "structures/structs.hpp"

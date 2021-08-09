@@ -18,7 +18,7 @@
 template<typename Structure1, typename Structure2, typename Structure3>
 noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, Structure3 structure)
 {
-	auto result = noarr::bag(structure);
+	auto result = noarr::make_bag(structure);
 
 	int x1_size = matrix1.template get_length<'n'>();
 	int y1_size = matrix1.template get_length<'m'>();
@@ -51,7 +51,7 @@ noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, no
 template<typename Structure1, typename Structure2>
 void noarr_matrix_copy(noarr::bag<Structure1>& source, Structure2 structure)
 {
-	auto result = noarr::bag(structure);
+	auto result = noarr::make_bag(structure);
 
 	for (int i = 0; i < source.template get_length<'n'>(); i++)
 		for (int j = 0; j < source.template get_length<'m'>(); j++)

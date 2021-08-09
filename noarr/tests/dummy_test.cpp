@@ -1,5 +1,4 @@
 #include <catch2/catch.hpp>
-//#include "noarr/structures.hpp"
 
 #include <iostream>
 #include <array>
@@ -9,8 +8,6 @@
 using namespace noarr::literals;
 
 TEST_CASE("Pipes Sizes", "[sizes]") {
-	// std::array<float, 300> data; <- // FIXME: NEVER USED
-
 	noarr::vector<'x', noarr::scalar<float>> v;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
@@ -139,18 +136,9 @@ TEST_CASE("Pipes Resize 4", "[Resizing]") {
 }
 
 
-
-
-
-
 //////////
 // Dots //
 //////////
-
-
-
-
-
 
 TEST_CASE("Sizes", "[sizes]") {
 	// std::array<float, 300> data; <- // FIXME: NEVER USED
@@ -201,7 +189,8 @@ TEST_CASE("Resize 2", "[Resizing]") {
 		REQUIRE(std::is_pod<decltype(vs2)>::value);
 	}
 
-	/*typeid(vs2).name();
+	/*
+	typeid(vs2).name();
 	vs2.size();
 	sizeof(vs2);
 	typeid(vs2 | fix<'x'>(5)).name();
@@ -210,7 +199,8 @@ TEST_CASE("Resize 2", "[Resizing]") {
 	(vs2 | fix<'x', 'y'>(5, 5) | offset());
 	(vs2 | fix<'y', 'x'>(5, 5) | offset());
 
-	typeid(vs2 | fix<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name();*/
+	typeid(vs2 | fix<'y', 'x'>(5, 5) | get_at((char *)nullptr)).name();
+	*/
 
 	SECTION("check is_pod") {
 		REQUIRE(std::is_pod<decltype(vs2.fix<'y', 'x'>(5, 5))>::value);
@@ -246,7 +236,8 @@ TEST_CASE("Resize 3", "[Resizing]") {
 
 
 // TODO
-/*TEST_CASE("Resize 4", "[Resizing]") {
+/*
+TEST_CASE("Resize 4", "[Resizing]") {
 	volatile std::size_t l = 20;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
@@ -288,4 +279,5 @@ TEST_CASE("Resize 3", "[Resizing]") {
 	//print_struct(std::cout, t2 | reassemble<'x', 'y'>()) << " t2';" << std::endl;
 	//print_struct(std::cout, t2 | set_length<'x'>(10) | reassemble<'y', 'x'>()) << " t2'';" << std::endl;
 	//print_struct(std::cout, t2 | reassemble<'x', 'x'>()) << " t2;" << std::endl;
-}*/
+}
+*/

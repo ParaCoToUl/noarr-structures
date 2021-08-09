@@ -121,7 +121,7 @@ template<typename Structure>
 noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
 {
 	// we will allocate target noarr matrix
-	auto target = noarr::bag(structure);
+	auto target = noarr::make_bag(structure);
 
 	// we will go through the classic matrix and copy it into noarr the matrix
 	for (int i = 0; i < source.n; i++)

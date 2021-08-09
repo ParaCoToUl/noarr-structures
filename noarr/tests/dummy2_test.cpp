@@ -1,20 +1,17 @@
 #include <catch2/catch.hpp>
-//#include "noarr/structures.hpp"
 
-#include <iostream>
 #include <array>
-
-#include "noarr/structures_extended.hpp"
-
+#include <iostream>
 #include <tuple>
 
-//#include "funcs.hpp"
+#include "noarr/structures_extended.hpp"
 
 TEST_CASE("Image", "[image]") {
 	//noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::tuple<'p', noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>, noarr::scalar<float>>>> image;
 
 	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::array<'p', 4, noarr::scalar<float>>>> g;
 	auto grayscale = noarr::wrap(g);
+
 	std::vector<char> my_blob_buffer(grayscale.get_size());
 	char* my_blob = (char*)my_blob_buffer.data();
 
@@ -31,7 +28,7 @@ TEST_CASE("Image", "[image]") {
 		//REQUIRE((typeid(image | noarr::fix<'x'>(0) | noarr::fix<'y'>(0) | noarr::fix<'p'>(2)).name()) == "float");
 		//auto value_ref = image | noarr::fix<'x'>(0) | noarr::fix<'y'>(0) | noarr::fix<'p'>(2);
 		//std::size_t offset = image | noarr::fix<'x', 'y', 'p'>(0, 0, 2) | noarr::offset();
-		std::size_t offset = grayscale.fix<'x'>(0).fix<'y'>(0).fix<'p'>(2).offset(); // FIXME: this can be rewritten into `grayscale | offset<'x', 'y', 'z'>()`
+		std::size_t offset = grayscale.offset<'x', 'y', 'p'>(0, 0, 2);
 		float& value_ref = *((float*)(my_blob + offset));
 		value_ref = 0;
 		//float& value_ref = image | fix<'x'>(0) | fix<'y'>(0) | fix<'p'>(2) | offset();
@@ -47,7 +44,7 @@ TEST_CASE("Pipes Vector", "[resizing]")
 		REQUIRE((v2 | noarr::get_length<'x'>()) == 10);
 	}
 
-	auto v3 = v | noarr::set_length<'x'>(20); // transform
+	auto v3 = v  | noarr::set_length<'x'>(20); // transform
 	auto v4 = v2 | noarr::set_length<'x'>(30); // transform
 
 	SECTION("size check 2") {
@@ -58,9 +55,9 @@ TEST_CASE("Pipes Vector", "[resizing]")
 
 	SECTION("check is_cube 2") {
 		REQUIRE(!noarr::is_cube<decltype(v)>::value);
-		REQUIRE(noarr::is_cube<decltype(v2)>::value);
-		REQUIRE(noarr::is_cube<decltype(v3)>::value);
-		REQUIRE(noarr::is_cube<decltype(v4)>::value);
+		REQUIRE( noarr::is_cube<decltype(v2)>::value);
+		REQUIRE( noarr::is_cube<decltype(v3)>::value);
+		REQUIRE( noarr::is_cube<decltype(v4)>::value);
 	}
 
 	auto v5 = v4 | noarr::set_length<'x'>(-10); // transform

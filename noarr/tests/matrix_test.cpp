@@ -1,13 +1,9 @@
 #include <catch2/catch.hpp>
-//#include "noarr/structures.hpp"
 
-#include <iostream>
-#include <array>
-#include <utility>
+#include <tuple>
 
 #include "noarr/structures_extended.hpp"
 
-#include <tuple>
 
 enum MatrixDataLayout { Rows = 0, Columns = 1, Zcurve = 2 };
 
@@ -182,6 +178,7 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 {
 	if (m1.x != m2.x)
 		return false;
+
 	if (m1.y != m2.y)
 		return false;
 
@@ -425,9 +422,8 @@ struct RowBlocks
 	}
 };
 
-// s��t�n�, n�sobit matice, n�sobit scal�rem, 
-
-/*struct MatrixStruct {
+/*
+struct MatrixStruct {
 	virtual ~MatrixStruct() noexcept = default;
 	virtual MatrixDataLayout GetLayout() = 0;
 };
@@ -656,8 +652,8 @@ static constexpr auto GetImageStructure(ColumnsStruct)
 static constexpr auto GetMatrixStructure(ZcurveStruct)
 {
 	return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
-}*/
-
+}
+*/
 
 TEST_CASE("Z curve", "[Matrix prototype]")
 {

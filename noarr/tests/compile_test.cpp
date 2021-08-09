@@ -33,7 +33,7 @@ TEST_CASE("Main example compile test", "[Main example compile test]") {
 	auto sized_matrix_structure = matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT);
 
 	// data allocation
-	auto matrix = noarr::bag(sized_matrix_structure);
+	auto matrix = noarr::make_bag(sized_matrix_structure);
 
 	for (int i = 0; i < matrix.get_length<'x'>(); i++)
 		for (int j = i; j < matrix.get_length<'y'>(); j++)
@@ -60,7 +60,7 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(5).set_length<'i'>(10);
 
 	// we will create a bag
-	auto bag = noarr::bag(my_structure_of_ten);
+	auto bag = noarr::make_bag(my_structure_of_ten);
 
 	// get the reference (we will get 5-th element)
 	float& value_ref = bag.structure().get_at<'i'>(bag.data(), 5);
