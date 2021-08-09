@@ -1,13 +1,5 @@
 # User documentation for Noarr
 
-~~Noarr framework aims to help with certain aspects of performant GPU algorithm development:
-
-~~1. [Data modelling](#data-modelling)
-~~2. Data serialization
-~~3. Algorithm benchmarking and optimization
-~4. Algorithm packaging (exporting a library for C++, Python and R)
-
-
 <a name="data-modelling"></a>
 ## Data modelling
 
