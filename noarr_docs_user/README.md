@@ -13,7 +13,7 @@ Noarr framework distinguishes two types of multidimensional data - uniform and j
 
 
 <a name="data-modelling-in-noarr"></a>
-### Data modelling in Noarr
+## Data modelling in Noarr
 
 *Noarr structures* was designed to support uniform data. Uniform data has the advantage of occupying one continuous array of memory. When working with it, you work with three objects:
 
@@ -23,7 +23,7 @@ Noarr framework distinguishes two types of multidimensional data - uniform and j
 
 > Note: in the case of jagged data, you can use *Noarr pipelines* without *Noarr structures*. The architecture of the GPU is designed for uniform data mainly, so it should fit most common cases. Also note, that you can also use several *Noarr structures* in your program.
 
-#### Creating a structure
+## Creating a structure
 
 First, we have to `#include` the `noarr` library:
 
@@ -50,7 +50,7 @@ A *structure* object is immutable. The `|` operator (the pipe) is used to create
 The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it does not care, where that dimension is inside the *structure*.
 
 <a name="wrapper"></a>
-#### Wrapper
+## Wrapper
 It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `noarr::wrapper` first.
 
 ```cpp
@@ -60,7 +60,7 @@ auto piped = my_structure_of_ten | noarr::set_length<'i'>(5) | noarr::set_length
 auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(5).set_length<'i'>(10);
 ```
 
-#### Allocating and accessing *data* and *bag*
+## Allocating and accessing *data* and *bag*
 
 Now that we have a structure defined, we can create a bag to store the data. Bag allocates *data* buffer automatically:
 
@@ -87,7 +87,7 @@ bag.at<'i'>(5) = 42;
 ```
 
 <a name="changing-data-layouts"></a>
-#### Changing data layout (*structure*)
+## Changing data layout (*structure*)
 
 Now we want to change the data layout. Noarr needs to know the structure at compile time (for performance). So the right approach is to template all functions and then select between compiled versions. We define different structures like this:
 
@@ -128,8 +128,8 @@ void main() {
 ```
 
 <a name="supported-layouts"></a>
-#### Our supported layouts (*structures*)
-##### Containers
+## Our supported layouts (*structures*)
+### Containers
 
 Noarr supports `vector` and `array`. Our library is designed to be easily extendable. We have implemented a 2D z-curve in  our matrix example [z-curve implementation example](../examples/matrix/z_curve.hpp "z-curve implementation example"). Basic declarations look like this:
 
@@ -138,13 +138,13 @@ noarr::vector<'i', noarr::scalar<float>> my_vector;
 noarr::array<'i', 10, noarr::scalar<float>> my_array;
 ```
 
-##### Scalars
+### Scalars
 
 Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`... 
 
 You can read about supported scalars in detail in [technical documentation](../noarr_docs_tech/README.md "technical documentation").
 
-##### Tuples
+### Tuples
 
 Here are some of the valid tuple declarations:
 
@@ -171,7 +171,7 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
 
 <a name="full-list-of-functions"></a>
-#### Full list of functions
+## Full list of functions
 
   - `compose`: function composition (honoring the left-associative notation)
   - `set_length`: changes the length (number of indices) of arrays and vectors
