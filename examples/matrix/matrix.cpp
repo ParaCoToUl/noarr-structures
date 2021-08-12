@@ -23,7 +23,9 @@ using matrix_rows = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>>;
 using matrix_columns = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>>;
 using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::sized_vector<'a', noarr::scalar<int>>>;
 
-// raw c++ structure, which implements matrix ("classic matrix")
+/**
+ * @brief Implemnts matrix using raw c++ ("classic matrix")
+ */
 struct classic_matrix
 {
 	// constructors
@@ -59,7 +61,13 @@ struct classic_matrix
 	}
 };
 
-// function returng random classic matrix with values in range [0 to 9] with size n x m. 
+/**
+ * @brief Creates random classic matrix with values in range [0 to 9] with size n x m. 
+ *
+ * @param n: width of the matrix
+ * @param m: heigth of the matrix
+ * @return classic_matrix with values in range [0 to 9] with size n x m. 
+ */
 classic_matrix get_clasic_matrix(int n, int m)
 {
 	// data container inicialization
@@ -74,7 +82,13 @@ classic_matrix get_clasic_matrix(int n, int m)
 	return classic_matrix(n, m, std::move(ary));
 }
 
-// function which compares two classic matrices for value equality
+/**
+ * @brief Compares two classic matrices for value equality
+ *
+ * @param m1: First classic matrix
+ * @param m2: Second classic matrix
+ * @return Value comparison result of two classic matrices 
+ */
 bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
 {
 	// n size must be the same
@@ -95,8 +109,13 @@ bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
 	return true;
 }
 
-// function converting noarr matrix to classic matrix
-// it takes source noarr matrix as argument
+
+/**
+ * @brief Converts noarr matrix to classic matrix
+ *
+ * @param source: noarr matrix
+ * @return classic_matrix cretaed from noarr matrix
+ */
 template<typename Structure>
 classic_matrix noarr_matrix_to_clasic(noarr::bag<Structure>& source)
 {
@@ -115,8 +134,13 @@ classic_matrix noarr_matrix_to_clasic(noarr::bag<Structure>& source)
 	return target;
 }
 
-// function converting classic matrix to noarr matrix
-// it takes source classic matrix and target noarr matrix structure (we need to know what structure should be used)
+/**
+ * @brief Converts classic matrix to noarr matrix
+ *
+ * @param source: classic_matrix
+ * @tparam structure: structure defining structure to be used by noarr matrix
+ * @return noarr::bag<Structure> noarr matrix created from souce classic_matrix
+ */
 template<typename Structure>
 noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
 {
@@ -131,8 +155,13 @@ noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure s
 	return target;
 }
 
-// function multiplying classic matrices
-// it takes 2 source classic matrices and returns multiplied matrix
+/**
+ * @brief Function multiplying classic matrices
+ *
+ * @param matrix1: First classic matrix
+ * @param matrix2: Second classic matrix
+ * @return Classic matrix multiplication product
+ */
 classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& matrix2)
 {
 	// some of the sizes have to be equal
@@ -156,8 +185,12 @@ classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& m
 	return result;
 }
 
-// !core function of the example!
-// it multiplies classic matrices, same noarr matrices, and checks if the results produced are equal
+/**
+ * @brief The core function of the example. It multiplies classic matrices, same noarr matrices, and checks if the results produced are equal.
+ *
+ * @param size: size of the matrices to be used
+ * @tparam structure: structure defining structure to be used by noarr matrix
+ */
 template<typename Structure>
 void matrix_demo(int size, Structure structure)
 {
@@ -188,7 +221,9 @@ void matrix_demo(int size, Structure structure)
 	assert(are_equal_classic_matrices(classic_result, classic_noarr_result));
 }
 
-// print help function
+/**
+ * @brief Prints help.
+ */
 void print_help_and_exit()
 {
 	std::cout << "Programm takes 2 parameters. First, you choose one of the following layouts:" << std::endl;
@@ -201,7 +236,12 @@ void print_help_and_exit()
 	exit(1);
 }
 
-// main function called from command line
+/**
+ * @brief Main function called from command line. It parses command line arguments and runs selected layout.
+ * 
+ * @param argc: command-line arguments count
+ * @param argv: command-line arguments
+ */
 int main(int argc, char* argv[])
 {
 	// there have to be two arguments
