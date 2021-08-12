@@ -466,17 +466,19 @@ struct get_size {
 
 namespace helpers {
 
-struct get_at_impl : private contain<char*> {
+template<typename Ptr>
+struct get_at_impl : private contain<Ptr> {
 	using func_family = top_tag;
 
 	constexpr get_at_impl() = delete; // we don't want to access nondeterministic memory
 
 	template<typename T>
-	explicit constexpr get_at_impl(T *ptr) : contain<char *>(reinterpret_cast<char *>(ptr)) {}
+	explicit constexpr get_at_impl(T *ptr) : contain<Ptr>(reinterpret_cast<Ptr>(ptr)) {}
 
+	// the return type checks whether the structure `t` is a cube and it also chooses `scalar_t<T> &` or `const scalar_t<T> &` according to constness of `Ptr` pointee
 	template<typename T>
-	constexpr auto operator()(T t) const -> std::enable_if_t<is_cube<T>::value, scalar_t<T> &> {
-		return reinterpret_cast<scalar_t<T> &>(*(contain<char *>::template get<0>() + (t | offset())));
+	constexpr auto operator()(T t) const -> std::enable_if_t<is_cube<T>::value, std::conditional_t<std::is_const<std::remove_pointer_t<Ptr>>::value, const scalar_t<T> &, scalar_t<T> &>> {
+		return reinterpret_cast<std::conditional_t<std::is_const<std::remove_pointer_t<Ptr>>::value, const scalar_t<T> &, scalar_t<T> &>>(*(contain<Ptr>::template get<0>() + (t | offset())));
 	}
 };
 
@@ -489,7 +491,17 @@ struct get_at_impl : private contain<char*> {
  */
 template<typename V>
 constexpr auto get_at(V *ptr) {
-	return helpers::get_at_impl(ptr);
+	return helpers::get_at_impl<char *>(ptr);
+}
+
+/**
+ * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure
+ * 
+ * @param ptr: the pointer to blob structure
+ */
+template<typename V>
+constexpr auto get_at(const V *ptr) {
+	return helpers::get_at_impl<const char *>(ptr);
 }
 
 /**
@@ -499,7 +511,17 @@ constexpr auto get_at(V *ptr) {
  */
 template<char... Dims, typename V, typename... Ts>
 constexpr auto get_at(V *ptr, Ts... ts) {
-	return compose(fix<Dims...>(ts...), helpers::get_at_impl(ptr));
+	return compose(fix<Dims...>(ts...), helpers::get_at_impl<char *>(ptr));
+}
+
+/**
+ * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure with some fixed indices (see `fix`)
+ * @tparam Dims: the dimension names of the fixed dimensions
+ * @param ptr: the pointer to blob structure
+ */
+template<char... Dims, typename V, typename... Ts>
+constexpr auto get_at(const V *ptr, Ts... ts) {
+	return compose(fix<Dims...>(ts...), helpers::get_at_impl<const char *>(ptr));
 }
 
 /**

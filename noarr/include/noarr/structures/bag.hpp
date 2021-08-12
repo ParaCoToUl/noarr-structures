@@ -132,6 +132,17 @@ public:
 	}
 
 	/**
+	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
+	 * 
+	 * @tparam Dims: the dimension names
+	 * @param ts: the dimension values
+	 */
+	template<char... Dims, typename... Ts>
+	constexpr decltype(auto) at(Ts... ts) {
+		return structure().template get_at<Dims...>(data(), ts...);
+	}
+
+	/**
 	 * @brief returns an offset of a value in `data` by fixing dimensions in the `structure`
 	 * 
 	 * @tparam Dims: the dimension names
