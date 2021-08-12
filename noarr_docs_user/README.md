@@ -146,12 +146,13 @@ You can read about supported scalars in detail in [technical documentation](../n
 
 ##### Tuples
 
-We declare tuple like this:
+Here are some of the valid tuple declarations:
 
 ```cpp
 noarr::tuple<'t', noarr::scalar<int>, noarr::scalar<float>> t;
 noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t2;
-noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
+noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, 
+	noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
 ```
 
 We will work with `tuple`s like this:
