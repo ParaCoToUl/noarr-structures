@@ -30,7 +30,7 @@ struct print_struct_impl<char_pack<Name...>> {
  * @param out: the output stream 
  */
 template<typename T>
-inline constexpr std::ostream &print_struct(std::ostream &out, T) {
+constexpr std::ostream &print_struct(std::ostream &out, T) {
 	return helpers::print_struct_impl<mangle<T>>::print(out);
 }
 

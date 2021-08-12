@@ -231,7 +231,7 @@ struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::
  * @return the result of the piping
  */
 template<typename S, typename F>
-inline constexpr auto operator|(S s, F f) ->
+constexpr auto operator|(S s, F f) ->
 std::enable_if_t<is_structoid<std::enable_if_t<std::is_class<S>::value, S>>::value, decltype(helpers::pipe_decider<F>::template operate<S>(std::declval<S>(), std::declval<F>()))> {
 	return helpers::pipe_decider<F>::template operate<S>(s, f);
 }
@@ -300,7 +300,7 @@ struct piper<S, F> {
  * @return constexpr decltype(auto) 
  */
 template<typename S, typename... FS>
-inline constexpr decltype(auto) pipe(S s, FS... funcs) {
+constexpr decltype(auto) pipe(S s, FS... funcs) {
 	return helpers::piper<S, FS...>::pipe(s, funcs...);
 }
 

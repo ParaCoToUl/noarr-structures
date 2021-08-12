@@ -150,7 +150,7 @@ struct construct_impl<T, 0> {
  * @param ts: the desired substructures
  */
 template<typename T, typename... TS>
-inline constexpr auto construct(T t, TS... ts) {
+constexpr auto construct(T t, TS... ts) {
 	return t.construct(ts...);
 }
 
@@ -161,7 +161,7 @@ inline constexpr auto construct(T t, TS... ts) {
  * @param ts: the desired substructures contained in a `std::tuple`
  */
 template<typename T, typename... TS>
-inline constexpr auto construct(T t, std::tuple<TS...> ts) {
+constexpr auto construct(T t, std::tuple<TS...> ts) {
 	return helpers::construct_impl<T>::construct(t, ts);
 }
 

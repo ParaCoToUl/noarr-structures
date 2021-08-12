@@ -14,7 +14,7 @@ template<typename Structure>
 class wrapper;
 
 template<typename Structure> 
-inline constexpr wrapper<Structure> wrap(Structure s);
+constexpr wrapper<Structure> wrap(Structure s);
 
 namespace helpers {
 
@@ -119,7 +119,7 @@ public:
  * @param s: the structure to be wrapped
  */
 template<typename Structure> 
-inline constexpr wrapper<Structure> wrap(Structure s) {
+constexpr wrapper<Structure> wrap(Structure s) {
 	return wrapper<Structure>(s);
 }
 

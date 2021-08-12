@@ -37,7 +37,7 @@ struct idx_translate<Accum, Char> {
  * @return constexpr auto the corresponding std::integral_constant
  */
 template<char... Chars>
-inline constexpr auto operator""_idx() {
+constexpr auto operator""_idx() {
 	return typename helpers::idx_translate<0, Chars...>::type();
 }
 
@@ -70,7 +70,7 @@ struct compose_impl : contain<F, G> {
  * @param g: the outer function
  */
 template<typename F, typename G>
-inline constexpr auto compose(F f, G g) {
+constexpr auto compose(F f, G g) {
 	return helpers::compose_impl<F, G>(f, g);
 }
 
@@ -147,7 +147,7 @@ struct static_set_length_impl {
  * @param length: the desired length
  */
 template<char Dim>
-inline constexpr auto set_length(std::size_t length) {
+constexpr auto set_length(std::size_t length) {
 	return helpers::dynamic_set_length<Dim>(length);
 }
 
@@ -158,7 +158,7 @@ inline constexpr auto set_length(std::size_t length) {
  * @param length: the desired length
  */
 template<char Dim, std::size_t Length>
-inline constexpr auto set_length(std::integral_constant<std::size_t, Length>) {
+constexpr auto set_length(std::integral_constant<std::size_t, Length>) {
 	return helpers::static_set_length_impl<Dim, Length>();
 }
 
@@ -261,7 +261,7 @@ struct safe_get_impl<T, i, std::enable_if_t<(std::tuple_size<remove_cvref<declty
 }
 
 template<std::size_t i, typename T>
-inline constexpr auto safe_get(T t) {
+constexpr auto safe_get(T t) {
 	return helpers::safe_get_impl<T, i>::get(t);
 }
 
@@ -358,7 +358,7 @@ struct fix_impl<> {
  * @param ts: parameters for fixing the indices
  */
 template<char... Dims, typename... Ts>
-inline constexpr auto fix(Ts... ts) {
+constexpr auto fix(Ts... ts) {
 	return helpers::fix_impl<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
 }
 
@@ -435,7 +435,7 @@ struct offset_impl {
 /**
  * @brief returns the offset of the value described by the structure
  */
-inline constexpr auto offset() {
+constexpr auto offset() {
 	return helpers::offset_impl();
 }
 
@@ -447,7 +447,7 @@ inline constexpr auto offset() {
  * @return constexpr auto 
  */
 template<char... Dims, typename... Ts>
-inline constexpr auto offset(Ts... ts) {
+constexpr auto offset(Ts... ts) {
 	return compose(fix<Dims...>(ts...), helpers::offset_impl());
 }
 
@@ -488,7 +488,7 @@ struct get_at_impl : private contain<char*> {
  * @param ptr: the pointer to blob structure
  */
 template<typename V>
-inline constexpr auto get_at(V *ptr) {
+constexpr auto get_at(V *ptr) {
 	return helpers::get_at_impl(ptr);
 }
 
@@ -498,7 +498,7 @@ inline constexpr auto get_at(V *ptr) {
  * @param ptr: the pointer to blob structure
  */
 template<char... Dims, typename V, typename... Ts>
-inline constexpr auto get_at(V *ptr, Ts... ts) {
+constexpr auto get_at(V *ptr, Ts... ts) {
 	return compose(fix<Dims...>(ts...), helpers::get_at_impl(ptr));
 }
 
