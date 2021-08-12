@@ -15,8 +15,8 @@
  * @tparam structure: Structure defining structure to be used by result noarr matrix
  * @return noarr::bag<Structure> noarr matrix created from source noarr matrices
  */
-template<typename Structure1, typename Structure2, typename Structure3>
-noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, Structure3 structure)
+template<typename Matrix1, typename Matrix2, typename Structure3>
+auto noarr_matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Structure3 structure)
 {
 	auto result = noarr::make_bag(structure);
 
@@ -53,8 +53,8 @@ noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, no
  * @tparam structure: Structure defining structure to be used by result noarr matrix
  * @return noarr::bag<Structure> noarr matrix created from source noarr matrix
  */
-template<typename Structure1, typename Structure2>
-void noarr_matrix_copy(noarr::bag<Structure1>& source, Structure2 structure)
+template<typename Matrix1, typename Structure2>
+void noarr_matrix_copy(Matrix1& source, Structure2 structure)
 {
 	auto result = noarr::make_bag(structure);
 
@@ -68,8 +68,8 @@ void noarr_matrix_copy(noarr::bag<Structure1>& source, Structure2 structure)
  *
  * @tparam matrix: source noarr matrix
  */
-template<typename Structure>
-void noarr_matrix_transpose(noarr::bag<Structure>& matrix1)
+template<typename Matrix1>
+void noarr_matrix_transpose(Matrix1& matrix1)
 {
 	int x_size = matrix1.template get_length<'n'>();
 	int y_size = matrix1.template get_length<'m'>();
@@ -92,8 +92,8 @@ void noarr_matrix_transpose(noarr::bag<Structure>& matrix1)
  * @tparam matrix: source noarr matrix
  * @param scalar: scalar
  */
-template<typename Structure>
-void noarr_matrix_scalar_multiplication(noarr::bag<Structure>& matrix, int scalar)
+template<typename Matrix>
+void noarr_matrix_scalar_multiplication(Matrix& matrix, int scalar)
 {
 	int x_size = matrix.template get_length<'n'>();
 	int y_size = matrix.template get_length<'m'>();

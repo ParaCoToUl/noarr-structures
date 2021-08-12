@@ -116,8 +116,8 @@ bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
  * @param source: noarr matrix
  * @return classic_matrix cretaed from noarr matrix
  */
-template<typename Structure>
-classic_matrix noarr_matrix_to_clasic(noarr::bag<Structure>& source)
+template<typename Matrix>
+classic_matrix noarr_matrix_to_clasic(Matrix& source)
 {
 	// we will cache matrix size values
 	int n_size = source.structure().template get_length<'n'>();
@@ -142,7 +142,7 @@ classic_matrix noarr_matrix_to_clasic(noarr::bag<Structure>& source)
  * @return noarr::bag<Structure> noarr matrix created from source classic_matrix
  */
 template<typename Structure>
-noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
+auto clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
 {
 	// we will allocate target noarr matrix
 	auto target = noarr::make_bag(structure);
