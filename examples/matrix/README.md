@@ -1,4 +1,4 @@
-## Matrix example
+# Matrix example
 
 #### Matrix example tests
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
