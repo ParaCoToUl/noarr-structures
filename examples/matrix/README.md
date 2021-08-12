@@ -1,3 +1,5 @@
+## Matrix example
+
 #### Matrix example tests
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
@@ -6,7 +8,7 @@
 
 ![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20Win/badge.svg)
 
-# Instalation
+## Instalation
 
 Make sure you are in the [examples/matrix](examples/matrix) folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
 
@@ -24,7 +26,7 @@ cmake ..
 cmake --build .
 ```
 
-# Usage
+## Usage
 ```text
 Programm takes 2 parameters. First, you choose one of the following layouts:
 1) rows
@@ -45,7 +47,7 @@ Running the example on Linux or Mac:
 ./matrix z_curve 8
 ```
 
-# Implementation
+## Implementation
 Implementation is commented on in detail. We recommend starting reading [matrix.cpp](matrix.cpp), following with [noarr_matrix_functions.hpp](noarr_matrix_functions.hpp) and [z_curve.hpp](z_curve.hpp) last.
 
 In file [matrix.cpp](matrix.cpp) basic matrix is implemented. Example first generates 2 classic matrices. Then it copies them into a noarr version. The example then performs multiplications separately. It then copies the noarr result into a normal version and compares the results if they are equal.
