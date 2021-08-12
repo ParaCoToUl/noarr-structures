@@ -102,16 +102,16 @@ void histogram_template_test_clear()
 	image.clear();
 	histogram.clear();
 
-	int x_size = image.structure().template get_length<'x'>();
-	int y_size = image.structure().template get_length<'y'>();
+	int x_size = image.template get_length<'x'>();
+	int y_size = image.template get_length<'y'>();
 
 	for (int i = 0; i < x_size; i++)
 	{
 		for (int j = 0; j < y_size; j++)
 		{
-			int pixel_value = image.structure().template get_at<'x', 'y'>(image.data(), i, j);
+			int pixel_value = image.template at<'x', 'y'>(i, j);
 
-			int& histogram_value = histogram.structure().template get_at<'x'>(histogram.data(), pixel_value);
+			int& histogram_value = histogram.template at<'x'>(pixel_value);
 			histogram_value = histogram_value + 1;
 		}
 	}
