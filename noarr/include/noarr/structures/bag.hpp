@@ -5,35 +5,102 @@
 
 namespace noarr {
 
+namespace helpers {
+
+template<typename...>
+struct bag_raw_pointer;
+
+template<template<typename...> class container>
+struct bag_policy {
+	using type = container<char[]>;
+
+	static auto construct(std::size_t size) {
+		return container<char[]>(size);
+	}
+
+	static char* get(const container<char[]> &_container) {
+		return _container.data();
+	}
+};
+
+template<>
+struct bag_policy<std::unique_ptr> {
+	using type = std::unique_ptr<char[]>;
+
+	static auto construct(std::size_t size) {
+		return std::make_unique<char[]>(size);
+	}
+
+	static char* get(const std::unique_ptr<char[]> &ptr) {
+		return ptr.get();
+	}
+};
+
+template<>
+struct bag_policy<bag_raw_pointer> {
+	using type = char *;
+
+	static char* construct(std::size_t size) {
+		return new char[size];
+	}
+
+	static char* get(char *ptr) {
+		return ptr;
+	}
+};
+
+}
+
 /**
  * @brief A bag is an abstraction of a structure combined with data of a corresponding size.
  * 
  * @tparam Structure: the structure that describes the data stored in the bag
+ * @tparam BagPolicy: indicates what underlying structure contains the data blob (typically `std::unique_ptr`)
  */
-template<typename Structure>
+template<typename Structure, typename BagPolicy>
 struct bag {
 private:
-	std::unique_ptr<char[]> data_;
-	noarr::wrapper<Structure> structure_;
+	typename BagPolicy::type data_;
+	wrapper<Structure> structure_;
 
 public:
-	explicit bag(Structure s) : structure_(noarr::wrap(s)) { 
-		data_ = std::make_unique<char[]>(structure().get_size());
+	explicit bag(Structure s) : structure_(wrap(s)) { 
+		data_ = BagPolicy::construct(structure().get_size());
 	}
 
-	explicit bag(noarr::wrapper<Structure> s) : structure_(s) {
-		data_ = std::make_unique<char[]>(structure().get_size());
+	explicit bag(wrapper<Structure> s) : structure_(s) {
+		data_ = BagPolicy::construct(structure().get_size());
+	}
+
+	explicit bag(Structure s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(wrap(s))
+	{ }
+
+	explicit bag(wrapper<Structure> s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(s)
+	{ }
+
+	explicit bag(Structure s, typename BagPolicy::type &data) : data_(data), structure_(wrap(s))
+	{ }
+
+	explicit bag(wrapper<Structure> s, typename BagPolicy::type &data) : data_(data), structure_(s)
+	{ }
+
+	bag(Structure s, BagPolicy policy) : structure_(wrap(s)) { 
+		data_ = policy.construct(structure().get_size());
+	}
+
+	bag(wrapper<Structure> s, BagPolicy policy) : structure_(s) {
+		data_ = policy.construct(structure().get_size());
 	}
 
 	/**
 	 * @brief return the wrapped structure which describes the `data` blob
 	 */
-	constexpr const noarr::wrapper<Structure>& structure() const noexcept { return structure_; }
+	constexpr const wrapper<Structure>& structure() const noexcept { return structure_; }
 
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr char* data() const noexcept { return data_.get(); }
+	constexpr char* data() const noexcept { return BagPolicy::get(data_); }
 
 	/**
 	 * @brief sets the `data` to zeros
@@ -99,14 +166,46 @@ public:
 	}
 };
 
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
+ * 
+ * @param s: the structure
+ */
 template<typename Structure>
 constexpr auto make_bag(Structure s) {
-	return bag<Structure>(s);
+	return bag<Structure, helpers::bag_policy<std::unique_ptr>>(s);
 }
 
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
+ * 
+ * @param s: the structure (wrapped)
+ */
 template<typename Structure>
 constexpr auto make_bag(noarr::wrapper<Structure> s) {
-	return bag<Structure>(s);
+	return bag<Structure, helpers::bag_policy<std::unique_ptr>>(s);
+}
+
+/**
+ * @brief creates a bag with the given structure and an underlying r/w observing data blob
+ * 
+ * @param s: the structure
+ * @param data: the data blob
+ */
+template<typename Structure>
+constexpr auto make_bag(Structure s, char *data) {
+	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer>>(s, data);
+}
+
+/**
+ * @brief creates a bag with the given structure and an underlying r/w observing data blob
+ * 
+ * @param s: the structure (wrapped)
+ * @param data: the data blob
+ */
+template<typename Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s, char *data) {
+	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer>>(s, data);
 }
 
 } // namespace noarr
