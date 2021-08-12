@@ -93,7 +93,7 @@ Now we want to change the data layout. Noarr needs to know the structure at comp
 
 ```cpp
 // layout declaration
-using matrix_rows = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
+using matrix_rows = noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>>;
 using matrix_columns = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
 ```
 
