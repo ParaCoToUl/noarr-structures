@@ -76,7 +76,7 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	bag.at<'i'>(5) = 42;
 
 	// layout declaration
-	using matrix_rows = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
+	using matrix_rows = noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>>;
 	using matrix_columns = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
 
 	// arguments definition
