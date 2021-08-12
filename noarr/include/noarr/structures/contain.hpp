@@ -59,7 +59,7 @@ private:
 		return ts.template get<I - 1>();
 	}
 
-	constexpr auto _get() const {
+	constexpr const auto &_get() const {
 		return t;
 	}
 };
@@ -87,7 +87,7 @@ private:
 		return contain_impl<void, TS...>::template get<I - 1>();
 	}
 
-	constexpr auto _get() const {
+	constexpr const auto &_get() const {
 		return t;
 	}
 };
@@ -113,7 +113,7 @@ private:
 		return contain_impl<void, TS...>::template get<I - 1>();
 	}
 
-	constexpr auto _get() const {
+	static constexpr auto _get() {
 		return T();
 	}
 };
@@ -133,7 +133,7 @@ struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
 	}
 
 private:
-	constexpr auto _get() const {
+	static constexpr auto _get() {
 		return T();
 	}
 };
@@ -155,7 +155,7 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 	}
 
 private:
-	constexpr auto _get() const {
+	constexpr const auto &_get() const {
 		return t;
 	}
 };
