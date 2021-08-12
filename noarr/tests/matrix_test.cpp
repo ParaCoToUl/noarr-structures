@@ -287,8 +287,3 @@ TEST_CASE("Small matrix multimplication Columns", "[Small matrix multimplication
 {
 	matrix_template_test_runtime(MatrixDataLayout::Columns, 10);
 }
-
-TEST_CASE("Small matrix multimplication Zcurve", "[Small matrix multimplication Zcurve]")
-{
-	matrix_template_test_runtime(MatrixDataLayout::Zcurve, 10);
-}
