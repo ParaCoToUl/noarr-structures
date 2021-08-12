@@ -1,12 +1,12 @@
 # Matrix example
 
 #### Matrix example tests
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
+![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
+![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
 
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20macosl/badge.svg)
+![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20macosl/badge.svg)
 
-![CI status](https://github.com/ParaCoToUl/noarr/workflows/Noarr%20matrix%20example%20test%20Win/badge.svg)
+![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20Win/badge.svg)
 
 ## Instalation
 
