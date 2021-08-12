@@ -5,7 +5,7 @@
 #include "noarr/structures_extended.hpp"
 
 
-enum MatrixDataLayout { Rows = 0, Columns = 1, Zcurve = 2 };
+enum MatrixDataLayout { Rows = 0, Columns = 1 };
 
 template<MatrixDataLayout layout>
 struct GetMatrixStructreStructure;
@@ -25,15 +25,6 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Columns>
 	static constexpr auto GetMatrixStructure()
 	{
 		return noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>>();
-	}
-};
-
-template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve>
-{
-	static constexpr auto GetMatrixStructure()
-	{
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
 	}
 };
 
@@ -277,8 +268,6 @@ void matrix_demo(MatrixDataLayout layout, int size)
 		matrix_demo_template<MatrixDataLayout::Rows>(size);
 	else if (layout == MatrixDataLayout::Columns)
 		matrix_demo_template<MatrixDataLayout::Columns>(size);
-	else if (layout == MatrixDataLayout::Zcurve)
-		matrix_demo_template<MatrixDataLayout::Zcurve>(size);
 }
 
 TEST_CASE("Small matrix demo", "[Small matrix demo]")
@@ -305,24 +294,3 @@ TEST_CASE("Small matrix multimplication Zcurve", "[Small matrix multimplication 
 {
 	matrix_template_test_runtime(MatrixDataLayout::Zcurve, 10);
 }
-
-struct RowBlocks
-{
-	uint32_t dim_x = 128;
-	uint32_t dim_y = 128;
-	uint32_t size = 8;
-
-	uint64_t calcRowBlocks(uint32_t x, uint32_t y)
-	{
-		uint32_t block_column = x / size;
-		uint32_t bloc_x = x % size;
-
-		uint32_t block_row = y / size;
-		uint32_t block_y = y % size;
-
-		return block_row * dim_x * size
-			+ block_column * size * size
-			+ block_y * size
-			+ bloc_x;
-	}
-};
