@@ -37,8 +37,8 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Zcurve>
 	}
 };
 
-template<typename Structure1, typename Structure2>
-void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2)
+template<typename Matrix1, typename Matrix2>
+void matrix_copy(Matrix1& matrix1, Matrix2& matrix2)
 {
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
@@ -51,8 +51,8 @@ void matrix_copy(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix
 			matrix2.template at<'x', 'y'>(i, j) = matrix1.template at<'x', 'y'>(i, j);
 }
 
-template<typename Structure>
-void matrix_transpose(noarr::bag<Structure>& matrix1)
+template<typename Matrix1>
+void matrix_transpose(Matrix1& matrix1)
 {
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
@@ -64,8 +64,8 @@ void matrix_transpose(noarr::bag<Structure>& matrix1)
 			std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
 }
 
-template<typename Structure1, typename Structure2, typename Structure3>
-void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
+template<typename Matrix1, typename Matrix2, typename Matrix3>
+void matrix_add(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
@@ -86,8 +86,8 @@ void matrix_add(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2
 		}
 }
 
-template<typename Structure>
-void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
+template<typename Matrix1>
+void matrix_scalar_multiplication(Matrix1& matrix1, int scalar)
 {
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
@@ -97,8 +97,8 @@ void matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
 			matrix1.template at<'x', 'y'>(i, j) *= scalar;
 }
 
-template<typename Structure1, typename Structure2, typename Structure3>
-void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, noarr::bag<Structure3>& matrix3)
+template<typename Matrix1, typename Matrix2, typename Matrix3>
+void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
 	int x1_size = matrix1.template get_length<'x'>();
 	int y1_size = matrix1.template get_length<'y'>();
@@ -133,9 +133,9 @@ void matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& ma
 template<MatrixDataLayout layout>
 void matrix_template_test(int size)
 {
-	auto m1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m2 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m3 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m1 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m2 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m3 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 
 	matrix_multiply(m1, m2, m3);
 }
@@ -190,8 +190,8 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 	return true;
 }
 
-template<typename Structure>
-matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
+template<typename Matrix1>
+matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 {
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
@@ -205,8 +205,8 @@ matrix noarr_matrix_to_clasic(noarr::bag<Structure>& matrix1)
 	return m;
 }
 
-template<typename Structure>
-void clasic_matrix_to_naorr(matrix& m1, noarr::bag<Structure>& matrix1)
+template<typename Matrix1>
+void clasic_matrix_to_naorr(matrix& m1, Matrix1& matrix1)
 {
 	int x_size = matrix1.template get_length<'x'>();
 	int y_size = matrix1.template get_length<'y'>();
@@ -256,9 +256,9 @@ void matrix_demo_template(int size)
 	matrix m2 = get_clasic_matrix(size, size);
 	matrix m3 = get_clasic_matrix(size, size);
 
-	auto n1 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n2 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n3 = noarr::bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n1 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n2 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n3 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 
 	clasic_matrix_to_naorr(m1, n1);
 	clasic_matrix_to_naorr(m2, n2);
