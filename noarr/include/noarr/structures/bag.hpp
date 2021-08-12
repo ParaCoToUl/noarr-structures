@@ -7,21 +7,23 @@ namespace noarr {
 
 namespace helpers {
 
-template<typename...>
-struct bag_raw_pointer;
-
+// general case for std::vector etc.
 template<template<typename...> class container>
 struct bag_policy {
-	using type = container<char[]>;
+	using type = container<char>;
 
 	static auto construct(std::size_t size) {
-		return container<char[]>(size);
+		return container<char>(size);
 	}
 
-	static char* get(const container<char[]> &_container) {
+	static char* get(const container<char> &_container) {
 		return _container.data();
 	}
 };
+
+// a helper struct for 'bag_policy' as the '*' specifier is not a class ()
+template<typename...>
+struct bag_raw_pointer_tag;
 
 template<>
 struct bag_policy<std::unique_ptr> {
@@ -37,7 +39,7 @@ struct bag_policy<std::unique_ptr> {
 };
 
 template<>
-struct bag_policy<bag_raw_pointer> {
+struct bag_policy<bag_raw_pointer_tag> {
 	using type = char *;
 
 	static char* construct(std::size_t size) {
@@ -100,7 +102,12 @@ public:
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr char* data() const noexcept { return BagPolicy::get(data_); }
+	constexpr const char* data() const noexcept { return BagPolicy::get(data_); }
+
+	/**
+	 * @brief returns the underlying data blob
+	 */
+	constexpr char* data() noexcept { return BagPolicy::get(data_); }
 
 	/**
 	 * @brief sets the `data` to zeros
@@ -194,7 +201,7 @@ constexpr auto make_bag(noarr::wrapper<Structure> s) {
  */
 template<typename Structure>
 constexpr auto make_bag(Structure s, char *data) {
-	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer>>(s, data);
+	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>(s, data);
 }
 
 /**
@@ -205,7 +212,7 @@ constexpr auto make_bag(Structure s, char *data) {
  */
 template<typename Structure>
 constexpr auto make_bag(noarr::wrapper<Structure> s, char *data) {
-	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer>>(s, data);
+	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>(s, data);
 }
 
 } // namespace noarr
