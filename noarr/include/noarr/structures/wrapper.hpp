@@ -13,6 +13,9 @@ namespace noarr {
 template<typename Structure>
 class wrapper;
 
+template<typename Structure> 
+inline constexpr wrapper<Structure> wrap(Structure s);
+
 namespace helpers {
 
 template<typename T>
