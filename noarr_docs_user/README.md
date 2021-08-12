@@ -183,5 +183,5 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
   - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
   - `contain`: tuple-like struct, and a structured layout, that facilitates creation of new structures and functions
 
-You can read about supported functions in detail in [structures documentation](../noarr/include/noarr/structures/README.md "structures documentation").
+You can read about supported functions in detail in [Noarr structures](../noarr/include/noarr/structures/README.md "Noarr structures").
 
