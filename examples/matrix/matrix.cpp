@@ -24,7 +24,7 @@ using matrix_columns = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>
 using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::sized_vector<'a', noarr::scalar<int>>>;
 
 /**
- * @brief Implemnts matrix using raw c++ ("classic matrix")
+ * @brief Implemnts matrix using raw c++ ("classic matrix").
  */
 struct classic_matrix
 {
@@ -83,7 +83,7 @@ classic_matrix get_clasic_matrix(int n, int m)
 }
 
 /**
- * @brief Compares two classic matrices for value equality
+ * @brief Compares two classic matrices for value equality.
  *
  * @param m1: First classic matrix
  * @param m2: Second classic matrix
@@ -111,7 +111,7 @@ bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
 
 
 /**
- * @brief Converts noarr matrix to classic matrix
+ * @brief Converts noarr matrix to classic matrix.
  *
  * @param source: noarr matrix
  * @return classic_matrix cretaed from noarr matrix
@@ -135,11 +135,11 @@ classic_matrix noarr_matrix_to_clasic(noarr::bag<Structure>& source)
 }
 
 /**
- * @brief Converts classic matrix to noarr matrix
+ * @brief Converts classic matrix to noarr matrix.
  *
  * @param source: classic_matrix
- * @tparam structure: structure defining structure to be used by noarr matrix
- * @return noarr::bag<Structure> noarr matrix created from souce classic_matrix
+ * @tparam structure: Structure defining structure to be used by result noarr matrix
+ * @return noarr::bag<Structure> noarr matrix created from source classic_matrix
  */
 template<typename Structure>
 noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
@@ -156,7 +156,7 @@ noarr::bag<Structure> clasic_matrix_to_noarr(classic_matrix& source, Structure s
 }
 
 /**
- * @brief Function multiplying classic matrices
+ * @brief Function multiplying classic matrices.
  *
  * @param matrix1: First classic matrix
  * @param matrix2: Second classic matrix

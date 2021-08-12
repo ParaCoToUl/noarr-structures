@@ -7,9 +7,14 @@
 
 // read IMPORTANT from matrix.cpp first
 
-
-// function takes 2 noarr matrices and multiplies them
-// it takes 2 source noarr matrices and structure describing structure (layout) of the result matrix
+/**
+ * @brief Takes 2 noarr matrices and multiplyes them.
+ *
+ * @tparam matrix1: First noarr matrix
+ * @tparam matrix2: Second noarr matrix
+ * @tparam structure: Structure defining structure to be used by result noarr matrix
+ * @return noarr::bag<Structure> noarr matrix created from source noarr matrices
+ */
 template<typename Structure1, typename Structure2, typename Structure3>
 noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, Structure3 structure)
 {
@@ -41,8 +46,13 @@ noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, no
 	return result;
 }
 
-// function takes noarr matrix and multiplies duplicates it
-// it takes source noarr matrix and structure describing structure (layout) of the result matrix
+/**
+ * @brief Takes noarr matrix and copies it.
+ *
+ * @tparam matrix: source noarr matrix
+ * @tparam structure: Structure defining structure to be used by result noarr matrix
+ * @return noarr::bag<Structure> noarr matrix created from source noarr matrix
+ */
 template<typename Structure1, typename Structure2>
 void noarr_matrix_copy(noarr::bag<Structure1>& source, Structure2 structure)
 {
@@ -53,8 +63,11 @@ void noarr_matrix_copy(noarr::bag<Structure1>& source, Structure2 structure)
 			result.template at<'n', 'm'>(i, j) = source.template at<'n', 'm'>(i, j);
 }
 
-
-// function takes noarr matrix and transposes it
+/**
+ * @brief Takes noarr matrix and transposes it.
+ *
+ * @tparam matrix: source noarr matrix
+ */
 template<typename Structure>
 void noarr_matrix_transpose(noarr::bag<Structure>& matrix1)
 {
@@ -73,17 +86,21 @@ void noarr_matrix_transpose(noarr::bag<Structure>& matrix1)
 		}
 }
 
-// function takes noarr matrix and multiplies dit by scalar
-// it takes noarr matrix and scalar to multiply with matrix
+/**
+ * @brief Takes noarr matrix and multiplies dit by scalar. It takes noarr matrix and scalar to multiply with matrix.
+ *
+ * @tparam matrix: source noarr matrix
+ * @param scalar: scalar
+ */
 template<typename Structure>
-void noarr_matrix_scalar_multiplication(noarr::bag<Structure>& matrix1, int scalar)
+void noarr_matrix_scalar_multiplication(noarr::bag<Structure>& matrix, int scalar)
 {
-	int x_size = matrix1.template get_length<'n'>();
-	int y_size = matrix1.template get_length<'m'>();
+	int x_size = matrix.template get_length<'n'>();
+	int y_size = matrix.template get_length<'m'>();
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
-			matrix1.template at<'n', 'm'>(i, j) *= scalar;
+			matrix.template at<'n', 'm'>(i, j) *= scalar;
 }
 
 #endif // NOARR_MATRIX_FUNCTIONS_HPP
