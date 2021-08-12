@@ -137,8 +137,6 @@ void matrix_template_test_runtime(MatrixDataLayout layout, int size)
 		matrix_template_test<MatrixDataLayout::Rows>(size);
 	else if (layout == MatrixDataLayout::Columns)
 		matrix_template_test<MatrixDataLayout::Columns>(size);
-	else if (layout == MatrixDataLayout::Zcurve)
-		matrix_template_test<MatrixDataLayout::Zcurve>(size);
 }
 
 
