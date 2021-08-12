@@ -1,4 +1,4 @@
-# Specification
+# Technical specification
 
 ## Structure
 
