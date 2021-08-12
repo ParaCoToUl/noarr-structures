@@ -7,7 +7,7 @@
 #include "noarr/structures_extended.hpp"
 
 
-enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2, Zcurve = 3 };
+enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2 };
 
 template<ImageDataLayout layout>
 struct GetImageStructreStructure;
@@ -23,15 +23,6 @@ struct GetImageStructreStructure<ImageDataLayout::ArrayOfArrays>
 
 template<>
 struct GetImageStructreStructure<ImageDataLayout::VectorOfVectors>
-{
-	static constexpr auto GetImageStructure()
-	{
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
-	}
-};
-
-template<>
-struct GetImageStructreStructure<ImageDataLayout::Zcurve>
 {
 	static constexpr auto GetImageStructure()
 	{
