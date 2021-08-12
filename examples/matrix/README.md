@@ -54,8 +54,9 @@ In file [matrix.cpp](matrix.cpp) basic matrix is implemented. Example first gene
 
 In file [noarr_matrix_functions.hpp](noarr_matrix_functions.hpp) are implemented several matrix functions. The important function is:
 ```cpp
-noarr::bag<Structure3> noarr_matrix_multiply(noarr::bag<Structure1>& matrix1, noarr::bag<Structure2>& matrix2, Structure3 structure)
+template<typename Matrix, typename Matrix2, typename Structure3>
+auto noarr_matrix_multiply(Matrix& matrix1, Matrix2& matrix2, Structure3 structure)
 ```
-it is given 2 matrices and it multiplies first two into third one using `noarr`.
+it is given 2 matrices and it multiplies them, product matrix uses `Structure3` as its structure.
 
 You are able to choose from several layouts. The first two are modeled using basic `noarr` features. The third one is using `z_curve` implemented in [z_curve.cpp](z_curve.cpp).
