@@ -139,7 +139,7 @@ classic_matrix noarr_matrix_to_clasic(Matrix& source)
  *
  * @param source: classic_matrix
  * @tparam structure: Structure defining structure to be used by result noarr matrix
- * @return noarr::bag<Structure> noarr matrix created from source classic_matrix
+ * @return Matrix noarr matrix created from source classic_matrix
  */
 template<typename Structure>
 auto clasic_matrix_to_noarr(classic_matrix& source, Structure structure)

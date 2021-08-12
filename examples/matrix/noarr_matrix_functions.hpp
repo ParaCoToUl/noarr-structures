@@ -13,10 +13,10 @@
  * @tparam matrix1: First noarr matrix
  * @tparam matrix2: Second noarr matrix
  * @tparam structure: Structure defining structure to be used by result noarr matrix
- * @return noarr::bag<Structure> noarr matrix created from source noarr matrices
+ * @return Matrix noarr matrix created from source noarr matrices
  */
-template<typename Matrix1, typename Matrix2, typename Structure3>
-auto noarr_matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Structure3 structure)
+template<typename Matrix, typename Matrix2, typename Structure3>
+auto noarr_matrix_multiply(Matrix& matrix1, Matrix2& matrix2, Structure3 structure)
 {
 	auto result = noarr::make_bag(structure);
 
@@ -51,16 +51,18 @@ auto noarr_matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Structure3 struct
  *
  * @tparam matrix: source noarr matrix
  * @tparam structure: Structure defining structure to be used by result noarr matrix
- * @return noarr::bag<Structure> noarr matrix created from source noarr matrix
+ * @return Matrix noarr matrix created from source noarr matrix
  */
-template<typename Matrix1, typename Structure2>
-void noarr_matrix_copy(Matrix1& source, Structure2 structure)
+template<typename Matrix, typename Structure>
+auto noarr_matrix_copy(Matrix& source, Structure structure)
 {
 	auto result = noarr::make_bag(structure);
 
 	for (int i = 0; i < source.template get_length<'n'>(); i++)
 		for (int j = 0; j < source.template get_length<'m'>(); j++)
 			result.template at<'n', 'm'>(i, j) = source.template at<'n', 'm'>(i, j);
+
+	return result;
 }
 
 /**
@@ -68,19 +70,19 @@ void noarr_matrix_copy(Matrix1& source, Structure2 structure)
  *
  * @tparam matrix: source noarr matrix
  */
-template<typename Matrix1>
-void noarr_matrix_transpose(Matrix1& matrix1)
+template<typename Matrix>
+void noarr_matrix_transpose(Matrix& matrix)
 {
-	int x_size = matrix1.template get_length<'n'>();
-	int y_size = matrix1.template get_length<'m'>();
+	int x_size = matrix.template get_length<'n'>();
+	int y_size = matrix.template get_length<'m'>();
 
 	assert(x_size == y_size);
 
 	for (int i = 0; i < x_size; i++)
 		for (int j = i; j < y_size; j++)
 		{
-			int& value1 = matrix1.template at<'n', 'm'>(i, j);
-			int& value2 = matrix1.template at<'n', 'm'>(j, i);
+			int& value1 = matrix.template at<'n', 'm'>(i, j);
+			int& value2 = matrix.template at<'n', 'm'>(j, i);
 
 			std::swap(value1, value2);
 		}
