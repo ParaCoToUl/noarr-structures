@@ -7,8 +7,6 @@
 
 using namespace noarr::literals;
 
-// TODO: change into a test of whether structures allow various pipes and what should be constexpr is constexpr
-
 TEST_CASE("Pipes Sizes", "[sizes]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;

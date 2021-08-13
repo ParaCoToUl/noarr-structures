@@ -44,7 +44,6 @@ struct get_struct_desc;
 template<typename T>
 using get_struct_desc_t = typename get_struct_desc<T>::type;
 
-// TODO: check if integral_pack
 template<typename T>
 struct get_struct_desc<T, void_t<typename T::description>> {
 	using type = typename T::description;
@@ -62,7 +61,7 @@ struct sub_structures {
 	explicit constexpr sub_structures(T) {}
 
 	using value_type = std::tuple<>;
-	static constexpr std::tuple<> value = std::tuple<>();
+	static constexpr std::tuple<> value = std::make_tuple<>();
 };
 
 namespace helpers {
@@ -79,7 +78,6 @@ struct sub_structures_are_static<T, void_t<decltype(T::sub_structures())>> {
 
 }
 
-// TODO: check if tuple
 template<typename T>
 struct sub_structures<T, std::enable_if_t<helpers::sub_structures_are_static<T>::value>> {
 	explicit constexpr sub_structures() = default;
@@ -113,7 +111,6 @@ using dims_impl = char_pack<Dims...>;
  */
 template<typename T>
 using get_dims = typename T::description::dims;
-// TODO: implement the recursive version using sub_structures
 
 namespace helpers {
 
