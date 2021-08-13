@@ -130,14 +130,14 @@ struct construct_builder;
 
 template<typename S, typename F>
 struct fmapper<S, F, std::enable_if_t<!can_apply<F, S>::value>> {
-	static constexpr decltype(auto) fmap(S s, F f) {
+	static constexpr auto fmap(S s, F f) {
 		return construct_builder<S, F>::construct_build(s, f);
 	}
 };
 
 template<typename S, typename F>
 struct fmapper<S, F, std::enable_if_t<can_apply<F, S>::value>> {
-	static constexpr decltype(auto) fmap(S s, F f) {
+	static constexpr auto fmap(S s, F f) {
 		return f(s);
 	}
 };
@@ -157,7 +157,7 @@ struct getter_impl;
 
 template<typename S, typename F, std::size_t J>
 struct getter_impl<S, F, std::integral_constant<std::size_t, J>, std::enable_if_t<!can_apply<F, S>::value>> {
-	static constexpr decltype(auto) get(S s, F f) {
+	static constexpr auto get(S s, F f) {
 		return std::tuple_cat(
 			getter_impl<S, F, std::integral_constant<std::size_t, J + 1>>::get(s, f),
 			getter_impl<std::tuple_element_t<J, typename sub_structures<S>::value_type>, F>::get(std::get<J>(sub_structures<S>(s).value), f));
@@ -167,24 +167,24 @@ struct getter_impl<S, F, std::integral_constant<std::size_t, J>, std::enable_if_
 
 template<typename S, typename F>
 struct getter_impl<S, F, std::integral_constant<std::size_t, 0>, std::enable_if_t<can_apply<F, S>::value>> {
-	static constexpr decltype(auto) get(S s, F f) { return std::make_tuple(f(s)); }
+	static constexpr auto get(S s, F f) { return std::make_tuple(f(s)); }
 	static constexpr std::size_t count = 1;
 };
 
 template<typename S, typename F>
 struct getter_impl<S, F, std::integral_constant<std::size_t, std::tuple_size<typename sub_structures<S>::value_type>::value>, std::enable_if_t<!can_apply<F, S>::value>> {
-	static constexpr decltype(auto) get(S, F) { return std::tuple<>(); }
+	static constexpr auto get(S, F) { return std::tuple<>(); }
 	static constexpr std::size_t count = 0;
 };
 
 template<typename S, typename F>
 struct getter<S, F, std::enable_if_t<can_apply<F, S>::value>> {
-	static constexpr decltype(auto) get(S s, F f) { return f(s); }
+	static constexpr auto get(S s, F f) { return f(s); }
 };
 
 template<typename S, typename F>
 struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, F>::count == 1)>> {
-	static constexpr decltype(auto) get(S s, F f) { return std::get<0>(getter_impl<S, F>::get(s, f)); }
+	static constexpr auto get(S s, F f) { return std::get<0>(getter_impl<S, F>::get(s, f)); }
 };
 
 template<typename S, typename F>
@@ -204,7 +204,7 @@ struct pipe_decider;
 template<typename F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, transform_tag>::value>> {
 	template<typename S>
-	static constexpr decltype(auto) operate(S s, F f) { return fmapper<S, F>::fmap(s, f); }
+	static constexpr auto operate(S s, F f) { return fmapper<S, F>::fmap(s, f); }
 };
 
 template<typename F>
@@ -241,7 +241,7 @@ namespace helpers {
 template<typename S, typename F, std::size_t Max, std::size_t I>
 struct construct_builder {
 	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build(S s, F f) {
+	static constexpr auto construct_build(S s, F f) {
 		return construct_builder<S, F, Max, I - 1>::template construct_build<I - 1, IS...>(s, f);
 	}
 };
@@ -249,11 +249,11 @@ struct construct_builder {
 template<typename S, typename F, std::size_t Max>
 struct construct_builder<S, F, Max, 0> {
 	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build(S s, F f) {
+	static constexpr auto construct_build(S s, F f) {
 		return construct_build_last<IS...>(s, f);
 	}
 	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build_last(S s, F f) {
+	static constexpr auto construct_build_last(S s, F f) {
 		return s.construct((std::get<IS>(s.sub_structures()) | f)...);
 	}
 };
@@ -262,11 +262,11 @@ struct construct_builder<S, F, Max, 0> {
 template<typename S, typename F>
 struct construct_builder<S, F, 0, 0> {
 	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build(S s, F f) {
+	static constexpr auto construct_build(S s, F f) {
 		return construct_build_last<IS...>(s, f);
 	}
 	template<std::size_t... IS>
-	static constexpr decltype(auto) construct_build_last(S s, F) {
+	static constexpr auto construct_build_last(S s, F) {
 		return s.construct();
 	}
 };
