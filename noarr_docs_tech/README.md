@@ -59,9 +59,44 @@ For a structure `T`:
 
 ### Cube
 
-A cube is a structure hierarchy which has all its dimensions dynamic. This has a consequence of having a single scalar type
+A cube is a structure hierarchy which has all its dimensions dynamic. This has a consequence of having a single scalar type (all values described by the structure share the same type).
 
 ### Point
 
-A point is a structure hierarchy with no dimensions. It has only a single scalar type. It is a special case of cube.
+A point is a structure hierarchy with no dimensions. It has only a single scalar type and it describes one scalar value of this type.
 
+It is a special case of cube.
+
+## (Noarr) Function
+
+Functions are (using the `operator|`) applied to structures. Applying them returns either another structure (this is mostly the case of the functions with `func_family` set to `transform_tag`, more on `func_family`s later in this section) or a scalar value (usually if `func_family` is set to `get_tag`).
+
+### Piping
+
+The piping mechanism (used inside `operator|`) is split into three cases:
+
+#### Top application
+
+This case applies to the functions have their `func_family` set to `top_tag`.
+
+It is the simplest piping mechanism case as it is equivalent to simple application (e.g.: the expression `s | f`, if `f` has a `top_tag`, is equivalent to `f(s)`).
+
+#### Getting
+
+This case applies to the functions have their `func_family` set to `get_tag`.
+
+It is an extension of the *top application* case:
+
+given the expresion `s | f`, if `f(s)` is not a valid expression, the piping mechanism attempts to apply `f` to the substructures of `s` (recursively). It fails if `f` is not applicable to any of the substructures or if it is applicable to more substructures. In other words, it succeeds if and only if there is one and only one sub-graph branch in the structure hierarchy (if represented by a tree) such that `f` is not applicable to any of the non-leaf nodes of the branch and it is applicable to the leaf.
+
+#### Mapping / Transformation
+
+This case applies to the functions have their `func_family` set to `transform_tag`.
+
+The result of `s | f` results in applying `f` to the top-most structure of each branch of the structure hierarchy  (or leaving the branch without change if `f` is applicable to none of the structures) and then reconstructing the structure with these changes to the substructures.
+
+### Function requirements
+
+Functions have rather informal requirements so the library can reach maximum expressiveness without affecting its complexity.
+
+It is very preferable that each function honors the piping mechanism and, it is a trivially and consteval constructible/destructible standard layout, and its operator() is also constexpr (and satisfies consteval requirements).
