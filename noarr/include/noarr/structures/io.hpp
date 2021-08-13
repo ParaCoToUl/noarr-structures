@@ -16,6 +16,7 @@ struct print_struct_impl;
 template<char... Name>
 struct print_struct_impl<char_pack<Name...>> {
 	static constexpr std::ostream &print(std::ostream &out) {
+		// translates a `char_pack<Name...>` to the corresponding c string
 		constexpr const char name[] = {Name..., '\0'};
 		return out << name;
 	}

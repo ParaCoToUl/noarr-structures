@@ -48,6 +48,9 @@ namespace helpers {
 template<typename F, typename G>
 struct compose_impl : contain<F, G> {
 	using base = contain<F, G>;
+	// the  composed functions are applied on the structure as a whole (it doesn't inherit the func_family)
+	// the `func_family`s of the composed functions are still relevant
+	// (the operator() calls the functions as if they were applied to the given structure directly)
 	using func_family = top_tag;
 
 	constexpr compose_impl(F f, G g) : base(f, g) {}
@@ -63,7 +66,7 @@ struct compose_impl : contain<F, G> {
 /**
  * @brief composes functions `F` and `G` together
  * 
- * @param f: the inner function
+ * @param f: the inner function (the one applied first)
  * @param g: the outer function
  */
 template<typename F, typename G>
@@ -74,17 +77,17 @@ constexpr auto compose(F f, G g) {
 namespace helpers {
 
 template<char Dim, typename T>
-struct set_length_can_apply {
+struct dynamic_set_length_can_apply {
 	static constexpr bool value = false;
 };
 
 template<char Dim, typename T>
-struct set_length_can_apply<Dim, vector<Dim, T>> {
+struct dynamic_set_length_can_apply<Dim, vector<Dim, T>> {
 	static constexpr bool value = true;
 };
 
 template<char Dim, typename T>
-struct set_length_can_apply<Dim, sized_vector<Dim, T>> {
+struct dynamic_set_length_can_apply<Dim, sized_vector<Dim, T>> {
 	static constexpr bool value = true;
 };
 
@@ -97,7 +100,7 @@ struct dynamic_set_length {
 	using func_family = transform_tag;
 
 	template<typename T>
-	using can_apply = helpers::set_length_can_apply<Dim, T>;
+	using can_apply = helpers::dynamic_set_length_can_apply<Dim, T>;
 
 	explicit constexpr dynamic_set_length(std::size_t length) : length(length) {}
 
@@ -490,6 +493,7 @@ struct get_at_impl : private contain<Ptr> {
 	// the return type checks whether the structure `t` is a cube and it also chooses `scalar_t<T> &` or `const scalar_t<T> &` according to constness of `Ptr` pointee
 	template<typename T>
 	constexpr auto operator()(T t) const -> std::enable_if_t<is_cube<T>::value, std::conditional_t<std::is_const<std::remove_pointer_t<Ptr>>::value, const scalar_t<T> &, scalar_t<T> &>> {
+		// accesses reference to a value with the given offset and casted to its corresponding type
 		return reinterpret_cast<std::conditional_t<std::is_const<std::remove_pointer_t<Ptr>>::value, const scalar_t<T> &, scalar_t<T> &>>(*(contain<Ptr>::template get<0>() + (t | offset())));
 	}
 };
