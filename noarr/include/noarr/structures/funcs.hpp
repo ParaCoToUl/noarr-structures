@@ -48,16 +48,13 @@ namespace helpers {
 template<typename F, typename G>
 struct compose_impl : contain<F, G> {
 	using base = contain<F, G>;
-	using func_family = typename func_trait<G>::type;
-
-	template<typename T>
-	using can_apply = get_applicability<F, T>;
+	using func_family = top_tag;
 
 	constexpr compose_impl(F f, G g) : base(f, g) {}
 
 	template<typename T>
 	constexpr decltype(auto) operator()(T t) const {
-		return pipe(t, base::template get<0>(), base::template get<1>());
+		return t | base::template get<0>() | base::template get<1>();
 	}
 };
 
