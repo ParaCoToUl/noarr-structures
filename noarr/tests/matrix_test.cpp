@@ -31,43 +31,43 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Columns>
 template<typename Matrix1, typename Matrix2>
 void matrix_copy(Matrix1& matrix1, Matrix2& matrix2)
 {
-	int x_size = matrix1.template get_length<'x'>();
-	int y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template get_length<'x'>();
+	std::size_t y_size = matrix1.template get_length<'y'>();
 
 	REQUIRE(x_size == matrix2.template get_length<'x'>());
 	REQUIRE(y_size == matrix2.template get_length<'y'>());
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = 0; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = 0; j < y_size; j++)
 			matrix2.template at<'x', 'y'>(i, j) = matrix1.template at<'x', 'y'>(i, j);
 }
 
 template<typename Matrix1>
 void matrix_transpose(Matrix1& matrix1)
 {
-	int x_size = matrix1.template get_length<'x'>();
-	int y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template get_length<'x'>();
+	std::size_t y_size = matrix1.template get_length<'y'>();
 
 	REQUIRE(x_size == y_size);
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = i; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = i; j < y_size; j++)
 			std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
 }
 
 template<typename Matrix1, typename Matrix2, typename Matrix3>
 void matrix_add(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
-	int x_size = matrix1.template get_length<'x'>();
-	int y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template get_length<'x'>();
+	std::size_t y_size = matrix1.template get_length<'y'>();
 
 	REQUIRE(x_size == matrix2.template get_length<'x'>());
 	REQUIRE(y_size == matrix2.template get_length<'y'>());
 	REQUIRE(x_size == matrix3.template get_length<'x'>());
 	REQUIRE(y_size == matrix3.template get_length<'y'>());
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = 0; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = 0; j < y_size; j++)
 		{
 			int& value1 = matrix1.template at<'x', 'y'>(i, j);
 			int& value2 = matrix2.template at<'x', 'y'>(i, j);
@@ -80,35 +80,35 @@ void matrix_add(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 template<typename Matrix1>
 void matrix_scalar_multiplication(Matrix1& matrix1, int scalar)
 {
-	int x_size = matrix1.template get_length<'x'>();
-	int y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template get_length<'x'>();
+	std::size_t y_size = matrix1.template get_length<'y'>();
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = i; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = i; j < y_size; j++)
 			matrix1.template at<'x', 'y'>(i, j) *= scalar;
 }
 
 template<typename Matrix1, typename Matrix2, typename Matrix3>
 void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
-	int x1_size = matrix1.template get_length<'x'>();
-	int y1_size = matrix1.template get_length<'y'>();
-	int x2_size = matrix2.template get_length<'x'>();
-	int y2_size = matrix2.template get_length<'y'>();
-	int x3_size = matrix3.template get_length<'x'>();
-	int y3_size = matrix3.template get_length<'y'>();
+	std::size_t x1_size = matrix1.template get_length<'x'>();
+	std::size_t y1_size = matrix1.template get_length<'y'>();
+	std::size_t x2_size = matrix2.template get_length<'x'>();
+	std::size_t y2_size = matrix2.template get_length<'y'>();
+	std::size_t x3_size = matrix3.template get_length<'x'>();
+	std::size_t y3_size = matrix3.template get_length<'y'>();
 
 	REQUIRE(x1_size == y2_size);
 	REQUIRE(y1_size == y3_size);
 	REQUIRE(x2_size == x3_size);
 
-	for (int i = 0; i < x3_size; i++)
+	for (std::size_t i = 0; i < x3_size; i++)
 	{
-		for (int j = 0; j < y3_size; j++)
+		for (std::size_t j = 0; j < y3_size; j++)
 		{
 			int sum = 0;
 
-			for (int k = 0; k < x1_size; k++)
+			for (std::size_t k = 0; k < x1_size; k++)
 			{
 				int& value1 = matrix1.template at<'x', 'y'>(k, j);
 				int& value2 = matrix2.template at<'x', 'y'>(i, k);
@@ -182,13 +182,13 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 template<typename Matrix1>
 matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 {
-	int x_size = matrix1.template get_length<'x'>();
-	int y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template get_length<'x'>();
+	std::size_t y_size = matrix1.template get_length<'y'>();
 
 	matrix m = get_clasic_matrix(x_size, y_size);
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = 0; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = 0; j < y_size; j++)
 			m.at(i, j) = matrix1.template at<'x', 'y'>(i, j);
 
 	return m;
@@ -197,34 +197,34 @@ matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 template<typename Matrix1>
 void clasic_matrix_to_naorr(matrix& m1, Matrix1& matrix1)
 {
-	int x_size = matrix1.template get_length<'x'>();
-	int y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template get_length<'x'>();
+	std::size_t y_size = matrix1.template get_length<'y'>();
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = 0; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = 0; j < y_size; j++)
 			matrix1.template at<'x', 'y'>(i, j) = m1.at(i, j);
 }
 
 void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 {
-	int x1_size = m1.x;
-	int y1_size = m1.y;
-	int x2_size = m2.x;
-	int y2_size = m2.y;
-	int x3_size = m3.x;
-	int y3_size = m3.y;
+	std::size_t x1_size = m1.x;
+	std::size_t y1_size = m1.y;
+	std::size_t x2_size = m2.x;
+	std::size_t y2_size = m2.y;
+	std::size_t x3_size = m3.x;
+	std::size_t y3_size = m3.y;
 
 	REQUIRE(x1_size == y2_size);
 	REQUIRE(y1_size == y3_size);
 	REQUIRE(x2_size == x3_size);
 
-	for (int i = 0; i < x3_size; i++)
+	for (std::size_t i = 0; i < x3_size; i++)
 	{
-		for (int j = 0; j < y3_size; j++)
+		for (std::size_t j = 0; j < y3_size; j++)
 		{
 			int sum = 0;
 
-			for (int k = 0; k < x1_size; k++)
+			for (std::size_t k = 0; k < x1_size; k++)
 			{
 				int& value1 = m1.at(k, j);
 				int& value2 = m2.at(i, k);
