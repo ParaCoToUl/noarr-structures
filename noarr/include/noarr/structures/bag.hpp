@@ -16,7 +16,7 @@ struct bag_policy {
 		return container<char>(size);
 	}
 
-	static char* get(const container<char> &_container) {
+	static constexpr char* get(const container<char> &_container) {
 		return _container.data();
 	}
 };
@@ -33,7 +33,7 @@ struct bag_policy<std::unique_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static char* get(const std::unique_ptr<char[]> &ptr) {
+	static constexpr char* get(const std::unique_ptr<char[]> &ptr) {
 		return ptr.get();
 	}
 };
@@ -46,7 +46,11 @@ struct bag_policy<bag_raw_pointer_tag> {
 		return new char[size];
 	}
 
-	static char* get(char *ptr) {
+	static constexpr char* get(char *ptr) {
+		return ptr;
+	}
+
+	static constexpr const char* get(const char *ptr) {
 		return ptr;
 	}
 };
