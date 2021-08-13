@@ -48,7 +48,7 @@ namespace helpers {
 template<typename F, typename G>
 struct compose_impl : contain<F, G> {
 	using base = contain<F, G>;
-	using func_family = typename func_trait<F>::type;
+	using func_family = typename func_trait<G>::type;
 
 	template<typename T>
 	using can_apply = get_applicability<F, T>;
@@ -120,6 +120,8 @@ private:
 
 template<char Dim, std::size_t L>
 struct static_set_length_impl {
+	using func_family = transform_tag;
+
 	constexpr static_set_length_impl() = default;
 
 	template<typename T>
@@ -269,6 +271,8 @@ namespace helpers {
 
 template<char Dim>
 struct fix_dynamic_impl {
+	using func_family = transform_tag;
+
 	constexpr fix_dynamic_impl() = default;
 	explicit constexpr fix_dynamic_impl(std::size_t idx) : idx(idx) {}
 
@@ -284,6 +288,7 @@ public:
 
 template<char Dim, std::size_t Idx>
 struct fix_static_impl {
+	using func_family = transform_tag;
 	using idx_t = std::integral_constant<std::size_t, Idx>;
 
 	constexpr fix_static_impl() = default;
@@ -300,6 +305,7 @@ struct fix_impl;
 template<char Dim, typename T, typename... Tuples>
 struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<fix_dynamic_impl<Dim>, fix_impl<Tuples...>> {
 	using base = contain<fix_dynamic_impl<Dim>, fix_impl<Tuples...>>;
+	using func_family = transform_tag;
 
 	constexpr fix_impl() = default;
 	
@@ -313,12 +319,17 @@ struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : p
 };
 
 template<char Dim, typename T>
-struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>> : private fix_dynamic_impl<Dim> { using fix_dynamic_impl<Dim>::fix_dynamic_impl; using fix_dynamic_impl<Dim>::operator(); };
+struct fix_impl<std::tuple<std::integral_constant<char, Dim>, T>> : private fix_dynamic_impl<Dim> {
+	using func_family = transform_tag;
+	using fix_dynamic_impl<Dim>::fix_dynamic_impl;
+	using fix_dynamic_impl<Dim>::operator();
+};
 
 
 template<char Dim, std::size_t Idx, typename... Tuples>
 struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>, Tuples...> : private contain<fix_static_impl<Dim, Idx>, fix_impl<Tuples...>> {
 	using base = contain<fix_static_impl<Dim, Idx>, fix_impl<Tuples...>>;
+	using func_family = transform_tag;
 
 	constexpr fix_impl() = default;
 	
@@ -333,6 +344,8 @@ struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_cons
 
 template<char Dim, std::size_t Idx>
 struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_constant<std::size_t, Idx>>> : private fix_static_impl<Dim, Idx> {
+	using func_family = transform_tag;
+
 	constexpr fix_impl() = default;
 	constexpr fix_impl(std::integral_constant<std::size_t, Idx>) : fix_static_impl<Dim,Idx>() {}
 
@@ -341,6 +354,8 @@ struct fix_impl<std::tuple<std::integral_constant<char, Dim>, std::integral_cons
 
 template<>
 struct fix_impl<> {
+	using func_family = transform_tag;
+
 	constexpr fix_impl() = default;
 
 	template<typename T>
