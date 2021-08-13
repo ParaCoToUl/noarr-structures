@@ -16,7 +16,11 @@ struct bag_policy {
 		return container<char>(size);
 	}
 
-	static constexpr char* get(const container<char> &_container) {
+	static char* get(container<char> &_container) {
+		return _container.data();
+	}
+
+	static const char* get(const container<char> &_container) {
 		return _container.data();
 	}
 };
@@ -33,7 +37,28 @@ struct bag_policy<std::unique_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static char* get(const std::unique_ptr<char[]> &ptr) {
+	static char* get(std::unique_ptr<char[]> &ptr) {
+		return ptr.get();
+	}
+
+	static const char* get(const std::unique_ptr<char[]> &ptr) {
+		return ptr.get();
+	}
+};
+
+template<>
+struct bag_policy<std::shared_ptr> {
+	using type = std::shared_ptr<char[]>;
+
+	static auto construct(std::size_t size) {
+		return std::make_unique<char[]>(size);
+	}
+
+	static char* get(std::shared_ptr<char[]> &ptr) {
+		return ptr.get();
+	}
+
+	static const char* get(const std::shared_ptr<char[]> &ptr) {
 		return ptr.get();
 	}
 };
@@ -194,7 +219,7 @@ public:
  * @param s: the structure
  */
 template<typename Structure>
-constexpr auto make_bag(Structure s) {
+constexpr auto make_unique_bag(Structure s) {
 	return bag<Structure, helpers::bag_policy<std::unique_ptr>>(s);
 }
 
@@ -204,8 +229,68 @@ constexpr auto make_bag(Structure s) {
  * @param s: the structure (wrapped)
  */
 template<typename Structure>
-constexpr auto make_bag(noarr::wrapper<Structure> s) {
+constexpr auto make_unique_bag(noarr::wrapper<Structure> s) {
 	return bag<Structure, helpers::bag_policy<std::unique_ptr>>(s);
+}
+
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::shared_ptr
+ * 
+ * @param s: the structure
+ */
+template<typename Structure>
+constexpr auto make_shared_bag(Structure s) {
+	return bag<Structure, helpers::bag_policy<std::shared_ptr>>(s);
+}
+
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::shared_ptr
+ * 
+ * @param s: the structure (wrapped)
+ */
+template<typename Structure>
+constexpr auto make_shared_bag(noarr::wrapper<Structure> s) {
+	return bag<Structure, helpers::bag_policy<std::shared_ptr>>(s);
+}
+
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::vector
+ * 
+ * @param s: the structure
+ */
+template<typename Structure>
+constexpr auto make_vector_bag(Structure s) {
+	return bag<Structure, helpers::bag_policy<std::vector>>(s);
+}
+
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::vector
+ * 
+ * @param s: the structure (wrapped)
+ */
+template<typename Structure>
+constexpr auto make_vector_bag(noarr::wrapper<Structure> s) {
+	return bag<Structure, helpers::bag_policy<std::vector>>(s);
+}
+
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
+ * 
+ * @param s: the structure
+ */
+template<typename Structure>
+constexpr auto make_bag(Structure s) {
+	return make_unique_bag(s);
+}
+
+/**
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
+ * 
+ * @param s: the structure (wrapped)
+ */
+template<typename Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s) {
+	return make_unique_bag(s);
 }
 
 /**
