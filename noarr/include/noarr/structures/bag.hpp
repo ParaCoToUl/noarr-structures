@@ -33,7 +33,7 @@ struct bag_policy<std::unique_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static constexpr char* get(const std::unique_ptr<char[]> &ptr) {
+	static char* get(const std::unique_ptr<char[]> &ptr) {
 		return ptr.get();
 	}
 };
