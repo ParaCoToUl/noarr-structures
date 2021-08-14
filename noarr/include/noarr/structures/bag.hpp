@@ -47,35 +47,6 @@ struct bag_policy<std::unique_ptr> {
 };
 
 template<>
-struct bag_policy<std::shared_ptr> {
-	using type = std::shared_ptr<char[]>;
-
-	static auto construct(std::size_t size) {
-		return std::make_shared<char[]>(size);
-	}
-
-	template<typename T>
-	static auto get(std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char (*)[]>::value, char *> {
-		return *ptr.get();
-	}
-
-	template<typename T>
-	static auto get(std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char *>::value, char *> {
-		return ptr.get();
-	}
-
-	template<typename T>
-	static auto get(const std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char (*)[]>::value, const char *> {
-		return *ptr.get();
-	}
-
-	template<typename T>
-	static auto get(const std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char *>::value, const char *> {
-		return ptr.get();
-	}
-};
-
-template<>
 struct bag_policy<bag_raw_pointer_tag> {
 	using type = char *;
 
@@ -243,26 +214,6 @@ constexpr auto make_unique_bag(Structure s) {
 template<typename Structure>
 constexpr auto make_unique_bag(noarr::wrapper<Structure> s) {
 	return bag<Structure, helpers::bag_policy<std::unique_ptr>>(s);
-}
-
-/**
- * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::shared_ptr
- * 
- * @param s: the structure
- */
-template<typename Structure>
-constexpr auto make_shared_bag(Structure s) {
-	return bag<Structure, helpers::bag_policy<std::shared_ptr>>(s);
-}
-
-/**
- * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::shared_ptr
- * 
- * @param s: the structure (wrapped)
- */
-template<typename Structure>
-constexpr auto make_shared_bag(noarr::wrapper<Structure> s) {
-	return bag<Structure, helpers::bag_policy<std::shared_ptr>>(s);
 }
 
 /**

@@ -124,8 +124,8 @@ void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 template<MatrixDataLayout layout>
 void matrix_template_test(int size)
 {
-	// using different kinds of bags (shared bag doesn't work on macos and windows)
-	auto m1 = noarr::make_unique_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	// using different kinds of bags
+	auto m1 = noarr::make_vector_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 	auto m2 = noarr::make_vector_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 	auto m3 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 
