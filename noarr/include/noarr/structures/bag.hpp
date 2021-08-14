@@ -51,7 +51,7 @@ struct bag_policy<std::shared_ptr> {
 	using type = std::shared_ptr<char[]>;
 
 	static auto construct(std::size_t size) {
-		return std::make_unique<char[]>(size);
+		return std::make_shared<char[]>(size);
 	}
 
 	template<typename T>
