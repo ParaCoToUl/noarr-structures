@@ -16,11 +16,11 @@ struct bag_policy {
 		return container<char>(size);
 	}
 
-	static char* get(container<char> &_container) {
+	static char *get(container<char> &_container) {
 		return _container.data();
 	}
 
-	static const char* get(const container<char> &_container) {
+	static const char *get(const container<char> &_container) {
 		return _container.data();
 	}
 };
@@ -37,11 +37,11 @@ struct bag_policy<std::unique_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static char* get(std::unique_ptr<char[]> &ptr) {
+	static char *get(std::unique_ptr<char[]> &ptr) {
 		return ptr.get();
 	}
 
-	static const char* get(const std::unique_ptr<char[]> &ptr) {
+	static const char *get(const std::unique_ptr<char[]> &ptr) {
 		return ptr.get();
 	}
 };
@@ -54,11 +54,23 @@ struct bag_policy<std::shared_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static char* get(std::shared_ptr<char[]> &ptr) {
+	template<typename T>
+	static auto get(std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char (*)[]>::value, char *> {
+		return *ptr.get();
+	}
+
+	template<typename T>
+	static auto get(std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char *>::value, char *> {
 		return ptr.get();
 	}
 
-	static const char* get(const std::shared_ptr<char[]> &ptr) {
+	template<typename T>
+	static auto get(const std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char (*)[]>::value, const char *> {
+		return *ptr.get();
+	}
+
+	template<typename T>
+	static auto get(const std::shared_ptr<T> &ptr) -> std::enable_if_t<std::is_same<decltype(ptr.get()), char *>::value, const char *> {
 		return ptr.get();
 	}
 };
@@ -71,11 +83,11 @@ struct bag_policy<bag_raw_pointer_tag> {
 		return new char[size];
 	}
 
-	static constexpr char* get(char *ptr) {
+	static constexpr char *get(char *ptr) {
 		return ptr;
 	}
 
-	static constexpr const char* get(const char *ptr) {
+	static constexpr const char *get(const char *ptr) {
 		return ptr;
 	}
 };
@@ -131,12 +143,12 @@ public:
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr const char* data() const noexcept { return BagPolicy::get(data_); }
+	constexpr const char *data() const noexcept { return BagPolicy::get(data_); }
 
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr char* data() noexcept { return BagPolicy::get(data_); }
+	constexpr char *data() noexcept { return BagPolicy::get(data_); }
 
 	/**
 	 * @brief sets the `data` to zeros
