@@ -48,7 +48,7 @@ namespace helpers {
 template<typename F, typename G>
 struct compose_impl : contain<F, G> {
 	using base = contain<F, G>;
-	// the  composed functions are applied on the structure as a whole (it doesn't inherit the func_family)
+	// the  composed functions are applied on the structure as a whole (it does not inherit the func_family)
 	// the `func_family`s of the composed functions are still relevant
 	// (the operator() calls the functions as if they were applied to the given structure directly)
 	using func_family = top_tag;
@@ -485,7 +485,7 @@ template<typename Ptr>
 struct get_at_impl : private contain<Ptr> {
 	using func_family = top_tag;
 
-	constexpr get_at_impl() = delete; // we don't want to access nondeterministic memory
+	constexpr get_at_impl() = delete; // we do not want to access nondeterministic memory
 
 	template<typename T>
 	explicit constexpr get_at_impl(T *ptr) : contain<Ptr>(reinterpret_cast<Ptr>(ptr)) {}

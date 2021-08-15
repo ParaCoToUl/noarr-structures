@@ -178,7 +178,7 @@ struct array : private contain<T> {
 };
 
 /**
- * @brief unsized vector ready to be resized to the desired size, this vector doesn't have size yet
+ * @brief unsized vector ready to be resized to the desired size, this vector does not have size yet
  * 
  * @tparam Dim: the dimmension name added by the vector
  * @tparam T: type of the substructure the vector contains
@@ -292,7 +292,7 @@ struct is_static_construct<T, decltype(&T::construct, void())> {
 template<char Dim, typename T, std::size_t Idx>
 struct sfixed_dim : private contain<T> {
 	/* e.g. sub_structures of a sfixed tuple are the same as the substructures of the tuple
-	 *(otherwise we couldn't have the right offset after an item with Idx2 < Idx in the tuple changes)
+	 *(otherwise we could not have the right offset after an item with Idx2 < Idx in the tuple changes)
 	 */
 	constexpr auto sub_structures() const { return contain<T>::template get<0>().sub_structures(); }
 	using description = struct_description<

@@ -21,7 +21,7 @@ For a structure `T`:
   - if `T::construct` is `const`:
     - each `construct`ed structure shall be identifiable by its sub-structures and a *prototype*. A prototype is a structure whose `construct` method, given the sub-structures as arguments, produces the aforementioned constructed structure
     - it shall follow that the relationship of having/being a prototype is a mathematical equivalence (transitive, reflexive and symmetric)
-      - and thus the structures can be divided into equivalence classes where any structure from a certain class can be called a prototype of the whole class (these equivalence classes don't have to correspond with generic `class`es defining the structures)
+      - and thus the structures can be divided into equivalence classes where any structure from a certain class can be called a prototype of the whole class (these equivalence classes do not have to correspond with generic `class`es defining the structures)
         - *e.g. `sized_vector`s can be divided into equivalence classes by their length*
   - if `T::construct` is `static`
     - the `construct`ed structure is identifiable by its sub-structures and thus the relationship of being a *prototype* (defined as above) forms a single equivalence class (again, do not mix up with `class`es as defined by the programming language)
@@ -29,7 +29,7 @@ For a structure `T`:
   - it shall be a *pure function* if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
 - the structure shall define `description`, a type that is a specialization of `struct_description` and describes the structure
   - the first entry shall be a `char_pack` specialization containing the structure's name
-  - the second entry shall be a `dims_impl` specialization containing the dimension (if any - *e.g. `scalar<T>` doesn't introduce a dimension*) the structure introduces
+  - the second entry shall be a `dims_impl` specialization containing the dimension (if any - *e.g. `scalar<T>` does not introduce a dimension*) the structure introduces
   - the third entry shall be a `dims_impl` specialization containing the dimensions (if any) the structure consumes from its sub-structures
   - the other entries are each a specialization of either `struct_param` or `struct_param` <!-- TODO -->
 - `T::length()` is a function that returns a `std::size_t` value which specifies the range of indices the structure supports via `T::offset`
