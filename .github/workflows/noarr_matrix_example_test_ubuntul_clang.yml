@@ -3,7 +3,7 @@ name: Noarr matrix example test ubuntu-latest - clang
 on:
   push:
     paths:
-    - 'noarr/**'
+    - 'include/**'
     - 'examples/matrix/**'
     - '.github/workflows/noarr_matrix_example_test_ubuntul_clang.yml'
 

@@ -97,7 +97,7 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 ## Running tests
 
-Make sure you are in the [noarr](noarr) folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
+Make sure you are in the root folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
 
 ```sh
 # creates the build directory

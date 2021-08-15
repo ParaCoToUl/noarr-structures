@@ -4,9 +4,10 @@
 *.obj
 *.o
 
-## VS files
+## editors
 .vs/
 .vscode/
+.idea/
 x64/
 x86/
 
@@ -294,3 +295,31 @@ TSWLatexianTemp*
 # option is specified. Footnotes are the stored in a file with suffix Notes.bib.
 # Uncomment the next line to have this generated file ignored.
 #*Notes.bib
+
+# CMake stuff
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# CTest & testing
+/ParseAndAddCatchTests.cmake
+/DartConfiguration.tcl
+/build
+
+# CMake stuff on Windows
+/Debug
+/Release4
+/test-runner.dir
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sln
+

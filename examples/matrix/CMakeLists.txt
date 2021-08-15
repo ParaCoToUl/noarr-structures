@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # setup the test runner executable
 add_executable(matrix matrix.cpp)
-target_include_directories(matrix PUBLIC ../../noarr/include)
+target_include_directories(matrix PUBLIC ../../include)
 
 # ask compiler to print maximum warnings
 if(MSVC)
