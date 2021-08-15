@@ -2,6 +2,7 @@
 #define NOARR_BAG_HPP
 
 #include <memory>
+#include <vector>
 
 namespace noarr {
 
