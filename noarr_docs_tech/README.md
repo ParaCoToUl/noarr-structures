@@ -97,13 +97,13 @@ The library provides a set of structures that describe the most essential layout
 
 ### Helper structures
 
-####
+#### Sfixed_dim
 
+`sfixed_dim` eliminates the static (or dynamic) dimension of the contained structure by fixing a certain index in it while preserving the layout of the structure and all substructures.
 
+#### Fixed_dim
 
-####
-
-
+`fixed_dim` eliminates the dynamic dimension of the contained structure by fixing a certain index in it while preserving the layout of the structure and all substructures.
 
 ## (Noarr) Function
 
@@ -125,7 +125,7 @@ This case applies to the functions have their `func_family` set to `get_tag`.
 
 It is an extension of the *top application* case:
 
-given the expresion `s | f`, if `f(s)` is not a valid expression, the piping mechanism attempts to apply `f` to the substructures of `s` (recursively). It fails if `f` is not applicable to any of the substructures or if it is applicable to more substructures. In other words, it succeeds if and only if there is one and only one sub-graph branch in the structure hierarchy (if represented by a tree) such that `f` is not applicable to any of the non-leaf nodes of the branch and it is applicable to the leaf.
+given the expression `s | f`, if `f(s)` is not a valid expression, the piping mechanism attempts to apply `f` to the substructures of `s` (recursively). It fails if `f` is not applicable to any of the substructures or if it is applicable to more substructures. In other words, it succeeds if and only if there is one and only one sub-graph branch in the structure hierarchy (if represented by a tree) such that `f` is not applicable to any of the non-leaf nodes of the branch and it is applicable to the leaf.
 
 #### Mapping / Transformation
 
