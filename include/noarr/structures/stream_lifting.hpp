@@ -30,7 +30,7 @@ struct stream_lift_static {
 
 template<typename Struct>
 struct stream_lift_static<0, Struct> {
-	static constexpr std::istream &stream_lift_(std::istream &in, Struct, char*) {
+	static constexpr std::istream &stream_lift_(std::istream &in, Struct, char *) {
 		return in;
 	}
 };
@@ -69,7 +69,7 @@ struct stream_unlift_static {
 
 template<typename Struct>
 struct stream_unlift_static<0, Struct> {
-	static constexpr std::ostream &stream_unlift_(std::ostream &out, Struct, char*) {
+	static constexpr std::ostream &stream_unlift_(std::ostream &out, Struct, char *) {
 		return out;
 	}
 };

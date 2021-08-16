@@ -131,7 +131,7 @@ given the expression `s | f`, if `f(s)` is not a valid expression, the piping me
 
 This case applies to the functions have their `func_family` set to `transform_tag`.
 
-The result of `s | f` results in applying `f` to the top-most structure of each branch of the structure hierarchy  (or leaving the branch without change if `f` is applicable to none of the structures) and then reconstructing the structure with these changes to the substructures.
+The result of `s | f` results in applying `f` to the top-most structure of each branch of the structure hierarchy (or leaving the branch without change if `f` is applicable to none of the structures) and then reconstructing the structure with these changes to the substructures.
 
 ### Function requirements
 

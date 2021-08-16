@@ -242,7 +242,7 @@ void print_help_and_exit()
  * @param argc: command-line arguments count
  * @param argv: command-line arguments
  */
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
 	// there have to be two arguments
 	if (argc != 3)

@@ -131,7 +131,7 @@ void main() {
 
 ### Containers
 
-Noarr supports `vector` and `array`. Our library is designed to be easily extendable. We have implemented a 2D z-curve in  our matrix example [z-curve implementation example](../examples/matrix/z_curve.hpp "z-curve implementation example"). Basic declarations look like this:
+Noarr supports `vector` and `array`. Our library is designed to be easily extendable. We have implemented a 2D z-curve in our matrix example [z-curve implementation example](../examples/matrix/z_curve.hpp "z-curve implementation example"). Basic declarations look like this:
 
 ```cpp
 noarr::vector<'i', noarr::scalar<float>> my_vector;

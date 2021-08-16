@@ -11,7 +11,7 @@ TEST_CASE("Image", "[image]") {
 	auto grayscale = noarr::wrap(g);
 
 	std::vector<char> my_blob_buffer(grayscale.get_size());
-	char* my_blob = (char*)my_blob_buffer.data();
+	char *my_blob = (char *)my_blob_buffer.data();
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(grayscale)>::value);

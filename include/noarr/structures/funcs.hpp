@@ -48,7 +48,7 @@ namespace helpers {
 template<typename F, typename G>
 struct compose_impl : contain<F, G> {
 	using base = contain<F, G>;
-	// the  composed functions are applied on the structure as a whole (it does not inherit the func_family)
+	// the composed functions are applied on the structure as a whole (it does not inherit the func_family)
 	// the `func_family`s of the composed functions are still relevant
 	// (the operator() calls the functions as if they were applied to the given structure directly)
 	using func_family = top_tag;

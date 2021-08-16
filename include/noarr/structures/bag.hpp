@@ -51,7 +51,7 @@ template<>
 struct bag_policy<bag_raw_pointer_tag> {
 	using type = char *;
 
-	static char* construct(std::size_t size) {
+	static char *construct(std::size_t size) {
 		return new char[size];
 	}
 
