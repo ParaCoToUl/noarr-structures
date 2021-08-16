@@ -76,7 +76,8 @@ struct z_curve_top : private contain<T, TH1, TH2> {
 
 	constexpr std::size_t size() const { return base::template get<0>().size(); }
 	constexpr std::size_t offset() const {
-		return base::template get<0>().offset(base::template get<1>().offset() | (base::template get<2>().offset() << 1));
+		return base::template get<0>().offset(
+			(std::uint16_t)(base::template get<1>().offset() | (base::template get<2>().offset() << 1)));
 	}
 };
 
