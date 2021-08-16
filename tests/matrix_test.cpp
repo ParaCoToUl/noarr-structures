@@ -122,7 +122,7 @@ void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 }
 
 template<MatrixDataLayout layout>
-void matrix_template_test(int size)
+void matrix_template_test(std::size_t size)
 {
 	// using different kinds of bags
 	auto m1 = noarr::make_vector_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
@@ -132,7 +132,7 @@ void matrix_template_test(int size)
 	matrix_multiply(m1, m2, m3);
 }
 
-void matrix_template_test_runtime(MatrixDataLayout layout, int size)
+void matrix_template_test_runtime(MatrixDataLayout layout, std::size_t size)
 {
 	if (layout == MatrixDataLayout::Rows)
 		matrix_template_test<MatrixDataLayout::Rows>(size);
@@ -143,22 +143,22 @@ void matrix_template_test_runtime(MatrixDataLayout layout, int size)
 
 struct matrix
 {
-	matrix(int X, int Y, std::vector<int>&& Ary) : x(X), y(Y), ary(std::move(Ary)) {};
+	matrix(std::size_t X, std::size_t Y, std::vector<int>&& Ary) : x(X), y(Y), ary(std::move(Ary)) {};
 
-	int x;
-	int y;
+	std::size_t x;
+	std::size_t y;
 	std::vector<int> ary;
 
-	int& at(int x_, int y_) { return ary[x_ + y_ * x]; }
-	const int& at(int x_, int y_) const { return ary[x_ + y_ * x]; }
+	int& at(std::size_t x_, std::size_t y_) { return ary[x_ + y_ * x]; }
+	const int& at(std::size_t x_, std::size_t y_) const { return ary[x_ + y_ * x]; }
 };
 
-matrix get_clasic_matrix(int x, int y)
+matrix get_clasic_matrix(std::size_t x, std::size_t y)
 {
-	const int length = x * y;
+	const std::size_t length = x * y;
 	std::vector<int> ary;
 
-	for (int i = 0; i < length; i++)
+	for (std::size_t i = 0; i < length; i++)
 		ary.push_back(rand() % 10);
 
 	return matrix(x, y, std::move(ary));
@@ -172,8 +172,8 @@ bool are_equal_matrices(matrix& m1, matrix& m2)
 	if (m1.y != m2.y)
 		return false;
 
-	const int length = m1.x * m1.y;
-	for (int i = 0; i < length; i++)
+	const std::size_t length = m1.x * m1.y;
+	for (std::size_t i = 0; i < length; i++)
 		if (m1.ary[i] != m2.ary[i])
 			return false;
 
@@ -239,7 +239,7 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 }
 
 template<MatrixDataLayout layout>
-void matrix_demo_template(int size)
+void matrix_demo_template(std::size_t size)
 {
 
 	matrix m1 = get_clasic_matrix(size, size);
@@ -261,7 +261,7 @@ void matrix_demo_template(int size)
 	REQUIRE(are_equal_matrices(m3, m4));
 }
 
-void matrix_demo(MatrixDataLayout layout, int size)
+void matrix_demo(MatrixDataLayout layout, std::size_t size)
 {
 	if (layout == MatrixDataLayout::Rows)
 		matrix_demo_template<MatrixDataLayout::Rows>(size);
