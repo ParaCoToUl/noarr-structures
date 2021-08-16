@@ -1,4 +1,7 @@
-#### Noarr tests
+# Noarr Structures
+
+## Noarr tests
+
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20test%20ubuntu-latest%20-%20clang/badge.svg)
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20test%20ubuntu-latest%20-%20gcc/badge.svg)
 
@@ -6,7 +9,7 @@
 
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20test%20Win/badge.svg)
 
-# Noarr Structures
+## Introduction
 
 Noarr structures is a header-only library that facilitates creation of many data structures and provides a layout-agnostic way of accessing the values stored in them.
 
@@ -14,8 +17,7 @@ It is a free software and distributed using the MIT [license](LICENSE).
 
 The library provides its low-level parts, *structures* and *functions*, as simple and easy-to-use building blocks, that can be used alongside with some memory management to easily create data structures that provide layout-agnostic access, and nigh-interplatform type checking and serialization.
 
-If you are not interested in creating a data structure yourself, you can use `noarr::bag` which uses the standard c++ memory management. (see: *`noarr::bag`: flexible data strucure*)
-
+If you are not interested in creating a data structure yourself, you can use `noarr::bag` which uses the standard c++ memory management. (see: *`noarr::bag`: flexible data structure*)
 
 ## Data layout modeling
 
@@ -43,7 +45,7 @@ bar | noarr::offset<'x', 'y'>(5, 10);
 
 ## `noarr::bag`: flexible data structure
 
-The data structure `noarr::bag<Structure>` uses the standard c++ memory management to contain some data described by `Structure` (`Structure` usually consists of nested `noarr::arrray`s or `noarr::vector`s). Then the data are accessed by the method `at<Dimensions>(indices)` which takes the names of dimensions as type parameters and their corresponding indices as function parameters, for example: `at<'x', 'y'>(5, 10)` (this allows for layout-agnostic data accessing demonstrated in [examples/matrix](examples/matrix "matrix example"), the main part of the demonstration is described in the following snippets in a very simplified form).
+The data structure `noarr::bag<Structure>` uses the standard c++ memory management to contain some data described by `Structure` (`Structure` usually consists of nested `noarr::array`s or `noarr::vector`s). Then the data are accessed by the method `at<Dimensions>(indices)` which takes the names of dimensions as type parameters and their corresponding indices as function parameters, for example: `at<'x', 'y'>(5, 10)` (this allows for layout-agnostic data accessing demonstrated in [examples/matrix](examples/matrix "matrix example"), the main part of the demonstration is described in the following snippets in a very simplified form).
 
 The following snippet shows how we define a matrix structure and then we use `noarr::bag` to create a data structure called `matrix1` consisting of the matrix structure with certain dimensions.
 
@@ -85,15 +87,14 @@ The library requires C++ 17.
 
 Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
-#### Matrix example tests
+### Matrix example tests
+
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
 
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20macosl/badge.svg)
 
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20Win/badge.svg)
-
-
 
 ## Running tests
 

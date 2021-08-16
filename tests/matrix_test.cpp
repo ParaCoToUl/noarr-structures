@@ -8,10 +8,10 @@
 enum MatrixDataLayout { Rows = 0, Columns = 1 };
 
 template<MatrixDataLayout layout>
-struct GetMatrixStructreStructure;
+struct MatrixStructureGetter;
 
 template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Rows>
+struct MatrixStructureGetter<MatrixDataLayout::Rows>
 {
 	static constexpr auto GetMatrixStructure()
 	{
@@ -20,7 +20,7 @@ struct GetMatrixStructreStructure<MatrixDataLayout::Rows>
 };
 
 template<>
-struct GetMatrixStructreStructure<MatrixDataLayout::Columns>
+struct MatrixStructureGetter<MatrixDataLayout::Columns>
 {
 	static constexpr auto GetMatrixStructure()
 	{
@@ -125,9 +125,9 @@ template<MatrixDataLayout layout>
 void matrix_template_test(int size)
 {
 	// using different kinds of bags
-	auto m1 = noarr::make_vector_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m2 = noarr::make_vector_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m3 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m1 = noarr::make_vector_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m2 = noarr::make_vector_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m3 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 
 	matrix_multiply(m1, m2, m3);
 }
@@ -196,7 +196,7 @@ matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 }
 
 template<typename Matrix1>
-void clasic_matrix_to_naorr(matrix& m1, Matrix1& matrix1)
+void clasic_matrix_to_noarr(matrix& m1, Matrix1& matrix1)
 {
 	std::size_t x_size = matrix1.template get_length<'x'>();
 	std::size_t y_size = matrix1.template get_length<'y'>();
@@ -246,12 +246,12 @@ void matrix_demo_template(int size)
 	matrix m2 = get_clasic_matrix(size, size);
 	matrix m3 = get_clasic_matrix(size, size);
 
-	auto n1 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n2 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n3 = noarr::make_bag(noarr::wrap(GetMatrixStructreStructure<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n1 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n2 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto n3 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 
-	clasic_matrix_to_naorr(m1, n1);
-	clasic_matrix_to_naorr(m2, n2);
+	clasic_matrix_to_noarr(m1, n1);
+	clasic_matrix_to_noarr(m2, n2);
 
 	clasic_matrix_multiply(m1, m2, m3);
 	matrix_multiply(n1, n2, n3);

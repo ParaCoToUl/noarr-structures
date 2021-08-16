@@ -11,7 +11,6 @@ Noarr framework distinguishes two types of multidimensional data - uniform and j
 
 **Uniform data** can be though of as a multidimensional cube of values. It is like a vector of same-sized vectors, but it also supports tuples and other structures. This lets us store the dimensions separately from the data, letting us freely change the order of specification of dimensions - completely separating the physical data layout from the data model.
 
-
 <a name="data-modelling-in-noarr"></a>
 ## Data modelling in Noarr
 
@@ -51,6 +50,7 @@ The reason we specify the size later is that it allows us to decouple the *struc
 
 <a name="wrapper"></a>
 ## Wrapper
+
 It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `noarr::wrapper` first.
 
 ```cpp
@@ -68,7 +68,6 @@ Now that we have a structure defined, we can create a bag to store the data. Bag
 // we will create a bag
 auto bag = noarr::make_bag(my_structure_of_ten);
 ```
-
 
 Now, with a *data* that holds the values, we can access these values by computing their offset in the *bag*:
 
@@ -129,6 +128,7 @@ void main() {
 
 <a name="supported-layouts"></a>
 ## Our supported layouts (*structures*)
+
 ### Containers
 
 Noarr supports `vector` and `array`. Our library is designed to be easily extendable. We have implemented a 2D z-curve in  our matrix example [z-curve implementation example](../examples/matrix/z_curve.hpp "z-curve implementation example"). Basic declarations look like this:
@@ -152,7 +152,7 @@ Here are some of the valid tuple declarations:
 noarr::tuple<'t', noarr::scalar<int>, noarr::scalar<float>> t;
 noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t2;
 noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, 
-	noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
+                  noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
 ```
 
 We will work with `tuple`s like this:
@@ -191,4 +191,3 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 
 You can read about supported functions in detail in [Noarr structures](../include/noarr/structures/README.md "Noarr structures").
-

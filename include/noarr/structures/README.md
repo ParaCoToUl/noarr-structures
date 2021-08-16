@@ -12,7 +12,7 @@
   - `get_length`: gets the length (number of indices) of a structure
   - `get_size`: returns the size of the data represented by the structure in bytes
   - `fix`: fixes an index in a structure
-  - `get_offset`: retrieves offset of a substructure 
+  - `get_offset`: retrieves offset of a substructure
   - `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
   - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 
@@ -24,7 +24,7 @@
 
   - `scalar`: the simplest possible structure referring to a single value of a certain type
 
-- [structs.hpp](structs.hpp): contains implementations of the structures defined by the library (other than `scalar`). 
+- [structs.hpp](structs.hpp): contains implementations of the structures defined by the library (other than `scalar`).
 
   - `tuple`: introduces a static dimension with many substructures (similar to `std::tuple`)
   - `array`: introduces a dynamic dimension of a static length with a single substructure (similar to `std::array`)

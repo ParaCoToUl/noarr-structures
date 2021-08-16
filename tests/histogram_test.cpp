@@ -10,10 +10,10 @@
 enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2 };
 
 template<ImageDataLayout layout>
-struct GetImageStructreStructure;
+struct GetImageStructureGetter;
 
 template<>
-struct GetImageStructreStructure<ImageDataLayout::ArrayOfArrays>
+struct GetImageStructureGetter<ImageDataLayout::ArrayOfArrays>
 {
 	static constexpr auto GetImageStructure()
 	{
@@ -22,7 +22,7 @@ struct GetImageStructreStructure<ImageDataLayout::ArrayOfArrays>
 };
 
 template<>
-struct GetImageStructreStructure<ImageDataLayout::VectorOfVectors>
+struct GetImageStructureGetter<ImageDataLayout::VectorOfVectors>
 {
 	static constexpr auto GetImageStructure()
 	{
@@ -33,7 +33,7 @@ struct GetImageStructreStructure<ImageDataLayout::VectorOfVectors>
 template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	auto image = noarr::make_bag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
+	auto image = noarr::make_bag(noarr::wrap(GetImageStructureGetter<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
 
 	CHECK(image.get_size() == width * height * sizeof(int));
 
@@ -87,7 +87,7 @@ TEST_CASE("Histogram prototype 64 x 43", "[Histogram prototype]")
 template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test_clear()
 {
-	auto image = GetBag(noarr::wrap(GetImageStructreStructure<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height)); // image size 
+	auto image = GetBag(noarr::wrap(GetImageStructureGetter<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height)); // image size 
 	auto histogram = GetBag(noarr::array<'x', pixel_range, noarr::scalar<int>>()); // lets say that every image has 256 pixel_range
 
 	image.clear();
