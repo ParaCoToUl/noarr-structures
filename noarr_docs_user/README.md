@@ -1,4 +1,4 @@
-# User documentation for Noarr
+# User documentation for Noarr Structures
 
 <a name="data-modelling"></a>
 ## Data modelling
@@ -170,18 +170,25 @@ using namespace noarr::literals;
 float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
 
+<a name="full-list-of-structures"></a>
+## Full list of the provided structures
+
+- `scalar`: the bottom structure describing a single value of a single type
+- `array`: a structure describing a static number of copies of its substructure's layout and introducing a dynamic dimension
+- `vector`: a structure describing a dynamic number of copies of its substructure's layout and introducing a dynamic dimension (its size is specified ad-hoc via `set_length` - see below)
+- `tuple`: a structure describing a multiple number of various substructures' layouts and introducing a static dimension
+
 <a name="full-list-of-functions"></a>
-## Full list of functions
+## Full list of the provided functions
 
-  - `compose`: function composition (honoring the left-associative notation)
-  - `set_length`: changes the length (number of indices) of arrays and vectors
-  - `get_length`: gets the length (number of indices) of a structure
-  - `get_size`: returns size of the data represented by the structure in bytes
-  - `fix`: fixes an index in a structure
-  - `get_offset`: retrieves offset of a substructure 
-  - `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
-  - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
-  - `contain`: tuple-like struct, and a structured layout, that facilitates creation of new structures and functions
+- `compose`: function composition (honoring the left-associative `|` notation)
+- `set_length`: changes the length (number of indices) of arrays and vectors
+- `get_length`: gets the length (number of indices) of a structure
+- `get_size`: returns the size of the data represented by the structure in bytes
+- `fix`: fixes an index in a structure
+- `get_offset`: retrieves offset of a substructure 
+- `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
+- `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 
-You can read about supported functions in detail in [Noarr structures](../noarr/include/noarr/structures/README.md "Noarr structures").
+You can read about supported functions in detail in [Noarr structures](../include/noarr/structures/README.md "Noarr structures").
 

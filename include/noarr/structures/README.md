@@ -1,6 +1,4 @@
-# Noarr structures
-
-## The file structure outline
+# Noarr Structures file structure outline
 
 - [pipes.hpp](pipes.hpp): contains the implementation for the piping mechanism of the library. Piping is a left-associative operation which applies the right-hand operand (a function) to the left-hand operand (generally a structure)
 
@@ -9,9 +7,10 @@
 
 - [funcs.hpp](funcs.hpp): contains implementations for functions (applicable in the piping mechanism, see the description for [pipes.hpp](pipes.hpp) defined by the library.
 
-  - `compose`: function composition (honoring the left-associative notation)
+  - `compose`: function composition (honoring the left-associative `|` notation)
   - `set_length`: changes the length (number of indices) of arrays and vectors
   - `get_length`: gets the length (number of indices) of a structure
+  - `get_size`: returns the size of the data represented by the structure in bytes
   - `fix`: fixes an index in a structure
   - `get_offset`: retrieves offset of a substructure 
   - `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions

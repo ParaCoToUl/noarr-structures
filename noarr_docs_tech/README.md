@@ -1,4 +1,6 @@
-# Technical specification
+# Technical documentation for Noarr Structures
+
+<!-- TODO: list all functions and what they do... -->
 
 ## Structure
 
@@ -67,6 +69,42 @@ A point is a structure hierarchy with no dimensions. It has only a single scalar
 
 It is a special case of cube.
 
+### Contain
+
+`contain` facilitates creation of new structures. It is a tuple-like struct that defines a struct's fields via inheritance, but in contrast with `std::tuple`, it is a trivially constructible standard layout.
+
+It is used in the library to define all structures (and the majority of all noarr functions). This is to provide a structured way of serializing a structure's data.
+
+### Provided structures
+
+The library provides a set of structures that describe the most essential layouts
+
+#### Scalar
+
+`scalar` contains a single scalar type and describes one value of this type. It serves as the leaf substructure in structure hierarchies and as the bottom case for many algorithms and mechanisms defined by the library. Its size is equal to the size of the contained type and it is always known during compile time.
+
+#### Array
+
+`array` is a structure containing a single substructure and providing a dynamic dimension. The layout described by an array consists of a static number of copies of the layout described by the contained substructure lined up right after one another. Its size is equal to the size of the contained substructure multiplied by the number of its copies and it is always know during compile time if the size of the substructure is as well.
+
+#### Vector
+
+`vector` is a structure containing a single substructure and providing a dynamic dimension. It is very similar to array (see above) with the distinction that the number of the substructure's layout copies is dynamic, and because of it being dynamic, the size of vector is dynamic as well and it is generally not know during compile time.
+
+#### Tuple
+
+`tuple` is a structure containing multiple substructures and providing a static dimension. It describes a layout consisting of the layouts of the substructures lined up one after another. Its size is equal to the sum of the sizes of the substructures and it is known during compile time if all sizes of the substructures are as well.
+
+### Helper structures
+
+####
+
+
+
+####
+
+
+
 ## (Noarr) Function
 
 Functions are (using the `operator|`) applied to structures. Applying them returns either another structure (this is mostly the case of the functions with `func_family` set to `transform_tag`, more on `func_family`s later in this section) or a scalar value (usually if `func_family` is set to `get_tag`).
@@ -100,3 +138,51 @@ The result of `s | f` results in applying `f` to the top-most structure of each 
 Functions have rather informal requirements so the library can reach maximum expressiveness without affecting its complexity.
 
 It is very preferable that each function honors the piping mechanism and, it is a trivially and consteval constructible/destructible standard layout, and its operator() is also constexpr (and satisfies consteval requirements).
+
+The only formal requirement is that a noarr function is implemented as a callable object providing an `operator()` - during piping (`structure | function`), this operator receives the structure as its argument. The function then can provide a `func_family` typedef set to `top_tag`, `transform_tag`, or `get_tag` (see above, in piping).
+
+- If `func_family` is set to `transform_tag`, the return value of `operator()` shall be a structure (otherwise it depends on the semantics of the function)
+
+## High level abstractions and utilities
+
+The library provides various high level abstractions and utilities that either simplify the usage of the lower level structures and functions, or they expand on them
+
+### Wrapper
+
+`wrapper` wraps a single structure and it provides the possibility of applying noarr functions (the expressions like `structure | function`) as methods using the traditional OO dot notation.
+
+It can be created using the function `wrap`.
+
+### Bag
+
+`bag` combines a wrapped structure with an underlying data blob. It provides all `wrapper`'s methods that don't affect its layout (those which do affect the layout are generally those with `func_family` set to `transform_tag`).
+
+It provides the following extra methods:
+
+- `data()` returns the underlying data blob
+- `structure()` returns the wrapped structure
+- `at<Dims...>(values...)` returns a reference to a value in the data blob with the offset computed fixing dimensions named `Dims...` (`char` constants) to `values...` respectively. In other words it is a shortcut for `bag.structure() | get_at<Dims...>(bag.data(), values...)`
+
+There are various types of `bag`s:
+
+- vector bag
+
+  - created by `make_vector_bag(structure)` or `make_vector_bag(wrapped_structure)`
+  - the underlying data blob is implemented via a `std::vector`
+  - the bag destroys the data blob in its destructor
+
+- unique bag (the default type)
+
+  - created by `make_unique_bag(structure)`, `make_unique_bag(wrapped_structure)`, `make_bag(structure)` or `make_bag(wrapped_structure)`
+  - the underlying data blob is implemented via a `std::unique_ptr`
+  - the bag destroys the data blob in its destructor
+
+- observer bag
+
+  - created by `make_bag(structure, char_carray)` or `make_bag(wrapped_structure, char_carray)`
+  - the underlying data blob is implemented via `char *`
+  - destruction of bag does not affect the data blob
+
+### Structure printing
+
+`print_struct(std::out&, structure)` prints the serialized type of the given structure to the provided output stream.
