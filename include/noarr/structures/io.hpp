@@ -28,7 +28,7 @@ struct print_struct_impl<char_pack<Name...>> {
  * @brief outputs the textual representation of the structure's type to the given `std::ostream`
  * 
  * @tparam T: the input strucure
- * @param out: the output stream 
+ * @param out: the output stream
  */
 template<typename T>
 constexpr std::ostream &print_struct(std::ostream &out, T) {
