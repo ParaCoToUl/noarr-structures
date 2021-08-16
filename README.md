@@ -58,7 +58,8 @@ The following snippet shows how we define a matrix structure and then we use `no
 // defines the structure of the matrix, rows are the 'x' dimension 
 	// and columns are the 'y' dimension
 // physically, the layout is an contiguous array of rows
-noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>> matrix_structure;
+noarr::vector<'y', noarr::vector<'x', 
+	noarr::scalar<int>>> matrix_structure;
 
 // defining size of the matrix
 auto sized_matrix_structure = matrix_structure 
