@@ -17,7 +17,7 @@ using void_t = void;
 /**
  * @brief a shortcut for applying std::remove_cv and std::remove_reference
  * 
- * @tparam T 
+ * @tparam T: the original type
  */
 template<class T>
 using remove_cvref = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
@@ -119,7 +119,7 @@ struct integral_pack_concat_sep_impl<integral_pack<T, sep...>, integral_pack<T, 
 /**
  * @brief concatenates multiple integral `Packs`
  * 
- * @tparam Packs 
+ * @tparam Packs: the input integral packs
  */
 template<class... Packs>
 using integral_pack_concat = typename helpers::integral_pack_concat_impl<Packs...>::type;
@@ -127,7 +127,7 @@ using integral_pack_concat = typename helpers::integral_pack_concat_impl<Packs..
 /**
  * @brief concatenates multiple integral packs (the 2nd, 3rd etc. member of `Packs`) pasting the 1st member of `Packs` between each consecutive packs
  * 
- * @tparam Packs 
+ * @tparam Packs: the input integral packs, the first one is the separator used when concatenating
  */
 template<class... Packs>
 using integral_pack_concat_sep = typename helpers::integral_pack_concat_sep_impl<Packs...>::type;

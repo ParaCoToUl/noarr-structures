@@ -51,7 +51,7 @@ struct z_curve_top_get_t<T, void> {
 template<typename T, typename TH1, typename TH2>
 struct z_curve_top : private contain<T, TH1, TH2> {
 	using base = contain<T, TH1, TH2>;
-	constexpr auto sub_structures() const { 
+	constexpr auto sub_structures() const {
 		return std::tuple_cat(base::template get<0>().sub_structures(), std::make_tuple(base::template get<1>(), base::template get<2>()));
 	}
 

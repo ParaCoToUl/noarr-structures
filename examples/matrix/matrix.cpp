@@ -62,11 +62,11 @@ struct classic_matrix
 };
 
 /**
- * @brief Creates random classic matrix with values in range [0 to 9] with size n x m. 
+ * @brief Creates random classic matrix with values in range [0 to 9] with size n x m.
  *
  * @param n: width of the matrix
  * @param m: heigth of the matrix
- * @return classic_matrix with values in range [0 to 9] with size n x m. 
+ * @return classic_matrix with values in range [0 to 9] with size n x m.
  */
 classic_matrix get_clasic_matrix(int n, int m)
 {
@@ -87,7 +87,7 @@ classic_matrix get_clasic_matrix(int n, int m)
  *
  * @param m1: First classic matrix
  * @param m2: Second classic matrix
- * @return Value comparison result of two classic matrices 
+ * @return Value comparison result of two classic matrices
  */
 bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
 {

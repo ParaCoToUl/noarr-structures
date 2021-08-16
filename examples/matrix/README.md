@@ -34,7 +34,7 @@ Program takes 2 parameters. First, you choose one of the following layouts:
 1) rows
 2) columns
 3) z_curve (the size has to be a power of 2)
-Then you input integer matrix size. The size of the matrix have to be at least one. 
+Then you input integer matrix size. The size of the matrix have to be at least one.
 (for example simplicity, only square matrices are supported)
 ```
 

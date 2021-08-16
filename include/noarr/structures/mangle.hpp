@@ -20,7 +20,7 @@ struct transform_dims_impl;
 }
 
 /**
- * @brief Returns a textual representation of the type of a structure using `char_pack` 
+ * @brief Returns a textual representation of the type of a structure using `char_pack`
  * 
  * @tparam T: the structure
  */

@@ -140,7 +140,7 @@ noarr::array<'i', 10, noarr::scalar<float>> my_array;
 
 ### Scalars
 
-Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`... 
+Noarr supports all scalars, for example: `bool`, `int`, `char`, `float`, `double`, `long`, `std::size_t`...
 
 You can read about supported scalars in detail in [technical documentation](../noarr_docs_tech/README.md "technical documentation").
 
@@ -151,7 +151,7 @@ Here are some of the valid tuple declarations:
 ```cpp
 noarr::tuple<'t', noarr::scalar<int>, noarr::scalar<float>> t;
 noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t2;
-noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, 
+noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>,
                   noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
 ```
 
@@ -186,7 +186,7 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 - `get_length`: gets the length (number of indices) of a structure
 - `get_size`: returns the size of the data represented by the structure in bytes
 - `fix`: fixes an index in a structure
-- `get_offset`: retrieves offset of a substructure 
+- `get_offset`: retrieves offset of a substructure
 - `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
 - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 

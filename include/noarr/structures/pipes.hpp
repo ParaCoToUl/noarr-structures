@@ -35,8 +35,8 @@ using default_trait = transform_tag;
 /**
  * @brief retrieves a family tag from a function `F`
  * 
- * @tparam F: the function 
- * @tparam typename 
+ * @tparam F: the function
+ * @tparam typename: placeholder type
  */
 template<typename F, typename = void>
 struct func_trait {
@@ -113,7 +113,7 @@ struct fmapper;
  * @tparam S: the structure to be reconstructed after the substructures are mapped
  * @tparam F: the mapping function
  * @tparam Max: the ceiling of iteration throught substructures in the `construct` function
- * @tparam I: the iterating variable which iterates throught substructures 
+ * @tparam I: the iterating variable which iterates throught substructures
  */
 template<typename S, typename F, std::size_t Max = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = Max>
 struct construct_builder;
@@ -293,11 +293,8 @@ struct piper<S, F> {
 /**
  * @brief performs a `fmapper::fmap`, `getter::get` or a simple application of `F` and subsequent `FS` to `S` according to `pipe_decider`
  * 
- * @tparam S 
- * @tparam FS 
- * @param s 
- * @param funcs 
- * @return constexpr decltype(auto) 
+ * @param s: the structure
+ * @param funcs: applied functions (consecutively)
  */
 template<typename S, typename... FS>
 constexpr decltype(auto) pipe(S s, FS... funcs) {

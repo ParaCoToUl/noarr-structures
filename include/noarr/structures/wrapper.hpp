@@ -13,7 +13,7 @@ namespace noarr {
 template<typename Structure>
 class wrapper;
 
-template<typename Structure> 
+template<typename Structure>
 constexpr wrapper<Structure> wrap(Structure s);
 
 namespace helpers {
@@ -56,11 +56,10 @@ public:
 	}
 
 	/**
-	 * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item 
+	 * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item
 	 * 
 	 * @tparam Dims: the dimension names of fixed indices
 	 * @param ts: parameters for fixing the indices
-	 * @return constexpr auto 
 	 */
 	template<char... Dims, typename... Ts>
 	constexpr auto offset(Ts... ts) const {
@@ -118,7 +117,7 @@ public:
  * 
  * @param s: the structure to be wrapped
  */
-template<typename Structure> 
+template<typename Structure>
 constexpr wrapper<Structure> wrap(Structure s) {
 	return wrapper<Structure>(s);
 }

@@ -455,11 +455,10 @@ constexpr auto offset() {
 }
 
 /**
- * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item 
+ * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item
  * 
  * @tparam Dims: the dimension names of fixed indices
  * @param ts: parameters for fixing the indices
- * @return constexpr auto 
  */
 template<char... Dims, typename... Ts>
 constexpr auto offset(Ts... ts) {

@@ -79,7 +79,7 @@ private:
 	wrapper<Structure> structure_;
 
 public:
-	explicit bag(Structure s) : structure_(wrap(s)) { 
+	explicit bag(Structure s) : structure_(wrap(s)) {
 		data_ = BagPolicy::construct(structure().get_size());
 	}
 
@@ -99,7 +99,7 @@ public:
 	explicit bag(wrapper<Structure> s, typename BagPolicy::type &data) : data_(data), structure_(s)
 	{ }
 
-	bag(Structure s, BagPolicy policy) : structure_(wrap(s)) { 
+	bag(Structure s, BagPolicy policy) : structure_(wrap(s)) {
 		data_ = policy.construct(structure().get_size());
 	}
 
@@ -190,7 +190,6 @@ public:
 	/**
 	 * @brief gets the size of the data described by the `structure`
 	 * 
-	 * @return constexpr auto 
 	 */
 	constexpr auto get_size() const {
 		return structure().get_size();
