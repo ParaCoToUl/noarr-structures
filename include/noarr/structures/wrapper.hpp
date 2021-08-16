@@ -13,6 +13,11 @@ namespace noarr {
 template<typename Structure>
 class wrapper;
 
+/**
+ * @brief wraps the structure into a `wrapper`
+ * 
+ * @param s: the structure to be wrapped
+ */
 template<typename Structure>
 constexpr wrapper<Structure> wrap(Structure s);
 
@@ -21,6 +26,15 @@ namespace helpers {
 template<typename T>
 struct is_cube_impl<wrapper<T>> {
 	using type = is_cube<T>;
+};
+
+struct wrap_impl {
+	using func_family = top_tag;
+
+	template<typename Structure>
+	constexpr auto operator()(Structure structure) {
+		return wrap(structure);
+	}
 };
 
 }
@@ -112,14 +126,17 @@ public:
 	}
 };
 
-/**
- * @brief wraps the structure into a `wrapper`
- * 
- * @param s: the structure to be wrapped
- */
 template<typename Structure>
 constexpr wrapper<Structure> wrap(Structure s) {
 	return wrapper<Structure>(s);
+}
+
+/**
+ * @brief wraps a structure into a `wrapper`
+ * 
+ */
+constexpr auto wrap() {
+	return helpers::wrap_impl();
 }
 
 } // namespace noarr
