@@ -166,7 +166,7 @@ auto tuple_bag = noarr::make_bag(tuple);
 // we can put this at the beginning of the file
 using namespace noarr::literals;
 // we index tuple like this
-// note that we fix multiple dimentions at one
+// note that we fix multiple dimensions at one
 float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
 

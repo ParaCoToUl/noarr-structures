@@ -10,7 +10,7 @@
 
 // IMPORTANT:
 // raw c++ matrix implementation is from now on a "classic matrix"
-// matrix implementation in noarr will be referecend as "noarr matrix"
+// matrix implementation in noarr will be referred to as "noarr matrix"
 // whole example assumes int matrices
 
 // definion of z-curve data stricture
@@ -24,7 +24,7 @@ using matrix_columns = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>
 using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::sized_vector<'a', noarr::scalar<int>>>;
 
 /**
- * @brief Implemnts matrix using raw c++ ("classic matrix").
+ * @brief Implements matrix using raw c++ ("classic matrix").
  */
 struct classic_matrix
 {
@@ -34,7 +34,7 @@ struct classic_matrix
 
 	// width
 	int n;
-	// heigth
+	// height
 	int m;
 	// data vector (flattened matrix by rows into std::vector<int>)
 	std::vector<int> ary;
@@ -65,12 +65,12 @@ struct classic_matrix
  * @brief Creates random classic matrix with values in range [0 to 9] with size n x m.
  *
  * @param n: width of the matrix
- * @param m: heigth of the matrix
+ * @param m: height of the matrix
  * @return classic_matrix with values in range [0 to 9] with size n x m.
  */
 classic_matrix get_clasic_matrix(int n, int m)
 {
-	// data container inicialization
+	// data container initialization
 	const int length = n * m;
 	std::vector<int> ary;
 
@@ -114,7 +114,7 @@ bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
  * @brief Converts noarr matrix to classic matrix.
  *
  * @param source: noarr matrix
- * @return classic_matrix cretaed from noarr matrix
+ * @return classic_matrix created from noarr matrix
  */
 template<typename Matrix>
 classic_matrix noarr_matrix_to_clasic(Matrix& source)
@@ -226,7 +226,7 @@ void matrix_demo(int size, Structure structure)
  */
 void print_help_and_exit()
 {
-	std::cout << "Programm takes 2 parameters. First, you choose one of the following layouts:" << std::endl;
+	std::cout << "Program takes 2 parameters. First, you choose one of the following layouts:" << std::endl;
 	std::cout << "1) rows" << std::endl;
 	std::cout << "2) columns" << std::endl;
 	std::cout << "3) z_curve (the size has to be a power of 2)" << std::endl;
