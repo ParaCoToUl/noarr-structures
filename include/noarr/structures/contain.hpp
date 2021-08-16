@@ -176,4 +176,18 @@ using contain = helpers::contain_impl<void, TS...>;
 
 } // namespace noarr
 
+
+namespace std {
+
+template<std::size_t I, typename... TS>
+struct tuple_element<I, noarr::contain<TS...>> {
+	using type = decltype(std::declval<noarr::contain<TS...>>().template get<I>());
+};
+
+template<typename... TS>
+struct tuple_size<noarr::contain<TS...>>
+	: std::integral_constant<std::size_t, sizeof...(TS)> { };
+
+} // namespace std
+
 #endif // NOARR_STRUCTURES_CONTAIN_HPP
