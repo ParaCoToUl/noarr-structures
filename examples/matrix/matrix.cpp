@@ -29,19 +29,21 @@ using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::sized_vector<'a', noarr::s
 struct classic_matrix
 {
 	// constructors
-	classic_matrix(int X, int Y, std::vector<int>&& Ary) : n(X), m(Y), ary(std::move(Ary)) {};
-	classic_matrix(int X, int Y, std::vector<int>& Ary) : n(X), m(Y), ary(Ary) {};
+	classic_matrix(std::size_t X, std::size_t Y, std::vector<int>&& Ary)
+		: n(X), m(Y), ary(std::move(Ary)) {};
+	classic_matrix(std::size_t X, std::size_t Y, std::vector<int>& Ary)
+		: n(X), m(Y), ary(Ary) {};
 
 	// width
-	int n;
+	std::size_t n;
 	// height
-	int m;
+	std::size_t m;
 	// data vector (flattened matrix by rows into std::vector<int>)
 	std::vector<int> ary;
 
 	// element access functions (returns reference into data vector based on input indexes)
-	int& at(int n_, int m_) { return ary[n_ + m_ * n]; }
-	const int& at(int n_, int m_) const { return ary[n_ + m_ * n]; }
+	int& at(std::size_t n_, std::size_t m_) { return ary[n_ + m_ * n]; }
+	const int& at(std::size_t n_, std::size_t m_) const { return ary[n_ + m_ * n]; }
 
 	// printing function which prints the whole matrix into the standard output
 	// it takes the name parameter and prints it at the beginning to make input clearer
@@ -49,9 +51,9 @@ struct classic_matrix
 	{
 		std::cout << name << ":" << std::endl;
 
-		for (int i = 0; i < n; i++)
+		for (std::size_t i = 0; i < n; i++)
 		{
-			for (int j = 0; j < m; j++)
+			for (std::size_t j = 0; j < m; j++)
 				std::cout << at(i, j) << " ";
 
 			std::cout << std::endl;
@@ -68,14 +70,14 @@ struct classic_matrix
  * @param m: height of the matrix
  * @return classic_matrix with values in range [0 to 9] with size n x m.
  */
-classic_matrix get_clasic_matrix(int n, int m)
+classic_matrix get_clasic_matrix(std::size_t n, std::size_t m)
 {
 	// data container initialization
-	const int length = n * m;
+	const std::size_t length = n * m;
 	std::vector<int> ary;
 
 	// random values generation
-	for (int i = 0; i < length; i++)
+	for (std::size_t i = 0; i < length; i++)
 		ary.push_back(rand() % 10);
 
 	// matrix construction
@@ -100,8 +102,8 @@ bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
 		return false;
 
 	// data container has to be the same size, we will compare values for equality
-	const int length = m1.n * m1.m;
-	for (int i = 0; i < length; i++)
+	const std::size_t length = m1.n * m1.m;
+	for (std::size_t i = 0; i < length; i++)
 		if (m1.ary[i] != m2.ary[i])
 			return false;
 
@@ -120,15 +122,15 @@ template<typename Matrix>
 classic_matrix noarr_matrix_to_clasic(Matrix& source)
 {
 	// we will cache matrix size values
-	int n_size = source.structure().template get_length<'n'>();
-	int m_size = source.structure().template get_length<'m'>();
+	std::size_t n_size = source.structure().template get_length<'n'>();
+	std::size_t m_size = source.structure().template get_length<'m'>();
 
 	// we will allocate target classic matrix
 	classic_matrix target = get_clasic_matrix(n_size, m_size);
 
 	// we will go through the matrix and copy noarr matrix into a classic matrix
-	for (int i = 0; i < n_size; i++)
-		for (int j = 0; j < m_size; j++)
+	for (std::size_t i = 0; i < n_size; i++)
+		for (std::size_t j = 0; j < m_size; j++)
 			target.at(i, j) = source.template at<'n', 'm'>(i, j);
 
 	return target;
@@ -148,8 +150,8 @@ auto clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
 	auto target = noarr::make_bag(structure);
 
 	// we will go through the classic matrix and copy it into noarr the matrix
-	for (int i = 0; i < source.n; i++)
-		for (int j = 0; j < source.m; j++)
+	for (std::size_t i = 0; i < source.n; i++)
+		for (std::size_t j = 0; j < source.m; j++)
 			target.template at<'n', 'm'>(i, j) = source.at(i, j);
 
 	return target;
@@ -171,12 +173,12 @@ classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& m
 	classic_matrix result = get_clasic_matrix(matrix2.n, matrix1.m);
 
 	// standart matrix multiplication
-	for (int i = 0; i < matrix2.n; i++)
-		for (int j = 0; j < matrix1.m; j++)
+	for (std::size_t i = 0; i < matrix2.n; i++)
+		for (std::size_t j = 0; j < matrix1.m; j++)
 		{
 			int sum = 0;
 
-			for (int k = 0; k < matrix1.n; k++)
+			for (std::size_t k = 0; k < matrix1.n; k++)
 				sum += matrix1.at(k, j) * matrix2.at(i, k);
 
 			result.at(i, j) = sum;
@@ -192,7 +194,7 @@ classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& m
  * @tparam structure: structure defining structure to be used by noarr matrix
  */
 template<typename Structure>
-void matrix_demo(int size, Structure structure)
+void matrix_demo(std::size_t size, Structure structure)
 {
 	// generating random classic matrix 1
 	classic_matrix classic_1 = get_clasic_matrix(size, size);
@@ -249,7 +251,7 @@ int main(int argc, char *argv[])
 		print_help_and_exit();
 
 	// parse the second argument (size) into int
-	int size;
+	std::size_t size;
 	try {
 		size = std::stoi(argv[2]);
 	}

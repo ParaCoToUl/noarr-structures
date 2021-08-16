@@ -20,19 +20,19 @@ auto noarr_matrix_multiply(Matrix& matrix1, Matrix2& matrix2, Structure3 structu
 {
 	auto result = noarr::make_bag(structure);
 
-	int x1_size = matrix1.template get_length<'n'>();
-	int y1_size = matrix1.template get_length<'m'>();
-	int x2_size = matrix2.template get_length<'n'>();
-	int y2_size = matrix2.template get_length<'m'>();
+	std::size_t x1_size = matrix1.template get_length<'n'>();
+	std::size_t y1_size = matrix1.template get_length<'m'>();
+	std::size_t x2_size = matrix2.template get_length<'n'>();
+	std::size_t y2_size = matrix2.template get_length<'m'>();
 
 	assert(x1_size == y2_size);
 
-	for (int i = 0; i < x2_size; i++)
-		for (int j = 0; j < y1_size; j++)
+	for (std::size_t i = 0; i < x2_size; i++)
+		for (std::size_t j = 0; j < y1_size; j++)
 		{
 			int sum = 0;
 
-			for (int k = 0; k < x1_size; k++)
+			for (std::size_t k = 0; k < x1_size; k++)
 			{
 				int& value1 = matrix1.template at<'n', 'm'>(k, j);
 				int& value2 = matrix2.template at<'n', 'm'>(i, k);
@@ -58,8 +58,8 @@ auto noarr_matrix_copy(Matrix& source, Structure structure)
 {
 	auto result = noarr::make_bag(structure);
 
-	for (int i = 0; i < source.template get_length<'n'>(); i++)
-		for (int j = 0; j < source.template get_length<'m'>(); j++)
+	for (std::size_t i = 0; i < source.template get_length<'n'>(); i++)
+		for (std::size_t j = 0; j < source.template get_length<'m'>(); j++)
 			result.template at<'n', 'm'>(i, j) = source.template at<'n', 'm'>(i, j);
 
 	return result;
@@ -73,13 +73,13 @@ auto noarr_matrix_copy(Matrix& source, Structure structure)
 template<typename Matrix>
 void noarr_matrix_transpose(Matrix& matrix)
 {
-	int x_size = matrix.template get_length<'n'>();
-	int y_size = matrix.template get_length<'m'>();
+	std::size_t x_size = matrix.template get_length<'n'>();
+	std::size_t y_size = matrix.template get_length<'m'>();
 
 	assert(x_size == y_size);
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = i; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = i; j < y_size; j++)
 		{
 			int& value1 = matrix.template at<'n', 'm'>(i, j);
 			int& value2 = matrix.template at<'n', 'm'>(j, i);
@@ -97,11 +97,11 @@ void noarr_matrix_transpose(Matrix& matrix)
 template<typename Matrix>
 void noarr_matrix_scalar_multiplication(Matrix& matrix, int scalar)
 {
-	int x_size = matrix.template get_length<'n'>();
-	int y_size = matrix.template get_length<'m'>();
+	std::size_t x_size = matrix.template get_length<'n'>();
+	std::size_t y_size = matrix.template get_length<'m'>();
 
-	for (int i = 0; i < x_size; i++)
-		for (int j = i; j < y_size; j++)
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = i; j < y_size; j++)
 			matrix.template at<'n', 'm'>(i, j) *= scalar;
 }
 
