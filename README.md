@@ -30,13 +30,17 @@ These structures are then combined with *functions* and together they create an 
 The following example demonstrates the layout-agnostic method of accessing the values using structures and functions defined in the library:
 
 ```cpp
-// the following two structures both describe a two-dimensional continuous array (matrix)
+// the following two structures both describe a two-dimensional 
+	// continuous array (matrix)
 
 // describes a layout of 20x30 two-dimensional array
-noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>> foo;
+noarr::array<'x', 20, noarr::array<'y', 30, 
+	noarr::scalar<int>>> foo;
 
-// describes a similar logical layout with switched dimensions in the physical layout
-noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>> bar;
+// describes a similar logical layout with switched dimensions 
+	// in the physical layout
+noarr::array<'y', 30, noarr::array<'x', 20, 
+	noarr::scalar<int>>> bar;
 
 // getting the offset of the value at (x = 5; y = 10):
 foo | noarr::offset<'x', 'y'>(5, 10);
@@ -51,12 +55,15 @@ The following snippet shows how we define a matrix structure and then we use `no
 
 ```cpp
 
-// defines the structure of the matrix, rows are the 'x' dimension and columns are the 'y' dimension
+// defines the structure of the matrix, rows are the 'x' dimension 
+	// and columns are the 'y' dimension
 // physically, the layout is an contiguous array of rows
 noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>> matrix_structure;
 
 // defining size of the matrix
-auto sized_matrix_structure = matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT);
+auto sized_matrix_structure = matrix_structure 
+	| noarr::set_length<'x'>(WIDTH) 
+	| noarr::set_length<'y'>(HEIGHT);
 
 // data allocation
 auto matrix = noarr::bag(sized_matrix_structure);
@@ -67,7 +74,9 @@ The following snippet then shows how we would transpose the values of the matrix
 ```cpp
 for (std::size_t i = 0; i < matrix.get_length<'x'>(); i++)
 	for (std::size_t j = i; j < matrix.get_length<'y'>(); j++)
-		std::swap(matrix.at<'x', 'y'>(i, j), matrix.at<'x', 'y'>(j, i));
+		std::swap(
+			matrix.at<'x', 'y'>(i, j), 
+			matrix.at<'x', 'y'>(j, i));
 ```
 
 In this snippet the actual physical layout of the matrix is not relevant to the way it is accessed. If the data were stored, for example, in an (contiguous) array of columns, it could still be accessed the same way. This contrasts with traditional C/C++ data structures.

@@ -1,6 +1,5 @@
 # User documentation for Noarr Structures
 
-<a name="data-modelling"></a>
 ## Data modelling
 
 Data modelling is the process of describing the structure of your data, so that an algorithm can be written to processes the data. Noarr lets you model your data in an abstract, multidimensional space, abstracting away any underlying physical structure.
@@ -11,7 +10,6 @@ Noarr framework distinguishes two types of multidimensional data - uniform and j
 
 **Uniform data** can be though of as a multidimensional cube of values. It is like a vector of same-sized vectors, but it also supports tuples and other structures. This lets us store the dimensions separately from the data, letting us freely change the order of specification of dimensions - completely separating the physical data layout from the data model.
 
-<a name="data-modelling-in-noarr"></a>
 ## Data modelling in Noarr
 
 *Noarr structures* was designed to support uniform data. Uniform data has the advantage of occupying one continuous array of memory. When working with it, you work with three objects:
@@ -39,7 +37,8 @@ noarr::vector<'i', noarr::scalar<float>> my_structure;
 The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values. But currently the structure has no size, we need to make room for 10 items:
 
 ```cpp
-auto my_structure_of_ten = my_structure | noarr::set_length<'i'>(10);
+auto my_structure_of_ten = my_structure 
+	| noarr::set_length<'i'>(10);
 ```
 
 A *structure* object is immutable. The `|` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
@@ -48,16 +47,20 @@ A *structure* object is immutable. The `|` operator (the pipe) is used to create
 
 The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it does not care, where that dimension is inside the *structure*.
 
-<a name="wrapper"></a>
 ## Wrapper
 
 It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `noarr::wrapper` first.
 
 ```cpp
 // artificially complicated example
-auto piped = my_structure_of_ten | noarr::set_length<'i'>(5) | noarr::set_length<'i'>(10);
+auto piped = my_structure_of_ten 
+	| noarr::set_length<'i'>(5) 
+	| noarr::set_length<'i'>(10);
+
 // now version with wrapper
-auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(5).set_length<'i'>(10);
+auto doted = noarr::wrap(my_structure_of_ten)
+	.set_length<'i'>(5)
+	.set_length<'i'>(10);
 ```
 
 ## Allocating and accessing *data* and *bag*
@@ -85,15 +88,16 @@ As discussed earlier, there is a good reason to separate *structure* and *data*.
 bag.at<'i'>(5) = 42;
 ```
 
-<a name="changing-data-layouts"></a>
 ## Changing data layout (*structure*)
 
 Now we want to change the data layout. Noarr needs to know the structure at compile time (for performance). So the right approach is to template all functions and then select between compiled versions. We define different structures like this:
 
 ```cpp
 // layout declaration
-using matrix_rows = noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>>;
-using matrix_columns = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
+using matrix_rows = noarr::vector<'y', 
+	noarr::vector<'x', noarr::scalar<int>>>;
+using matrix_columns = noarr::vector<'x', 
+	noarr::vector<'y', noarr::scalar<int>>>;
 ```
 
 We will create a templated matrix. And also set size at runtime like this:
@@ -103,10 +107,16 @@ We will create a templated matrix. And also set size at runtime like this:
 template<typename Structure>
 void matrix_demo(int size) {
 	// dot version
-	// note template keyword, it is there because the whole function is layout templated
-	auto n1 = noarr::make_bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	// pipe version (both are valid syntax and produce the same result)
-	auto n2 = noarr::make_bag(Structure() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
+	// note template keyword, it is there because 
+		//the whole function is layout templated
+	auto n1 = noarr::make_bag(noarr::wrap(Structure())
+		.template set_length<'x'>(size)
+		.template set_length<'y'>(size));
+	// pipe version (both are valid syntax and produce 
+		//the same result)
+	auto n2 = noarr::make_bag(Structure() 
+		| noarr::set_length<'x'>(size) 
+		| noarr::set_length<'y'>(size));
 }
 ```
 
@@ -126,7 +136,6 @@ void main() {
 }
 ```
 
-<a name="supported-layouts"></a>
 ## Our supported layouts (*structures*)
 
 ### Containers
@@ -149,20 +158,27 @@ You can read about supported scalars in detail in [technical documentation](../n
 Here are some of the valid tuple declarations:
 
 ```cpp
-noarr::tuple<'t', noarr::scalar<int>, noarr::scalar<float>> t;
-noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t2;
-noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>,
-                  noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t3;
+noarr::tuple<'t', noarr::scalar<int>, 
+	noarr::scalar<float>> t;
+noarr::tuple<'t', noarr::array<'x', 10, 
+	noarr::scalar<float>>, noarr::vector<'x', 
+	noarr::scalar<int>>> t2;
+noarr::tuple<'t', noarr::array<'y', 20000, 
+	noarr::vector<'x', noarr::scalar<float>>>,
+	noarr::vector<'x', noarr::array<'y', 20, 
+	noarr::scalar<int>>>> t3;
 ```
 
 We will work with `tuple`s like this:
 
 ```cpp
 // tuple declaration
-noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::array<'x', 20, noarr::scalar<int>>> tuple;
+noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, 
+	noarr::array<'x', 20, noarr::scalar<int>>> tuple;
 // we will create a bag
 auto tuple_bag = noarr::make_bag(tuple);
-// we have to use noarr::literals namespace to be able to index tuples
+// we have to use noarr::literals namespace 
+	// to be able to index tuples
 // we can put this at the beginning of the file
 using namespace noarr::literals;
 // we index tuple like this
@@ -170,7 +186,6 @@ using namespace noarr::literals;
 float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
 
-<a name="full-list-of-structures"></a>
 ## Full list of the provided structures
 
 - `scalar`: the bottom structure describing a single value of a single type
@@ -178,7 +193,6 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 - `vector`: a structure describing a dynamic number of copies of its substructure's layout and introducing a dynamic dimension (its size is specified ad-hoc via `set_length` - see below)
 - `tuple`: a structure describing a multiple number of various substructures' layouts and introducing a static dimension
 
-<a name="full-list-of-functions"></a>
 ## Full list of the provided functions
 
 - `compose`: function composition (honoring the left-associative `|` notation)
