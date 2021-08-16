@@ -33,6 +33,13 @@ TEST_CASE("Pipes Vector", "[resizing]")
 
 	auto v5 = v4 | noarr::set_length<'x'>(10);
 
+	SECTION("size check 3") {
+		REQUIRE((v2 | noarr::get_length<'x'>()) == 10);
+		REQUIRE((v3 | noarr::get_length<'x'>()) == 20);
+		REQUIRE((v4 | noarr::get_length<'x'>()) == 30);
+		REQUIRE((v5 | noarr::get_length<'x'>()) == 10);
+	}
+
 	SECTION("check is_cube 3") {
 		REQUIRE(noarr::is_cube<decltype(v5)>::value);
 	}

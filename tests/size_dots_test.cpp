@@ -30,7 +30,7 @@ TEST_CASE("Resize", "[transform]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto w = noarr::wrap(v);
 
-	auto vs = w.set_length<'x'>(10); // transform
+	auto vs = w.set_length<'x'>(10);
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs)>::value);
@@ -38,6 +38,10 @@ TEST_CASE("Resize", "[transform]") {
 
 	SECTION("check is_pod") {
 		REQUIRE(std::is_pod<decltype(vs)>::value);
+	}
+
+	SECTION("check size") {
+		REQUIRE(vs.get_length<'x'>() == 10);
 	}
 }
 
@@ -58,6 +62,11 @@ TEST_CASE("Resize 2", "[Resizing]") {
 		REQUIRE(std::is_pod<decltype(vs2.fix<'y', 'x'>(5, 5))>::value);
 		REQUIRE(std::is_pod<decltype(noarr::fix<'y', 'x'>(5, 5))>::value);
 	}
+
+	SECTION("check size") {
+		REQUIRE(vs2.get_length<'x'>() == 20);
+		REQUIRE(vs2.get_length<'y'>() == 20000);
+	}
 }
 
 TEST_CASE("Resize 3", "[Resizing]") {
@@ -71,5 +80,10 @@ TEST_CASE("Resize 3", "[Resizing]") {
 
 	SECTION("check is_pod") {
 		REQUIRE(std::is_pod<decltype(vs2)>::value);
+	}
+
+	SECTION("check size") {
+		REQUIRE(vs2.get_length<'x'>() == 20);
+		REQUIRE(vs2.get_length<'y'>() == 20000);
 	}
 }

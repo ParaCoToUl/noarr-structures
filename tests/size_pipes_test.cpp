@@ -28,7 +28,7 @@ TEST_CASE("Pipes Sizes", "[sizes]") {
 
 TEST_CASE("Pipes Resize", "[transform]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
-	auto vs = v | noarr::set_length<'x'>(10); // transform
+	auto vs = v | noarr::set_length<'x'>(10);
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs)>::value);
@@ -37,11 +37,15 @@ TEST_CASE("Pipes Resize", "[transform]") {
 	SECTION("check is_pod") {
 		REQUIRE(std::is_pod<decltype(vs)>::value);
 	}
+
+	SECTION("check size") {
+		REQUIRE((vs | noarr::get_length<'x'>()) == 10);
+	}
 }
 
 TEST_CASE("Pipes Resize 2", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	auto vs2 = v2 | noarr::set_length<'x'>(20); // transform
+	auto vs2 = v2 | noarr::set_length<'x'>(20);
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs2)>::value);
@@ -59,6 +63,11 @@ TEST_CASE("Pipes Resize 2", "[Resizing]") {
 	SECTION("check point") {
 		REQUIRE(noarr::is_point<decltype(vs2 | noarr::fix<'y', 'x'>(5, 5))>::value);
 	}
+
+	SECTION("check size") {
+		REQUIRE((vs2 | noarr::get_length<'x'>()) == 20);
+		REQUIRE((vs2 | noarr::get_length<'y'>()) == 20000);
+	}
 }
 
 TEST_CASE("Pipes Resize 3", "[Resizing]") {
@@ -71,6 +80,11 @@ TEST_CASE("Pipes Resize 3", "[Resizing]") {
 
 	SECTION("check is_pod") {
 		REQUIRE(std::is_pod<decltype(vs3)>::value);
+	}
+
+	SECTION("check size") {
+		REQUIRE((vs3 | noarr::get_length<'x'>()) == 10);
+		REQUIRE((vs3 | noarr::get_length<'y'>()) == 20000);
 	}
 }
 
