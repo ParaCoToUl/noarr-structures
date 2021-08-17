@@ -11,7 +11,7 @@
 
 ## Installation
 
-Make sure you are in the [examples/matrix](examples/matrix) folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
+Make sure you are in the [examples/matrix](.) folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
 
 ```sh
 # creates the build directory
