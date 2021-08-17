@@ -1,6 +1,6 @@
 # Noarr Structures tests outline
 
-- [compile_test.cpp](compile_tests.cpp): contains the code snippets from the root [README.md](../README.md).
+- [compile_test.cpp](compile_test.cpp): contains the code snippets from the root [README.md](../README.md).
 - [container_dots_test.cpp](container_dots_test.cpp): checks that the `set_length` method correctly sets the lengths of wrapped vectors and arrays
 - [container_pipes_test.cpp](container_pipes_test.cpp): checks that the `set_length` function correctly sets the lengths of unwrapped vectors and arrays (via the piping mechanism)
 - [histogram_test.cpp](histogram_test.cpp): contains a simple histogram computation on an image and checks its correctness
