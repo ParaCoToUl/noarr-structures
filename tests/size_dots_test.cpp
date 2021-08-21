@@ -7,11 +7,11 @@
 
 using namespace noarr::literals;
 
-TEST_CASE("Sizes", "[sizes]") {
+TEST_CASE("Sizes is_cube is_pod", "[sizes is_cube is_pod]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
-	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t2;
+	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'y', noarr::scalar<int>>> t;
+	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'a', noarr::array<'b', 20, noarr::scalar<int>>>> t2;
 
 	SECTION("check is_cube") {
 		REQUIRE(!noarr::is_cube<decltype(v)>::value);
@@ -23,6 +23,20 @@ TEST_CASE("Sizes", "[sizes]") {
 		REQUIRE(std::is_pod<decltype(v)>::value);
 		REQUIRE(std::is_pod<decltype(v2)>::value);
 		REQUIRE(std::is_pod<decltype(t)>::value);
+	}
+}
+
+TEST_CASE("Sizes sizes", "[sizes sizes]") {
+	noarr::vector<'x', noarr::scalar<float>> v;
+	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'y', noarr::scalar<int>>> t;
+	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'a', noarr::array<'b', 20, noarr::scalar<int>>>> t2;
+
+	SECTION("check cizes") {
+		REQUIRE((v2 | noarr::get_length<'y'>()) == 20000);
+		REQUIRE((t | noarr::get_length<'x'>()) == 10);
+		REQUIRE((t2 | noarr::get_length<'y'>()) == 20000);
+		REQUIRE((t2 | noarr::get_length<'b'>()) == 20);
 	}
 }
 
