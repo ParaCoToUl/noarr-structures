@@ -1,6 +1,6 @@
 # Matrix example
 
-## Matrix example tests
+## Matrix example tests  <!-- Exclude this line from linear documentation -->
 
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
 ![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
