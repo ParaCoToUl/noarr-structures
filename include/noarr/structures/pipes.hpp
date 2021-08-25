@@ -5,7 +5,6 @@
 #include "struct_decls.hpp"
 #include "is_struct.hpp"
 
-// TODO: add loading and storing to files (binary, json?, xml?, ...)
 // TODO: add a method for structures that configures the struct => this will be reflected by 2nd serialization
 
 namespace noarr {

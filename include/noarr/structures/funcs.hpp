@@ -8,9 +8,6 @@
 
 namespace noarr {
 
-// TODO: function that renames dimensions -> cannot be done unless structures are reworked or something
-// TODO: function that switches independent substructures (fuse with reassemble?)
-
 namespace literals {
 
 namespace helpers {
