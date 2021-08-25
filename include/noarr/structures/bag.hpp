@@ -186,6 +186,9 @@ public:
 	using bag_base<Structure, BagPolicy>::bag_base;
 };
 
+/**
+ * @brief implementation for bag policies that define nonconst types
+ */
 template<typename Structure, typename BagPolicy>
 class bag_impl<Structure, BagPolicy, std::enable_if_t<!std::is_const<std::remove_pointer_t<typename BagPolicy::type>>::value>>
 	: public bag_base<Structure, BagPolicy> {
