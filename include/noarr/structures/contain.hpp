@@ -42,11 +42,11 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<
 	template<typename, std::size_t>
 	friend struct contain_get;
 
-	T t;
-	contain_impl<void, TS...> ts;
+	T t_;
+	contain_impl<void, TS...> ts_;
 
 	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T t, TS... ts) : t(t), ts(ts...) {}
+	explicit constexpr contain_impl(T t, TS... ts) : t_(t), ts_(ts...) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const {
@@ -56,11 +56,11 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<
 private:
 	template<std::size_t I>
 	constexpr decltype(auto) _get_next() const {
-		return ts.template get<I - 1>();
+		return ts_.template get<I - 1>();
 	}
 
 	constexpr const auto &_get() const {
-		return t;
+		return t_;
 	}
 };
 
@@ -70,11 +70,11 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<c
 	template<typename, std::size_t>
 	friend struct contain_get;
 
-	T t;
+	T t_;
 
 	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T t) : t(t) {}
-	explicit constexpr contain_impl(T t, TS...) : t(t) {}
+	explicit constexpr contain_impl(T t) : t_(t) {}
+	explicit constexpr contain_impl(T t, TS...) : t_(t) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const {
@@ -88,7 +88,7 @@ private:
 	}
 
 	constexpr const auto &_get() const {
-		return t;
+		return t_;
 	}
 };
 
@@ -144,10 +144,10 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 	template<typename, std::size_t>
 	friend struct contain_get;
 
-	T t;
+	T t_;
 
 	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T t) : t(t) {}
+	explicit constexpr contain_impl(T t) : t_(t) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const {
@@ -156,7 +156,7 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 
 private:
 	constexpr const auto &_get() const {
-		return t;
+		return t_;
 	}
 };
 
