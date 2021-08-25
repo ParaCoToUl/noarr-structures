@@ -1,7 +1,5 @@
 # Technical documentation for Noarr Structures
 
-<!-- TODO: list all functions and what they do... -->
-
 ## Structure
 
 Structure is a simple object that describes data layouts and their abstractions
@@ -120,6 +118,18 @@ It is very preferable that each function honors the piping mechanism and, it is 
 The only formal requirement is that a noarr function is implemented as a callable object providing an `operator()` - during piping (`structure | function`), this operator receives the structure as its argument. The function then can provide a `func_family` typedef set to `top_tag`, `transform_tag`, or `get_tag` (see above, in piping).
 
 - If `func_family` is set to `transform_tag`, the return value of `operator()` shall be a structure (otherwise it depends on the semantics of the function)
+
+### Provided functions
+
+- **`compose`:** composition of two noarr functions (honoring the left-associative `|` notation)
+- **`set_length`:** changes the length (number of indices) of arrays and vectors
+- **`get_length`:** gets the length (number of indices) of a structure
+- **`reassemble`:** takes two structures in the structure hierarchy, one contained in the other, and swaps them, returning the resulting structure
+- **`get_size`:** returns the size of the data represented by the structure in bytes
+- **`fix`:** fixes an index in a structure
+- **`get_offset`:** retrieves offset of a substructure
+- **`offset`:** retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
+- **`get_at`:** returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 
 ## High level abstractions and utilities
 
