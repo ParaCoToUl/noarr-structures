@@ -7,8 +7,6 @@
 #include "struct_decls.hpp"
 #include "scalar.hpp"
 
-// FIXME: is_point returns false for point static dimensions where irrelevant substructures are nonpoint
-
 namespace noarr {
 
 namespace helpers {
@@ -57,10 +55,35 @@ struct is_dynamic_dimension_impl<T, void_t<decltype(std::declval<T>().offset(std
 	using type = std::true_type;
 };
 
+template<typename T>
+struct is_scalar_impl {
+	using type = std::false_type;
+};
+
+template<typename T>
+struct is_scalar_impl<scalar<T>> {
+	using type = std::true_type;
+};
+
 template<typename T, typename = void>
-struct is_point_impl;
+struct is_point_impl {
+	using type = std::false_type;
+};
+
+template<typename T, typename = void>
+struct is_cube_impl {
+	using type = std::false_type;
+};
 
 } // namespace helpers
+
+/**
+ * @brief returns whether a structure is a `scalar<...>`
+ * 
+ * @tparam T: the structure
+ */
+template<typename T>
+using is_scalar = typename helpers::is_scalar_impl<T>::type;
 
 /**
  * @brief returns whether the structure has a static dimension (accepts static indices)
@@ -86,25 +109,6 @@ using is_dynamic_dimension = std::conditional_t<helpers::has_dynamic_offset_impl
 template<typename T>
 using is_point = typename helpers::is_point_impl<remove_cvref<T>>::type;
 
-namespace helpers {
-
-template<typename T>
-struct is_point_impl<T, std::enable_if_t<(std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value) && tuple_forall<is_point, typename sub_structures<T>::value_type>::value>> {
-	using type = std::true_type;
-};
-
-template<typename T, typename = void>
-struct is_cube_int_impl {
-	using type = std::false_type;
-};
-
-template<typename T>
-struct is_cube_impl {
-	using type = typename is_cube_int_impl<T>::type;
-};
-
-} // namespace helpers
-
 /**
  * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all dynamic)
  * 
@@ -116,22 +120,32 @@ using is_cube = typename helpers::is_cube_impl<remove_cvref<T>>::type;
 namespace helpers {
 
 template<typename T>
-struct is_cube_int_impl<T, std::enable_if_t<!std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value>> {
-	using type = std::conditional_t<is_dynamic_dimension<T>::value, std::true_type, std::false_type>;
+struct is_point_impl<T, std::enable_if_t<(std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && !is_scalar<T>::value)>> {
+	using type = typename is_point<typename T::template get_t<>>::type;
 };
 
 template<typename T>
-struct is_cube_int_impl<T, std::enable_if_t<std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && tuple_forall<is_cube, typename sub_structures<T>::value_type>::value>> {
+struct is_point_impl<T, std::enable_if_t<is_scalar<T>::value>> {
 	using type = std::true_type;
 };
 
 template<typename T>
-struct is_scalar_impl {
-	using type = std::false_type;
+struct is_cube_impl_recurse {
+	using type = typename is_cube<typename T::template get_t<>>::type;
 };
 
 template<typename T>
-struct is_scalar_impl<scalar<T>> {
+struct is_cube_impl<T, std::enable_if_t<!std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value>> {
+	using type = typename std::conditional_t<is_dynamic_dimension<T>::value, is_cube_impl_recurse<T>, std::false_type>::type;
+};
+
+template<typename T>
+struct is_cube_impl<T, std::enable_if_t<std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && !is_scalar<T>::value>> {
+	using type = typename is_cube_impl_recurse<T>::type;
+};
+
+template<typename T>
+struct is_cube_impl<T, std::enable_if_t<is_scalar<T>::value>> {
 	using type = std::true_type;
 };
 
@@ -139,14 +153,6 @@ template<typename T, typename = void>
 struct scalar_t_impl;
 
 } // namespace helpers
-
-/**
- * @brief returns whether a structure is a `scalar<...>`
- * 
- * @tparam T: the structure
- */
-template<typename T>
-using is_scalar = typename helpers::is_scalar_impl<T>::type;
 
 /**
  * @brief returns the type of the value described by a `scalar<...>`
