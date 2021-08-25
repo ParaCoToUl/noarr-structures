@@ -8,7 +8,9 @@ Structure is a simple object that describes data layouts and their abstractions
 
 For a structure `T`:
 
-- the expression `std::is_trivial<T>::value && std::is_standard_layout<T>::value` shall evaluate to `true` (= it shall be a *[PODType](https://en.cppreference.com/w/cpp/named_req/PODType)*)
+- the expression `std::is_trivial<T>::value && std::is_standard_layout<T>::value` shall evaluate to `true` (= it shall be a *[PODType](https://en.cppreference.com/w/cpp/named_req/PODType)*), furthermore, it shall not define any fields in its body
+  - all desired fields shall be defined by inheriting the tuple-like `contain` (see below)
+- it shall inherit from `contain`
 - `T::sub_structures()` returns a tuple of sub-structures that can be (replaced and) used to `construct` a new structure `T`
   - it shall be a *pure function*
   - it shall be `constexpr` and either `static` or `const`. It shall be `static` iff the structure has no sub-structure

@@ -164,6 +164,19 @@ private:
 template<>
 struct contain_impl<void> {};
 
+template<typename... TS>
+struct contain_wrapper : private contain_impl<void, TS...> {
+protected:
+	using contain_impl<void, TS...>::contain_impl;
+	using contain_impl<void, TS...>::get;
+};
+
+template<>
+struct contain_wrapper<> : private contain_impl<void> {
+protected:
+	using contain_impl<void>::contain_impl;
+};
+
 } // namespace helpers
 
 /**
@@ -172,7 +185,7 @@ struct contain_impl<void> {};
  * @tparam TS the contained fields
  */
 template<typename... TS>
-using contain = helpers::contain_impl<void, TS...>;
+using contain = helpers::contain_wrapper<TS...>;
 
 } // namespace noarr
 

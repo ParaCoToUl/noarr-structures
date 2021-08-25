@@ -35,11 +35,14 @@ struct tuple_get_t<tuple_part<tuple<Dim, T, TS...>, I>, std::integral_constant<s
 };
 
 template<char Dim, typename T, typename... TS, std::size_t I>
-struct tuple_part<tuple<Dim, T, TS...>, I> : private contain<T, tuple_part<tuple<Dim, TS...>, I + 1>> {
-	using base = contain<T, tuple_part<tuple<Dim, TS...>, I + 1>>;
+struct tuple_part<tuple<Dim, T, TS...>, I> : contain<T, tuple_part<tuple<Dim, TS...>, I + 1>> {
+	template<typename, std::size_t>
+	friend struct tuple_part;
 
 	constexpr tuple_part() = default;
 	explicit constexpr tuple_part(T t, TS... ts) : base(t, tuple_part<tuple<Dim, TS...>, I + 1>(ts...)) {}
+protected:
+	using base = contain<T, tuple_part<tuple<Dim, TS...>, I + 1>>;
 
 	constexpr auto sub_structures() const {
 		return std::tuple_cat(std::tuple<T>(base::template get<0>()), base::template get<1>().sub_structures());
@@ -47,10 +50,14 @@ struct tuple_part<tuple<Dim, T, TS...>, I> : private contain<T, tuple_part<tuple
 };
 
 template<char Dim, typename T, std::size_t I>
-struct tuple_part<tuple<Dim, T>, I> : private contain<T> {
+struct tuple_part<tuple<Dim, T>, I> : contain<T> {
+	template<typename, std::size_t>
+	friend struct tuple_part;
+
 	constexpr tuple_part() = default;
 	explicit constexpr tuple_part(T t) : contain<T>(t) {}
 
+protected:
 	constexpr auto sub_structures() const {
 		return std::tuple<T>(contain<T>::template get<0>());
 	}
@@ -91,7 +98,7 @@ struct tuple_size_getter<T, 0> {
 }
 
 template<char Dim, typename T, typename... TS>
-struct tuple<Dim, T, TS...> : private helpers::tuple_part<tuple<Dim, T, TS...>, 0> {
+struct tuple<Dim, T, TS...> : helpers::tuple_part<tuple<Dim, T, TS...>, 0> {
 	constexpr std::tuple<T, TS...> sub_structures() const { return helpers::tuple_part<tuple<Dim, T, TS...>, 0>::sub_structures(); }
 	using description = struct_description<
 		char_pack<'t', 'u', 'p', 'l', 'e'>,
@@ -150,7 +157,7 @@ struct array_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam T: the type of the substructure the array contains
  */
 template<char Dim, std::size_t L, typename T>
-struct array : private contain<T> {
+struct array : contain<T> {
 	constexpr std::tuple<T> sub_structures() const { return std::tuple<T>(contain<T>::template get<0>()); }
 	using description = struct_description<
 		char_pack<'a', 'r', 'r', 'a', 'y'>,
@@ -184,7 +191,7 @@ struct array : private contain<T> {
  * @tparam T: type of the substructure the vector contains
  */
 template<char Dim, typename T>
-struct vector : private contain<T> {
+struct vector : contain<T> {
 	constexpr std::tuple<T> sub_structures() const { return std::tuple<T>(contain<T>::template get<0>()); }
 	using description = struct_description<
 		char_pack<'v', 'e', 'c', 't', 'o', 'r'>,
@@ -230,7 +237,7 @@ struct sized_vector_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam T: the type of the substructure the sized vector consists of
  */
 template<char Dim, typename T>
-struct sized_vector : private contain<vector<Dim, T>, std::size_t> {
+struct sized_vector : contain<vector<Dim, T>, std::size_t> {
 	using base = contain<vector<Dim, T>, std::size_t>;
 	constexpr std::tuple<T> sub_structures() const { return base::template get<0>().sub_structures(); }
 	using description = struct_description<
@@ -290,7 +297,7 @@ struct is_static_construct<T, decltype(&T::construct, void())> {
  * @tparam T: substructure type
  */
 template<char Dim, typename T, std::size_t Idx>
-struct sfixed_dim : private contain<T> {
+struct sfixed_dim : contain<T> {
 	/* e.g. sub_structures of a sfixed tuple are the same as the substructures of the tuple
 	 *(otherwise we could not have the right offset after an item with Idx2 < Idx in the tuple changes)
 	 */
@@ -342,7 +349,7 @@ struct fixed_dim_get_t<T, void> {
  * @tparam T: substructure type
  */
 template<char Dim, typename T>
-struct fixed_dim : private contain<T, std::size_t> {
+struct fixed_dim : contain<T, std::size_t> {
 	using base = contain<T, std::size_t>;
 	constexpr auto sub_structures() const { return noarr::sub_structures<decltype(this->base::template get<0>())>(base::template get<0>()).value; }
 	using description = struct_description<
