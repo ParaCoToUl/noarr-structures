@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include <iostream>
 #include <tuple>
 
 #include "noarr/structures_extended.hpp"
@@ -28,8 +29,35 @@ struct MatrixStructureGetter<MatrixDataLayout::Columns>
 	}
 };
 
+template<typename MatrixSource, typename MatrixDestination>
+void matrix_copy(MatrixSource& matrix_src, MatrixDestination& matrix_dst)
+{
+	std::size_t x_size = matrix_src.template get_length<'x'>();
+	std::size_t y_size = matrix_src.template get_length<'y'>();
+
+	REQUIRE(x_size == matrix_dst.template get_length<'x'>());
+	REQUIRE(y_size == matrix_dst.template get_length<'y'>());
+
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = 0; j < y_size; j++)
+			matrix_dst.template at<'x', 'y'>(i, j) = matrix_src.template at<'x', 'y'>(i, j);
+}
+
+template<typename Matrix>
+void matrix_transpose(Matrix& matrix)
+{
+	std::size_t x_size = matrix.template get_length<'x'>();
+	std::size_t y_size = matrix.template get_length<'y'>();
+
+	REQUIRE(x_size == y_size);
+
+	for (std::size_t i = 0; i < x_size; i++)
+		for (std::size_t j = i; j < y_size; j++)
+			std::swap(matrix.template at<'x', 'y'>(i, j), matrix.template at<'x', 'y'>(j, i));
+}
+
 template<typename Matrix1, typename Matrix2>
-void matrix_copy(Matrix1& matrix1, Matrix2& matrix2)
+bool are_equal_matrices(Matrix1& matrix1, Matrix2& matrix2)
 {
 	std::size_t x_size = matrix1.template get_length<'x'>();
 	std::size_t y_size = matrix1.template get_length<'y'>();
@@ -37,22 +65,17 @@ void matrix_copy(Matrix1& matrix1, Matrix2& matrix2)
 	REQUIRE(x_size == matrix2.template get_length<'x'>());
 	REQUIRE(y_size == matrix2.template get_length<'y'>());
 
-	for (std::size_t i = 0; i < x_size; i++)
-		for (std::size_t j = 0; j < y_size; j++)
-			matrix2.template at<'x', 'y'>(i, j) = matrix1.template at<'x', 'y'>(i, j);
-}
+	for (std::size_t i = 0; i < x_size; i++) {
+		for (std::size_t j = 0; j < y_size; j++) {
+			if (matrix1.template at<'x', 'y'>(i, j) != matrix2.template at<'x', 'y'>(i, j)) {
+				std::cout << "at (x, y) = (" << i << ", " << j << "): " << matrix1.template at<'x', 'y'>(i, j) << " != " << matrix2.template at<'x', 'y'>(i, j) << std::endl;
 
-template<typename Matrix1>
-void matrix_transpose(Matrix1& matrix1)
-{
-	std::size_t x_size = matrix1.template get_length<'x'>();
-	std::size_t y_size = matrix1.template get_length<'y'>();
-
-	REQUIRE(x_size == y_size);
-
-	for (std::size_t i = 0; i < x_size; i++)
-		for (std::size_t j = i; j < y_size; j++)
-			std::swap(matrix1.at<'x', 'y'>(i, j), matrix1.at<'x', 'y'>(j, i));
+				return false;
+			}
+		}
+	}
+	
+	return true;
 }
 
 template<typename Matrix1, typename Matrix2, typename Matrix3>
@@ -84,7 +107,7 @@ void matrix_scalar_multiplication(Matrix1& matrix1, int scalar)
 	std::size_t y_size = matrix1.template get_length<'y'>();
 
 	for (std::size_t i = 0; i < x_size; i++)
-		for (std::size_t j = i; j < y_size; j++)
+		for (std::size_t j = 0; j < y_size; j++)
 			matrix1.template at<'x', 'y'>(i, j) *= scalar;
 }
 
@@ -164,7 +187,7 @@ matrix get_clasic_matrix(std::size_t x, std::size_t y)
 	return matrix(x, y, std::move(ary));
 }
 
-bool are_equal_matrices(matrix& m1, matrix& m2)
+bool are_equal_classic_matrices(matrix& m1, matrix& m2)
 {
 	if (m1.x != m2.x)
 		return false;
@@ -254,11 +277,27 @@ void matrix_demo_template(std::size_t size)
 	clasic_matrix_to_noarr(m2, n2);
 
 	clasic_matrix_multiply(m1, m2, m3);
-	matrix_multiply(n1, n2, n3);
 
-	matrix m4 = noarr_matrix_to_clasic(n3);
+	matrix_transpose(n2);
+	matrix_transpose(n1);
 
-	REQUIRE(are_equal_matrices(m3, m4));
+	matrix_multiply(n2, n1, n3);
+
+	matrix_transpose(n3);
+
+	auto n4 = noarr::make_bag(n3.structure().unwrap() | noarr::reassemble<'x', 'y'>());
+	matrix_copy(n3, n4);
+
+	matrix m4 = noarr_matrix_to_clasic(n4);
+
+	REQUIRE(are_equal_classic_matrices(m3, m4));
+
+	auto n5 = noarr::make_bag(n3.structure());
+
+	matrix_add(n3, n4, n5);
+	matrix_scalar_multiplication(n3, 2);
+
+	REQUIRE(are_equal_matrices(n3, n5));
 }
 
 void matrix_demo(MatrixDataLayout layout, std::size_t size)

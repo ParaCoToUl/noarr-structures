@@ -101,7 +101,7 @@ void noarr_matrix_scalar_multiplication(Matrix& matrix, int scalar)
 	std::size_t y_size = matrix.template get_length<'m'>();
 
 	for (std::size_t i = 0; i < x_size; i++)
-		for (std::size_t j = i; j < y_size; j++)
+		for (std::size_t j = 0; j < y_size; j++)
 			matrix.template at<'n', 'm'>(i, j) *= scalar;
 }
 
