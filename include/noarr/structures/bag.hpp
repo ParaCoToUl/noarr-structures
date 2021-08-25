@@ -81,38 +81,40 @@ struct bag_policy<bag_const_raw_pointer_tag> {
 	}
 };
 
-template<typename Structure, typename BagPolicy, typename = void>
-class bag_impl {
+template<typename Structure, typename BagPolicy>
+class bag_base {
+	template<typename, typename, typename>
+	friend class bag_impl;
 private:
 	typename BagPolicy::type data_;
 	wrapper<Structure> structure_;
 
 public:
-	explicit bag_impl(Structure s) : structure_(wrap(s)) {
+	explicit bag_base(Structure s) : structure_(wrap(s)) {
 		data_ = BagPolicy::construct(structure().get_size());
 	}
 
-	explicit bag_impl(wrapper<Structure> s) : structure_(s) {
+	explicit bag_base(wrapper<Structure> s) : structure_(s) {
 		data_ = BagPolicy::construct(structure().get_size());
 	}
 
-	explicit bag_impl(Structure s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(wrap(s))
+	explicit bag_base(Structure s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(wrap(s))
 	{ }
 
-	explicit bag_impl(wrapper<Structure> s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(s)
+	explicit bag_base(wrapper<Structure> s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(s)
 	{ }
 
-	explicit bag_impl(Structure s, typename BagPolicy::type &data) : data_(data), structure_(wrap(s))
+	explicit bag_base(Structure s, typename BagPolicy::type &data) : data_(data), structure_(wrap(s))
 	{ }
 
-	explicit bag_impl(wrapper<Structure> s, typename BagPolicy::type &data) : data_(data), structure_(s)
+	explicit bag_base(wrapper<Structure> s, typename BagPolicy::type &data) : data_(data), structure_(s)
 	{ }
 
-	bag_impl(Structure s, BagPolicy policy) : structure_(wrap(s)) {
+	bag_base(Structure s, BagPolicy policy) : structure_(wrap(s)) {
 		data_ = policy.construct(structure().get_size());
 	}
 
-	bag_impl(wrapper<Structure> s, BagPolicy policy) : structure_(s) {
+	bag_base(wrapper<Structure> s, BagPolicy policy) : structure_(s) {
 		data_ = policy.construct(structure().get_size());
 	}
 
@@ -127,17 +129,6 @@ public:
 	constexpr const char *data() const noexcept { return BagPolicy::get(data_); }
 
 	/**
-	 * @brief sets the `data` to zeros
-	 * 
-	 */
-	void clear() {
-		auto size_ = structure().get_size();
-
-		for (std::size_t i = 0; i < size_; ++i)
-			data_[i] = 0;
-	}
-
-	/**
 	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
 	 * 
 	 * @tparam Dims: the dimension names
@@ -145,17 +136,6 @@ public:
 	 */
 	template<char... Dims, typename... Ts>
 	constexpr decltype(auto) at(Ts... ts) const {
-		return structure().template get_at<Dims...>(data(), ts...);
-	}
-
-	/**
-	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
-	 * 
-	 * @tparam Dims: the dimension names
-	 * @param ts: the dimension values
-	 */
-	template<char... Dims, typename... Ts>
-	constexpr decltype(auto) at(Ts... ts) {
 		return structure().template get_at<Dims...>(data(), ts...);
 	}
 
@@ -200,55 +180,23 @@ public:
 	}
 };
 
-template<typename Structure, typename BagPolicy>
-class bag_impl<Structure, BagPolicy, std::enable_if_t<!std::is_const<std::remove_pointer_t<typename BagPolicy::type>>::value>> {
-private:
-	typename BagPolicy::type data_;
-	wrapper<Structure> structure_;
-
+template<typename Structure, typename BagPolicy, typename = void>
+class bag_impl : public bag_base<Structure, BagPolicy> {
 public:
-	explicit bag_impl(Structure s) : structure_(wrap(s)) {
-		data_ = BagPolicy::construct(structure().get_size());
-	}
+	using bag_base<Structure, BagPolicy>::bag_base;
+};
 
-	explicit bag_impl(wrapper<Structure> s) : structure_(s) {
-		data_ = BagPolicy::construct(structure().get_size());
-	}
-
-	explicit bag_impl(Structure s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(wrap(s))
-	{ }
-
-	explicit bag_impl(wrapper<Structure> s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(s)
-	{ }
-
-	explicit bag_impl(Structure s, typename BagPolicy::type &data) : data_(data), structure_(wrap(s))
-	{ }
-
-	explicit bag_impl(wrapper<Structure> s, typename BagPolicy::type &data) : data_(data), structure_(s)
-	{ }
-
-	bag_impl(Structure s, BagPolicy policy) : structure_(wrap(s)) {
-		data_ = policy.construct(structure().get_size());
-	}
-
-	bag_impl(wrapper<Structure> s, BagPolicy policy) : structure_(s) {
-		data_ = policy.construct(structure().get_size());
-	}
-
-	/**
-	 * @brief return the wrapped structure which describes the `data` blob
-	 */
-	constexpr const wrapper<Structure>& structure() const noexcept { return structure_; }
+template<typename Structure, typename BagPolicy>
+class bag_impl<Structure, BagPolicy, std::enable_if_t<!std::is_const<std::remove_pointer_t<typename BagPolicy::type>>::value>>
+	: public bag_base<Structure, BagPolicy> {
+public:
+	using bag_base<Structure, BagPolicy>::bag_base;
+	using bag_base<Structure, BagPolicy>::structure;
 
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr const char *data() const noexcept { return BagPolicy::get(data_); }
-
-	/**
-	 * @brief returns the underlying data blob
-	 */
-	constexpr char *data() { return BagPolicy::get(bag_impl<Structure, BagPolicy>::data_); }
+	constexpr char *data() { return BagPolicy::get(bag_base<Structure, BagPolicy>::data_); }
 
 	/**
 	 * @brief sets the `data` to zeros
@@ -258,18 +206,7 @@ public:
 		auto size_ = structure().get_size();
 
 		for (std::size_t i = 0; i < size_; ++i)
-			data_[i] = 0;
-	}
-
-	/**
-	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
-	 * 
-	 * @tparam Dims: the dimension names
-	 * @param ts: the dimension values
-	 */
-	template<char... Dims, typename... Ts>
-	constexpr decltype(auto) at(Ts... ts) const {
-		return structure().template get_at<Dims...>(data(), ts...);
+			bag_base<Structure, BagPolicy>::data_[i] = 0;
 	}
 
 	/**
@@ -281,46 +218,6 @@ public:
 	template<char... Dims, typename... Ts>
 	constexpr decltype(auto) at(Ts... ts) {
 		return structure().template get_at<Dims...>(data(), ts...);
-	}
-
-	/**
-	 * @brief returns an offset of a value in `data` by fixing dimensions in the `structure`
-	 * 
-	 * @tparam Dims: the dimension names
-	 * @param ts: the dimension values
-	 */
-	template<char... Dims, typename... Ts>
-	constexpr auto offset(Ts... ts) const {
-		return structure().template offset<Dims...>(ts...);
-	}
-
-	/**
-	 * @brief returns an offset of a substructure with a certain index in a structure given by its dimension name
-	 * 
-	 * @tparam Dim: the dimension name
-	 * @param t: the index of the substructure
-	 */
-	template<char Dim, typename T>
-	constexpr auto get_offset(T t) const {
-		return structure().template get_offset<Dim>(t);
-	}
-
-	/**
-	 * @brief gets the length (number of indices) of a dimension in the `structure`
-	 * 
-	 * @tparam Dim: the dimension name
-	 */
-	template<char Dim>
-	constexpr auto get_length() const {
-		return structure().template get_length<Dim>();
-	}
-
-	/**
-	 * @brief gets the size of the data described by the `structure`
-	 * 
-	 */
-	constexpr auto get_size() const {
-		return structure().get_size();
 	}
 };
 
