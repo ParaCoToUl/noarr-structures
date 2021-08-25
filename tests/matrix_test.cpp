@@ -133,8 +133,8 @@ void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 
 			for (std::size_t k = 0; k < x1_size; k++)
 			{
-				int& value1 = matrix1.template at<'x', 'y'>(k, j);
-				int& value2 = matrix2.template at<'x', 'y'>(i, k);
+				const int& value1 = matrix1.template at<'x', 'y'>(k, j);
+				const int& value2 = matrix2.template at<'x', 'y'>(i, k);
 
 				sum += value1 * value2;
 			}
@@ -148,7 +148,10 @@ template<MatrixDataLayout layout>
 void matrix_template_test(std::size_t size)
 {
 	// using different kinds of bags
-	auto m1 = noarr::make_vector_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m1_structure = noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size);
+	std::vector<char> blob(m1_structure.get_size());
+
+	auto m1 = noarr::make_bag(m1_structure, static_cast<const char *>(blob.data()));
 	auto m2 = noarr::make_vector_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 	auto m3 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
 

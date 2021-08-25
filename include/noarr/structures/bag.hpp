@@ -30,6 +30,10 @@ struct bag_policy {
 template<typename...>
 struct bag_raw_pointer_tag;
 
+// a helper struct for 'bag_policy' as the '*' specifier is not a class ()
+template<typename...>
+struct bag_const_raw_pointer_tag;
+
 template<>
 struct bag_policy<std::unique_ptr> {
 	using type = std::unique_ptr<char[]>;
@@ -57,6 +61,19 @@ struct bag_policy<bag_raw_pointer_tag> {
 
 	static constexpr char *get(char *ptr) {
 		return ptr;
+	}
+
+	static constexpr const char *get(const char *ptr) {
+		return ptr;
+	}
+};
+
+template<>
+struct bag_policy<bag_const_raw_pointer_tag> {
+	using type = const char *;
+
+	static char *construct(std::size_t size) {
+		return new char[size];
 	}
 
 	static constexpr const char *get(const char *ptr) {
@@ -120,7 +137,10 @@ public:
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr char *data() noexcept { return BagPolicy::get(data_); }
+	template<typename _ = void>
+	constexpr auto /* char * */ data() noexcept ->
+	std::enable_if_t<!std::is_const<std::remove_pointer_t<typename BagPolicy::type>>::value, first_t<char *, _>>
+	{ return BagPolicy::get(data_); }
 
 	/**
 	 * @brief sets the `data` to zeros
@@ -276,6 +296,28 @@ constexpr auto make_bag(Structure s, char *data) {
 template<typename Structure>
 constexpr auto make_bag(noarr::wrapper<Structure> s, char *data) {
 	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>(s, data);
+}
+
+/**
+ * @brief creates a bag with the given structure and an underlying r/o observing data blob
+ * 
+ * @param s: the structure
+ * @param data: the data blob
+ */
+template<typename Structure>
+constexpr auto make_bag(Structure s, const char *data) {
+	return bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, data);
+}
+
+/**
+ * @brief creates a bag with the given structure and an underlying r/o observing data blob
+ * 
+ * @param s: the structure (wrapped)
+ * @param data: the data blob
+ */
+template<typename Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s, const char *data) {
+	return bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, data);
 }
 
 } // namespace noarr
