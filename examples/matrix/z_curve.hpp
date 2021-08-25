@@ -40,12 +40,12 @@ struct z_curve_top_get_t;
 
 template<typename T>
 struct z_curve_top_get_t<T> {
-	using type = T;
+	using type = typename T::template get_t<>;
 };
 
 template<typename T>
 struct z_curve_top_get_t<T, void> {
-	using type = T;
+	using type = typename T::template get_t<void>;
 };
 
 template<typename T, typename TH1, typename TH2>
