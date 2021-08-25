@@ -34,12 +34,17 @@ TEST_CASE("Sizes sizes", "[sizes sizes]") {
 	
 	auto v_sized = v | noarr::set_length<'x'>(20);
 
+	auto w_v_sized = noarr::wrap(v_sized);
+	auto w_v2 = noarr::wrap(v2);
+	auto w_t = noarr::wrap(t);
+	auto w_t2 = noarr::wrap(t2);
+
 	SECTION("check cizes") {
-		REQUIRE((v_sized | noarr::get_length<'x'>()) == 20);
-		REQUIRE((v2 | noarr::get_length<'y'>()) == 20000);
-		REQUIRE((t | noarr::get_length<'x'>()) == 10);
-		REQUIRE((t2 | noarr::get_length<'y'>()) == 20000);
-		REQUIRE((t2 | noarr::get_length<'b'>()) == 20);
+		REQUIRE(w_v_sized.get_length<'x'>() == 20);
+		REQUIRE(w_v2.get_length<'y'>() == 20000);
+		REQUIRE(w_t.get_length<'x'>() == 10);
+		REQUIRE(w_t2 .get_length<'y'>() == 20000);
+		REQUIRE(w_t2.get_length<'b'>() == 20);
 	}
 }
 

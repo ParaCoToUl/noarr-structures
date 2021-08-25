@@ -145,7 +145,7 @@ void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 }
 
 template<MatrixDataLayout layout>
-void matrix_template_test(std::size_t size)
+void matrix_simple_multiply_template_test(std::size_t size)
 {
 	// using different kinds of bags
 	auto m1_structure = noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size);
@@ -158,12 +158,12 @@ void matrix_template_test(std::size_t size)
 	matrix_multiply(m1, m2, m3);
 }
 
-void matrix_template_test_runtime(MatrixDataLayout layout, std::size_t size)
+void matrix_simple_multiply_template_test_runtime(MatrixDataLayout layout, std::size_t size)
 {
 	if (layout == MatrixDataLayout::Rows)
-		matrix_template_test<MatrixDataLayout::Rows>(size);
+		matrix_simple_multiply_template_test<MatrixDataLayout::Rows>(size);
 	else if (layout == MatrixDataLayout::Columns)
-		matrix_template_test<MatrixDataLayout::Columns>(size);
+		matrix_simple_multiply_template_test<MatrixDataLayout::Columns>(size);
 }
 
 
@@ -265,7 +265,7 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 }
 
 template<MatrixDataLayout layout>
-void matrix_demo_template(std::size_t size)
+void matrix_multiply_demo_template(std::size_t size)
 {
 
 	matrix m1 = get_clasic_matrix(size, size);
@@ -303,30 +303,30 @@ void matrix_demo_template(std::size_t size)
 	REQUIRE(are_equal_matrices(n3, n5));
 }
 
-void matrix_demo(MatrixDataLayout layout, std::size_t size)
+void matrix_multiply_demo(MatrixDataLayout layout, std::size_t size)
 {
 	if (layout == MatrixDataLayout::Rows)
-		matrix_demo_template<MatrixDataLayout::Rows>(size);
+		matrix_multiply_demo_template<MatrixDataLayout::Rows>(size);
 	else if (layout == MatrixDataLayout::Columns)
-		matrix_demo_template<MatrixDataLayout::Columns>(size);
+		matrix_multiply_demo_template<MatrixDataLayout::Columns>(size);
 }
 
 TEST_CASE("Small matrix demo", "[Small matrix demo]")
 {
-	matrix_demo(MatrixDataLayout::Rows, 10);
+	matrix_multiply_demo(MatrixDataLayout::Rows, 10);
 }
 
 TEST_CASE("Small matrix demo 2", "[Small matrix demo 2]")
 {
-	matrix_demo(MatrixDataLayout::Rows, 20);
+	matrix_multiply_demo(MatrixDataLayout::Rows, 20);
 }
 
 TEST_CASE("Small matrix multimplication Rows", "[Small matrix multimplication Rows]")
 {
-	matrix_template_test_runtime(MatrixDataLayout::Rows, 10);
+	matrix_simple_multiply_template_test_runtime(MatrixDataLayout::Rows, 10);
 }
 
 TEST_CASE("Small matrix multimplication Columns", "[Small matrix multimplication Columns]")
 {
-	matrix_template_test_runtime(MatrixDataLayout::Columns, 10);
+	matrix_simple_multiply_template_test_runtime(MatrixDataLayout::Columns, 10);
 }
