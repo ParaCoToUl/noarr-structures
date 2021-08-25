@@ -326,12 +326,12 @@ struct fixed_dim_get_t;
 
 template<typename T>
 struct fixed_dim_get_t<T> {
-	using type = T;
+	using type = typename T::template get_t<>;
 };
 
 template<typename T>
 struct fixed_dim_get_t<T, void> {
-	using type = T;
+	using type = typename T::template get_t<void>;
 };
 
 }
