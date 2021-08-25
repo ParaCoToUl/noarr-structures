@@ -9,10 +9,19 @@ namespace noarr {
 /**
  * @brief converts any type(s) to void
  * 
- * @tparam T: the converted types
+ * @tparam TS: the converted types
  */
 template<class... TS>
 using void_t = void;
+
+/**
+ * @brief returns the first of the given types
+ * 
+ * @tparam T: the type to be returned
+ * @tparam TS: the types to be forgotten
+ */
+template<class T, class... TS>
+using first_t = T;
 
 /**
  * @brief a shortcut for applying std::remove_cv and std::remove_reference
