@@ -59,15 +59,13 @@ For a structure `T`:
     - *as a result, structures with a dynamic dimension will have just one sub-structure or it should be a ground (leaf) structure*
   - if the structure has no sub-structures, `T::get_t` shall return a representation of the type of the physical data
 
-### Cube
+### Subtypes of structures
 
-A cube is a structure hierarchy which has all its dimensions dynamic. This has a consequence of having a single scalar type (all values described by the structure share the same type).
+- **Cube:** a cube is a structure hierarchy which has all its dimensions dynamic. This has a consequence of having a single scalar type (all values described by the structure share the same type).
 
-### Point
+- **Point:** a point is a structure hierarchy with no dimensions. It has only a single scalar type and it describes one scalar value of this type.
 
-A point is a structure hierarchy with no dimensions. It has only a single scalar type and it describes one scalar value of this type.
-
-It is a special case of cube.
+  It is a special case of cube.
 
 ### Contain
 
@@ -77,35 +75,19 @@ It is used in the library to define all structures (and the majority of all noar
 
 ### Provided structures
 
-The library provides a set of structures that describe the most essential layouts
+The library provides the following set of structures that describe the most essential layouts:
 
-#### Scalar
-
-`scalar` contains a single scalar type and describes one value of this type. It serves as the leaf substructure in structure hierarchies and as the bottom case for many algorithms and mechanisms defined by the library. Its size is equal to the size of the contained type and it is always known during compile time.
-
-#### Array
-
-`array` is a structure containing a single substructure and providing a dynamic dimension. The layout described by an array consists of a static number of copies of the layout described by the contained substructure lined up right after one another. Its size is equal to the size of the contained substructure multiplied by the number of its copies and it is always know during compile time if the size of the substructure is as well.
-
-#### Vector
-
-`vector` is a structure containing a single substructure and providing a dynamic dimension. It is very similar to array (see above) with the distinction that the number of the substructure's layout copies is dynamic, and because of it being dynamic, the size of vector is dynamic as well and it is generally not know during compile time.
-
-#### Tuple
-
-`tuple` is a structure containing multiple substructures and providing a static dimension. It describes a layout consisting of the layouts of the substructures lined up one after another. Its size is equal to the sum of the sizes of the substructures and it is known during compile time if all sizes of the substructures are as well.
+- **`scalar`:** contains a single scalar type and describes one value of this type. It serves as the leaf substructure in structure hierarchies and as the bottom case for many algorithms and mechanisms defined by the library. Its size is equal to the size of the contained type and it is always known during compile time.
+- **`array`:** a structure containing a single substructure and providing a dynamic dimension. The layout described by an array consists of a static number of copies of the layout described by the contained substructure lined up right after one another. Its size is equal to the size of the contained substructure multiplied by the number of its copies and it is always know during compile time if the size of the substructure is as well.
+- **`vector`:** a structure containing a single substructure and providing a dynamic dimension. It is very similar to array (see above) with the distinction that the number of the substructure's layout copies is dynamic, and because of it being dynamic, the size of vector is dynamic as well and it is generally not know during compile time.
+- **`tuple`:** a structure containing multiple substructures and providing a static dimension. It describes a layout consisting of the layouts of the substructures lined up one after another. Its size is equal to the sum of the sizes of the substructures and it is known during compile time if all sizes of the substructures are as well.
 
 ### Helper structures
 
-#### Sfixed_dim
+- **`sfixed_dim`:** eliminates the static (or dynamic) dimension of the contained structure by fixing a certain index in it while preserving the layout of the structure and all substructures.
+- **`fixed_dim`:** eliminates the dynamic dimension of the contained structure by fixing a certain index in it while preserving the layout of the structure and all substructures.
 
-`sfixed_dim` eliminates the static (or dynamic) dimension of the contained structure by fixing a certain index in it while preserving the layout of the structure and all substructures.
-
-#### Fixed_dim
-
-`fixed_dim` eliminates the dynamic dimension of the contained structure by fixing a certain index in it while preserving the layout of the structure and all substructures.
-
-## (Noarr) Function
+## Noarr Function
 
 Functions are (using the `operator|`) applied to structures. Applying them returns either another structure (this is mostly the case of the functions with `func_family` set to `transform_tag`, more on `func_family`s later in this section) or a scalar value (usually if `func_family` is set to `get_tag`).
 
@@ -113,25 +95,21 @@ Functions are (using the `operator|`) applied to structures. Applying them retur
 
 The piping mechanism (used inside `operator|`) is split into three cases:
 
-#### Top application
+- **Top application:** This case applies to the functions have their `func_family` set to `top_tag`.
 
-This case applies to the functions have their `func_family` set to `top_tag`.
+  It is the simplest piping mechanism case as it is equivalent to simple application (e.g.: the expression `s | f`, if `f` has a `top_tag`, is equivalent to `f(s)`).
 
-It is the simplest piping mechanism case as it is equivalent to simple application (e.g.: the expression `s | f`, if `f` has a `top_tag`, is equivalent to `f(s)`).
+- **Getting:** This case applies to the functions have their `func_family` set to `get_tag`.
 
-#### Getting
+  It is an extension of the *top application* case:
 
-This case applies to the functions have their `func_family` set to `get_tag`.
+  given the expression `s | f`, if `f(s)` is not a valid expression, the piping mechanism attempts to apply `f` to the substructures of `s` (recursively). It fails if `f` is not applicable to any of the substructures or if it is applicable to more substructures. In other words, it succeeds if and only if there is one and only one sub-graph branch in the structure hierarchy (if represented by a tree) such that `f` is not applicable to any of the non-leaf nodes of the branch and it is applicable to the leaf.
 
-It is an extension of the *top application* case:
+- **Transformation (mapping)**
 
-given the expression `s | f`, if `f(s)` is not a valid expression, the piping mechanism attempts to apply `f` to the substructures of `s` (recursively). It fails if `f` is not applicable to any of the substructures or if it is applicable to more substructures. In other words, it succeeds if and only if there is one and only one sub-graph branch in the structure hierarchy (if represented by a tree) such that `f` is not applicable to any of the non-leaf nodes of the branch and it is applicable to the leaf.
+  This case applies to the functions have their `func_family` set to `transform_tag`.
 
-#### Mapping / Transformation
-
-This case applies to the functions have their `func_family` set to `transform_tag`.
-
-The result of `s | f` results in applying `f` to the top-most structure of each branch of the structure hierarchy (or leaving the branch without change if `f` is applicable to none of the structures) and then reconstructing the structure with these changes to the substructures.
+  The result of `s | f` results in applying `f` to the top-most structure of each branch of the structure hierarchy (or leaving the branch without change if `f` is applicable to none of the structures) and then reconstructing the structure with these changes to the substructures.
 
 ### Function requirements
 
