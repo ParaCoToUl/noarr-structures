@@ -31,8 +31,11 @@ TEST_CASE("Sizes sizes", "[sizes sizes]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'y', noarr::scalar<int>>> t;
 	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'a', noarr::array<'b', 20, noarr::scalar<int>>>> t2;
+	
+	auto v_sized = v | noarr::set_length<'x'>(20);
 
 	SECTION("check cizes") {
+		REQUIRE((v_sized | noarr::get_length<'x'>()) == 20);
 		REQUIRE((v2 | noarr::get_length<'y'>()) == 20000);
 		REQUIRE((t | noarr::get_length<'x'>()) == 10);
 		REQUIRE((t2 | noarr::get_length<'y'>()) == 20000);
