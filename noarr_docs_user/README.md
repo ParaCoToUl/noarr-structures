@@ -1,18 +1,18 @@
 # User documentation for Noarr Structures
 
-## Data modelling
+## Data modeling
 
-Data modelling is the process of describing the structure of your data, so that an algorithm can be written to processes the data. Noarr lets you model your data in an abstract, multidimensional space, abstracting away any underlying physical structure.
+Data modeling is the process of describing the structure of your data so that an algorithm can be written to processes the data. Noarr lets you model your data in an abstract, multidimensional space, abstracting away any underlying physical structure.
 
 Noarr framework distinguishes two types of multidimensional data - uniform and jagged.
 
-**Jagged data** can be thought of as a vector of vectors, each having different size. This means the dimensions of such data need to be stored within the data itself, requiring the use of pointers and making processing of such data inefficient. Noarr supports this type of data only at the highest abstraction levels of your data model.
+**Jagged data** can be thought of as a vector of vectors, each having a different size. This means the dimensions of such data need to be stored within the data itself, requiring the use of pointers and making processing of such data inefficient. Noarr supports this type of data only at the highest abstraction levels of your data model.
 
-**Uniform data** can be though of as a multidimensional cube of values. It is like a vector of same-sized vectors, but it also supports tuples and other structures. This lets us store the dimensions separately from the data, letting us freely change the order of specification of dimensions - completely separating the physical data layout from the data model.
+**Uniform data** can be thought of as a multidimensional cube of values. It is like a vector of same-sized vectors, but it also supports tuples and other structures. This lets us store the dimensions separately from the data, letting us freely change the order of specification of dimensions - completely separating the physical data layout from the data model.
 
-## Data modelling in Noarr
+## Data modeling in Noarr
 
-*Noarr structures* was designed to support uniform data. Uniform data has the advantage of occupying one continuous array of memory. When working with it, you work with three objects:
+*Noarr structures* were designed to support uniform data. Uniform data has the advantage of occupying one continuous array of memory. When working with it, you work with three objects:
 
 1. **Structure:** A small, tree-like object, that represents the structure of the data. It does not contain the data itself, nor a pointer to the data. It can be thought of as a function that maps indices to memory offsets (in bytes). It stores information, such as data dimensions and tuple types.
 2. **Data:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *Structure* object.
@@ -34,7 +34,7 @@ To represent a list of floats, you create the following *structure* object:
 noarr::vector<'i', noarr::scalar<float>> my_structure;
 ```
 
-The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values. But currently the structure has no size, we need to make room for 10 items:
+The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values. But currently, the structure has no size, we need to make room for 10 items:
 
 ```cpp
 auto my_structure_of_ten = my_structure 
@@ -191,7 +191,7 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 - `scalar`: the bottom structure describing a single value of a single type
 - `array`: a structure describing a static number of copies of its substructure's layout and introducing a dynamic dimension
 - `vector`: a structure describing a dynamic number of copies of its substructure's layout and introducing a dynamic dimension (its size is specified ad-hoc via `set_length` - see below)
-- `tuple`: a structure describing a multiple number of various substructures' layouts and introducing a static dimension
+- `tuple`: a structure describing a number of various substructures' layouts and introducing a static dimension
 
 ## Full list of the provided functions
 
