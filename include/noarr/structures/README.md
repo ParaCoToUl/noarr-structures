@@ -21,6 +21,8 @@
 
   - `contain`: tuple-like struct, and a structured layout, that facilitates creation of new structures and functions
 
+- [contain_serialize.hpp](contain_serialize.hpp): contains implementations for `serialize` and `deserialize`, functions that serialize and deserialize structures
+
 - [scalar.hpp](scalar.hpp): contains the implementation of the `scalar` structure. It serves as the bottom-most node for other structures (e.g. `vector<'v', scalar<int>>`).
 
   - `scalar`: the simplest possible structure referring to a single value of a certain type
