@@ -2,7 +2,7 @@
 
 ## Structure
 
-Structure is a simple object that describes data layouts and their abstractions
+A  *structure* is a simple object that describes data layouts and their abstractions
 
 ### Structure requirements
 
@@ -17,19 +17,19 @@ For a structure `T`:
     - *example of a structure with no sub-structure: `scalar<T>` (serves as a ground (or leaf) structure)*
   - it shall satisfy `consteval`
 - `T::construct(T1, T2, ...)` creates a new structure `T` from sub-structures `T1`, `T2`, ...
-  - it shall take the same universe of sub-structures that `T::sub_structures()` returns in tuple, and the `construct`ing structure shall be identical to the structure `construct`ed from it given these sub-structures as arguments
+  - it shall take the same universe of sub-structures that `T::sub_structures()` returns in a tuple and the `construct`ing structure shall be identical to the structure `construct`ed from it given these sub-structures as arguments
   - it shall be `constexpr` and either `static` or `const`. It shall be `static` iff the structure depends solely on its sub-structures
     - *e.g. `array::construct` is `static`, but `sized_vector::construct` is `const` as its length is not dependent on its sub-structures*
   - if `T::construct` is `const`:
     - each `construct`ed structure shall be identifiable by its sub-structures and a *prototype*. A prototype is a structure whose `construct` method, given the sub-structures as arguments, produces the aforementioned constructed structure
-    - it shall follow that the relationship of having/being a prototype is a mathematical equivalence (transitive, reflexive and symmetric)
+    - it shall follow that the relationship of having/being a prototype is a mathematical equivalence (transitive, reflexive, and symmetric)
       - and thus the structures can be divided into equivalence classes where any structure from a certain class can be called a prototype of the whole class (these equivalence classes do not have to correspond with generic `class`es defining the structures)
         - *e.g. `sized_vector`s can be divided into equivalence classes by their length*
   - if `T::construct` is `static`
     - the `construct`ed structure is identifiable by its sub-structures and thus the relationship of being a *prototype* (defined as above) forms a single equivalence class (again, do not mix up with `class`es as defined by the programming language)
   - it shall satisfy `consteval` if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
   - it shall be a *pure function* if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
-- the structure shall define `description`, a type that is an instance of `struct_description` and describes the structure and its type parameters
+- the structure shall define `description`, a type that is an instance of `struct_description`, and describes the structure and its type parameters
   - the first entry shall be a `char_pack` instance containing the structure's name
   - the second entry shall be a `dims_impl` instance containing the dimension (if any - *e.g. `scalar<T>` does not introduce a dimension*) the structure introduces
   - the third entry shall be a `dims_impl` instance containing the dimensions (if any) the structure consumes from its sub-structures
@@ -48,29 +48,29 @@ For a structure `T`:
   - the number of all valid arguments for `T::offset` shall be equal to `T::length()`
     - *as a result, if `l = T::length()` is positive then `l - k` will be a valid argument for `T::offset`; where `k` is an integer s.t. `0 < k < l + 1`*
 - `T::get_t<...>` is a type of the (sub-structure) instance at `T::offset` given the following:
-  - if the structure has no dimension then `T::get_t` shall accept both no argument or a single `void` argument, `T::offset` shall take no argument, and they shall return the type and the offset of the only (sub-structure) instance , respectively
+  - if the structure has no dimension then `T::get_t` shall accept both no argument or a single `void` argument, `T::offset` shall take no argument, and they shall return the type and the offset of the only (sub-structure) instance, respectively
     - `T::get_t<>` and `T::get_t<void>` shall return the same type
   - if the structure has one static dimension then `T::get_t` shall take a single `std::integral_constant<std::size_t, ...>` argument, `T::offset` shall take one `std::size_t` template argument , and they shall return the type and the offset of the (sub-structure) instance with the given index
-  - if the structure has one dynamic dimension then `T::get_t` shall combine the behavior of the `get_t` of a structure with no dimension and of a structure with one static dimension, `T::offset` shall take both one `std::size_t` formal argument or one `std::size_t` template argument, and they shall return the type and the offset of the (sub-structure) instance with the given index
+  - if the structure has one dynamic dimension then `T::get_t` shall combine the behavior of the `get_t` of a structure with no dimension and a structure with one static dimension, `T::offset` shall take both one `std::size_t` formal argument or one `std::size_t` template argument, and they shall return the type and the offset of the (sub-structure) instance with the given index
     - `T::get_t` shall return the same type for any correct arguments given
     - `T::offset` shall return the same offset for the given index regardless of whether it was given via template or formally
   - if the structure has a dimension then it is called static or dynamic if the structure would satisfy the previous statements (this means that the staticity or dynamicity of the dimension is deduced)
   - if the structure has a dimension then it shall be either static or dynamic
-  - if the structure has any sub-structures, `T::get_t` shall always return one of types of sub-structures in `T::sub_structures()` and for every sub-structure type there shall exist an argument to `T::get_t` such that it returns this sub-structure and they shall share their indices
+  - if the structure has any sub-structures, `T::get_t` shall always return one of the types of sub-structures in `T::sub_structures()` and for every sub-structure type there shall exist an argument to `T::get_t` such that it returns this sub-structure and they shall share their indices
     - *as a result, structures with a dynamic dimension will have just one sub-structure or it should be a ground (leaf) structure*
   - if the structure has no sub-structures, `T::get_t` shall return a representation of the type of the physical data
 
 ### Subtypes of structures
 
-- **Cube:** a cube is a structure hierarchy which has all its dimensions dynamic. This has a consequence of having a single scalar type (all values described by the structure share the same type).
+- **Cube:** a cube is a structure hierarchy that has all its dimensions dynamic. This has a consequence of having a single scalar type (all values described by the structure share the same type).
 
 - **Point:** a point is a structure hierarchy with no dimensions. It has only a single scalar type and it describes one scalar value of this type.
 
-  It is a special case of cube.
+  It is a special case of a cube.
 
 ### Contain
 
-`contain` facilitates creation of new structures. It is a tuple-like struct that defines a struct's fields via inheritance, but in contrast with `std::tuple`, it is a trivially constructible standard layout.
+`contain` facilitates the creation of new structures. It is a tuple-like struct that defines a struct's fields via inheritance, but in contrast with `std::tuple`, it is a trivially constructible standard layout.
 
 It is used in the library to define all structures (and the majority of all noarr functions). This is to provide a structured way of serializing a structure's data.
 
@@ -79,8 +79,8 @@ It is used in the library to define all structures (and the majority of all noar
 The library provides the following set of structures that describe the most essential layouts:
 
 - **`scalar`:** contains a single scalar type and describes one value of this type. It serves as the leaf substructure in structure hierarchies and as the bottom case for many algorithms and mechanisms defined by the library. Its size is equal to the size of the contained type and it is always known during compile time.
-- **`array`:** a structure containing a single substructure and providing a dynamic dimension. The layout described by an array consists of a static number of copies of the layout described by the contained substructure lined up right after one another. Its size is equal to the size of the contained substructure multiplied by the number of its copies and it is always know during compile time if the size of the substructure is as well.
-- **`vector`:** a structure containing a single substructure and providing a dynamic dimension. It is very similar to array (see above) with the distinction that the number of the substructure's layout copies is dynamic, and because of it being dynamic, the size of vector is dynamic as well and it is generally not know during compile time.
+- **`array`:** a structure containing a single substructure and providing a dynamic dimension. The layout described by an array consists of a static number of copies of the layout described by the contained substructure lined up right after one another. Its size is equal to the size of the contained substructure multiplied by the number of its copies and it is always known during compile time if the size of the substructure is as well.
+- **`vector`:** a structure containing a single substructure and providing a dynamic dimension. It is very similar to array (see above) with the distinction that the number of the substructure's layout copies is dynamic, and because of it being dynamic, the size of the vector is dynamic as well and it is generally not known during compile time.
 - **`tuple`:** a structure containing multiple substructures and providing a static dimension. It describes a layout consisting of the layouts of the substructures lined up one after another. Its size is equal to the sum of the sizes of the substructures and it is known during compile time if all sizes of the substructures are as well.
 
 ### Helper structures
@@ -98,9 +98,9 @@ The piping mechanism (used inside `operator|`) is split into three cases:
 
 - **Top application:** This case applies to the functions have their `func_family` set to `top_tag`.
 
-  It is the simplest piping mechanism case as it is equivalent to simple application (e.g.: the expression `s | f`, if `f` has a `top_tag`, is equivalent to `f(s)`).
+  It is the simplest piping mechanism case as it is equivalent to a simple application (e.g.: the expression `s | f`, if `f` has a `top_tag`, is equivalent to `f(s)`).
 
-- **Getting:** This case applies to the functions have their `func_family` set to `get_tag`.
+- **Getting:** This case applies to the functions that have their `func_family` set to `get_tag`.
 
   It is an extension of the *top application* case:
 
@@ -108,7 +108,7 @@ The piping mechanism (used inside `operator|`) is split into three cases:
 
 - **Transformation (mapping)**
 
-  This case applies to the functions have their `func_family` set to `transform_tag`.
+  This case applies to the functions that have their `func_family` set to `transform_tag`.
 
   The result of `s | f` results in applying `f` to the top-most structure of each branch of the structure hierarchy (or leaving the branch without change if `f` is applicable to none of the structures) and then reconstructing the structure with these changes to the substructures.
 
@@ -134,9 +134,9 @@ The only formal requirement is that a noarr function is implemented as a callabl
 - **`offset`:** retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
 - **`get_at`:** returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 
-## High level abstractions and utilities
+## High-level abstractions and utilities
 
-The library provides various high level abstractions and utilities that either simplify the usage of the lower level structures and functions, or they expand on them
+The library provides various high-level abstractions and utilities that either simplify the usage of the lower-level structures and functions, or they expand on them
 
 ### Wrapper
 
