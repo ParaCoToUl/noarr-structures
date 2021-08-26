@@ -43,7 +43,7 @@ auto my_structure_of_ten = my_structure
 
 A *structure* object is immutable. The `|` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
 
-> The pipe operator is the preferred way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label (in compile time).
+> **Note:** The pipe operator is the preferred way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label (in compile time).
 
 The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it does not care, where that dimension is inside the *structure*.
 
