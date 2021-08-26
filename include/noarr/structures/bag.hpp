@@ -200,6 +200,7 @@ public:
 	 * @brief returns the underlying data blob
 	 */
 	constexpr char *data() { return BagPolicy::get(bag_base<Structure, BagPolicy>::data_); }
+	using bag_base<Structure, BagPolicy>::data;
 
 	/**
 	 * @brief sets the `data` to zeros
@@ -222,6 +223,7 @@ public:
 	constexpr decltype(auto) at(Ts... ts) {
 		return structure().template get_at<Dims...>(data(), ts...);
 	}
+	using bag_base<Structure, BagPolicy>::at;
 };
 
 }
