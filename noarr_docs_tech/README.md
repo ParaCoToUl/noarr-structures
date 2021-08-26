@@ -30,9 +30,9 @@ For a structure `T`:
   - it shall satisfy `consteval` if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
   - it shall be a *pure function* if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
 - the structure shall define `description`, a type that is an instance of `struct_description` and describes the structure and its type parameters
-  - the first entry shall be a `char_pack` specialization containing the structure's name
-  - the second entry shall be a `dims_impl` specialization containing the dimension (if any - *e.g. `scalar<T>` does not introduce a dimension*) the structure introduces
-  - the third entry shall be a `dims_impl` specialization containing the dimensions (if any) the structure consumes from its sub-structures
+  - the first entry shall be a `char_pack` instance containing the structure's name
+  - the second entry shall be a `dims_impl` instance containing the dimension (if any - *e.g. `scalar<T>` does not introduce a dimension*) the structure introduces
+  - the third entry shall be a `dims_impl` instance containing the dimensions (if any) the structure consumes from its sub-structures
   - the other entries shall each be a either `structure_param` or `type_param`, `type_param` for (scalar) type parameters and `structure_param` for types that represent structures
   - this `description` should be implemented in such a way that `print_struct(std::ostream&, structure)` outputs an equivalent of the structure type with all type parameters written in C++ (this is not a technical requirement, but not satisfying it can hinder any data serialization validation based on `print_struct`)
 - `T::length()` is a function that returns a `std::size_t` value which specifies the range of indices the structure supports via `T::offset`
@@ -48,8 +48,8 @@ For a structure `T`:
   - the number of all valid arguments for `T::offset` shall be equal to `T::length()`
     - *as a result, if `l = T::length()` is positive then `l - k` will be a valid argument for `T::offset`; where `k` is an integer s.t. `0 < k < l + 1`*
 - `T::get_t<...>` is a type of the (sub-structure) instance at `T::offset` given the following:
-  - if the structure has no dimension then `T::get_t` shall take both no argument or a single `void` argument, `T::offset` shall take no argument, and they shall return the type and the offset of the only (sub-structure) instance , respectively
-    - `T::get<>` and `T::get<void>` shall return the same type
+  - if the structure has no dimension then `T::get_t` shall accept both no argument or a single `void` argument, `T::offset` shall take no argument, and they shall return the type and the offset of the only (sub-structure) instance , respectively
+    - `T::get_t<>` and `T::get_t<void>` shall return the same type
   - if the structure has one static dimension then `T::get_t` shall take a single `std::integral_constant<std::size_t, ...>` argument, `T::offset` shall take one `std::size_t` template argument , and they shall return the type and the offset of the (sub-structure) instance with the given index
   - if the structure has one dynamic dimension then `T::get_t` shall combine the behavior of the `get_t` of a structure with no dimension and of a structure with one static dimension, `T::offset` shall take both one `std::size_t` formal argument or one `std::size_t` template argument, and they shall return the type and the offset of the (sub-structure) instance with the given index
     - `T::get_t` shall return the same type for any correct arguments given
@@ -146,7 +146,7 @@ It can be created using the function `wrap`.
 
 ### Bag
 
-`bag` combines a wrapped structure with an underlying data blob. It provides all `wrapper`'s methods that don't affect its layout (those which do affect the layout are generally those with `func_family` set to `transform_tag`).
+`bag` combines a wrapped structure with an underlying data blob. It provides all `wrapper`'s methods that do not affect its layout (those which do affect the layout are generally those with `func_family` set to `transform_tag`).
 
 It provides the following extra methods:
 
