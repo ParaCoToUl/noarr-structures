@@ -18,7 +18,7 @@ Noarr framework distinguishes two types of multidimensional data - uniform and j
 2. **Data:** A continuous block of bytes that contains the actual data. Its structure is defined by a corresponding *Structure* object.
 3. **Bag:** Wrapper object, which combines *structure* and *data* together.
 
-> Note: in the case of jagged data, you can use *Noarr pipelines* without *Noarr structures*. The architecture of the GPU is designed for uniform data mainly, so it should fit most common cases. Also note, that you can also use several *Noarr structures* in your program.
+> **Note:** in the case of jagged data, you can use *Noarr pipelines* without *Noarr structures*. The architecture of the GPU is designed for uniform data mainly, so it should fit most common cases. Also note, that you can also use several *Noarr structures* in your program.
 
 ## Creating a structure
 
