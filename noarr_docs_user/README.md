@@ -198,10 +198,11 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 - `compose`: function composition (honoring the left-associative `|` notation)
 - `set_length`: changes the length (number of indices) of arrays and vectors
 - `get_length`: gets the length (number of indices) of a structure
+- `reassemble`: takes two structures in the structure hierarchy, one contained in the other, and swaps them, returning the resulting structure
 - `get_size`: returns the size of the data represented by the structure in bytes
 - `fix`: fixes an index in a structure
 - `get_offset`: retrieves offset of a substructure
 - `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
 - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
-
+ 
 You can read about supported functions in detail in [Noarr structures](../include/noarr/structures/README.md "Noarr structures").
