@@ -11,17 +11,17 @@
 
 ## Introduction
 
-Noarr structures is a header-only library that facilitates creation of many data structures and provides a layout-agnostic way of accessing the values stored in them.
+Noarr Structures is a header-only library that facilitates the creation of many data structures and provides a layout-agnostic way of accessing the values stored in them.
 
-It is a free software and distributed using the MIT [license](LICENSE).
+It is free software and distributed using the MIT [license](LICENSE).
 
-The library provides its low-level parts, *structures* and *functions*, as simple and easy-to-use building blocks, that can be used alongside with some memory management to easily create data structures that provide layout-agnostic access, and nigh-interplatform type checking and serialization.
+The library provides its low-level parts, *structures* and *functions*, as simple and easy-to-use building blocks, that can be used alongside some memory management to easily create data structures that provide layout-agnostic access, and nigh-interplatform type checking and serialization.
 
 If you are not interested in creating a data structure yourself, you can use `noarr::bag` which uses the standard c++ memory management. (see: *`noarr::bag`: flexible data structure*)
 
 ## Data layout modeling
 
-This section contains the low-level building blocks the library consists of, these are in background in the higher-level concepts like `noarr::bag` which is a simple data structure described in the next section.
+This section contains the low-level building blocks the library consists of, these are in the background in the higher-level concepts like `noarr::bag` which is a simple data structure described in the next section.
 
 The main feature of the library are *structures* which describe a layout of the data, they do not contain the data themselves which makes them a good tool for creating such data structures with any memory management specifics.
 
@@ -80,11 +80,11 @@ for (std::size_t i = 0; i < matrix.get_length<'x'>(); i++)
 			matrix.at<'x', 'y'>(j, i));
 ```
 
-In this snippet the actual physical layout of the matrix is not relevant to the way it is accessed. If the data were stored, for example, in an (contiguous) array of columns, it could still be accessed the same way. This contrasts with traditional C/C++ data structures.
+In this snippet, the actual physical layout of the matrix is not relevant to the way it is accessed. If the data were stored, for example, in a (contiguous) array of columns, it could still be accessed the same way. This contrasts with traditional C/C++ data structures.
 
 ## Using the library
 
-Noarr structures is a header-only library, so only include path need to be added. The include path should point to the `/include` folder of this repository.
+Noarr Structures is a header-only library, so only its include path needs to be added. The include path should point to the `/include` folder of this repository.
 
 ```cmake
 # the CMake line that adds the include directory
@@ -108,7 +108,7 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 ## Running tests
 
-Make sure you are in the root folder. In the terminal (linux bash, windows cygwin or gitbash) run the following commands:
+Make sure you are in the root folder. In the terminal (Linux bash, Windows Cygwin or Gitbash) run the following commands:
 
 ```sh
 # creates the build directory
