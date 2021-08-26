@@ -1,6 +1,6 @@
 # Noarr Structures file structure outline
 
-- [pipes.hpp](pipes.hpp): contains the implementation for the piping mechanism of the library. Piping is a left-associative operation which applies the right-hand operand (a function) to the left-hand operand (generally a structure)
+- [pipes.hpp](pipes.hpp): contains the implementation for the piping mechanism of the library. Piping is a left-associative operation that applies the right-hand operand (a function) to the left-hand operand (generally a structure)
 
   - `operator|`: applies a function (the right-hand operand) to a structure (the left-hand operand), left-associative
   - `pipe`: chains its operands in multiple applications using left-associative `operator|`
@@ -38,6 +38,6 @@
   - `wrapper`: a wrapper for a structure, allows dot notation instead of using `operator|` (see `pipes.hpp`)
   - `wrap`: wraps a structure inside a `wrapper`
 
-- [bag.hpp](bag.hpp): contains the implementation of the `bag` struct. It creates a data structure with underlying blob containing values described by the layout of the "bagged" structure.
+- [bag.hpp](bag.hpp): contains the implementation of the `bag` struct. It creates a data structure with an underlying blob containing values described by the layout of the "bagged" structure.
 
-  - `bag`: simple class that contains a wrapped structure and an underlying blob
+  - `bag`: a simple class that contains a wrapped structure and an underlying blob
