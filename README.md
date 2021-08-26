@@ -108,7 +108,7 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 ## Running tests
 
-Make sure you are in the root folder. In the terminal (Linux bash, Windows Cygwin or Gitbash) run the following commands:
+Make sure you are in the root folder. In the terminal (Linux bash, Windows Cygwin, or Gitbash), run the following commands:
 
 ```sh
 # creates the build directory
