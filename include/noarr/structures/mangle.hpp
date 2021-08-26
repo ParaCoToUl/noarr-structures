@@ -77,8 +77,13 @@ struct mangle_scalar<struct_description<Name, dims_impl<>, dims_impl<>, type_par
 };
 
 template<typename T, typename Pre, typename Post>
-struct mangle_impl<type_param<T>, Pre, Post> {
+struct mangle_impl<structure_param<T>, Pre, Post> {
 	using type = integral_pack_concat<Pre, mangle<T>, Post>;
+};
+
+template<typename T, typename Pre, typename Post>
+struct mangle_impl<type_param<T>, Pre, Post> {
+	using type = integral_pack_concat<Pre, scalar_name_t<T>, Post>;
 };
 
 template<typename T, T V, typename Pre, typename Post>

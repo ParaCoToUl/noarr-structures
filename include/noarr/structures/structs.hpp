@@ -104,8 +104,8 @@ struct tuple<Dim, T, TS...> : helpers::tuple_part<tuple<Dim, T, TS...>, 0> {
 		char_pack<'t', 'u', 'p', 'l', 'e'>,
 		dims_impl<Dim>,
 		dims_impl<>,
-		type_param<T>,
-		type_param<TS>...>;
+		structure_param<T>,
+		structure_param<TS>...>;
 
 	template<typename... KS>
 	using get_t = typename helpers::tuple_get_t<helpers::tuple_part<tuple<Dim, T, TS...>, 0>, KS...>::type;
@@ -164,7 +164,7 @@ struct array : contain<T> {
 		dims_impl<Dim>,
 		dims_impl<>,
 		value_param<std::size_t, L>,
-		type_param<T>>;
+		structure_param<T>>;
 
 	template<typename... KS>
 	using get_t = typename helpers::array_get_t<T, KS...>::type;
@@ -197,7 +197,7 @@ struct vector : contain<T> {
 		char_pack<'v', 'e', 'c', 't', 'o', 'r'>,
 		dims_impl<Dim>,
 		dims_impl<>,
-		type_param<T>>;
+		structure_param<T>>;
 
 	constexpr vector() = default;
 	explicit constexpr vector(T sub_structure) : contain<T>(sub_structure) {}
@@ -244,7 +244,7 @@ struct sized_vector : contain<vector<Dim, T>, std::size_t> {
 		char_pack<'s', 'i', 'z', 'e', 'd', '_', 'v', 'e', 'c', 't', 'o', 'r'>,
 		dims_impl<Dim>,
 		dims_impl<>,
-		type_param<T>>;
+		structure_param<T>>;
 
 	template<typename... KS>
 	using get_t = typename helpers::sized_vector_get_t<T, KS...>::type;
@@ -306,7 +306,7 @@ struct sfixed_dim : contain<T> {
 		char_pack<'s', 'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
 		dims_impl<>,
 		dims_impl<Dim>,
-		type_param<T>,
+		structure_param<T>,
 		value_param<std::size_t, Idx>>;
 
 	template<typename... KS>
@@ -356,7 +356,7 @@ struct fixed_dim : contain<T, std::size_t> {
 		char_pack<'f', 'i', 'x', 'e', 'd', '_', 'd', 'i', 'm'>,
 		dims_impl<>,
 		dims_impl<Dim>,
-		type_param<T>>;
+		structure_param<T>>;
 
 	template<typename... KS>
 	using get_t = typename helpers::fixed_dim_get_t<T, KS...>::type;

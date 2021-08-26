@@ -29,11 +29,12 @@ For a structure `T`:
     - the `construct`ed structure is identifiable by its sub-structures and thus the relationship of being a *prototype* (defined as above) forms a single equivalence class (again, do not mix up with `class`es as defined by the programming language)
   - it shall satisfy `consteval` if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
   - it shall be a *pure function* if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
-- the structure shall define `description`, a type that is a specialization of `struct_description` and describes the structure
+- the structure shall define `description`, a type that is an instance of `struct_description` and describes the structure and its type parameters
   - the first entry shall be a `char_pack` specialization containing the structure's name
   - the second entry shall be a `dims_impl` specialization containing the dimension (if any - *e.g. `scalar<T>` does not introduce a dimension*) the structure introduces
   - the third entry shall be a `dims_impl` specialization containing the dimensions (if any) the structure consumes from its sub-structures
-  - the other entries are each a specialization of either `struct_param` or `struct_param` <!-- TODO -->
+  - the other entries shall each be a either `structure_param` or `type_param`, `type_param` for (scalar) type parameters and `structure_param` for types that represent structures
+  - this `description` should be implemented in such a way that `print_struct(std::ostream&, structure)` outputs an equivalent of the structure type with all type parameters written in C++ (this is not a technical requirement, but not satisfying it can hinder any data serialization validation based on `print_struct`)
 - `T::length()` is a function that returns a `std::size_t` value which specifies the range of indices the structure supports via `T::offset`
   - it shall be `constexpr`
   - it shall be either `static` or `const`

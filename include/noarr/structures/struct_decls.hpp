@@ -7,9 +7,6 @@
 
 namespace noarr {
 
-// TODO: add a way to get Params
-// TODO: split type_param into struct_param and scalar_param (or regular type param, idk)
-
 /**
  * @brief a struct that describes a structure
  * 
@@ -25,6 +22,9 @@ struct struct_description {
 	using adims = ADims;
 	using description = struct_description;
 };
+
+template<typename>
+struct structure_param;
 
 template<typename>
 struct type_param;
