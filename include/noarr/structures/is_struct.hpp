@@ -4,8 +4,6 @@
 #include "std_ext.hpp"
 #include "pipes.hpp"
 
-// TODO: is_struct and is_structoid should be more strict
-
 namespace noarr {
 
 namespace helpers {
