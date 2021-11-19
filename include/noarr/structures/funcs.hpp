@@ -503,17 +503,7 @@ struct get_at_impl : private contain<Ptr> {
  */
 template<typename V>
 constexpr auto get_at(V *ptr) {
-	return helpers::get_at_impl<char *>(ptr);
-}
-
-/**
- * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure
- * 
- * @param ptr: the pointer to blob structure
- */
-template<typename V>
-constexpr auto get_at(const V *ptr) {
-	return helpers::get_at_impl<const char *>(ptr);
+	return helpers::get_at_impl<std::conditional_t<std::is_const<V>::value, const char *, char *>>(ptr);
 }
 
 /**
@@ -523,17 +513,7 @@ constexpr auto get_at(const V *ptr) {
  */
 template<char... Dims, typename V, typename... Ts>
 constexpr auto get_at(V *ptr, Ts... ts) {
-	return compose(fix<Dims...>(ts...), helpers::get_at_impl<char *>(ptr));
-}
-
-/**
- * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure with some fixed indices (see `fix`)
- * @tparam Dims: the dimension names of the fixed dimensions
- * @param ptr: the pointer to blob structure
- */
-template<char... Dims, typename V, typename... Ts>
-constexpr auto get_at(const V *ptr, Ts... ts) {
-	return compose(fix<Dims...>(ts...), helpers::get_at_impl<const char *>(ptr));
+	return compose(fix<Dims...>(ts...), get_at<V>(ptr));
 }
 
 /**
