@@ -10,12 +10,12 @@ namespace noarr {
 
 namespace helpers {
 
-template<typename T>
+template<class T>
 struct print_struct_impl;
 
 template<char... Name>
 struct print_struct_impl<char_pack<Name...>> {
-	static constexpr std::ostream &print(std::ostream &out) {
+	static constexpr std::ostream &print(std::ostream &out) noexcept {
 		// translates a `char_pack<Name...>` to the corresponding c string
 		constexpr const char name[] = {Name..., '\0'};
 		return out << name;
@@ -30,8 +30,8 @@ struct print_struct_impl<char_pack<Name...>> {
  * @tparam T: the input strucure
  * @param out: the output stream
  */
-template<typename T>
-constexpr std::ostream &print_struct(std::ostream &out, T) {
+template<class T>
+constexpr std::ostream &print_struct(std::ostream &out, T) noexcept {
 	return helpers::print_struct_impl<mangle<T>>::print(out);
 }
 

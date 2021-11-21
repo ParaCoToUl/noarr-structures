@@ -13,7 +13,7 @@ namespace noarr {
  * @param contain: the structure (contain is it's base class)
  * @param bytes: the array of bytes
  */
-template<typename... Types>
+template<class... Types>
 inline void serialize(const contain<Types...> &contain, char *bytes) {
     std::memcpy(bytes, &contain, sizeof(contain));
 } // namespace noarr
@@ -24,7 +24,7 @@ inline void serialize(const contain<Types...> &contain, char *bytes) {
  * @param contain: the structure (contain is it's base class)
  * @param bytes: the array of bytes
  */
-template<typename... Types>
+template<class... Types>
 inline void deserialize(contain<Types...> &contain, const char *bytes) {
     std::memcpy(&contain, bytes, sizeof(contain));
 }

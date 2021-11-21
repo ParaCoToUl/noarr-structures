@@ -33,29 +33,29 @@ using default_trait = transform_tag;
  * @brief retrieves a family tag from a function `F`
  * 
  * @tparam F: the function
- * @tparam typename: placeholder type
+ * @tparam class: placeholder type
  */
-template<typename F, typename = void>
+template<class F, class = void>
 struct func_trait {
 	using type = default_trait;
 };
 
-template<typename F>
+template<class F>
 struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, transform_tag>::value>> {
 	using type = transform_tag;
 };
 
-template<typename F>
+template<class F>
 struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, get_tag>::value>> {
 	using type = get_tag;
 };
 
-template<typename F>
+template<class F>
 struct func_trait<F, std::enable_if_t<std::is_same<typename F::func_family, top_tag>::value>> {
 	using type = top_tag;
 };
 
-template<typename F>
+template<class F>
 using func_trait_t = typename func_trait<F>::type;
 
 /**
@@ -63,34 +63,26 @@ using func_trait_t = typename func_trait<F>::type;
  * 
  * @tparam F: the tested function
  * @tparam S: the structure
- * @tparam typename: placeholder type
+ * @tparam class: placeholder type
  */
-template<typename F, typename S, typename = void>
-struct get_applicability {
-	static constexpr bool value = true;
-};
+template<class F, class S, class = void>
+struct get_applicability : std::true_type {};
 
-template<typename F, typename S>
-struct get_applicability<F, S, void_t<typename F::template can_apply<S>>> {
-	static constexpr bool value = F::template can_apply<S>::value;
-};
+template<class F, class S>
+struct get_applicability<F, S, void_t<typename F::template can_apply<S>>> : F::template can_apply<S> {};
 
 /**
  * @brief returns whether the function `F` is applicable to the structure `S`, also honoring `get_applicability`
  * 
  * @tparam S: the structure
  * @tparam F: the tested function
- * @tparam typename: placeholder type
+ * @tparam class: placeholder type
  */
-template<typename S, typename F, typename = void>
-struct can_apply {
-	static constexpr bool value = false;
-};
+template<class S, class F, class = void>
+struct can_apply : std::false_type {};
 
-template<typename F, typename S>
-struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> {
-	static constexpr bool value = get_applicability<F, S>::value;
-};
+template<class F, class S>
+struct can_apply<F, S, void_t<decltype(std::declval<F>()(std::declval<S>()))>> : get_applicability<F, S> {};
 
 namespace helpers {
 
@@ -99,9 +91,9 @@ namespace helpers {
  * 
  * @tparam S: the structure to be mapped
  * @tparam F: the mapping function
- * @tparam typename: placeholder type
+ * @tparam class: placeholder type
  */
-template<typename S, typename F, typename = void>
+template<class S, class F, class = void>
 struct fmapper;
 
 /**
@@ -112,29 +104,19 @@ struct fmapper;
  * @tparam Max: the ceiling of iteration throught substructures in the `construct` function
  * @tparam I: the iterating variable which iterates throught substructures
  */
-template<typename S, typename F, std::size_t Max = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = Max>
+template<class S, class F, std::size_t Max = std::tuple_size<typename sub_structures<S>::value_type>::value, std::size_t I = Max>
 struct construct_builder;
 
-// template<typename S, typename F, typename = void>
-// struct fmapper_cond_helper {
-// 	static constexpr bool value = false;
-// };
-
-// template<typename S, typename F>
-// struct fmapper_cond_helper<S, F, void_t<decltype(construct_builder<S, F>::construct_build(std::declval<S>(), std::declval<F>()))>> {
-// 	static constexpr bool value = true;
-// };
-
-template<typename S, typename F>
+template<class S, class F>
 struct fmapper<S, F, std::enable_if_t<!can_apply<F, S>::value>> {
-	static constexpr auto fmap(S s, F f) {
+	static constexpr auto fmap(S s, F f) noexcept {
 		return construct_builder<S, F>::construct_build(s, f);
 	}
 };
 
-template<typename S, typename F>
+template<class S, class F>
 struct fmapper<S, F, std::enable_if_t<can_apply<F, S>::value>> {
-	static constexpr auto fmap(S s, F f) {
+	static constexpr auto fmap(S s, F f) noexcept {
 		return f(s);
 	}
 };
@@ -144,17 +126,17 @@ struct fmapper<S, F, std::enable_if_t<can_apply<F, S>::value>> {
  * 
  * @tparam S: the structure
  * @tparam F: the function which retrieves a value from the structure
- * @tparam typename: a placeholder type
+ * @tparam class: a placeholder type
  */
-template<typename S, typename F, typename = void>
+template<class S, class F, class = void>
 struct getter;
 
-template<typename S, typename F, typename J = std::integral_constant<std::size_t, 0>, typename = void>
+template<class S, class F, class J = std::integral_constant<std::size_t, 0>, class = void>
 struct getter_impl;
 
-template<typename S, typename F, std::size_t J>
+template<class S, class F, std::size_t J>
 struct getter_impl<S, F, std::integral_constant<std::size_t, J>, std::enable_if_t<!can_apply<F, S>::value>> {
-	static constexpr auto get(S s, F f) {
+	static constexpr auto get(S s, F f) noexcept {
 		return std::tuple_cat(
 			getter_impl<S, F, std::integral_constant<std::size_t, J + 1>>::get(s, f),
 			getter_impl<std::tuple_element_t<J, typename sub_structures<S>::value_type>, F>::get(std::get<J>(sub_structures<S>(s).value), f));
@@ -162,58 +144,58 @@ struct getter_impl<S, F, std::integral_constant<std::size_t, J>, std::enable_if_
 	static constexpr std::size_t count = getter_impl<S, F, std::integral_constant<std::size_t, J + 1>>::count + getter_impl<std::tuple_element_t<J, typename sub_structures<S>::value_type>,F>::count;
 };
 
-template<typename S, typename F>
+template<class S, class F>
 struct getter_impl<S, F, std::integral_constant<std::size_t, 0>, std::enable_if_t<can_apply<F, S>::value>> {
-	static constexpr auto get(S s, F f) { return std::make_tuple(f(s)); }
+	static constexpr auto get(S s, F f) noexcept { return std::make_tuple(f(s)); }
 	static constexpr std::size_t count = 1;
 };
 
-template<typename S, typename F>
+template<class S, class F>
 struct getter_impl<S, F, std::integral_constant<std::size_t, std::tuple_size<typename sub_structures<S>::value_type>::value>, std::enable_if_t<!can_apply<F, S>::value>> {
-	static constexpr auto get(S, F) { return std::tuple<>(); }
+	static constexpr auto get(S, F) noexcept { return std::tuple<>(); }
 	static constexpr std::size_t count = 0;
 };
 
-template<typename S, typename F>
+template<class S, class F>
 struct getter<S, F, std::enable_if_t<can_apply<F, S>::value>> {
-	static constexpr auto get(S s, F f) { return f(s); }
+	static constexpr auto get(S s, F f) noexcept { return f(s); }
 };
 
-template<typename S, typename F>
+template<class S, class F>
 struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, F>::count == 1)>> {
-	static constexpr auto get(S s, F f) { return std::get<0>(getter_impl<S, F>::get(s, f)); }
+	static constexpr auto get(S s, F f) noexcept { return std::get<0>(getter_impl<S, F>::get(s, f)); }
 };
 
-template<typename S, typename F>
+template<class S, class F>
 struct getter<S, F, std::enable_if_t<!can_apply<F, S>::value && (getter_impl<S, F>::count != 1)>> {
 	static_assert(getter_impl<S, F>::count != 0, "getter has to be applicable");
 	static_assert(!(getter_impl<S, F>::count > 1), "getter cannot be ambiguous");
-	static constexpr void get(S, F) {}
+	static constexpr void get(S, F) noexcept {}
 };
 
-template<typename F, typename = void>
+template<class F, class = void>
 struct pipe_decider;
 
 /**
  * @brief decided whether perform `fmapper`, `getter` or simple application according to `func_trait`
  * 
  */
-template<typename F>
+template<class F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, transform_tag>::value>> {
-	template<typename S>
-	static constexpr auto operate(S s, F f) { return fmapper<S, F>::fmap(s, f); }
+	template<class S>
+	static constexpr auto operate(S s, F f) noexcept { return fmapper<S, F>::fmap(s, f); }
 };
 
-template<typename F>
+template<class F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, get_tag>::value>> {
-	template<typename S>
-	static constexpr decltype(auto) operate(S s, F f) { return getter<S, F>::get(s, f); }
+	template<class S>
+	static constexpr decltype(auto) operate(S s, F f) noexcept { return getter<S, F>::get(s, f); }
 };
 
-template<typename F>
+template<class F>
 struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::value>> {
-	template<typename S>
-	static constexpr decltype(auto) operate(S s, F f) { return f(s); }
+	template<class S>
+	static constexpr decltype(auto) operate(S s, F f) noexcept { return f(s); }
 };
 
 } // namespace helpers
@@ -227,60 +209,60 @@ struct pipe_decider<F, std::enable_if_t<std::is_same<func_trait_t<F>, top_tag>::
  * @param f: the function
  * @return the result of the piping
  */
-template<typename S, typename F>
-constexpr auto operator|(S s, F f) ->
+template<class S, class F>
+constexpr auto operator|(S s, F f) noexcept ->
 std::enable_if_t<is_structoid<std::enable_if_t<std::is_class<S>::value, S>>::value, decltype(helpers::pipe_decider<F>::template operate<S>(std::declval<S>(), std::declval<F>()))> {
 	return helpers::pipe_decider<F>::template operate<S>(s, f);
 }
 
 namespace helpers {
 
-template<typename S, typename F, std::size_t Max, std::size_t I>
+template<class S, class F, std::size_t Max, std::size_t I>
 struct construct_builder {
 	template<std::size_t... IS>
-	static constexpr auto construct_build(S s, F f) {
+	static constexpr auto construct_build(S s, F f) noexcept {
 		return construct_builder<S, F, Max, I - 1>::template construct_build<I - 1, IS...>(s, f);
 	}
 };
 
-template<typename S, typename F, std::size_t Max>
+template<class S, class F, std::size_t Max>
 struct construct_builder<S, F, Max, 0> {
 	template<std::size_t... IS>
-	static constexpr auto construct_build(S s, F f) {
+	static constexpr auto construct_build(S s, F f) noexcept {
 		return construct_build_last<IS...>(s, f);
 	}
 	template<std::size_t... IS>
-	static constexpr auto construct_build_last(S s, F f) {
+	static constexpr auto construct_build_last(S s, F f) noexcept {
 		return s.construct((std::get<IS>(s.sub_structures()) | f)...);
 	}
 };
 
 // this explicit instance is here because the more general one makes warnings on structures with zero substructures
-template<typename S, typename F>
+template<class S, class F>
 struct construct_builder<S, F, 0, 0> {
 	template<std::size_t... IS>
-	static constexpr auto construct_build(S s, F f) {
+	static constexpr auto construct_build(S s, F f) noexcept {
 		return construct_build_last<IS...>(s, f);
 	}
 	template<std::size_t... IS>
-	static constexpr auto construct_build_last(S s, F) {
+	static constexpr auto construct_build_last(S s, F) noexcept {
 		return s.construct();
 	}
 };
 
-template<typename S, typename... FS>
+template<class S, class... FS>
 struct piper;
 
-template<typename S, typename F, typename... FS>
+template<class S, class F, class... FS>
 struct piper<S, F, FS...> {
-	static constexpr decltype(auto) pipe(S s, F func, FS... funcs) {
+	static constexpr decltype(auto) pipe(S s, F func, FS... funcs) noexcept {
 		return piper<remove_cvref<decltype(s | func)>, FS...>::pipe(s | func, funcs...);
 	}
 };
 
-template<typename S, typename F>
+template<class S, class F>
 struct piper<S, F> {
-	static constexpr decltype(auto) pipe(S s, F func) {
+	static constexpr decltype(auto) pipe(S s, F func) noexcept {
 		return s | func;
 	}
 };
@@ -293,8 +275,8 @@ struct piper<S, F> {
  * @param s: the structure
  * @param funcs: applied functions (consecutively)
  */
-template<typename S, typename... FS>
-constexpr decltype(auto) pipe(S s, FS... funcs) {
+template<class S, class... FS>
+constexpr decltype(auto) pipe(S s, FS... funcs) noexcept {
 	return helpers::piper<S, FS...>::pipe(s, funcs...);
 }
 

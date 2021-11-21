@@ -10,7 +10,7 @@ namespace noarr {
  * 
  * @tparam Structure: the underlying structure
  */
-template<typename Structure>
+template<class Structure>
 class wrapper;
 
 /**
@@ -18,34 +18,32 @@ class wrapper;
  * 
  * @param s: the structure to be wrapped
  */
-template<typename Structure>
-constexpr wrapper<Structure> wrap(Structure s);
+template<class Structure>
+constexpr wrapper<Structure> wrap(Structure s) noexcept;
 
 namespace helpers {
 
-template<typename T>
-struct is_cube_impl<wrapper<T>> {
-	using type = is_cube<T>;
-};
+template<class T>
+struct is_cube_impl<wrapper<T>> : is_cube<T> {};
 
 struct wrap_impl {
 	using func_family = top_tag;
 
-	template<typename Structure>
-	constexpr auto operator()(Structure structure) {
+	template<class Structure>
+	constexpr auto operator()(Structure structure) const noexcept {
 		return wrap(structure);
 	}
 };
 
 }
 
-template<typename Structure>
+template<class Structure>
 class wrapper : private contain<Structure> {
 	using base = contain<Structure>;
 
 public:
-	constexpr wrapper() = default;
-	explicit constexpr wrapper(Structure s) : base(s) {}
+	constexpr wrapper() noexcept = default;
+	explicit constexpr wrapper(Structure s) noexcept : base(s) {}
 
 	/**
 	 * @brief sets the length of a `vector`, `sized_vector` or an `array` in the wrapped structure
@@ -54,7 +52,7 @@ public:
 	 * @param length: the desired length
 	 */
 	template<char Dim>
-	constexpr auto set_length(std::size_t length) const {
+	constexpr auto set_length(std::size_t length) const noexcept {
 		return wrap(base::template get<0>() | noarr::set_length<Dim>(length));
 	}
 
@@ -64,8 +62,8 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: parameters for fixing the indices
 	 */
-	template<char... Dims, typename... Ts>
-	constexpr auto fix(Ts... ts) const {
+	template<char... Dims, class... Ts>
+	constexpr auto fix(Ts... ts) const noexcept {
 		return wrap(base::template get<0>() | noarr::fix<Dims...>(ts...));
 	}
 
@@ -75,8 +73,8 @@ public:
 	 * @tparam Dims: the dimension names of fixed indices
 	 * @param ts: parameters for fixing the indices
 	 */
-	template<char... Dims, typename... Ts>
-	constexpr auto offset(Ts... ts) const {
+	template<char... Dims, class... Ts>
+	constexpr auto offset(Ts... ts) const noexcept {
 		return base::template get<0>() | noarr::offset<Dims...>(ts...);
 	}
 
@@ -86,8 +84,8 @@ public:
 	 * @tparam Dim: the dimension name
 	 * @param t: the index of the substructure
 	 */
-	template<char Dim, typename T>
-	constexpr auto get_offset(T t) const {
+	template<char Dim, class T>
+	constexpr auto get_offset(T t) const noexcept {
 		return base::template get<0>() | noarr::get_offset<Dim>(t);
 	}
 
@@ -97,14 +95,14 @@ public:
 	 * @tparam Dim: the dimension name of the desired structure
 	 */
 	template<char Dim>
-	constexpr auto get_length() const {
+	constexpr auto get_length() const noexcept {
 		return base::template get<0>() | noarr::get_length<Dim>();
 	}
 
 	/**
 	 * @brief returns the size (in bytes) of the wrapped structure
 	 */
-	constexpr auto get_size() const {
+	constexpr auto get_size() const noexcept {
 		return base::template get<0>() | noarr::get_size();
 	}
 
@@ -113,21 +111,21 @@ public:
 	 * @tparam Dims: the dimension names of the fixed dimensions
 	 * @param ptr: the pointer to blob structure
 	 */
-	template<char... Dims, typename V, typename... Ts>
-	constexpr decltype(auto) get_at(V *ptr, Ts... ts) const {
+	template<char... Dims, class V, class... Ts>
+	constexpr decltype(auto) get_at(V *ptr, Ts... ts) const noexcept {
 		return base::template get<0>() | noarr::get_at<Dims...>(ptr, ts...);
 	}
 
 	/**
 	 * @brief returns the wrapped structure
 	 */
-	constexpr auto unwrap() const {
+	constexpr auto unwrap() const noexcept {
 		return base::template get<0>();
 	}
 };
 
-template<typename Structure>
-constexpr wrapper<Structure> wrap(Structure s) {
+template<class Structure>
+constexpr wrapper<Structure> wrap(Structure s) noexcept {
 	return wrapper<Structure>(s);
 }
 
@@ -135,7 +133,7 @@ constexpr wrapper<Structure> wrap(Structure s) {
  * @brief wraps a structure into a `wrapper`
  * 
  */
-constexpr auto wrap() {
+constexpr auto wrap() noexcept {
 	return helpers::wrap_impl();
 }
 

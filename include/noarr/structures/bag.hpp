@@ -9,7 +9,7 @@ namespace noarr {
 namespace helpers {
 
 // general case for std::vector etc.
-template<template<typename...> class container>
+template<template<class...> class container>
 struct bag_policy {
 	using type = container<char>;
 
@@ -17,21 +17,21 @@ struct bag_policy {
 		return container<char>(size);
 	}
 
-	static char *get(container<char> &_container) {
+	static char *get(container<char> &_container) noexcept {
 		return _container.data();
 	}
 
-	static const char *get(const container<char> &_container) {
+	static const char *get(const container<char> &_container) noexcept {
 		return _container.data();
 	}
 };
 
-// a helper struct for 'bag_policy' as the '*' specifier is not a class ()
-template<typename...>
+// a helper struct for 'bag_policy' as the '*' (pointer) specifier is not a class ()
+template<class...>
 struct bag_raw_pointer_tag;
 
-// a helper struct for 'bag_policy' as the '*' specifier is not a class ()
-template<typename...>
+// a helper struct for 'bag_policy' as the '*' (pointer) specifier is not a class ()
+template<class...>
 struct bag_const_raw_pointer_tag;
 
 template<>
@@ -42,11 +42,11 @@ struct bag_policy<std::unique_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static char *get(std::unique_ptr<char[]> &ptr) {
+	static char *get(std::unique_ptr<char[]> &ptr) noexcept {
 		return ptr.get();
 	}
 
-	static const char *get(const std::unique_ptr<char[]> &ptr) {
+	static const char *get(const std::unique_ptr<char[]> &ptr) noexcept {
 		return ptr.get();
 	}
 };
@@ -59,11 +59,11 @@ struct bag_policy<bag_raw_pointer_tag> {
 		return new char[size];
 	}
 
-	static constexpr char *get(char *ptr) {
+	static constexpr char *get(char *ptr) noexcept {
 		return ptr;
 	}
 
-	static constexpr const char *get(const char *ptr) {
+	static constexpr const char *get(const char *ptr) noexcept {
 		return ptr;
 	}
 };
@@ -76,14 +76,14 @@ struct bag_policy<bag_const_raw_pointer_tag> {
 		return new char[size];
 	}
 
-	static constexpr const char *get(const char *ptr) {
+	static constexpr const char *get(const char *ptr) noexcept {
 		return ptr;
 	}
 };
 
-template<typename Structure, typename BagPolicy>
+template<class Structure, class BagPolicy>
 class bag_base {
-	template<typename, typename, typename>
+	template<class, class, class>
 	friend class bag_impl;
 private:
 	typename BagPolicy::type data_;
@@ -134,8 +134,8 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<char... Dims, typename... Ts>
-	constexpr decltype(auto) at(Ts... ts) const {
+	template<char... Dims, class... Ts>
+	constexpr decltype(auto) at(Ts... ts) const noexcept {
 		return structure().template get_at<Dims...>(data(), ts...);
 	}
 
@@ -145,8 +145,8 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<char... Dims, typename... Ts>
-	constexpr auto offset(Ts... ts) const {
+	template<char... Dims, class... Ts>
+	constexpr auto offset(Ts... ts) const noexcept {
 		return structure().template offset<Dims...>(ts...);
 	}
 
@@ -156,8 +156,8 @@ public:
 	 * @tparam Dim: the dimension name
 	 * @param t: the index of the substructure
 	 */
-	template<char Dim, typename T>
-	constexpr auto get_offset(T t) const {
+	template<char Dim, class T>
+	constexpr auto get_offset(T t) const noexcept {
 		return structure().template get_offset<Dim>(t);
 	}
 
@@ -167,7 +167,7 @@ public:
 	 * @tparam Dim: the dimension name
 	 */
 	template<char Dim>
-	constexpr auto get_length() const {
+	constexpr auto get_length() const noexcept {
 		return structure().template get_length<Dim>();
 	}
 
@@ -175,12 +175,12 @@ public:
 	 * @brief gets the size of the data described by the `structure`
 	 * 
 	 */
-	constexpr auto get_size() const {
+	constexpr auto get_size() const noexcept {
 		return structure().get_size();
 	}
 };
 
-template<typename Structure, typename BagPolicy, typename = void>
+template<class Structure, class BagPolicy, class = void>
 class bag_impl : public bag_base<Structure, BagPolicy> {
 public:
 	using bag_base<Structure, BagPolicy>::bag_base;
@@ -189,7 +189,7 @@ public:
 /**
  * @brief implementation for bag policies that define nonconst types
  */
-template<typename Structure, typename BagPolicy>
+template<class Structure, class BagPolicy>
 class bag_impl<Structure, BagPolicy, std::enable_if_t<!std::is_const<std::remove_pointer_t<typename BagPolicy::type>>::value>>
 	: public bag_base<Structure, BagPolicy> {
 public:
@@ -199,7 +199,7 @@ public:
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr char *data() { return BagPolicy::get(bag_base<Structure, BagPolicy>::data_); }
+	constexpr char *data() noexcept { return BagPolicy::get(bag_base<Structure, BagPolicy>::data_); }
 	using bag_base<Structure, BagPolicy>::data;
 
 	/**
@@ -219,8 +219,8 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<char... Dims, typename... Ts>
-	constexpr decltype(auto) at(Ts... ts) {
+	template<char... Dims, class... Ts>
+	constexpr decltype(auto) at(Ts... ts) noexcept {
 		return structure().template get_at<Dims...>(data(), ts...);
 	}
 	using bag_base<Structure, BagPolicy>::at;
@@ -234,7 +234,7 @@ public:
  * @tparam Structure: the structure that describes the data stored in the bag
  * @tparam BagPolicy: indicates what underlying structure contains the data blob (typically `std::unique_ptr`)
  */
-template<typename Structure, typename BagPolicy>
+template<class Structure, class BagPolicy>
 class bag : public helpers::bag_impl<Structure, BagPolicy> {
 public:
 	using helpers::bag_impl<Structure, BagPolicy>::bag_impl;
@@ -245,8 +245,8 @@ public:
  * 
  * @param s: the structure
  */
-template<typename Structure>
-constexpr auto make_unique_bag(Structure s) {
+template<class Structure>
+constexpr auto make_unique_bag(Structure s) noexcept {
 	return bag<Structure, helpers::bag_policy<std::unique_ptr>>(s);
 }
 
@@ -255,8 +255,8 @@ constexpr auto make_unique_bag(Structure s) {
  * 
  * @param s: the structure (wrapped)
  */
-template<typename Structure>
-constexpr auto make_unique_bag(noarr::wrapper<Structure> s) {
+template<class Structure>
+constexpr auto make_unique_bag(noarr::wrapper<Structure> s) noexcept {
 	return bag<Structure, helpers::bag_policy<std::unique_ptr>>(s);
 }
 
@@ -265,8 +265,8 @@ constexpr auto make_unique_bag(noarr::wrapper<Structure> s) {
  * 
  * @param s: the structure
  */
-template<typename Structure>
-constexpr auto make_vector_bag(Structure s) {
+template<class Structure>
+constexpr auto make_vector_bag(Structure s) noexcept {
 	return bag<Structure, helpers::bag_policy<std::vector>>(s);
 }
 
@@ -275,8 +275,8 @@ constexpr auto make_vector_bag(Structure s) {
  * 
  * @param s: the structure (wrapped)
  */
-template<typename Structure>
-constexpr auto make_vector_bag(noarr::wrapper<Structure> s) {
+template<class Structure>
+constexpr auto make_vector_bag(noarr::wrapper<Structure> s) noexcept {
 	return bag<Structure, helpers::bag_policy<std::vector>>(s);
 }
 
@@ -285,8 +285,8 @@ constexpr auto make_vector_bag(noarr::wrapper<Structure> s) {
  * 
  * @param s: the structure
  */
-template<typename Structure>
-constexpr auto make_bag(Structure s) {
+template<class Structure>
+constexpr auto make_bag(Structure s) noexcept {
 	return make_unique_bag(s);
 }
 
@@ -295,8 +295,8 @@ constexpr auto make_bag(Structure s) {
  * 
  * @param s: the structure (wrapped)
  */
-template<typename Structure>
-constexpr auto make_bag(noarr::wrapper<Structure> s) {
+template<class Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s) noexcept {
 	return make_unique_bag(s);
 }
 
@@ -306,8 +306,8 @@ constexpr auto make_bag(noarr::wrapper<Structure> s) {
  * @param s: the structure
  * @param data: the data blob
  */
-template<typename Structure>
-constexpr auto make_bag(Structure s, char *data) {
+template<class Structure>
+constexpr auto make_bag(Structure s, char *data) noexcept {
 	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>(s, data);
 }
 
@@ -317,8 +317,8 @@ constexpr auto make_bag(Structure s, char *data) {
  * @param s: the structure (wrapped)
  * @param data: the data blob
  */
-template<typename Structure>
-constexpr auto make_bag(noarr::wrapper<Structure> s, char *data) {
+template<class Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s, char *data) noexcept {
 	return bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>(s, data);
 }
 
@@ -328,8 +328,8 @@ constexpr auto make_bag(noarr::wrapper<Structure> s, char *data) {
  * @param s: the structure
  * @param data: the data blob
  */
-template<typename Structure>
-constexpr auto make_bag(Structure s, const char *data) {
+template<class Structure>
+constexpr auto make_bag(Structure s, const char *data) noexcept {
 	return bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, data);
 }
 
@@ -339,8 +339,8 @@ constexpr auto make_bag(Structure s, const char *data) {
  * @param s: the structure (wrapped)
  * @param data: the data blob
  */
-template<typename Structure>
-constexpr auto make_bag(noarr::wrapper<Structure> s, const char *data) {
+template<class Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s, const char *data) noexcept {
 	return bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, data);
 }
 

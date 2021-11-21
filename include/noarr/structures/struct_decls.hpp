@@ -15,7 +15,7 @@ namespace noarr {
  * @tparam ADims: the dimensions the structure consumes
  * @tparam Params: template parameters of the structure
  */
-template<typename Name, typename Dims, typename ADims, typename... Params>
+template<class Name, class Dims, class ADims, class... Params>
 struct struct_description {
 	using name = Name;
 	using dims = Dims;
@@ -23,28 +23,28 @@ struct struct_description {
 	using description = struct_description;
 };
 
-template<typename>
+template<class>
 struct structure_param;
 
-template<typename>
+template<class>
 struct type_param;
 
-template<typename T, T V>
+template<class T, T V>
 struct value_param;
 
 /**
  * @brief returns the `struct_description` of a structure
  * 
  * @tparam T: the structure
- * @tparam typename: a placeholder type
+ * @tparam class: a placeholder type
  */
-template<typename T, typename = void>
+template<class T, class = void>
 struct get_struct_desc;
 
-template<typename T>
+template<class T>
 using get_struct_desc_t = typename get_struct_desc<T>::type;
 
-template<typename T>
+template<class T>
 struct get_struct_desc<T, void_t<typename T::description>> {
 	using type = typename T::description;
 };
@@ -55,10 +55,10 @@ struct get_struct_desc<T, void_t<typename T::description>> {
  * @return value of type value_type will hold the list of sub_structures in a tuple
  * @tparam T the type of the given structure
  */
-template<typename T, typename = void>
+template<class T, class = void>
 struct sub_structures {
-	explicit constexpr sub_structures() = default;
-	explicit constexpr sub_structures(T) {}
+	explicit constexpr sub_structures() noexcept = default;
+	explicit constexpr sub_structures(T) noexcept {}
 
 	using value_type = std::tuple<>;
 	static constexpr std::tuple<> value = std::make_tuple<>();
@@ -66,31 +66,27 @@ struct sub_structures {
 
 namespace helpers {
 
-template<typename T, typename = void>
-struct sub_structures_are_static {
-	static constexpr bool value = false;
-};
+template<class T, class = void>
+struct sub_structures_are_static : std::false_type {};
 
-template<typename T>
-struct sub_structures_are_static<T, void_t<decltype(T::sub_structures())>> {
-	static constexpr bool value = true;
-};
+template<class T>
+struct sub_structures_are_static<T, void_t<decltype(T::sub_structures())>> : std::true_type {};
 
 }
 
-template<typename T>
+template<class T>
 struct sub_structures<T, std::enable_if_t<helpers::sub_structures_are_static<T>::value>> {
-	explicit constexpr sub_structures() = default;
-	explicit constexpr sub_structures(T) {}
+	explicit constexpr sub_structures() noexcept = default;
+	explicit constexpr sub_structures(T) noexcept {}
 
 	using value_type = remove_cvref<decltype(T::sub_structures())>;
 	static constexpr value_type value = T::sub_structures();
 };
 
-template<typename T>
+template<class T>
 struct sub_structures<T, std::enable_if_t<!helpers::sub_structures_are_static<T>::value, void_t<decltype(std::declval<T>().sub_structures())>>> {
-	explicit constexpr sub_structures() = delete;
-	explicit constexpr sub_structures(T t) : value(t.sub_structures()) {}
+	explicit constexpr sub_structures() noexcept = delete;
+	explicit constexpr sub_structures(T t) noexcept : value(t.sub_structures()) {}
 
 	using value_type = remove_cvref<decltype(std::declval<T>().sub_structures())>;
 	value_type value;
@@ -109,31 +105,31 @@ using dims_impl = char_pack<Dims...>;
  * 
  * @tparam T: the structure
  */
-template<typename T>
+template<class T>
 using get_dims = typename T::description::dims;
 
 namespace helpers {
 
-template<typename T, std::size_t I = std::tuple_size<typename sub_structures<T>::value_type>::value>
+template<class T, std::size_t I = std::tuple_size<typename sub_structures<T>::value_type>::value>
 struct construct_impl;
 
-template<typename T, std::size_t I>
+template<class T, std::size_t I>
 struct construct_impl {
-	template<std::size_t... IS, typename... TS>
-	static constexpr auto construct(T t, std::tuple<TS...> sub_structures){
+	template<std::size_t... IS, class... TS>
+	static constexpr auto construct(T t, std::tuple<TS...> sub_structures) noexcept {
 		return construct_impl<T, I - 1>::template construct<I - 1, IS...>(t, sub_structures);
 	}
 };
 
-template<typename T>
+template<class T>
 struct construct_impl<T, 0> {
-	template<std::size_t... IS, typename... TS>
-	static constexpr auto construct(T t, std::tuple<TS...> sub_structures) {
+	template<std::size_t... IS, class... TS>
+	static constexpr auto construct(T t, std::tuple<TS...> sub_structures) noexcept {
 		return t.construct(std::get<IS>(sub_structures)...);
 	}
 
 	template<std::size_t... IS>
-	static constexpr auto construct(T t, std::tuple<>) {
+	static constexpr auto construct(T t, std::tuple<>) noexcept {
 		return t.construct();
 	}
 };
@@ -146,8 +142,8 @@ struct construct_impl<T, 0> {
  * @param t: the prototype for constructing the structure
  * @param ts: the desired substructures
  */
-template<typename T, typename... TS>
-constexpr auto construct(T t, TS... ts) {
+template<class T, class... TS>
+constexpr auto construct(T t, TS... ts) noexcept {
 	return t.construct(ts...);
 }
 
@@ -157,8 +153,8 @@ constexpr auto construct(T t, TS... ts) {
  * @param t: the prototype for constructing the structure
  * @param ts: the desired substructures contained in a `std::tuple`
  */
-template<typename T, typename... TS>
-constexpr auto construct(T t, std::tuple<TS...> ts) {
+template<class T, class... TS>
+constexpr auto construct(T t, std::tuple<TS...> ts) noexcept {
 	return helpers::construct_impl<T>::construct(t, ts);
 }
 

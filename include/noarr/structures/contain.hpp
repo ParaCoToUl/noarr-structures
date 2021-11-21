@@ -10,10 +10,10 @@ namespace helpers {
 /**
  * @brief see `contain`. This is a helper structure implementing its functionality
  * 
- * @tparam typename: placeholder type
+ * @tparam class: placeholder type
  * @tparam ...TS: contained fields
  */
-template<typename, typename... TS>
+template<class, class... TS>
 struct contain_impl;
 
 /**
@@ -22,140 +22,140 @@ struct contain_impl;
  * @tparam T: the `contain` structure
  * @tparam I: the index of the desired field
  */
-template<typename T, std::size_t I>
+template<class T, std::size_t I>
 struct contain_get {
-	static constexpr decltype(auto) get(const T &t) {
+	static constexpr decltype(auto) get(const T &t) noexcept {
 		return t.template _get_next<I>();
 	}
 };
 
-template<typename T>
+template<class T>
 struct contain_get<T, 0> {
-	static constexpr decltype(auto) get(const T &t) {
+	static constexpr decltype(auto) get(const T &t) noexcept {
 		return t._get();
 	}
 };
 
 // an implementation for the pair (T, TS...) where neither is empty
-template<typename T, typename... TS>
+template<class T, class... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
-	template<typename, std::size_t>
+	template<class, std::size_t>
 	friend struct contain_get;
 
 	T t_;
 	contain_impl<void, TS...> ts_;
 
-	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T t, TS... ts) : t_(t), ts_(ts...) {}
+	constexpr contain_impl() noexcept = default;
+	explicit constexpr contain_impl(T t, TS... ts) noexcept : t_(t), ts_(ts...) {}
 
 	template<std::size_t I>
-	constexpr decltype(auto) get() const {
+	constexpr decltype(auto) get() const noexcept {
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
 private:
 	template<std::size_t I>
-	constexpr decltype(auto) _get_next() const {
+	constexpr decltype(auto) _get_next() const noexcept {
 		return ts_.template get<I - 1>();
 	}
 
-	constexpr const auto &_get() const {
+	constexpr const auto &_get() const noexcept {
 		return t_;
 	}
 };
 
 // an implementation for the pair (T, TS...) where TS... is empty
-template<typename T, typename... TS>
+template<class T, class... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
-	template<typename, std::size_t>
+	template<class, std::size_t>
 	friend struct contain_get;
 
 	T t_;
 
-	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T t) : t_(t) {}
-	explicit constexpr contain_impl(T t, TS...) : t_(t) {}
+	constexpr contain_impl() noexcept = default;
+	explicit constexpr contain_impl(T t) noexcept : t_(t) {}
+	explicit constexpr contain_impl(T t, TS...) noexcept : t_(t) {}
 
 	template<std::size_t I>
-	constexpr decltype(auto) get() const {
+	constexpr decltype(auto) get() const noexcept {
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
 private:
 	template<std::size_t I>
-	constexpr decltype(auto) _get_next() const {
+	constexpr decltype(auto) _get_next() const noexcept {
 		return contain_impl<void, TS...>::template get<I - 1>();
 	}
 
-	constexpr const auto &_get() const {
+	constexpr const auto &_get() const noexcept {
 		return t_;
 	}
 };
 
 // an implementation for the pair (T, TS...) where T is empty
-template<typename T, typename... TS>
+template<class T, class... TS>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
-	template<typename, std::size_t>
+	template<class, std::size_t>
 	friend struct contain_get;
 
-	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(TS... ts) : contain_impl<void, TS...>(ts...) {}
-	explicit constexpr contain_impl(T, TS... ts) : contain_impl<void, TS...>(ts...) {}
+	constexpr contain_impl() noexcept = default;
+	explicit constexpr contain_impl(TS... ts) noexcept : contain_impl<void, TS...>(ts...) {}
+	explicit constexpr contain_impl(T, TS... ts) noexcept : contain_impl<void, TS...>(ts...) {}
 
 	template<std::size_t I>
-	constexpr decltype(auto) get() const {
+	constexpr decltype(auto) get() const noexcept {
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
 private:
 	template<std::size_t I>
-	constexpr decltype(auto) _get_next() const {
+	constexpr decltype(auto) _get_next() const noexcept {
 		return contain_impl<void, TS...>::template get<I - 1>();
 	}
 
-	static constexpr auto _get() {
+	static constexpr auto _get() noexcept {
 		return T();
 	}
 };
 
 // an implementation for an empty T
-template<typename T>
+template<class T>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
-	template<typename, std::size_t>
+	template<class, std::size_t>
 	friend struct contain_get;
 
-	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T) {}
+	constexpr contain_impl() noexcept = default;
+	explicit constexpr contain_impl(T) noexcept {}
 
 	template<std::size_t I>
-	constexpr decltype(auto) get() const {
+	constexpr decltype(auto) get() const noexcept {
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
 private:
-	static constexpr auto _get() {
+	static constexpr auto _get() noexcept {
 		return T();
 	}
 };
 
 // an implementation for an nonempty T
-template<typename T>
+template<class T>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
-	template<typename, std::size_t>
+	template<class, std::size_t>
 	friend struct contain_get;
 
 	T t_;
 
-	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T t) : t_(t) {}
+	constexpr contain_impl() noexcept = default;
+	explicit constexpr contain_impl(T t) noexcept : t_(t) {}
 
 	template<std::size_t I>
-	constexpr decltype(auto) get() const {
+	constexpr decltype(auto) get() const noexcept {
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
 private:
-	constexpr const auto &_get() const {
+	constexpr const auto &_get() const noexcept {
 		return t_;
 	}
 };
@@ -164,7 +164,7 @@ private:
 template<>
 struct contain_impl<void> {};
 
-template<typename... TS>
+template<class... TS>
 struct contain_wrapper : private contain_impl<void, TS...> {
 protected:
 	using contain_impl<void, TS...>::contain_impl;
@@ -184,7 +184,7 @@ protected:
  * 
  * @tparam TS the contained fields
  */
-template<typename... TS>
+template<class... TS>
 using contain = helpers::contain_wrapper<TS...>;
 
 } // namespace noarr
@@ -192,12 +192,12 @@ using contain = helpers::contain_wrapper<TS...>;
 
 namespace std {
 
-template<std::size_t I, typename... TS>
+template<std::size_t I, class... TS>
 struct tuple_element<I, noarr::contain<TS...>> {
 	using type = decltype(std::declval<noarr::contain<TS...>>().template get<I>());
 };
 
-template<typename... TS>
+template<class... TS>
 struct tuple_size<noarr::contain<TS...>>
 	: std::integral_constant<std::size_t, sizeof...(TS)> { };
 

@@ -11,10 +11,10 @@ namespace noarr {
 
 namespace helpers {
 
-template<typename T, typename Pre = char_pack<>, typename Post = char_pack<>>
+template<class T, class Pre = char_pack<>, class Post = char_pack<>>
 struct mangle_impl;
 
-template<typename Dims>
+template<class Dims>
 struct transform_dims_impl;
 
 }
@@ -24,7 +24,7 @@ struct transform_dims_impl;
  * 
  * @tparam T: the structure
  */
-template<typename T>
+template<class T>
 using mangle = typename helpers::mangle_impl<T>::type;
 
 /**
@@ -32,22 +32,20 @@ using mangle = typename helpers::mangle_impl<T>::type;
  * 
  * @tparam Dims: the dimensions to be transformed
  */
-template<typename Dims>
+template<class Dims>
 using transform_dims = typename helpers::transform_dims_impl<Dims>::type;
 
 namespace helpers {
 
-template<typename T>
+template<class T>
 struct scalar_name<T, void_t<get_struct_desc_t<T>>> {
 	using type = mangle<T>;
 };
 
-template<typename T, typename Pre, typename Post>
-struct mangle_impl {
-	using type = typename mangle_impl<get_struct_desc_t<T>, Pre, Post>::type;
-};
+template<class T, class Pre, class Post>
+struct mangle_impl : mangle_impl<get_struct_desc_t<T>, Pre, Post> {};
 
-template<typename T, typename Pre, typename Post>
+template<class T, class Pre, class Post>
 struct mangle_scalar;
 
 template<char Dim>
@@ -60,46 +58,39 @@ struct transform_dims_impl<dims_impl<>> {
 	using type = dims_impl<>;
 };
 
-template<typename Name, typename Dims, typename ADims, typename... Params, typename Pre, typename Post>
-struct mangle_impl<struct_description<Name, Dims, ADims, Params...>, Pre, Post> {
-	using type = integral_pack_concat<
+template<class Name, class Dims, class ADims, class... Params, class Pre, class Post>
+struct mangle_impl<struct_description<Name, Dims, ADims, Params...>, Pre, Post>
+	: integral_pack_concat<
 		Pre,
 		Name,
 		char_pack<'<'>,
 		integral_pack_concat_sep<char_pack<','>, transform_dims<Dims>, transform_dims<ADims>, mangle<Params>...>,
 		char_pack<'>'>,
-		Post>;
-};
+		Post> {};
 
-template<typename Name, typename Param, typename Pre, typename Post>
-struct mangle_scalar<struct_description<Name, dims_impl<>, dims_impl<>, type_param<Param>>, Pre, Post> {
-	using type = integral_pack_concat<Pre, Name, char_pack<'<'>, scalar_name_t<Param>, char_pack<'>'>, Post>;
-};
+template<class Name, class Param, class Pre, class Post>
+struct mangle_scalar<struct_description<Name, dims_impl<>, dims_impl<>, type_param<Param>>, Pre, Post>
+	: integral_pack_concat<Pre, Name, char_pack<'<'>, scalar_name_t<Param>, char_pack<'>'>, Post> {};
 
-template<typename T, typename Pre, typename Post>
-struct mangle_impl<structure_param<T>, Pre, Post> {
-	using type = integral_pack_concat<Pre, mangle<T>, Post>;
-};
+template<class T, class Pre, class Post>
+struct mangle_impl<structure_param<T>, Pre, Post>
+	: integral_pack_concat<Pre, mangle<T>, Post> {};
 
-template<typename T, typename Pre, typename Post>
-struct mangle_impl<type_param<T>, Pre, Post> {
-	using type = integral_pack_concat<Pre, scalar_name_t<T>, Post>;
-};
+template<class T, class Pre, class Post>
+struct mangle_impl<type_param<T>, Pre, Post>
+	: integral_pack_concat<Pre, scalar_name_t<T>, Post> {};
 
-template<typename T, T V, typename Pre, typename Post>
-struct mangle_impl<value_param<T, V>, Pre, Post> {
-	using type = integral_pack_concat<Pre, char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>, Post>;
-};
+template<class T, T V, class Pre, class Post>
+struct mangle_impl<value_param<T, V>, Pre, Post>
+	: integral_pack_concat<Pre, char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>, Post> {};
 
-template<typename T, typename Pre, typename Post>
-struct mangle_impl<scalar<T>, Pre, Post> {
-	using type = typename mangle_scalar<get_struct_desc_t<scalar<T>>, Pre, Post>::type;
-};
+template<class T, class Pre, class Post>
+struct mangle_impl<scalar<T>, Pre, Post>
+	: mangle_scalar<get_struct_desc_t<scalar<T>>, Pre, Post> {};
 
-template<typename Pre, typename Post>
-struct mangle_impl<std::tuple<>, Pre, Post> {
-	using type = integral_pack_concat<Pre, Post>;
-};
+template<class Pre, class Post>
+struct mangle_impl<std::tuple<>, Pre, Post>
+	: integral_pack_concat<Pre, Post> {};
 
 } // namespace helpers
 

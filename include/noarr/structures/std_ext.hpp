@@ -37,16 +37,10 @@ using remove_cvref = typename std::remove_cv<typename std::remove_reference<T>::
  * @tparam T: the type
  */
 template<class T>
-struct is_array {
-	using value_type = bool;
-	static constexpr value_type value = false;
-};
+struct is_array : std::false_type {};
 
 template<class T, std::size_t N>
-struct is_array<T[N]> {
-	using value_type = bool;
-	static constexpr value_type value = true;
-};
+struct is_array<T[N]> : std::true_type {};
 
 /**
  * @brief Contains multiple values of a certain type
@@ -59,7 +53,7 @@ struct integral_pack;
 
 namespace helpers {
 
-template<class T, T V, class Pack, typename = void>
+template<class T, T V, class Pack, class = void>
 struct integral_pack_contains_impl;
 
 }
@@ -85,9 +79,7 @@ struct integral_pack {
 	using type = integral_pack;
 
 	template<T V>
-	struct contains {
-		static constexpr bool value = integral_pack_contains<integral_pack, V>::value;
-	};
+	struct contains : integral_pack_contains<integral_pack, V> {};
 };
 
 namespace helpers {
@@ -144,19 +136,13 @@ using integral_pack_concat_sep = typename helpers::integral_pack_concat_sep_impl
 namespace helpers {
 
 template<class T, T V, T... VS>
-struct integral_pack_contains_impl<T, V, integral_pack<T, V, VS...>> {
-	static constexpr bool value = true;
-};
+struct integral_pack_contains_impl<T, V, integral_pack<T, V, VS...>> : std::true_type {};
 
 template<class T, T V, T v, T... VS>
-struct integral_pack_contains_impl<T, V, integral_pack<T, v, VS...>, std::enable_if_t<(V != v)>> {
-	static constexpr bool value = integral_pack_contains_impl<T, V, integral_pack<T, VS...>>::value;
-};
+struct integral_pack_contains_impl<T, V, integral_pack<T, v, VS...>, std::enable_if_t<(V != v)>> : integral_pack_contains_impl<T, V, integral_pack<T, VS...>> {};
 
 template<class T, T V>
-struct integral_pack_contains_impl<T, V, integral_pack<T>> {
-	static constexpr bool value = false;
-};
+struct integral_pack_contains_impl<T, V, integral_pack<T>> : std::false_type {};
 
 }
 
@@ -173,27 +159,19 @@ using char_pack = integral_pack<char, VS...>;
  * 
  * @tparam T: the type preceding the value
  */
-template<typename T>
-struct template_false {
-	static constexpr bool value = false;
-};
+template<class T>
+struct template_false : std::false_type {};
 
 namespace helpers {
 
-template<template<typename> class Function, typename Tuple, typename = void>
-struct tuple_forall_impl {
-	static constexpr bool value = false;
-};
+template<template<class> class Function, class Tuple, class = void>
+struct tuple_forall_impl : std::false_type {};
 
-template<template<typename> class Function, typename T, typename... TS>
-struct tuple_forall_impl<Function, std::tuple<T, TS...>, std::enable_if_t<Function<T>::value>> {
-	static constexpr bool value = tuple_forall_impl<Function, std::tuple<TS...>>::value;
-};
+template<template<class> class Function, class T, class... TS>
+struct tuple_forall_impl<Function, std::tuple<T, TS...>, std::enable_if_t<Function<T>::value>> : tuple_forall_impl<Function, std::tuple<TS...>> {};
 
-template<template<typename> class Function>
-struct tuple_forall_impl<Function, std::tuple<>> {
-	static constexpr bool value = true;
-};
+template<template<class> class Function>
+struct tuple_forall_impl<Function, std::tuple<>> : std::true_type {};
 
 }
 
@@ -203,7 +181,7 @@ struct tuple_forall_impl<Function, std::tuple<>> {
  * @tparam Function: the applied type function
  * @tparam Tuple: the tuple containing the set of inputs for the function
  */
-template<template<typename> class Function, typename Tuple>
+template<template<class> class Function, class Tuple>
 using tuple_forall = helpers::tuple_forall_impl<Function, Tuple>;
 
 } // namespace noarr

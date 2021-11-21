@@ -9,15 +9,15 @@ namespace noarr {
 
 namespace helpers {
 
-template<typename T, typename... KS>
+template<class T, class... KS>
 struct scalar_get_t;
 
-template<typename T>
+template<class T>
 struct scalar_get_t<T> {
 	using type = T;
 };
 
-template<typename T>
+template<class T>
 struct scalar_get_t<T, void> {
 	using type = T;
 };
@@ -29,25 +29,25 @@ struct scalar_get_t<T, void> {
  * 
  * @tparam T the stored type
  */
-template<typename T>
+template<class T>
 struct scalar : contain<> {
-	static constexpr std::tuple<> sub_structures() { return {}; }
+	static constexpr std::tuple<> sub_structures() noexcept { return {}; }
 	using description = struct_description<
 		char_pack<'s', 'c', 'a', 'l', 'a', 'r'>,
 		dims_impl<>,
 		dims_impl<>,
 		type_param<T>>;
 
-	template<typename... KS>
+	template<class... KS>
 	using get_t = typename helpers::scalar_get_t<T, KS...>::type;
 
-	constexpr scalar() = default;
-	static constexpr auto construct() {
+	constexpr scalar() noexcept = default;
+	static constexpr auto construct() noexcept {
 		return scalar<T>();
 	}
-	static constexpr std::size_t size() { return sizeof(T); }
-	static constexpr std::size_t offset() { return 0; }
-	static constexpr std::size_t length() { return 0; }
+	static constexpr std::size_t size() noexcept { return sizeof(T); }
+	static constexpr std::size_t offset() noexcept { return 0; }
+	static constexpr std::size_t length() noexcept { return 0; }
 };
 
 } // namespace noarr
