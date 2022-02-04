@@ -373,6 +373,58 @@ struct fixed_dim : contain<T, std::size_t> {
 	constexpr std::size_t length() const noexcept { return 0; }
 };
 
+namespace helpers {
+
+template<class T, class... KS>
+struct shifted_dim_get_t;
+
+template<class T>
+struct shifted_dim_get_t<T> {
+	using type = typename T::template get_t<>;
+};
+
+template<class T>
+struct shifted_dim_get_t<T, void> {
+	using type = typename T::template get_t<void>;
+};
+
+}
+
+/**
+ * @brief shifted dimension, carries a single sub_structure with a shifted index
+ * 
+ * @tparam T: substructure type
+ */
+template<char Dim, class T>
+struct shifted_dim : contain<T, std::size_t> {
+	using base = contain<T, std::size_t>;
+	constexpr auto sub_structures() const noexcept { return noarr::sub_structures<decltype(this->base::template get<0>())>(base::template get<0>()).value; }
+	using description = struct_description<
+		char_pack<'s', 'h', 'i', 'f', 't', 'e', 'd', '_', 'd', 'i', 'm'>,
+		dims_impl<Dim>,
+		dims_impl<Dim>,
+		structure_param<T>>;
+
+	template<class... KS>
+	using get_t = typename helpers::shifted_dim_get_t<T, KS...>::type;
+
+	constexpr shifted_dim() noexcept = default;
+	constexpr shifted_dim(T sub_structure, std::size_t idx) noexcept : base(sub_structure, idx) {}
+
+	template<class... T2>
+	constexpr auto construct(T2...sub_structures) const noexcept {
+		return shifted_dim<Dim, decltype(std::declval<T>().construct(sub_structures...))>(
+			base::template get<0>().construct(sub_structures...),
+			base::template get<1>());
+	}
+
+	constexpr std::size_t size() const noexcept { return base::template get<0>().size(); }
+	constexpr std::size_t offset(std::size_t i) const noexcept { return base::template get<0>().offset(i + base::template get<1>()); }
+	template<std::size_t I>
+	constexpr std::size_t offset() const noexcept { return base::template get<0>().offset(I + base::template get<1>()); }
+	constexpr std::size_t length() const noexcept { return base::template get<0>().length() - base::template get<1>(); }
+};
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_STRUCTS_HPP

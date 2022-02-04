@@ -353,6 +353,61 @@ struct fix_impl<> {
 	}
 };
 
+template<class... Tuples>
+struct shift_impl;
+
+template<char Dim>
+struct shift_dynamic_impl {
+	using func_family = transform_tag;
+
+	constexpr shift_dynamic_impl() noexcept = default;
+	explicit constexpr shift_dynamic_impl(std::size_t idx) noexcept : idx(idx) {}
+
+private:
+	std::size_t idx;
+
+public:
+	template<class T>
+	constexpr auto operator()(T t) const noexcept -> decltype(std::declval<std::enable_if_t<get_dims<T>::template contains<Dim>::value>>(), shifted_dim<Dim, T>(t, idx)) {
+		return shifted_dim<Dim, T>(t, idx);
+	}
+};
+
+template<char Dim, class T, class... Tuples>
+struct shift_impl<std::tuple<std::integral_constant<char, Dim>, T>, Tuples...> : private contain<shift_dynamic_impl<Dim>, shift_impl<Tuples...>> {
+	using base = contain<shift_dynamic_impl<Dim>, shift_impl<Tuples...>>;
+	using func_family = transform_tag;
+
+	constexpr shift_impl() noexcept = default;
+	
+	template <class... Ts>
+	constexpr shift_impl(T t, Ts... ts) noexcept : base(shift_dynamic_impl<Dim>(t), shift_impl<Tuples...>(ts...)) {}
+
+	template<class S>
+	constexpr auto operator()(S s) const noexcept {
+		return pipe(s, base::template get<0>(), base::template get<1>());
+	}
+};
+
+template<char Dim, class T>
+struct shift_impl<std::tuple<std::integral_constant<char, Dim>, T>> : private shift_dynamic_impl<Dim> {
+	using func_family = transform_tag;
+	using shift_dynamic_impl<Dim>::shift_dynamic_impl;
+	using shift_dynamic_impl<Dim>::operator();
+};
+
+template<>
+struct shift_impl<> {
+	using func_family = transform_tag;
+
+	constexpr shift_impl() noexcept = default;
+
+	template<class T>
+	constexpr auto operator()(T t) const noexcept {
+		return t;
+	}
+};
+
 }
 
 /**
@@ -364,6 +419,17 @@ struct fix_impl<> {
 template<char... Dims, class... Ts>
 constexpr auto fix(Ts... ts) noexcept {
 	return helpers::fix_impl<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
+}
+
+/**
+ * @brief shifts an index (or indices) given by dimension name(s) in a structure
+ * 
+ * @tparam Dims: the dimension names
+ * @param ts: parameters for shifting the indices
+ */
+template<char... Dims, class... Ts>
+constexpr auto shift(Ts... ts) noexcept {
+	return helpers::shift_impl<std::tuple<std::integral_constant<char, Dims>, Ts>...>(ts...);
 }
 
 namespace helpers {

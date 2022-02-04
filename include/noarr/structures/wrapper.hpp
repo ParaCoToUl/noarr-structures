@@ -79,6 +79,17 @@ public:
 	}
 
 	/**
+	 * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item
+	 * 
+	 * @tparam Dims: the dimension names of fixed indices
+	 * @param ts: parameters for fixing the indices
+	 */
+	template<char... Dims, class... Ts>
+	constexpr auto shift(Ts... ts) const noexcept {
+		return wrap(base::template get<0>() | noarr::shift<Dims...>(ts...));
+	}
+
+	/**
 	 * @brief returns an offset of a substructure with a certain index in a structure given by its dimension name
 	 * 
 	 * @tparam Dim: the dimension name
