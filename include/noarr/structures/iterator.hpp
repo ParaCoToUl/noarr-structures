@@ -6,6 +6,7 @@
 #include "dimension_map.hpp"
 #include "std_ext.hpp"
 #include "pipes.hpp"
+#include "funcs.hpp"
 
 namespace noarr {
 
