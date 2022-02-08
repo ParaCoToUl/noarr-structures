@@ -27,11 +27,19 @@ struct contain_get {
 	static constexpr decltype(auto) get(const T &t) noexcept {
 		return t.template _get_next<I>();
 	}
+
+	static constexpr decltype(auto) get(T &t) noexcept {
+		return t.template _get_next<I>();
+	}
 };
 
 template<class T>
 struct contain_get<T, 0> {
 	static constexpr decltype(auto) get(const T &t) noexcept {
+		return t._get();
+	}
+
+	static constexpr decltype(auto) get(T &t) noexcept {
 		return t._get();
 	}
 };
@@ -53,13 +61,27 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
+	template<std::size_t I>
+	constexpr decltype(auto) get() noexcept {
+		return contain_get<contain_impl, I>::get(*this);
+	}
+
 private:
 	template<std::size_t I>
 	constexpr decltype(auto) _get_next() const noexcept {
 		return ts_.template get<I - 1>();
 	}
 
+	template<std::size_t I>
+	constexpr decltype(auto) _get_next() noexcept {
+		return ts_.template get<I - 1>();
+	}
+
 	constexpr const auto &_get() const noexcept {
+		return t_;
+	}
+
+	constexpr auto &_get() noexcept {
 		return t_;
 	}
 };
@@ -81,13 +103,27 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<c
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
+	template<std::size_t I>
+	constexpr decltype(auto) get() noexcept {
+		return contain_get<contain_impl, I>::get(*this);
+	}
+
 private:
 	template<std::size_t I>
 	constexpr decltype(auto) _get_next() const noexcept {
 		return contain_impl<void, TS...>::template get<I - 1>();
 	}
 
+	template<std::size_t I>
+	constexpr decltype(auto) _get_next() noexcept {
+		return contain_impl<void, TS...>::template get<I - 1>();
+	}
+
 	constexpr const auto &_get() const noexcept {
+		return t_;
+	}
+
+	constexpr auto &_get() noexcept {
 		return t_;
 	}
 };
@@ -107,9 +143,19 @@ struct contain_impl<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) >
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
+	template<std::size_t I>
+	constexpr decltype(auto) get() noexcept {
+		return contain_get<contain_impl, I>::get(*this);
+	}
+
 private:
 	template<std::size_t I>
 	constexpr decltype(auto) _get_next() const noexcept {
+		return contain_impl<void, TS...>::template get<I - 1>();
+	}
+
+	template<std::size_t I>
+	constexpr decltype(auto) _get_next() noexcept {
 		return contain_impl<void, TS...>::template get<I - 1>();
 	}
 
@@ -129,6 +175,11 @@ struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
+		return contain_get<contain_impl, I>::get(*this);
+	}
+
+	template<std::size_t I>
+	constexpr decltype(auto) get() noexcept {
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
@@ -154,8 +205,17 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 		return contain_get<contain_impl, I>::get(*this);
 	}
 
+	template<std::size_t I>
+	constexpr decltype(auto) get() noexcept {
+		return contain_get<contain_impl, I>::get(*this);
+	}
+
 private:
 	constexpr const auto &_get() const noexcept {
+		return t_;
+	}
+
+	constexpr auto &_get() noexcept {
 		return t_;
 	}
 };
@@ -168,6 +228,8 @@ template<class... TS>
 struct contain_wrapper : private contain_impl<void, TS...> {
 protected:
 	using contain_impl<void, TS...>::contain_impl;
+
+public:
 	using contain_impl<void, TS...>::get;
 };
 
