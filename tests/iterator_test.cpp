@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include "noarr/structures_extended.hpp"
-#include "noarr/structures/iterator.hpp"
 
 TEST_CASE("Iterator Trivial", "[iterator]") {
 	auto array = noarr::array<'x', 20, noarr::scalar<int>>();
