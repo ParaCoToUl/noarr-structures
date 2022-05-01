@@ -27,8 +27,8 @@ TEST_CASE("Iterator Trivial", "[iterator]") {
 	}
 
 	auto it = range.begin();
-	bool consistent;
-	bool consistent_length;
+	bool consistent = true;
+	bool consistent_length = true;
 
 	for (std::size_t x = 0; x != 20; ++x) {
 		auto idx = std::get<0>(it);
@@ -65,8 +65,8 @@ TEST_CASE("Iterator composite", "[iterator]") {
 	}
 
 	auto it = range.begin();
-	bool consistent;
-	bool consistent_length;
+	bool consistent = true;
+	bool consistent_length = true;
 
 	for (std::size_t x = 0; x != 20; ++x) {
 		for(std::size_t y = 0; y != 30; ++y) {
@@ -105,8 +105,8 @@ TEST_CASE("Iterator composite reversed", "[iterator]") {
 	}
 
 	auto it = range.begin();
-	bool consistent;
-	bool consistent_length;
+	bool consistent = true;
+	bool consistent_length = true;
 
 	for(std::size_t y = 0; y != 30; ++y) {
 		for (std::size_t x = 0; x != 20; ++x) {
