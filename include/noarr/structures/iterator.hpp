@@ -102,14 +102,14 @@ struct iterator {
     Struct *structure;
     dimension_map<index_pair<Dims, std::size_t>...> dims;
 
-    using value_type = decltype(*structure | fix<Dims...>((Dims, (std::size_t)0U) ...));
+    using value_type = decltype(*structure | fix<Dims...>(const_v<std::size_t>(0U, Dims)...));
 
 private:
     static constexpr std::size_t NDims = sizeof...(Dims);
 
 public:
-    constexpr iterator() noexcept : structure(nullptr), dims(((void)Dims, (std::size_t)0U)...) {}
-    constexpr iterator(Struct &structure) noexcept : structure(&structure), dims(((void)Dims, (std::size_t)0U)...) {}
+    constexpr iterator() noexcept : structure(nullptr), dims(const_v<std::size_t>(0U, Dims)...) {}
+    constexpr iterator(Struct &structure) noexcept : structure(&structure), dims(const_v<std::size_t>(0U, Dims)...) {}
 
     template<class ...Idxs>
     constexpr iterator(Struct &structure, Idxs ...idxs) noexcept : structure(&structure), dims(idxs...) {}
