@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 Include(FetchContent)
 
 # set the project name
-project(Noarr VERSION 0.1)
+project(Noarr VERSION 0.17.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
