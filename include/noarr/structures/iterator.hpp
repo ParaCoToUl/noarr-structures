@@ -71,7 +71,7 @@ private:
 
 public:
     template<class Struct>
-    static bool increment(DimensionMap &dims, Struct &s) noexcept {
+    static bool increment(DimensionMap &dims, const Struct &s) noexcept {
         auto &&dim = dims.template get<symbol>();
         ++dim;
 
@@ -109,10 +109,10 @@ private:
 
 public:
     constexpr iterator() noexcept : structure(nullptr), dims(const_v<std::size_t>(0U, Dims)...) {}
-    constexpr iterator(Struct &structure) noexcept : structure(&structure), dims(const_v<std::size_t>(0U, Dims)...) {}
+    constexpr iterator(Struct *structure) noexcept : structure(structure), dims(const_v<std::size_t>(0U, Dims)...) {}
 
     template<class ...Idxs>
-    constexpr iterator(Struct &structure, Idxs ...idxs) noexcept : structure(&structure), dims(idxs...) {}
+    constexpr iterator(Struct *structure, Idxs ...idxs) noexcept : structure(structure), dims(idxs...) {}
 
     constexpr iterator &operator*() noexcept {
         return *this;
@@ -168,13 +168,14 @@ struct range {
     Struct structure;
     using Iterator = iterator<Struct, Dims...>;
 
-    range(const Struct &structure) : structure(structure) {}
+    explicit constexpr range(const Struct &structure) noexcept : structure(structure) {}
+    explicit constexpr range(Struct &&structure) noexcept : structure(std::move(structure)) {}
 
-    Iterator begin() noexcept {
-        return Iterator(structure);
+    constexpr Iterator begin() noexcept {
+        return Iterator(&structure);
     }
 
-    Iterator end() const noexcept {
+    static constexpr Iterator end() noexcept {
         return Iterator();
     }
 };
@@ -208,7 +209,7 @@ namespace std {
     };
 
     template<std::size_t I, class Struct, char ...Dims>
-    decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
+    constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
         return noarr::helpers::iterator_get_helper<I, Struct, Dims...>::get(it);
     }
 }
