@@ -11,7 +11,7 @@
 
 #include "noarr/structures_extended.hpp"
 
-TEST_CASE("Iterator Trivial", "[iterator]") {
+TEST_CASE("Iterator trivial", "[iterator]") {
 	auto array = noarr::array<'x', 20, noarr::scalar<int>>();
 
 	auto data = std::array<int, 20>();
