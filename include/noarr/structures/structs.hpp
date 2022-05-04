@@ -17,7 +17,6 @@ template<char Dim, class... TS>
 struct tuple;
 
 namespace helpers {
-
 template<class TUPLE, std::size_t I>
 struct tuple_part;
 
@@ -157,7 +156,7 @@ struct array_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam Dim: the dimmension name added by the array
  * @tparam T: the type of the substructure the array contains
  */
-template<char Dim, std::size_t L, class T>
+template<char Dim, std::size_t L, class T = void>
 struct array : contain<T> {
 	constexpr std::tuple<T> sub_structures() const noexcept { return std::tuple<T>(contain<T>::template get<0>()); }
 	using description = struct_description<
@@ -185,13 +184,37 @@ struct array : contain<T> {
 	static constexpr std::size_t length() noexcept { return L; }
 };
 
+template<char Dim, std::size_t L>
+struct array<Dim, L> {
+	constexpr std::tuple<> sub_structures() const noexcept { return {}; }
+	using description = struct_description<
+		char_pack<'a', 'r', 'r', 'a', 'y'>,
+		dims_impl<Dim>,
+		dims_impl<>,
+		value_param<std::size_t, L>>;
+
+	constexpr array() noexcept = default;
+
+	template<class T2>
+	static constexpr auto construct(T2 sub_structure) noexcept {
+		return array<Dim, L, T2>(sub_structure);
+	}
+
+	static constexpr auto construct() noexcept {
+		return array();
+	}
+
+
+	static constexpr std::size_t length() noexcept { return L; }
+};
+
 /**
  * @brief unsized vector ready to be resized to the desired size, this vector does not have size yet
  * 
  * @tparam Dim: the dimmension name added by the vector
  * @tparam T: type of the substructure the vector contains
  */
-template<char Dim, class T>
+template<char Dim, class T = void>
 struct vector : contain<T> {
 	constexpr std::tuple<T> sub_structures() const noexcept { return std::tuple<T>(contain<T>::template get<0>()); }
 	using description = struct_description<
@@ -206,6 +229,27 @@ struct vector : contain<T> {
 	template<class T2>
 	static constexpr auto construct(T2 sub_structure) noexcept {
 		return vector<Dim, T2>(sub_structure);
+	}
+};
+
+
+template<char Dim>
+struct vector<Dim> {
+	constexpr std::tuple<> sub_structures() const noexcept { return {}; }
+	using description = struct_description<
+		char_pack<'v', 'e', 'c', 't', 'o', 'r'>,
+		dims_impl<Dim>,
+		dims_impl<>>;
+
+	constexpr vector() noexcept = default;
+
+	template<class T2>
+	static constexpr auto construct(T2 sub_structure) noexcept {
+		return vector<Dim, T2>(sub_structure);
+	}
+
+	static constexpr auto construct() noexcept {
+		return vector();
 	}
 };
 
@@ -237,7 +281,7 @@ struct sized_vector_get_t<T, std::integral_constant<std::size_t, K>> {
  * @tparam Dim: the dimmension name added by the sized vector
  * @tparam T: the type of the substructure the sized vector consists of
  */
-template<char Dim, class T>
+template<char Dim, class T = void>
 struct sized_vector : contain<vector<Dim, T>, std::size_t> {
 	using base = contain<vector<Dim, T>, std::size_t>;
 	constexpr std::tuple<T> sub_structures() const noexcept { return base::template get<0>().sub_structures(); }
@@ -264,6 +308,36 @@ struct sized_vector : contain<vector<Dim, T>, std::size_t> {
 	constexpr std::size_t offset() const noexcept { return std::get<0>(sub_structures()).size() * I; }
 	constexpr std::size_t length() const noexcept { return base::template get<1>(); }
 };
+
+template<char Dim>
+struct sized_vector<Dim> : contain<std::size_t> {
+	using base = contain<std::size_t>;
+	constexpr std::tuple<> sub_structures() const noexcept { return {}; }
+	using description = struct_description<
+		char_pack<'s', 'i', 'z', 'e', 'd', '_', 'v', 'e', 'c', 't', 'o', 'r'>,
+		dims_impl<Dim>,
+		dims_impl<>,
+		structure_param<void>>;
+
+	constexpr sized_vector() noexcept = default;
+	constexpr sized_vector(std::size_t length) noexcept : base(length) {}
+
+	template<class T2>
+	constexpr auto construct(T2 sub_structure) const noexcept {
+		return sized_vector<Dim, T2>(sub_structure, base::template get<0>());
+	}
+
+	constexpr auto construct() const noexcept {
+		return sized_vector(base::template get<0>());
+	}
+
+	constexpr std::size_t length() const noexcept { return base::template get<0>(); }
+};
+
+template<class Struct, class ProtoStruct>
+constexpr auto operator^(Struct &&s, ProtoStruct &&p)  -> decltype(p.construct(std::forward<Struct>(s))) {
+	return p.construct(std::forward<Struct>(s));
+}
 
 namespace helpers {
 

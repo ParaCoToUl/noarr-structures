@@ -98,9 +98,17 @@ struct dynamic_set_length {
 		return sized_vector<Dim, T>(std::get<0>(v.sub_structures()), length);
 	}
 
+	constexpr auto operator()(vector<Dim>) const noexcept {
+		return sized_vector<Dim>(length);
+	}
+
 	template<class T>
 	constexpr auto operator()(sized_vector<Dim, T> v) const noexcept {
 		return sized_vector<Dim, T>(std::get<0>(v.sub_structures()), length);
+	}
+
+	constexpr auto operator()(sized_vector<Dim>) const noexcept {
+		return sized_vector<Dim>(length);
 	}
 
 private:

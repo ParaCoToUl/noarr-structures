@@ -6,7 +6,7 @@
 
 #include "noarr/structures_extended.hpp"
 
-TEST_CASE("Pipes Vector", "[resizing]")
+TEST_CASE("Pipes vector", "[resizing]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto v2 = v | noarr::set_length<'x'>(10);
@@ -45,7 +45,7 @@ TEST_CASE("Pipes Vector", "[resizing]")
 	}
 }
 
-TEST_CASE("Pipes Vector2", "[is_trivial]")
+TEST_CASE("Pipes vector2", "[is_trivial]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto v2 = v | noarr::set_length<'x'>(10);
@@ -70,7 +70,7 @@ TEST_CASE("Pipes Vector2", "[is_trivial]")
 	}
 }
 
-TEST_CASE("Pipes Array", "[is_trivial]")
+TEST_CASE("Pipes array", "[is_trivial]")
 {
 	noarr::array<'x', 1920, noarr::scalar<float>> v;
 	auto v2 = v | noarr::set_length<'x'>(10);
@@ -93,4 +93,12 @@ TEST_CASE("Pipes Array", "[is_trivial]")
 		REQUIRE(std::is_trivial<decltype(v4)>::value);
 		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
 	}
+}
+
+
+TEST_CASE("Pipes do not affect bitwise or", "[is_trivial]")
+{
+	auto num = 3 | 12;
+
+	REQUIRE(num == 15);
 }

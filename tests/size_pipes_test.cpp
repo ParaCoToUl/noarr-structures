@@ -7,7 +7,7 @@
 
 using namespace noarr::literals;
 
-TEST_CASE("Pipes Sizes is_cube is_pod", "[sizes is_cube is_pod]") {
+TEST_CASE("Pipes sizes is_cube is_pod", "[sizes is_cube is_pod]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'y', noarr::scalar<int>>> t;
@@ -34,7 +34,7 @@ TEST_CASE("Pipes sizes", "[sizes sizes]") {
 	
 	auto v_sized = v | noarr::set_length<'x'>(20);
 
-	SECTION("check cizes") {
+	SECTION("check sizes") {
 		REQUIRE((v_sized | noarr::get_length<'x'>()) == 20);
 		REQUIRE((v2 | noarr::get_length<'y'>()) == 20000);
 		REQUIRE((t | noarr::get_length<'x'>()) == 10);
@@ -43,7 +43,7 @@ TEST_CASE("Pipes sizes", "[sizes sizes]") {
 	}
 }
 
-TEST_CASE("Pipes Resize", "[transform]") {
+TEST_CASE("Pipes resize", "[transform]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto vs = v | noarr::set_length<'x'>(10);
 
@@ -60,7 +60,7 @@ TEST_CASE("Pipes Resize", "[transform]") {
 	}
 }
 
-TEST_CASE("Pipes Resize 2", "[Resizing]") {
+TEST_CASE("Pipes resize 2", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	auto vs2 = v2 | noarr::set_length<'x'>(20);
 
@@ -88,7 +88,7 @@ TEST_CASE("Pipes Resize 2", "[Resizing]") {
 	}
 }
 
-TEST_CASE("Pipes Resize 3", "[Resizing]") {
+TEST_CASE("Pipes resize 3", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	auto vs3 = v2 | noarr::set_length<'x'>(10_idx);
 
@@ -106,7 +106,7 @@ TEST_CASE("Pipes Resize 3", "[Resizing]") {
 	}
 }
 
-TEST_CASE("Pipes Resize 4", "[Resizing]") {
+TEST_CASE("Pipes resize 4", "[Resizing]") {
 	volatile std::size_t l = 20;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
