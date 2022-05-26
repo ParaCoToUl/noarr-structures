@@ -10,3 +10,4 @@
 #include "structures/wrapper.hpp"
 #include "structures/bag.hpp"
 #include "structures/io.hpp"
+#include "structures/zip.hpp"
