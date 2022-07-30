@@ -5,6 +5,7 @@
 #include <tuple>
 
 #include "noarr/structures_extended.hpp"
+#include "noarr_test_defs.hpp"
 
 TEST_CASE("Vector resizing", "[resizing]")
 {
@@ -46,54 +47,46 @@ TEST_CASE("Vector resizing", "[resizing]")
 	}
 }
 
-TEST_CASE("Vector2 resizing", "[is_trivial]")
+TEST_CASE("Vector2 resizing", "[is_simple]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto w = noarr::wrap(v);
 	auto v2 = w.set_length<'x'>(10);
 
-	SECTION("is_trivial check 1") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 1") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 	}
 
 	auto v3 = w.set_length<'x'>(20);
 	auto v4 = v2.set_length<'x'>(30);
 
-	SECTION("is_trivial check 2") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 2") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 
-		REQUIRE(std::is_trivial<decltype(v3)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v3)>::value);
+		REQUIRE(noarr_test::type_is_simple(v3));
 
-		REQUIRE(std::is_trivial<decltype(v4)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
+		REQUIRE(noarr_test::type_is_simple(v4));
 	}
 }
 
-TEST_CASE("Array resizing", "[is_trivial]")
+TEST_CASE("Array resizing", "[is_simple]")
 {
 	noarr::array<'x', 1920, noarr::scalar<float>> v;
 	auto w = noarr::wrap(v);
 	auto v2 = w.set_length<'x'>(10);
 
-	SECTION("is_trivial check 1") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 1") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 	}
 
 	auto v3 = w.set_length<'x'>(20);
 	auto v4 = v2.set_length<'x'>(30);
 
-	SECTION("is_trivial check 2") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 2") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 
-		REQUIRE(std::is_trivial<decltype(v3)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v3)>::value);
+		REQUIRE(noarr_test::type_is_simple(v3));
 
-		REQUIRE(std::is_trivial<decltype(v4)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
+		REQUIRE(noarr_test::type_is_simple(v4));
 	}
 }

@@ -61,8 +61,8 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(5).set_length<'i'>(10);
 
 	// to remove warnings
-	piped.size();
-	doted.get_size();
+	(void) piped;
+	(void) doted;
 
 	// we will create a bag
 	auto bag = noarr::make_bag(my_structure_of_ten);

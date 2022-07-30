@@ -5,6 +5,7 @@
 #include <tuple>
 
 #include "noarr/structures_extended.hpp"
+#include "noarr_test_defs.hpp"
 
 TEST_CASE("Pipes vector", "[resizing]")
 {
@@ -45,58 +46,50 @@ TEST_CASE("Pipes vector", "[resizing]")
 	}
 }
 
-TEST_CASE("Pipes vector2", "[is_trivial]")
+TEST_CASE("Pipes vector2", "[is_simple]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto v2 = v | noarr::set_length<'x'>(10);
 
-	SECTION("is_trivial check 1") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 1") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 	}
 
 	auto v3 = v | noarr::set_length<'x'>(20);
 	auto v4 = v2 | noarr::set_length<'x'>(30);
 
-	SECTION("is_trivial check 2") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 2") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 
-		REQUIRE(std::is_trivial<decltype(v3)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v3)>::value);
+		REQUIRE(noarr_test::type_is_simple(v3));
 
-		REQUIRE(std::is_trivial<decltype(v4)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
+		REQUIRE(noarr_test::type_is_simple(v4));
 	}
 }
 
-TEST_CASE("Pipes array", "[is_trivial]")
+TEST_CASE("Pipes array", "[is_simple]")
 {
 	noarr::array<'x', 1920, noarr::scalar<float>> v;
 	auto v2 = v | noarr::set_length<'x'>(10);
 
-	SECTION("is_trivial check 1") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 1") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 	}
 
 	auto v3 = v | noarr::set_length<'x'>(20);
 	auto v4 = v2 | noarr::set_length<'x'>(30);
 
-	SECTION("is_trivial check 2") {
-		REQUIRE(std::is_trivial<decltype(v2)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v2)>::value);
+	SECTION("is_simple check 2") {
+		REQUIRE(noarr_test::type_is_simple(v2));
 
-		REQUIRE(std::is_trivial<decltype(v3)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v3)>::value);
+		REQUIRE(noarr_test::type_is_simple(v3));
 
-		REQUIRE(std::is_trivial<decltype(v4)>::value);
-		REQUIRE(std::is_standard_layout<decltype(v4)>::value);
+		REQUIRE(noarr_test::type_is_simple(v4));
 	}
 }
 
 
-TEST_CASE("Pipes do not affect bitwise or", "[is_trivial]")
+TEST_CASE("Pipes do not affect bitwise or", "[is_simple]")
 {
 	auto num = 3 | 12;
 
