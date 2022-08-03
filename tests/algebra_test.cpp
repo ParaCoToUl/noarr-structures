@@ -20,16 +20,8 @@ TEST_CASE("Simple vector algebra", "[algebra]") {
 }
 
 TEST_CASE("Sized vector algebra", "[algebra]") {
-	auto testee = scalar<int>() ^ (vector<'x'>() | set_length<'x'>(10));
-	auto reference = vector<'x', scalar<int>>() | set_length<'x'>(10);
-
-	REQUIRE(std::is_same<decltype(testee), decltype(reference)>::value);
-	REQUIRE((testee | get_length<'x'>()) == (reference | get_length<'x'>()));
-}
-
-TEST_CASE("Resized vector algebra", "[algebra]") {
-	auto testee = scalar<int>() ^ (vector<'x'>() | set_length<'x'>(10) | set_length<'x'>(20));
-	auto reference = vector<'x', scalar<int>>() | set_length<'x'>(20);
+	auto testee = scalar<int>() ^ (vector<'x'>() ^ set_length<'x'>(10));
+	auto reference = vector<'x', scalar<int>>() ^ set_length<'x'>(10);
 
 	REQUIRE(std::is_same<decltype(testee), decltype(reference)>::value);
 	REQUIRE((testee | get_length<'x'>()) == (reference | get_length<'x'>()));

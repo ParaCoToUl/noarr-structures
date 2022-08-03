@@ -102,7 +102,7 @@ struct iterator {
     Struct *structure;
     dimension_map<index_pair<Dims, std::size_t>...> dims;
 
-    using value_type = decltype(*structure | fix<Dims...>(const_v<std::size_t>(0U, Dims)...));
+    using value_type = decltype(*structure ^ fix<Dims...>(const_v<std::size_t>(0U, Dims)...));
 
 private:
     static constexpr std::size_t NDims = sizeof...(Dims);
@@ -155,11 +155,11 @@ struct iterator_get_helper {
 template<class Struct, char ...Dims>
 struct iterator_get_helper<0U, Struct, Dims...> {
     static constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-        return *it.structure | fix<Dims...>(it.dims.template get<Dims>()...);
+        return *it.structure ^ fix<Dims...>(it.dims.template get<Dims>()...);
     }
 
     static constexpr decltype(auto) get(const noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-        return *it.structure | fix<Dims...>(it.dims.template get<Dims>()...);
+        return *it.structure ^ fix<Dims...>(it.dims.template get<Dims>()...);
     }
 };
 
@@ -184,8 +184,6 @@ struct range {
 
 template<char ...Dims>
 struct iterate {
-	using func_family = top_tag;
-
     template<class Struct>
     constexpr helpers::range<Struct, Dims...> operator()(const Struct &s) const noexcept {
         return helpers::range<Struct, Dims...>(s);

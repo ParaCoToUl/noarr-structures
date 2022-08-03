@@ -33,7 +33,7 @@ TEST_CASE("Sizes sizes", "[sizes sizes]") {
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'y', noarr::scalar<int>>> t;
 	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'a', noarr::array<'b', 20, noarr::scalar<int>>>> t2;
 	
-	auto v_sized = v | noarr::set_length<'x'>(20);
+	auto v_sized = v ^ noarr::set_length<'x'>(20);
 
 	auto w_v_sized = noarr::wrap(v_sized);
 	auto w_v2 = noarr::wrap(v2);
@@ -43,9 +43,9 @@ TEST_CASE("Sizes sizes", "[sizes sizes]") {
 	SECTION("check cizes") {
 		REQUIRE(w_v_sized.get_length<'x'>() == 20);
 		REQUIRE(w_v2.get_length<'y'>() == 20000);
-		REQUIRE(w_t.get_length<'x'>() == 10);
-		REQUIRE(w_t2 .get_length<'y'>() == 20000);
-		REQUIRE(w_t2.get_length<'b'>() == 20);
+		REQUIRE(w_t.fix<'t'>(0_idx).get_length<'x'>() == 10);
+		REQUIRE(w_t2.fix<'t'>(0_idx).get_length<'y'>() == 20000);
+		REQUIRE(w_t2.fix<'t'>(1_idx).get_length<'b'>() == 20);
 	}
 }
 

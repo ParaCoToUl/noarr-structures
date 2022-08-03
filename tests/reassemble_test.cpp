@@ -4,6 +4,7 @@
 
 using namespace noarr;
 
+#if 0 // TODO reassemble?
 TEST_CASE("reassemble: array ^ array", "[reassemble]") {
     array<'x', 10, array<'y', 20, scalar<int>>> array_x_array;
 
@@ -21,3 +22,4 @@ TEST_CASE("trivial reassemble: vector * array (tuple)", "[reassemble]") {
 
     REQUIRE(std::is_same<decltype(array_x_array | reassemble<'x', 'x'>()), array<'x', 10, array<'y', 20, scalar<int>>>>::value);
 }
+#endif
