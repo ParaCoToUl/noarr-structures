@@ -106,18 +106,6 @@ struct get_length {
 };
 
 /**
- * @brief swaps two structures given by their dimension names in the substructure tree of a structure
- * 
- * @tparam Dim1: the dimension name of the first structure
- * @tparam Dim2: the dimension name of the second structure
- */
-template<char Dim1, char Dim2>
-struct reassemble; // TODO
-
-template<std::size_t i, class T>
-constexpr auto safe_get(T t) noexcept; // TODO
-
-/**
  * @brief fixes an index (or indices) given by dimension name(s) in a structure
  * 
  * @tparam Dims: the dimension names
