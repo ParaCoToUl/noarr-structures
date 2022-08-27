@@ -103,6 +103,15 @@ struct scalar_type {
 	static constexpr bool any_accept = false;
 };
 
+template<class T>
+struct is_struct_type : std::false_type {};
+template<char Dim, class ArgLength, class RetType>
+struct is_struct_type<function_type<Dim, ArgLength, RetType>> : std::true_type {};
+template<char Dim, class... RetTypes>
+struct is_struct_type<dep_function_type<Dim, RetTypes...>> : std::true_type {};
+template<class ValueType>
+struct is_struct_type<scalar_type<ValueType>> : std::true_type {};
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_TYPES_HPP
