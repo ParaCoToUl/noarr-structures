@@ -55,14 +55,6 @@ void matrix_demo(int size) {
 TEST_CASE("Example compile test", "[Example compile test]") {
 	noarr::vector<'i', noarr::scalar<float>> my_structure;
 	auto my_structure_of_ten = my_structure ^ noarr::set_length<'i'>(10);
-	// artificially complicated example
-	auto piped = my_structure_of_ten ^ noarr::set_length<'i'>(5) ^ noarr::set_length<'i'>(10);
-	// now version with wrapper
-	auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(5).set_length<'i'>(10);
-
-	// to remove warnings
-	(void) piped;
-	(void) doted;
 
 	// we will create a bag
 	auto bag = noarr::make_bag(my_structure_of_ten);

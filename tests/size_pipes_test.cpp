@@ -111,7 +111,7 @@ TEST_CASE("Pipes resize 4", "[Resizing]") {
 	volatile std::size_t l = 20;
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
-	auto vs4 = v2 ^ noarr::set_length<'y'>(10_idx) ^ noarr::set_length<'x'>(l);
+	auto vs4 = v2 ^ noarr::set_length<'x'>(l);
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs4)>::value);
@@ -121,13 +121,11 @@ TEST_CASE("Pipes resize 4", "[Resizing]") {
 		REQUIRE(noarr_test::type_is_simple(vs4));
 	}
 
-	auto ts = t ^ noarr::set_length<'x'>(20);
-
 	SECTION("check is_cube") {
-		REQUIRE(!noarr::is_cube<decltype(ts)>::value);
+		REQUIRE(!noarr::is_cube<decltype(t)>::value);
 	}
 
 	SECTION("check is_simple") {
-		REQUIRE(noarr_test::type_is_simple(ts));
+		REQUIRE(noarr_test::type_is_simple(t));
 	}
 }

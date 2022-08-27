@@ -147,8 +147,7 @@ private:
 		template<class Original>
 		struct length_dim_replacement {
 			static_assert(!Original::dependent, "Cannot set tuple length");
-			// TODO disallow resizing
-			//static_assert(!Original::arg_length::is_known, "Length already set");
+			static_assert(!Original::arg_length::is_known, "Length already set");
 			using type = function_type<Dim, arg_length_from_t<ValueType>, typename Original::ret_type>;
 		};
 	};
