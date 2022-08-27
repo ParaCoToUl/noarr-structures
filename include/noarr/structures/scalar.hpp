@@ -4,6 +4,7 @@
 #include "pipes.hpp"
 #include "struct_decls.hpp"
 #include "contain.hpp"
+#include "type.hpp"
 
 namespace noarr {
 
@@ -48,6 +49,8 @@ struct scalar : contain<> {
 	static constexpr std::size_t size() noexcept { return sizeof(T); }
 	static constexpr std::size_t offset() noexcept { return 0; }
 	static constexpr std::size_t length() noexcept { return 0; }
+
+	using struct_type = scalar_type<T>;
 };
 
 } // namespace noarr

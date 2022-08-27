@@ -23,10 +23,27 @@ struct decompose_t : contain<T> {
 		structure_param<T>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+
+	static_assert(DimMajor != DimMinor, "Cannot use the same name for both components of a dimension");
+	static_assert(T::struct_type::template all_accept<Dim>, "The structure does not have a dimension of this name");
+	static_assert(DimMajor == Dim || !T::struct_type::template any_accept<DimMajor>, "Dimension of this name already exists");
+	static_assert(DimMinor == Dim || !T::struct_type::template any_accept<DimMinor>, "Dimension of this name already exists");
+private:
+	template<class Original>
+	struct dim_replacement {
+		static_assert(!Original::dependent, "Cannot decompose a tuple index");
+		using major_length = std::conditional_t<Original::arg_length::is_known, dynamic_arg_length, unknown_arg_length>;
+		using minor_length = unknown_arg_length;
+		using type = function_type<DimMajor, major_length, function_type<DimMinor, minor_length, typename Original::ret_type>>;
+	};
+public:
+	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
 };
 
 template<char Dim, char DimMajor, char DimMinor>
 struct decompose_proto {
+	static constexpr bool is_proto_struct = true;
+
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) noexcept { return decompose_t<Dim, DimMajor, DimMinor, Struct>(s); }
 };

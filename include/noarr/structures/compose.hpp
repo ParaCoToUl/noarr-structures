@@ -23,10 +23,45 @@ struct compose_t : contain<T> {
 		structure_param<T>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+
+	static_assert(DimMajor != DimMinor, "Cannot compose a dimension with itself");
+	static_assert(T::struct_type::template all_accept<DimMajor>, "The structure does not have a dimension of this name");
+	static_assert(T::struct_type::template all_accept<DimMinor>, "The structure does not have a dimension of this name");
+	static_assert(Dim == DimMajor || Dim == DimMinor || !T::struct_type::template any_accept<Dim>, "Dimension of this name already exists");
+private:
+	template<class Original>
+	struct outer_dim_replacement {
+		static_assert(!Original::dependent, "Cannot compose a tuple index");
+		template<class OriginalInner>
+		struct inner_dim_replacement {
+			static_assert(!OriginalInner::dependent, "Cannot compose a tuple index");
+			using OrigMajor = std::conditional_t<Original::dim == DimMajor, Original, OriginalInner>;
+			using OrigMinor = std::conditional_t<Original::dim == DimMinor, Original, OriginalInner>;
+			static_assert(OrigMajor::dim == DimMajor && OrigMinor::dim == DimMinor, "bug");
+			static_assert(OrigMinor::arg_length::is_known, "The minor dimension length must be set before composition");
+
+			template<bool = OrigMinor::arg_length::is_static && OrigMajor::arg_length::is_static, bool = OrigMajor::arg_length::is_known, class = void>
+			struct composed_len;
+			template<class Useless>
+			struct composed_len<true, true, Useless> { using type = static_arg_length<OrigMajor::arg_length::value * OrigMinor::arg_length::value>; };
+			template<class Useless>
+			struct composed_len<false, true, Useless> { using type = dynamic_arg_length; };
+			template<class Useless>
+			struct composed_len<false, false, Useless> { using type = unknown_arg_length; };
+
+			using type = function_type<Dim, typename composed_len<>::type, typename OriginalInner::ret_type>;
+		};
+
+		using type = typename Original::ret_type::replace<inner_dim_replacement, DimMinor, DimMajor>;
+	};
+public:
+	using struct_type = typename T::struct_type::replace<outer_dim_replacement, DimMajor, DimMinor>;
 };
 
 template<char DimMajor, char DimMinor, char Dim>
 struct compose_proto {
+	static constexpr bool is_proto_struct = true;
+
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) noexcept { return compose_t<DimMajor, DimMinor, Dim, Struct>(s); }
 };

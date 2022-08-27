@@ -118,6 +118,7 @@ struct state : contain<typename StateItems::value_type...> {
 	}
 };
 
+// TODO specialize to fix and set_length
 template<class StateUpdates, class Struct>
 struct setter_t : contain<StateUpdates, Struct> {
 	using base = contain<StateUpdates, Struct>;
@@ -126,11 +127,55 @@ struct setter_t : contain<StateUpdates, Struct> {
 	constexpr StateUpdates state_update() const noexcept { return base::template get<0>(); }
 	constexpr Struct sub_structure() const noexcept { return base::template get<1>(); }
 	constexpr std::tuple<Struct> sub_structures() { return std::tuple(sub_structure()); }
+
+private:
+	template<char Dim, class ValueType>
+	struct replacers {
+		template<class Original>
+		struct index_dim_replacement;
+		template<class ArgLength, class RetType>
+		struct index_dim_replacement<function_type<Dim, ArgLength, RetType>> {
+			static_assert(ArgLength::is_known, "Set length before setting the value");
+			using type = RetType;
+		};
+		template<class... RetTypes>
+		struct index_dim_replacement<dep_function_type<Dim, RetTypes...>> {
+			using original = dep_function_type<Dim, RetTypes...>;
+			static_assert(ValueType::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
+			using type = typename dep_function_type<Dim, RetTypes...>::ret_type<ValueType::value>;
+		};
+		template<class Original>
+		struct length_dim_replacement {
+			static_assert(!Original::dependent, "Cannot set tuple length");
+			// TODO disallow resizing
+			//static_assert(!Original::arg_length::is_known, "Length already set");
+			using type = function_type<Dim, arg_length_from_t<ValueType>, typename Original::ret_type>;
+		};
+	};
+	template<class StateUpdatesTail = StateUpdates, class = void>
+	struct helper;
+	template<char Dim, class ValueType, class... StateItems>
+	struct helper<state<state_item<index_in<Dim>, ValueType>, StateItems...>> {
+		using result = typename helper<state<StateItems...>>::result::replace<replacers<Dim, ValueType>::template index_dim_replacement, Dim>;
+	};
+	template<char Dim, class ValueType, class... StateItems>
+	struct helper<state<state_item<length_in<Dim>, ValueType>, StateItems...>> {
+		using result = typename helper<state<StateItems...>>::result::replace<replacers<Dim, ValueType>::template length_dim_replacement, Dim>;
+	};
+	template<class Useless>
+	struct helper<state<>, Useless> {
+		using result = typename Struct::struct_type;
+	};
+public:
+	using struct_type = typename helper<>::result;
 };
 
 template<class StateUpdates>
 struct setter : contain<StateUpdates> {
 	explicit constexpr setter(StateUpdates u) noexcept : contain<StateUpdates>(u) {}
+
+	static constexpr bool is_proto_struct = true;
+
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) noexcept { return setter_t<StateUpdates, Struct>(contain<StateUpdates>::template get<0>(), s); }
 };
