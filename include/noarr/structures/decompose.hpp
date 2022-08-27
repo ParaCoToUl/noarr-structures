@@ -117,46 +117,6 @@ struct spi_length<QDim, decompose_t<Dim, DimMajor, DimMinor, T>> {
 	}
 };
 
-
-
-template<char Dim, char DimMajor, char DimMinor, class T>
-struct spi_traits<decompose_t<Dim, DimMajor, DimMinor, T>> {
-	template<class State>
-	static auto get(const decompose_t<Dim, DimMajor, DimMinor, T> &view, State state) {
-		if constexpr(State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
-			auto major_index = state.template get<index_in<DimMajor>>();
-			auto minor_index = state.template get<index_in<DimMinor>>();
-			auto minor_length = state.template get<length_in<DimMinor>>();
-			auto sub_state = state
-				.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
-				.template with<index_in<Dim>>(major_index*minor_length + minor_index);
-			return spi_traits_get(view.sub_structure(), sub_state);
-		} else {
-			auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-			return spi_traits_get(view.sub_structure(), sub_state);
-		}
-	}
-};
-
-template<char Dim, char DimMajor, char DimMinor, class T>
-struct spi_type<decompose_t<Dim, DimMajor, DimMinor, T>> {
-	template<class State>
-	static auto get(const decompose_t<Dim, DimMajor, DimMinor, T> &view, State state) {
-		if constexpr(State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
-			auto major_index = state.template get<index_in<DimMajor>>();
-			auto minor_index = state.template get<index_in<DimMinor>>();
-			auto minor_length = state.template get<length_in<DimMinor>>();
-			auto sub_state = state
-				.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
-				.template with<index_in<Dim>>(major_index*minor_length + minor_index);
-			return spi_type_get(view.sub_structure(), sub_state);
-		} else {
-			auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-			return spi_type_get(view.sub_structure(), sub_state);
-		}
-	}
-};
-
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_DECOMPOSE_HPP

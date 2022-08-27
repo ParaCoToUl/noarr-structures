@@ -116,6 +116,12 @@ struct state : contain<typename StateItems::value_type...> {
 	constexpr state<StateItems..., NewStateItems...> merge(const state<NewStateItems...> &other) const noexcept {
 		return state<StateItems..., NewStateItems...>(get<typename StateItems::tag>()..., other.template get<typename NewStateItems::tag>()...);
 	}
+
+	template<class Tag>
+	using get_t = decltype(std::declval<state>().template get<Tag>());
+
+	template<class... Tags>
+	using remove_t = decltype(std::declval<state>().template remove<Tags...>());
 };
 
 // TODO specialize to fix and set_length

@@ -1,180 +1,16 @@
 #ifndef NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 #define NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 
-#include <type_traits>
-
-#include "std_ext.hpp"
-#include "struct_decls.hpp"
-#include "scalar.hpp"
-#include "structs.hpp"
+#include "type.hpp"
 
 namespace noarr {
 
-template<bool IsCube, bool IsPoint>
-struct struct_traits {
-	static constexpr bool is_cube = IsCube;
-	static constexpr bool is_point = IsPoint;
-	static constexpr struct_traits<false, IsPoint> non_cube = {};
-	static constexpr struct_traits<IsCube, false> non_point = {};
-};
-
-
-
-template<class Struct>
-struct spi_traits;
-
-template<class Struct, class State>
-constexpr auto spi_traits_get(Struct str, State state) {
-	std::abort();
-	return spi_traits<Struct>::get(str, state);
-}
-
-template<class Struct, class State>
-using spi_traits_t = decltype(spi_traits_get(std::declval<Struct>(), std::declval<State>()));
-
-template<char Dim, std::size_t L, class T>
-struct spi_traits<array<Dim, L, T>> {
-	template<class State>
-	static auto get(array<Dim, L, T> arr, State state) {
-		auto sub_traits = spi_traits_get(arr.sub_structure(), state.template remove<index_in<Dim>, length_in<Dim>>());
-		if constexpr(State::template contains<index_in<Dim>>)
-			return sub_traits;
-		else
-			return sub_traits.non_point;
-	}
-};
-
-template<char Dim, class T>
-struct spi_traits<vector<Dim, T>> {
-	template<class State>
-	static auto get(vector<Dim, T> vec, State state) {
-		if constexpr(State::template contains<length_in<Dim>>) {
-			auto sub_traits = spi_traits_get(vec.sub_structure(), state.template remove<index_in<Dim>, length_in<Dim>>());
-			if constexpr(State::template contains<index_in<Dim>>)
-				return sub_traits;
-			else
-				return sub_traits.non_point;
-		} else {
-			return struct_traits<false, false>();
-		}
-	}
-};
-
-template<char Dim, class... Ts>
-struct spi_traits<tuple<Dim, Ts...>> {
-	template<class State>
-	static auto get(const tuple<Dim, Ts...> &tup, State state) {
-		if constexpr(State::template contains<index_in<Dim>>) {
-			static constexpr std::size_t index = state.template get<index_in<Dim>>();
-			auto sub_structure = tup.template sub_structure<index>();
-			auto sub_state = state.template remove<index_in<Dim>>();
-			return spi_traits_get(sub_structure, sub_state);
-		} else {
-			return struct_traits<false, false>();
-		}
-	}
-};
-
-template<class U, class T>
-struct spi_traits<setter_t<U, T>> {
-	template<class State>
-	static auto get(setter_t<U, T> setter, State state) {
-		return spi_traits_get(setter.sub_structure(), state.merge(setter.state_update()));
-	}
-};
-
-template<char Dim, char ViewDim, class T, class ShiftT, class LenT>
-struct spi_traits<view_t<Dim, ViewDim, T, ShiftT, LenT>> {
-	template<class State>
-	static auto get(const view_t<Dim, ViewDim, T, ShiftT, LenT> &view, State state) {
-		if constexpr(State::template contains<index_in<ViewDim>>) {
-			auto index = state.template get<index_in<ViewDim>>();
-			auto sub_state = state.template remove<index_in<ViewDim>>().template with<index_in<Dim>>(view.shift() + index);
-			return spi_traits_get(view.sub_structure(), sub_state);
-		} else {
-			return spi_traits_get(view.sub_structure(), state);
-		}
-	}
-};
-
 template<class T>
-struct spi_traits<scalar<T>> {
-	template<class State>
-	static struct_traits<true, true> get(scalar<T>, State) {
-		std::abort();
-	}
+struct type_is_point : std::false_type {
+	static_assert(is_struct_type<T>(), "type_is_point is only applicable to struct types (type.hpp)");
 };
-
-
-
-template<class Struct>
-struct spi_type;
-
-template<class Struct, class State>
-constexpr auto spi_type_get(Struct str, State state) {
-	std::abort();
-	return spi_type<Struct>::get(str, state);
-}
-
-template<class Struct, class State>
-using spi_type_t = typename decltype(spi_type_get(std::declval<Struct>(), std::declval<State>()))::type;
-
-template<char Dim, std::size_t L, class T>
-struct spi_type<array<Dim, L, T>> {
-	template<class State>
-	static auto get(array<Dim, L, T> arr, State state) {
-		return spi_type_get(arr.sub_structure(), state);
-	}
-};
-
-template<char Dim, class T>
-struct spi_type<vector<Dim, T>> {
-	template<class State>
-	static auto get(vector<Dim, T> vec, State state) {
-		return spi_type_get(vec.sub_structure(), state);
-	}
-};
-
-template<char Dim, class... Ts>
-struct spi_type<tuple<Dim, Ts...>> {
-	template<class State>
-	static auto get(const tuple<Dim, Ts...> &tup, State state) {
-		static constexpr std::size_t index = state.template get<index_in<Dim>>();
-		auto sub_structure = tup.template sub_structure<index>();
-		auto sub_state = state.template remove<index_in<Dim>>();
-		return spi_type_get(sub_structure, sub_state);
-	}
-};
-
-template<class U, class T>
-struct spi_type<setter_t<U, T>> {
-	template<class State>
-	static auto get(setter_t<U, T> setter, State state) {
-		return spi_type_get(setter.sub_structure(), state.merge(setter.state_update()));
-	}
-};
-
-template<char Dim, char ViewDim, class T, class ShiftT, class LenT>
-struct spi_type<view_t<Dim, ViewDim, T, ShiftT, LenT>> {
-	template<class State>
-	static auto get(const view_t<Dim, ViewDim, T, ShiftT, LenT> &view, State state) {
-		auto index = state.template get<index_in<ViewDim>>();
-		auto sub_state = state.template remove<index_in<ViewDim>>().template with<index_in<Dim>>(view.shift() + index);
-		return spi_type_get(view.sub_structure(), state.merge(sub_state));
-	}
-};
-
-template<class T>
-struct spi_type<scalar<T>> {
-	template<class State>
-	static spi_type<scalar<T>> get(scalar<T>, State) {
-		std::abort();
-	}
-
-	using type = T;
-};
-
-
+template<class ValueType>
+struct type_is_point<scalar_type<ValueType>> : std::true_type {};
 
 /**
  * @brief returns whether the structure is a point (a structure with no dimensions, or with all dimensions being fixed)
@@ -182,7 +18,18 @@ struct spi_type<scalar<T>> {
  * @tparam T: the structure
  */
 template<class T>
-struct is_point : std::integral_constant<bool, spi_traits_t<T, state<>>::is_point> {};
+struct is_point : type_is_point<typename T::struct_type> {};
+
+
+
+template<class T>
+struct type_is_cube : std::false_type {
+	static_assert(is_struct_type<T>(), "type_is_cube is only applicable to struct types (type.hpp)");
+};
+template<class ValueType>
+struct type_is_cube<scalar_type<ValueType>> : std::true_type {};
+template<char Dim, class ArgLength, class RetType>
+struct type_is_cube<function_type<Dim, ArgLength, RetType>> : std::integral_constant<bool, ArgLength::is_known && type_is_cube<RetType>()> {};
 
 /**
  * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all dynamic)
@@ -190,7 +37,40 @@ struct is_point : std::integral_constant<bool, spi_traits_t<T, state<>>::is_poin
  * @tparam T: the structure
  */
 template<class T>
-struct is_cube : std::integral_constant<bool, spi_traits_t<T, state<>>::is_cube> {};
+struct is_cube : type_is_cube<typename T::struct_type> {};
+
+
+
+namespace helpers {
+
+template<class T, class State>
+struct scalar_t_impl;
+template<char Dim, class ArgLength, class RetType, class State>
+struct scalar_t_impl<function_type<Dim, ArgLength, RetType>, State> {
+	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
+	using type = typename scalar_t_impl<RetType, typename State::remove_t<index_in<Dim>, length_in<Dim>>>::type;
+};
+template<char Dim, class... RetTypes, class State>
+struct scalar_t_impl<dep_function_type<Dim, RetTypes...>, State> {
+	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
+	static_assert(State::template get_t<index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
+	using type = typename scalar_t_impl<typename dep_function_type<Dim, RetTypes...>::ret_type<State::template get_t<index_in<Dim>>::value>, typename State::template remove_t<index_in<Dim>, length_in<Dim>>>::type;
+};
+template<class ValueType, class State>
+struct scalar_t_impl<scalar_type<ValueType>, State> {
+	static_assert(State::is_empty, "Superfluous parameters passed in the state");
+	using type = ValueType;
+};
+
+} // namespace helpers
+
+/**
+ * @brief returns the type of the value described by a `scalar<...>`
+ * 
+ * @tparam T: the `scalar<...>`
+ */
+template<class T, class State = state<>>
+using scalar_t = typename helpers::scalar_t_impl<T, State>::type;
 
 } // namespace noarr
 

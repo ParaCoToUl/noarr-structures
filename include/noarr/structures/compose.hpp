@@ -116,26 +116,6 @@ struct spi_length<QDim, compose_t<DimMajor, DimMinor, Dim, T>> {
 	}
 };
 
-
-
-template<char DimMajor, char DimMinor, char Dim, class T>
-struct spi_traits<compose_t<DimMajor, DimMinor, Dim, T>> {
-	template<class State>
-	static auto get(const compose_t<DimMajor, DimMinor, Dim, T> &view, State state) {
-		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		return spi_traits_get(view.sub_structure(), sub_state);
-	}
-};
-
-template<char DimMajor, char DimMinor, char Dim, class T>
-struct spi_type<compose_t<DimMajor, DimMinor, Dim, T>> {
-	template<class State>
-	static auto get(const compose_t<DimMajor, DimMinor, Dim, T> &view, State state) {
-		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		return spi_type_get(view.sub_structure(), sub_state);
-	}
-};
-
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_DECOMPOSE_HPP
