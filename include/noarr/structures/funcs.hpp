@@ -147,7 +147,7 @@ struct offset_impl : contain<State> {
 
 	template<class T>
 	constexpr auto operator()(T t) const noexcept {
-		return spi_offset<T>::get(t, contain<State>::template get<0>());
+		return offset_of<scalar<scalar_t<typename T::struct_type, State>>>(t, contain<State>::template get<0>());
 	}
 };
 

@@ -179,6 +179,12 @@ public:
 		// TODO check absence of new items
 		return sub_structure().size(state.merge(state_update()));
 	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		// TODO check absence of new items
+		return offset_of<Sub>(sub_structure(), state.merge(state_update()));
+	}
 };
 
 template<class StateUpdates>

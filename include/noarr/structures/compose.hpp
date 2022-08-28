@@ -3,6 +3,7 @@
 
 #include "std_ext.hpp"
 #include "structs.hpp"
+#include "struct_decls.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"
 #include "struct_getters.hpp"
@@ -62,6 +63,21 @@ public:
 		// TODO check and translate
 		return sub_structure().size(state);
 	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		// TODO check
+		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		auto minor_length = spi_length_get<DimMinor>(sub_structure(), tmp_state);
+		auto index = state.template get<index_in<Dim>>();
+		auto sub_state = tmp_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
+		if constexpr(State::template contains<length_in<Dim>>) {
+			auto length = state.template get<length_in<Dim>>();
+			return offset_of<Sub>(sub_structure(), sub_state.template with<length_in<DimMajor>>(length / minor_length));
+		} else {
+			return offset_of<Sub>(sub_structure(), sub_state);
+		}
+	}
 };
 
 template<char DimMajor, char DimMinor, char Dim>
@@ -83,23 +99,6 @@ constexpr auto compose(MinorSizeT minor_length) {
 }
 
 
-
-template<char DimMajor, char DimMinor, char Dim, class T>
-struct spi_offset<compose_t<DimMajor, DimMinor, Dim, T>> {
-	template<class State>
-	static constexpr std::size_t get(const compose_t<DimMajor, DimMinor, Dim, T> &view, State state) {
-		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		auto minor_length = spi_length_get<DimMinor>(view.sub_structure(), tmp_state);
-		auto index = state.template get<index_in<Dim>>();
-		auto sub_state = tmp_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
-		if constexpr(State::template contains<length_in<Dim>>) {
-			auto length = state.template get<length_in<Dim>>();
-			return spi_offset_get(view.sub_structure(), sub_state.template with<length_in<DimMajor>>(length / minor_length));
-		} else {
-			return spi_offset_get(view.sub_structure(), sub_state);
-		}
-	}
-};
 
 template<char QDim, char DimMajor, char DimMinor, char Dim, class T>
 struct spi_length<QDim, compose_t<DimMajor, DimMinor, Dim, T>> {

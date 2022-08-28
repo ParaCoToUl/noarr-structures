@@ -40,6 +40,16 @@ struct tuple : contain<TS...> {
 		return size_inner(is, state.template remove<index_in<Dim>>());
 	}
 
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
+		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
+		static_assert(State::template get_t<index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
+		constexpr std::size_t index = State::template get_t<index_in<Dim>>::value;
+		auto sub_state = state.template remove<index_in<Dim>>(); // TODO remove all indices for size_inner
+		return size_inner(std::make_index_sequence<index>(), sub_state) + offset_of<Sub>(sub_structure<index>(), sub_state);
+	}
+
 private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
@@ -50,6 +60,7 @@ private:
 
 	template<std::size_t... IS, class State>
 	constexpr std::size_t size_inner(std::index_sequence<IS...>, State sub_state) const noexcept {
+		(void) sub_state; // don't complain about unused parameter in case of empty fold
 		return (0 + ... + sub_structure<IS>().size(sub_state));
 	}
 };
@@ -82,6 +93,16 @@ struct array : contain<T> {
 	constexpr std::size_t size(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		return L * sub_structure().size(state.template remove<index_in<Dim>>());
+	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
+		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
+		std::size_t index = state.template get<index_in<Dim>>();
+		auto sub_struct = sub_structure();
+		auto sub_state = state.template remove<index_in<Dim>>();
+		return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
 	}
 };
 
@@ -121,6 +142,15 @@ struct vector : contain<T> {
 		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
 		std::size_t len = state.template get<length_in<Dim>>();
 		return len * sub_structure().size(state.template remove<index_in<Dim>, length_in<Dim>>());
+	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
+		std::size_t index = state.template get<index_in<Dim>>();
+		auto sub_struct = sub_structure();
+		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
 	}
 };
 
@@ -186,6 +216,15 @@ public:
 	constexpr std::size_t size(State state) const noexcept {
 		// TODO check and translate
 		return sub_structure().size(state);
+	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		// TODO length
+		static_assert(State::template contains<index_in<ViewDim>>, "All indices must be set");
+		std::size_t index = state.template get<index_in<ViewDim>>();
+		auto sub_state = state.template remove<index_in<ViewDim>>().template with<index_in<Dim>>(shift() + index);
+		return offset_of<Sub>(sub_structure(), sub_state);
 	}
 };
 

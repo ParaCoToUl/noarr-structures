@@ -3,6 +3,7 @@
 
 #include "std_ext.hpp"
 #include "structs.hpp"
+#include "struct_decls.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"
 #include "struct_getters.hpp"
@@ -44,6 +45,24 @@ public:
 		// TODO check and translate
 		return sub_structure().size(state);
 	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		// TODO check
+		auto major_index = state.template get<index_in<DimMajor>>();
+		auto minor_index = state.template get<index_in<DimMinor>>();
+		auto minor_length = state.template get<length_in<DimMinor>>();
+		auto tmp_state = state
+			.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
+			.template with<index_in<Dim>>(major_index*minor_length + minor_index);
+		if constexpr(State::template contains<length_in<DimMajor>>) {
+			auto major_length = state.template get<length_in<DimMajor>>();
+			auto sub_state = tmp_state.template with<length_in<Dim>>(major_length*minor_length);
+			return offset_of<Sub>(sub_structure(), sub_state);
+		} else {
+			return offset_of<Sub>(sub_structure(), tmp_state);
+		}
+	}
 };
 
 template<char Dim, char DimMajor, char DimMinor>
@@ -65,26 +84,6 @@ constexpr auto decompose(MinorSizeT minor_length) {
 }
 
 
-
-template<char Dim, char DimMajor, char DimMinor, class T>
-struct spi_offset<decompose_t<Dim, DimMajor, DimMinor, T>> {
-	template<class State>
-	static constexpr std::size_t get(const decompose_t<Dim, DimMajor, DimMinor, T> &view, State state) {
-		auto major_index = state.template get<index_in<DimMajor>>();
-		auto minor_index = state.template get<index_in<DimMinor>>();
-		auto minor_length = state.template get<length_in<DimMinor>>();
-		auto tmp_state = state
-			.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
-			.template with<index_in<Dim>>(major_index*minor_length + minor_index);
-		if constexpr(State::template contains<length_in<DimMajor>>) {
-			auto major_length = state.template get<length_in<DimMajor>>();
-			auto sub_state = tmp_state.template with<length_in<Dim>>(major_length*minor_length);
-			return spi_offset_get(view.sub_structure(), sub_state);
-		} else {
-			return spi_offset_get(view.sub_structure(), tmp_state);
-		}
-	}
-};
 
 template<char QDim, char Dim, char DimMajor, char DimMinor, class T>
 struct spi_length<QDim, decompose_t<Dim, DimMajor, DimMinor, T>> {

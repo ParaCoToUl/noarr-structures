@@ -57,6 +57,12 @@ struct scalar : contain<> {
 		static_assert(State::is_empty, "Unused items in state");
 		return sizeof(T);
 	}
+
+	template<class Sub, class State>
+	std::size_t strict_offset_of(State) const noexcept {
+		static_assert(always_false<Sub>, "Substructure was not found");
+		std::terminate();
+	}
 };
 
 } // namespace noarr

@@ -189,6 +189,9 @@ struct tuple_forall_impl<Function, std::tuple<>> : std::true_type {};
 template<template<class> class Function, class Tuple>
 using tuple_forall = helpers::tuple_forall_impl<Function, Tuple>;
 
+template<class>
+static constexpr bool always_false = false;
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_STD_EXT_HPP
