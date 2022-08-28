@@ -6,7 +6,6 @@
 #include "struct_decls.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"
-#include "struct_getters.hpp"
 #include "funcs.hpp"
 
 namespace noarr {
@@ -63,6 +62,33 @@ public:
 			return offset_of<Sub>(sub_structure(), tmp_state);
 		}
 	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		// TODO check and translate
+		if constexpr(QDim == DimMinor) {
+			static_assert(always_false_dim<QDim>, "Length has not been set");
+			return 0;
+		} else if constexpr(QDim == DimMajor) {
+			auto minor_length = state.template get<length_in<DimMinor>>();
+			auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
+			return sub_structure().template length<Dim>(sub_state) / minor_length;
+		} else {
+			static_assert(QDim != Dim, "Index in this dimension is overriden by a substructure");
+			if constexpr(State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
+				auto major_index = state.template get<index_in<DimMajor>>();
+				auto minor_index = state.template get<index_in<DimMinor>>();
+				auto minor_length = state.template get<length_in<DimMinor>>();
+				auto sub_state = state
+					.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
+					.template with<index_in<Dim>>(major_index*minor_length + minor_index);
+				return sub_structure().template length<QDim>(sub_state);
+			} else {
+				auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
+				return sub_structure().template length<QDim>(sub_state);
+			}
+		}
+	}
 };
 
 template<char Dim, char DimMajor, char DimMinor>
@@ -82,37 +108,6 @@ template<char Dim, char DimMajor, char DimMinor, class MinorSizeT>
 constexpr auto decompose(MinorSizeT minor_length) {
 	return decompose_proto<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
 }
-
-
-
-template<char QDim, char Dim, char DimMajor, char DimMinor, class T>
-struct spi_length<QDim, decompose_t<Dim, DimMajor, DimMinor, T>> {
-	template<class State>
-	static constexpr std::size_t get(const decompose_t<Dim, DimMajor, DimMinor, T> &view, State state) {
-		if constexpr(QDim == DimMinor) {
-			static_assert(helpers::wrong_dim<QDim>, "Length has not been set");
-			return 0;
-		} else if constexpr(QDim == DimMajor) {
-			auto minor_length = state.template get<length_in<DimMinor>>();
-			auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-			return spi_length_get<Dim>(view.sub_structure(), sub_state) / minor_length;
-		} else {
-			static_assert(QDim != Dim, "Index in this dimension is overriden by a substructure");
-			if constexpr(State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
-				auto major_index = state.template get<index_in<DimMajor>>();
-				auto minor_index = state.template get<index_in<DimMinor>>();
-				auto minor_length = state.template get<length_in<DimMinor>>();
-				auto sub_state = state
-					.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
-					.template with<index_in<Dim>>(major_index*minor_length + minor_index);
-				return spi_length_get<QDim>(view.sub_structure(), sub_state);
-			} else {
-				auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-				return spi_length_get<QDim>(view.sub_structure(), sub_state);
-			}
-		}
-	}
-};
 
 } // namespace noarr
 

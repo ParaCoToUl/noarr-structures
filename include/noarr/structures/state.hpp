@@ -185,6 +185,14 @@ public:
 		// TODO check absence of new items
 		return offset_of<Sub>(sub_structure(), state.merge(state_update()));
 	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		// TODO do not test, decide from the type and templates
+		auto sub_state = state.merge(state_update());
+		static_assert(!decltype(sub_state)::template contains<index_in<QDim>>, "Index in this dimension is overriden by a substructure");
+		return sub_structure().template length<QDim>(sub_state);
+	}
 };
 
 template<class StateUpdates>

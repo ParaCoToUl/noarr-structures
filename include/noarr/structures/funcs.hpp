@@ -5,7 +5,6 @@
 #include "structs.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"
-#include "struct_getters.hpp"
 #include "pipes.hpp"
 
 namespace noarr {
@@ -101,7 +100,7 @@ struct get_length {
 
 	template<class T>
 	constexpr std::size_t operator()(T t) const noexcept {
-		return spi_length<Dim, T>::get(t, empty_state);
+		return t.template length<Dim>(empty_state);
 	}
 };
 

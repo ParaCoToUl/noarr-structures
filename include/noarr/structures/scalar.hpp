@@ -63,6 +63,12 @@ struct scalar : contain<> {
 		static_assert(always_false<Sub>, "Substructure was not found");
 		std::terminate();
 	}
+
+	template<char QDim, class State>
+	std::size_t length(State state) const noexcept {
+		static_assert(always_false_dim<QDim>, "Index in this dimension is not accepted by any substructure");
+		std::terminate();
+	}
 };
 
 } // namespace noarr

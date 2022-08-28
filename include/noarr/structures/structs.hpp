@@ -50,6 +50,19 @@ struct tuple : contain<TS...> {
 		return size_inner(std::make_index_sequence<index>(), sub_state) + offset_of<Sub>(sub_structure<index>(), sub_state);
 	}
 
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
+		if constexpr(QDim == Dim) {
+			// TODO check remaining state
+			return sizeof...(TS);
+		} else {
+			static_assert(State::template contains<index_in<Dim>>, "Tuple indices must be set");
+			constexpr std::size_t index = state.template get<index_in<Dim>>();
+			return sub_structure<index>().template length<QDim>(state.template remove<index_in<Dim>>());
+		}
+	}
+
 private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
@@ -104,6 +117,17 @@ struct array : contain<T> {
 		auto sub_state = state.template remove<index_in<Dim>>();
 		return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
 	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
+		if constexpr(QDim == Dim) {
+			// TODO check remaining state
+			return L;
+		} else {
+			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>>());
+		}
+	}
 };
 
 template<char Dim, std::size_t L>
@@ -151,6 +175,17 @@ struct vector : contain<T> {
 		auto sub_struct = sub_structure();
 		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
 		return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
+	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		if constexpr(QDim == Dim) {
+			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
+			// TODO check remaining state
+			return state.template get<length_in<Dim>>();
+		} else {
+			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>, length_in<Dim>>());
+		}
 	}
 };
 
@@ -225,6 +260,29 @@ public:
 		std::size_t index = state.template get<index_in<ViewDim>>();
 		auto sub_state = state.template remove<index_in<ViewDim>>().template with<index_in<Dim>>(shift() + index);
 		return offset_of<Sub>(sub_structure(), sub_state);
+	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		// TODO clean up the code after split
+		if constexpr(QDim == ViewDim && !std::is_same_v<LenT, view_default_len>) {
+			// TODO check remaining state
+			return len() - shift();
+		} else {
+			if constexpr(State::template contains<index_in<ViewDim>>) {
+				auto index = state.template get<index_in<ViewDim>>();
+				auto sub_state = state.template remove<index_in<ViewDim>>().template with<index_in<Dim>>(shift() + index);
+				if constexpr(QDim == ViewDim)
+					return sub_structure().template length<Dim>(sub_state) - shift();
+				else
+					return sub_structure().template length<QDim>(sub_state);
+			} else {
+				if constexpr(QDim == ViewDim)
+					return sub_structure().template length<Dim>(state) - shift();
+				else
+					return sub_structure().template length<QDim>(state);
+			}
+		}
 	}
 };
 

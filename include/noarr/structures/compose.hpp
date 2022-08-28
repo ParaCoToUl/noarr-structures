@@ -6,7 +6,6 @@
 #include "struct_decls.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"
-#include "struct_getters.hpp"
 #include "funcs.hpp"
 
 namespace noarr {
@@ -68,7 +67,7 @@ public:
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
 		// TODO check
 		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		auto minor_length = spi_length_get<DimMinor>(sub_structure(), tmp_state);
+		auto minor_length = sub_structure().template length<DimMinor>(tmp_state);
 		auto index = state.template get<index_in<Dim>>();
 		auto sub_state = tmp_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
 		if constexpr(State::template contains<length_in<Dim>>) {
@@ -76,6 +75,17 @@ public:
 			return offset_of<Sub>(sub_structure(), sub_state.template with<length_in<DimMajor>>(length / minor_length));
 		} else {
 			return offset_of<Sub>(sub_structure(), sub_state);
+		}
+	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		// TODO use length?
+		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		if constexpr(QDim == Dim) {
+			return sub_structure().template length<DimMajor>(sub_state) * sub_structure().template length<DimMinor>(sub_state);
+		} else {
+			return sub_structure().template length<QDim>(sub_state);
 		}
 	}
 };
@@ -97,21 +107,6 @@ template<char DimMajor, char DimMinor, char Dim, class MinorSizeT>
 constexpr auto compose(MinorSizeT minor_length) {
 	return set_length<DimMinor>(minor_length) ^ compose_proto<DimMajor, DimMinor, Dim>();
 }
-
-
-
-template<char QDim, char DimMajor, char DimMinor, char Dim, class T>
-struct spi_length<QDim, compose_t<DimMajor, DimMinor, Dim, T>> {
-	template<class State>
-	static constexpr std::size_t get(const compose_t<DimMajor, DimMinor, Dim, T> &view, State state) {
-		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		if constexpr(QDim == Dim) {
-			return spi_length_get<DimMajor>(view.sub_structure(), sub_state) * spi_length_get<DimMinor>(view.sub_structure(), sub_state);
-		} else {
-			return spi_length_get<QDim>(view.sub_structure(), sub_state);
-		}
-	}
-};
 
 } // namespace noarr
 

@@ -191,6 +191,8 @@ using tuple_forall = helpers::tuple_forall_impl<Function, Tuple>;
 
 template<class>
 static constexpr bool always_false = false;
+template<char>
+static constexpr bool always_false_dim = false;
 
 } // namespace noarr
 
