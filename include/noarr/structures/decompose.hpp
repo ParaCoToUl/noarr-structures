@@ -38,6 +38,12 @@ private:
 	};
 public:
 	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
+
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		// TODO check and translate
+		return sub_structure().size(state);
+	}
 };
 
 template<char Dim, char DimMajor, char DimMinor>
@@ -59,14 +65,6 @@ constexpr auto decompose(MinorSizeT minor_length) {
 }
 
 
-
-template<char Dim, char DimMajor, char DimMinor, class T>
-struct spi_size<decompose_t<Dim, DimMajor, DimMinor, T>> {
-	template<class State>
-	static constexpr std::size_t get(const decompose_t<Dim, DimMajor, DimMinor, T> &view, State state) {
-		return spi_size_get(view.sub_structure(), state);
-	}
-};
 
 template<char Dim, char DimMajor, char DimMinor, class T>
 struct spi_offset<decompose_t<Dim, DimMajor, DimMinor, T>> {

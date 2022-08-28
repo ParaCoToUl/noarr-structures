@@ -21,7 +21,7 @@ struct tuple : contain<TS...> {
 
 	template<std::size_t Index>
 	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
-	constexpr std::tuple<TS...> sub_structures() const noexcept { return sub_structures(std::index_sequence_for<TS...>()); }
+	constexpr std::tuple<TS...> sub_structures() const noexcept { return sub_structures(is); }
 	using description = struct_description<
 		char_pack<'t', 'u', 'p', 'l', 'e'>,
 		dims_impl<Dim>,
@@ -34,10 +34,23 @@ struct tuple : contain<TS...> {
 	static_assert(!(TS::struct_type::template any_accept<Dim> || ...), "Dimension name already used");
 	using struct_type = dep_function_type<Dim, typename TS::struct_type...>;
 
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
+		return size_inner(is, state.template remove<index_in<Dim>>());
+	}
+
 private:
+	static constexpr std::index_sequence_for<TS...> is = {};
+
 	template<std::size_t... IS>
 	constexpr std::tuple<TS...> sub_structures(std::index_sequence<IS...>) const noexcept {
 		return std::tuple(sub_structure<IS>()...);
+	}
+
+	template<std::size_t... IS, class State>
+	constexpr std::size_t size_inner(std::index_sequence<IS...>, State sub_state) const noexcept {
+		return (0 + ... + sub_structure<IS>().size(sub_state));
 	}
 };
 
@@ -64,6 +77,12 @@ struct array : contain<T> {
 
 	static_assert(!T::struct_type::template any_accept<Dim>, "Dimension name already used");
 	using struct_type = function_type<Dim, static_arg_length<L>, typename T::struct_type>;
+
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
+		return L * sub_structure().size(state.template remove<index_in<Dim>>());
+	}
 };
 
 template<char Dim, std::size_t L>
@@ -96,6 +115,13 @@ struct vector : contain<T> {
 
 	static_assert(!T::struct_type::template any_accept<Dim>, "Dimension name already used");
 	using struct_type = function_type<Dim, unknown_arg_length, typename T::struct_type>;
+
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
+		std::size_t len = state.template get<length_in<Dim>>();
+		return len * sub_structure().size(state.template remove<index_in<Dim>, length_in<Dim>>());
+	}
 };
 
 template<char Dim>
@@ -155,6 +181,12 @@ private:
 	};
 public:
 	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
+
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		// TODO check and translate
+		return sub_structure().size(state);
+	}
 };
 
 template<char Dim, char ViewDim, class ShiftT, class LenT>

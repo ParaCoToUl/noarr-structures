@@ -179,7 +179,7 @@ struct get_size {
 
 	template<class T>
 	constexpr auto operator()(T t) const noexcept {
-		return spi_size<T>::get(t, empty_state);
+		return t.size(empty_state);
 	}
 };
 

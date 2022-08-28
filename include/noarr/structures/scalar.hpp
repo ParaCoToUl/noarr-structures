@@ -51,6 +51,12 @@ struct scalar : contain<> {
 	static constexpr std::size_t length() noexcept { return 0; }
 
 	using struct_type = scalar_type<T>;
+
+	template<class State>
+	constexpr std::size_t size(State) const noexcept {
+		static_assert(State::is_empty, "Unused items in state");
+		return sizeof(T);
+	}
 };
 
 } // namespace noarr

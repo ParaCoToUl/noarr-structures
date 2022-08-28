@@ -173,6 +173,12 @@ private:
 	};
 public:
 	using struct_type = typename helper<>::result;
+
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		// TODO check absence of new items
+		return sub_structure().size(state.merge(state_update()));
+	}
 };
 
 template<class StateUpdates>

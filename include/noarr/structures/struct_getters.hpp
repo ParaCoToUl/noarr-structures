@@ -19,74 +19,11 @@ namespace helpers {
 
 
 
-template<class Struct>
-struct spi_size;
-
-template<class Struct, class... State>
-constexpr std::size_t spi_size_get(Struct str, State... state) {
-	return spi_size<Struct>::get(str, state...);
-}
-
-template<char Dim, std::size_t L, class T>
-struct spi_size<array<Dim, L, T>> {
-	template<class State>
-	static constexpr std::size_t get(const array<Dim, L, T> &arr, State state) {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot resize an array");
-		auto sub_structure = arr.sub_structure();
-		auto sub_state = state.template remove<index_in<Dim>>();
-		std::size_t sub_size = spi_size_get(sub_structure, sub_state);
-		return L*sub_size;
-	}
-};
-
-template<char Dim, class T>
-struct spi_size<vector<Dim, T>> {
-	template<class State>
-	static constexpr std::size_t get(const vector<Dim, T> &vec, State state) {
-		std::size_t length = state.template get<length_in<Dim>>();
-		auto sub_structure = vec.sub_structure();
-		auto sub_state = state.template remove<length_in<Dim>, index_in<Dim>>();
-		std::size_t sub_size = spi_size_get(sub_structure, sub_state);
-		return length*sub_size;
-	}
-};
-
-template<char Dim, class... Ts>
-struct spi_size<tuple<Dim, Ts...>> {
-	template<class State>
-	static constexpr std::size_t get(const tuple<Dim, Ts...> &tup, State state) {
-		return get(tup, state, std::make_index_sequence<sizeof...(Ts)>());
-	}
-
-	template<class State, std::size_t... Indices>
+struct deprecated_tuple_size {
+	template<char Dim, class... Ts, class State, std::size_t... Indices>
 	static constexpr std::size_t get(const tuple<Dim, Ts...> &tup, State state, std::index_sequence<Indices...>) {
 		(void) state; // don't complain about unused parameter in case of empty fold
-		return (0 + ... + spi_size_get(tup.template sub_structure<Indices>(), state));
-	}
-};
-
-template<class U, class T>
-struct spi_size<setter_t<U, T>> {
-	template<class State>
-	static constexpr std::size_t get(const setter_t<U, T> &setter, State state) {
-		return spi_size_get(setter.sub_structure(), state.merge(setter.state_update()));
-	}
-};
-
-template<char Dim, char ViewDim, class T, class ShiftT, class LenT>
-struct spi_size<view_t<Dim, ViewDim, T, ShiftT, LenT>> {
-	template<class State>
-	static constexpr std::size_t get(const view_t<Dim, ViewDim, T, ShiftT, LenT> &view, State state) {
-		return spi_size_get(view.sub_structure(), state);
-	}
-};
-
-template<class T>
-struct spi_size<scalar<T>> {
-	template<class State>
-	static constexpr std::size_t get(const scalar<T> &, State) {
-		static_assert(State::is_empty, "Unused items in state");
-		return sizeof(T);
+		return (0 + ... + tup.template sub_structure<Indices>().size(state));
 	}
 };
 
@@ -107,7 +44,7 @@ struct spi_offset<array<Dim, L, T>> {
 		std::size_t index = state.template get<index_in<Dim>>();
 		auto sub_structure = arr.sub_structure();
 		auto sub_state = state.template remove<length_in<Dim>, index_in<Dim>>();
-		std::size_t sub_size = spi_size_get(sub_structure, sub_state);
+		std::size_t sub_size = sub_structure.size(sub_state);
 		return index*sub_size + spi_offset_get(sub_structure, sub_state);
 	}
 };
@@ -119,7 +56,7 @@ struct spi_offset<vector<Dim, T>> {
 		std::size_t index = state.template get<index_in<Dim>>();
 		auto sub_structure = vec.sub_structure();
 		auto sub_state = state.template remove<length_in<Dim>, index_in<Dim>>();
-		std::size_t sub_size = spi_size_get(sub_structure, sub_state);
+		std::size_t sub_size = sub_structure.size(sub_state);
 		return index*sub_size + spi_offset_get(sub_structure, sub_state);
 	}
 };
@@ -131,7 +68,7 @@ struct spi_offset<tuple<Dim, Ts...>> {
 		constexpr std::size_t index = state.template get<index_in<Dim>>();
 		auto sub_structure = tup.template sub_structure<index>();
 		auto sub_state = state.template remove<length_in<Dim>, index_in<Dim>>();
-		return spi_size_get(tup, sub_state, std::make_index_sequence<index>()) + spi_offset_get(sub_structure, sub_state);
+		return deprecated_tuple_size::get(tup, sub_state, std::make_index_sequence<index>()) + spi_offset_get(sub_structure, sub_state);
 	}
 };
 
