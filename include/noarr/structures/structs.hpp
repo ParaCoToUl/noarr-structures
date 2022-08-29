@@ -54,6 +54,7 @@ struct tuple : contain<TS...> {
 	constexpr std::size_t length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(QDim == Dim) {
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			// TODO check remaining state
 			return sizeof...(TS);
 		} else {
@@ -122,6 +123,7 @@ struct array : contain<T> {
 	constexpr std::size_t length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		if constexpr(QDim == Dim) {
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			// TODO check remaining state
 			return L;
 		} else {
@@ -180,6 +182,7 @@ struct vector : contain<T> {
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
 			// TODO check remaining state
 			return state.template get<length_in<Dim>>();
@@ -197,7 +200,7 @@ struct vector<Dim> {
 	constexpr auto instantiate_and_construct(Struct s) noexcept { return vector<Dim, Struct>(s); }
 };
 
-template<class Struct, class ProtoStruct, class = std::enable_if_t<ProtoStruct::is_proto_struct, decltype(std::declval<Struct>().sub_structures())>>
+template<class Struct, class ProtoStruct, class = std::enable_if_t<is_struct<Struct>::value && ProtoStruct::is_proto_struct>>
 constexpr auto operator ^(Struct s, ProtoStruct p) {
 	return p.instantiate_and_construct(s);
 }
