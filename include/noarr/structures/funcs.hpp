@@ -116,17 +116,6 @@ constexpr auto fix(Ts... ts) noexcept {
 }
 
 /**
- * @brief shifts an index (or indices) given by dimension name(s) in a structure
- * 
- * @tparam Dims: the dimension names
- * @param ts: parameters for shifting the indices
- */
-template<char... Dims, class... Ts>
-constexpr auto shift(Ts... ts) noexcept {
-	return (unit_struct ^ ... ^ view<Dims>(ts));
-}
-
-/**
  * @brief returns the offset of a substructure given by a dimension name in a structure
  * 
  * @tparam Dim: the dimension name

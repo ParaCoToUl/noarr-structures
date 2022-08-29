@@ -4,5 +4,6 @@
  */
 
 #include "structures/structs.hpp"
+#include "structures/view.hpp"
 #include "structures/funcs.hpp"
 #include "structures/wrapper.hpp"
