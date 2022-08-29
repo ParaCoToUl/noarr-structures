@@ -3,7 +3,6 @@
 
 #include "struct_decls.hpp"
 #include "contain.hpp"
-#include "scalar.hpp"
 #include "state.hpp"
 #include "type.hpp"
 
@@ -241,7 +240,7 @@ struct shift_proto : contain<StartT> {
  * @param start: parameters for shifting the indices
  */
 template<char... Dim, class... StartT>
-constexpr auto shift(StartT... start) noexcept { return (unit_struct ^ ... ^ shift_proto<Dim, StartT>(start)); }
+constexpr auto shift(StartT... start) noexcept { return (unit_struct ^ ... ^ shift_proto<Dim, good_index_t<StartT>>(start)); }
 
 template<char Dim, class T, class StartT, class LenT>
 struct slice_t : contain<T, StartT, LenT> {
@@ -324,7 +323,7 @@ struct slice_proto : contain<StartT, LenT> {
 };
 
 template<char Dim, class StartT, class LenT>
-constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, StartT, LenT>(start, len); }
+constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, good_index_t<StartT>, good_index_t<LenT>>(start, len); }
 
 } // namespace noarr
 

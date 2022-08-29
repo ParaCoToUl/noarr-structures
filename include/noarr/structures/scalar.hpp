@@ -59,15 +59,13 @@ struct scalar : contain<> {
 	}
 
 	template<class Sub, class State>
-	std::size_t strict_offset_of(State) const noexcept {
+	constexpr void strict_offset_of(State) const noexcept {
 		static_assert(always_false<Sub>, "Substructure was not found");
-		std::terminate();
 	}
 
 	template<char QDim, class State>
-	std::size_t length(State state) const noexcept {
+	constexpr void length(State state) const noexcept {
 		static_assert(always_false_dim<QDim>, "Index in this dimension is not accepted by any substructure");
-		std::terminate();
 	}
 };
 
