@@ -6,6 +6,7 @@
 #include "state.hpp"
 #include "struct_traits.hpp"
 #include "pipes.hpp"
+#include "setters.hpp"
 
 namespace noarr {
 
@@ -66,29 +67,6 @@ constexpr auto compose(F f, G g) noexcept {
 	return helpers::compose_impl<F, G>(f, g);
 }
 
-
-/**
- * @brief sets the length of a `vector`, `sized_vector` or an `array` specified by the dimension name
- * 
- * @tparam Dim: the dimension name of the transformed structure
- * @param length: the desired length
- */
-template<char Dim>
-constexpr auto set_length(std::size_t length) noexcept {
-	return setter(empty_state.with<length_in<Dim>>(length));
-}
-
-/**
- * @brief sets the length of a `vector`, `sized_vector` or an `array` specified by the dimension name
- * 
- * @tparam Dim: the dimension name of the transformed structure
- * @param length: the desired length
- */
-template<char Dim, std::size_t Length>
-constexpr auto set_length(std::integral_constant<std::size_t, Length> length) noexcept {
-	return setter(empty_state.with<length_in<Dim>>(length));
-}
-
 /**
  * @brief returns the number of indices in the structure specified by the dimension name
  * 
@@ -103,17 +81,6 @@ struct get_length {
 		return t.template length<Dim>(empty_state);
 	}
 };
-
-/**
- * @brief fixes an index (or indices) given by dimension name(s) in a structure
- * 
- * @tparam Dims: the dimension names
- * @param ts: parameters for fixing the indices
- */
-template<char... Dims, class... Ts>
-constexpr auto fix(Ts... ts) noexcept {
-	return setter(empty_state.with<index_in<Dims>...>(ts...));
-}
 
 /**
  * @brief returns the offset of a substructure given by a dimension name in a structure

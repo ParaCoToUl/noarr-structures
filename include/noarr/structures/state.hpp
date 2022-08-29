@@ -124,88 +124,19 @@ struct state : contain<typename StateItems::value_type...> {
 	using remove_t = decltype(std::declval<state>().template remove<Tags...>());
 };
 
-// TODO specialize to fix and set_length
-template<class StateUpdates, class Struct>
-struct setter_t : contain<StateUpdates, Struct> {
-	using base = contain<StateUpdates, Struct>;
-	using base::base;
-
-	constexpr StateUpdates state_update() const noexcept { return base::template get<0>(); }
-	constexpr Struct sub_structure() const noexcept { return base::template get<1>(); }
-	constexpr std::tuple<Struct> sub_structures() { return std::tuple(sub_structure()); }
-
-private:
-	template<char Dim, class ValueType>
-	struct replacers {
-		template<class Original>
-		struct index_dim_replacement;
-		template<class ArgLength, class RetType>
-		struct index_dim_replacement<function_type<Dim, ArgLength, RetType>> {
-			static_assert(ArgLength::is_known, "Set length before setting the value");
-			using type = RetType;
-		};
-		template<class... RetTypes>
-		struct index_dim_replacement<dep_function_type<Dim, RetTypes...>> {
-			using original = dep_function_type<Dim, RetTypes...>;
-			static_assert(ValueType::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
-			using type = typename dep_function_type<Dim, RetTypes...>::ret_type<ValueType::value>;
-		};
-		template<class Original>
-		struct length_dim_replacement {
-			static_assert(!Original::dependent, "Cannot set tuple length");
-			static_assert(!Original::arg_length::is_known, "Length already set");
-			using type = function_type<Dim, arg_length_from_t<ValueType>, typename Original::ret_type>;
-		};
-	};
-	template<class StateUpdatesTail = StateUpdates, class = void>
-	struct helper;
-	template<char Dim, class ValueType, class... StateItems>
-	struct helper<state<state_item<index_in<Dim>, ValueType>, StateItems...>> {
-		using result = typename helper<state<StateItems...>>::result::replace<replacers<Dim, ValueType>::template index_dim_replacement, Dim>;
-	};
-	template<char Dim, class ValueType, class... StateItems>
-	struct helper<state<state_item<length_in<Dim>, ValueType>, StateItems...>> {
-		using result = typename helper<state<StateItems...>>::result::replace<replacers<Dim, ValueType>::template length_dim_replacement, Dim>;
-	};
-	template<class Useless>
-	struct helper<state<>, Useless> {
-		using result = typename Struct::struct_type;
-	};
-public:
-	using struct_type = typename helper<>::result;
-
-	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
-		// TODO check absence of new items
-		return sub_structure().size(state.merge(state_update()));
-	}
-
-	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
-		// TODO check absence of new items
-		return offset_of<Sub>(sub_structure(), state.merge(state_update()));
-	}
-
-	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
-		// TODO do not test, decide from the type and templates
-		auto sub_state = state.merge(state_update());
-		static_assert(!decltype(sub_state)::template contains<index_in<QDim>>, "Index in this dimension is overriden by a substructure");
-		return sub_structure().template length<QDim>(sub_state);
-	}
-};
-
-template<class StateUpdates>
-struct setter : contain<StateUpdates> {
-	explicit constexpr setter(StateUpdates u) noexcept : contain<StateUpdates>(u) {}
-
-	static constexpr bool is_proto_struct = true;
-
-	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return setter_t<StateUpdates, Struct>(contain<StateUpdates>::template get<0>(), s); }
-};
-
 static constexpr state<> empty_state;
+
+namespace helpers {
+
+constexpr std::size_t supported_index_type(std::size_t);
+
+template<std::size_t Value>
+constexpr std::integral_constant<std::size_t, Value> supported_index_type(std::integral_constant<std::size_t, Value>);
+
+} // namespace helpers
+
+template<class T>
+using good_index_t = decltype(helpers::supported_index_type(std::declval<T>()));
 
 } // namespace noarr
 
