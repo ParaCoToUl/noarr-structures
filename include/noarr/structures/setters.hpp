@@ -4,7 +4,7 @@
 #include "struct_decls.hpp"
 #include "contain.hpp"
 #include "state.hpp"
-#include "type.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
@@ -19,23 +19,23 @@ struct fix_t : contain<T, IdxT> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr IdxT idx() const noexcept { return base::template get<1>(); }
 
-	static_assert(T::struct_type::template all_accept<Dim>, "The structure does not have a dimension of this name");
+	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
-	template<class ArgLength, class RetType>
-	struct dim_replacement<function_type<Dim, ArgLength, RetType>> {
+	template<class ArgLength, class RetSig>
+	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> {
 		static_assert(ArgLength::is_known, "Index cannot be fixed until its length is set");
-		using type = RetType;
+		using type = RetSig;
 	};
-	template<class... RetTypes>
-	struct dim_replacement<dep_function_type<Dim, RetTypes...>> {
-		using original = dep_function_type<Dim, RetTypes...>;
+	template<class... RetSigs>
+	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
+		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(IdxT::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
-		using type = typename original::ret_type<IdxT::value>;
+		using type = typename original::ret_sig<IdxT::value>;
 	};
 public:
-	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -97,21 +97,21 @@ struct set_length_t : contain<T, LenT> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr LenT len() const noexcept { return base::template get<1>(); }
 
-	static_assert(T::struct_type::template all_accept<Dim>, "The structure does not have a dimension of this name");
+	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
-	template<class ArgLength, class RetType>
-	struct dim_replacement<function_type<Dim, ArgLength, RetType>> {
+	template<class ArgLength, class RetSig>
+	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> {
 		static_assert(!ArgLength::is_known, "The length in this dimension is already set");
-		using type = function_type<Dim, arg_length_from_t<LenT>, RetType>;
+		using type = function_sig<Dim, arg_length_from_t<LenT>, RetSig>;
 	};
-	template<class... RetTypes>
-	struct dim_replacement<dep_function_type<Dim, RetTypes...>> {
+	template<class... RetSigs>
+	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		static_assert(always_false<Dim>, "Cannot set tuple length");
 	};
 public:
-	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {

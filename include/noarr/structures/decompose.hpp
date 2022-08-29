@@ -25,19 +25,19 @@ struct decompose_t : contain<T> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for both components of a dimension");
-	static_assert(T::struct_type::template all_accept<Dim>, "The structure does not have a dimension of this name");
-	static_assert(DimMajor == Dim || !T::struct_type::template any_accept<DimMajor>, "Dimension of this name already exists");
-	static_assert(DimMinor == Dim || !T::struct_type::template any_accept<DimMinor>, "Dimension of this name already exists");
+	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
+	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>, "Dimension of this name already exists");
+	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>, "Dimension of this name already exists");
 private:
 	template<class Original>
 	struct dim_replacement {
 		static_assert(!Original::dependent, "Cannot decompose a tuple index");
 		using major_length = std::conditional_t<Original::arg_length::is_known, dynamic_arg_length, unknown_arg_length>;
 		using minor_length = unknown_arg_length;
-		using type = function_type<DimMajor, major_length, function_type<DimMinor, minor_length, typename Original::ret_type>>;
+		using type = function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, typename Original::ret_sig>>;
 	};
 public:
-	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {

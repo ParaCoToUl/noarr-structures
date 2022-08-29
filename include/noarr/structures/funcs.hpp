@@ -102,7 +102,7 @@ struct offset_impl : contain<State> {
 
 	template<class T>
 	constexpr auto operator()(T t) const noexcept {
-		return offset_of<scalar<scalar_t<typename T::struct_type, State>>>(t, contain<State>::template get<0>());
+		return offset_of<scalar<scalar_t<typename T::signature, State>>>(t, contain<State>::template get<0>());
 	}
 };
 
@@ -146,7 +146,7 @@ struct get_at_impl : private contain<Ptr, State> {
 	explicit constexpr get_at_impl(Ptr ptr, const State &state) noexcept : contain<Ptr, State>(ptr, state) {}
 
 	template<class T>
-	using scalar_type = scalar_t<typename T::struct_type, State>;
+	using scalar_type = scalar_t<typename T::signature, State>;
 
 	// the return type checks whether the structure `t` is a cube and it also chooses `scalar_t<T> &` or `const scalar_t<T> &` according to constness of `Ptr` pointee
 	template<class T>

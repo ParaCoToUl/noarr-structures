@@ -4,7 +4,7 @@
 #include "pipes.hpp"
 #include "struct_decls.hpp"
 #include "contain.hpp"
-#include "type.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
@@ -50,7 +50,7 @@ struct scalar : contain<> {
 	static constexpr std::size_t offset() noexcept { return 0; }
 	static constexpr std::size_t length() noexcept { return 0; }
 
-	using struct_type = scalar_type<T>;
+	using signature = scalar_sig<T>;
 
 	template<class State>
 	constexpr std::size_t size(State) const noexcept {

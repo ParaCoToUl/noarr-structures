@@ -4,7 +4,7 @@
 #include "struct_decls.hpp"
 #include "contain.hpp"
 #include "state.hpp"
-#include "type.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
@@ -44,19 +44,19 @@ struct rename_dim<QDim, std::integer_sequence<char>, std::integer_sequence<char>
 	static constexpr char dim = QDim;
 };
 
-template<class From, class To, class StructType>
-struct rename_type;
-template<class From, class To, char Dim, class ArgLength, class RetType>
-struct rename_type<From, To, function_type<Dim, ArgLength, RetType>> {
-	using type = function_type<rename_dim<Dim, From, To>::dim, ArgLength, typename rename_type<From, To, RetType>::type>;
+template<class From, class To, class Signature>
+struct rename_sig;
+template<class From, class To, char Dim, class ArgLength, class RetSig>
+struct rename_sig<From, To, function_sig<Dim, ArgLength, RetSig>> {
+	using type = function_sig<rename_dim<Dim, From, To>::dim, ArgLength, typename rename_sig<From, To, RetSig>::type>;
 };
-template<class From, class To, char Dim, class... RetTypes>
-struct rename_type<From, To, dep_function_type<Dim, RetTypes...>> {
-	using type = dep_function_type<rename_dim<Dim, From, To>::dim, typename rename_type<From, To, RetTypes>::type...>;
+template<class From, class To, char Dim, class... RetSigs>
+struct rename_sig<From, To, dep_function_sig<Dim, RetSigs...>> {
+	using type = dep_function_sig<rename_dim<Dim, From, To>::dim, typename rename_sig<From, To, RetSigs>::type...>;
 };
 template<class From, class To, class ValueType>
-struct rename_type<From, To, scalar_type<ValueType>> {
-	using type = scalar_type<ValueType>;
+struct rename_sig<From, To, scalar_sig<ValueType>> {
+	using type = scalar_sig<ValueType>;
 };
 
 template<class From, class To, class StateTag>
@@ -101,8 +101,8 @@ private:
 	template<char... ExternalDims, char... InternalDims>
 	struct assertion<std::integer_sequence<char, ExternalDims...>, std::integer_sequence<char, InternalDims...>> {
 		template<char Dim>
-		static constexpr bool is_free = (!T::struct_type::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
-		static_assert((... && T::struct_type::template any_accept<InternalDims>), "The structure does not have a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
+		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
+		static_assert((... && T::signature::template any_accept<InternalDims>), "The structure does not have a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
 		static_assert((... && is_free<ExternalDims>), "The structure already has a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
 		// Note: in case a dimension is renamed to itself, is_free returns true. This is necessary to make the above assertion pass.
 		// The `rename_uniquity<external>` check already ensures that if a dimension is renamed to itself, no other dimension is renamed to its name.
@@ -110,7 +110,7 @@ private:
 	};
 public:
 	static_assert(assertion<>::success);
-	using struct_type = typename helpers::rename_type<internal, external, typename T::struct_type>::type;
+	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
@@ -149,36 +149,36 @@ struct shift_t : contain<T, StartT> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr StartT start() const noexcept { return base::template get<1>(); }
 
-	static_assert(T::struct_type::template all_accept<Dim>, "The structure does not have a dimension of this name");
+	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
-	template<class ArgLength, class RetType>
-	struct dim_replacement<function_type<Dim, ArgLength, RetType>> {
+	template<class ArgLength, class RetSig>
+	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> {
 		template<class L, class S>
 		struct subtract { using type = dynamic_arg_length; };
 		template<class S>
 		struct subtract<unknown_arg_length, S> { using type = unknown_arg_length; };
 		template<std::size_t L, std::size_t S>
 		struct subtract<static_arg_length<L>, std::integral_constant<std::size_t, S>> { using type = static_arg_length<L-S>; };
-		using type = function_type<Dim, typename subtract<ArgLength, StartT>::type, RetType>;
+		using type = function_sig<Dim, typename subtract<ArgLength, StartT>::type, RetSig>;
 	};
-	template<class... RetTypes>
-	struct dim_replacement<dep_function_type<Dim, RetTypes...>> {
-		using original = dep_function_type<Dim, RetTypes...>;
+	template<class... RetSigs>
+	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
+		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(StartT::value || true, "Cannot shift a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
-		static constexpr std::size_t len = sizeof...(RetTypes) - start;
+		static constexpr std::size_t len = sizeof...(RetSigs) - start;
 
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_type<Dim, typename original::ret_type<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::ret_sig<Indices-start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
 public:
-	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -253,15 +253,15 @@ struct slice_t : contain<T, StartT, LenT> {
 	constexpr StartT start() const noexcept { return base::template get<1>(); }
 	constexpr LenT len() const noexcept { return base::template get<2>(); }
 
-	static_assert(T::struct_type::template all_accept<Dim>, "The structure does not have a dimension of this name");
+	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
-	template<class ArgLength, class RetType>
-	struct dim_replacement<function_type<Dim, ArgLength, RetType>> { using type = function_type<Dim, arg_length_from_t<LenT>, RetType>; };
-	template<class... RetTypes>
-	struct dim_replacement<dep_function_type<Dim, RetTypes...>> {
-		using original = dep_function_type<Dim, RetTypes...>;
+	template<class ArgLength, class RetSig>
+	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> { using type = function_sig<Dim, arg_length_from_t<LenT>, RetSig>; };
+	template<class... RetSigs>
+	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
+		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(StartT::value || true, "Cannot slice a tuple dimension dynamically");
 		static_assert(LenT::value || true, "Cannot slice a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
@@ -270,12 +270,12 @@ private:
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_type<Dim, typename original::ret_type<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::ret_sig<Indices-start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
 public:
-	using struct_type = typename T::struct_type::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {

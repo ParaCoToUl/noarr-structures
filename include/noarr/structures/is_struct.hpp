@@ -1,7 +1,7 @@
 #ifndef NOARR_STRUCTURES_IS_STRUCT_HPP
 #define NOARR_STRUCTURES_IS_STRUCT_HPP
 
-#include "type.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
@@ -10,8 +10,8 @@ namespace helpers {
 template<class T, class = void>
 struct is_struct_impl : std::false_type {};
 template<class T>
-struct is_struct_impl<T, std::void_t<typename T::struct_type>> : std::true_type {
-	static_assert(is_struct_type<typename T::struct_type>());
+struct is_struct_impl<T, std::void_t<typename T::signature>> : std::true_type {
+	static_assert(is_signature<typename T::signature>());
 };
 
 } // namespace helpers

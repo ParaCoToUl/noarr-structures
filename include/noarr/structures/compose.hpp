@@ -25,9 +25,9 @@ struct compose_t : contain<T> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot compose a dimension with itself");
-	static_assert(T::struct_type::template all_accept<DimMajor>, "The structure does not have a dimension of this name");
-	static_assert(T::struct_type::template all_accept<DimMinor>, "The structure does not have a dimension of this name");
-	static_assert(Dim == DimMajor || Dim == DimMinor || !T::struct_type::template any_accept<Dim>, "Dimension of this name already exists");
+	static_assert(T::signature::template all_accept<DimMajor>, "The structure does not have a dimension of this name");
+	static_assert(T::signature::template all_accept<DimMinor>, "The structure does not have a dimension of this name");
+	static_assert(Dim == DimMajor || Dim == DimMinor || !T::signature::template any_accept<Dim>, "Dimension of this name already exists");
 private:
 	template<class Original>
 	struct outer_dim_replacement {
@@ -49,13 +49,13 @@ private:
 			template<class Useless>
 			struct composed_len<false, false, Useless> { using type = unknown_arg_length; };
 
-			using type = function_type<Dim, typename composed_len<>::type, typename OriginalInner::ret_type>;
+			using type = function_sig<Dim, typename composed_len<>::type, typename OriginalInner::ret_sig>;
 		};
 
-		using type = typename Original::ret_type::replace<inner_dim_replacement, DimMinor, DimMajor>;
+		using type = typename Original::ret_sig::replace<inner_dim_replacement, DimMinor, DimMajor>;
 	};
 public:
-	using struct_type = typename T::struct_type::replace<outer_dim_replacement, DimMajor, DimMinor>;
+	using signature = typename T::signature::replace<outer_dim_replacement, DimMajor, DimMinor>;
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {

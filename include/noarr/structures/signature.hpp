@@ -1,5 +1,5 @@
-#ifndef NOARR_STRUCTURES_TYPES_HPP
-#define NOARR_STRUCTURES_TYPES_HPP
+#ifndef NOARR_STRUCTURES_SIGNATURE_HPP
+#define NOARR_STRUCTURES_SIGNATURE_HPP
 
 #include "contain.hpp"
 
@@ -37,65 +37,65 @@ struct arg_length_from<std::integral_constant<std::size_t, L>> { using type = st
 template<class T>
 using arg_length_from_t = typename helpers::arg_length_from<T>::type;
 
-template<char Dim, class ArgLength, class RetType>
-struct function_type {
+template<char Dim, class ArgLength, class RetSig>
+struct function_sig {
 	static_assert(ArgLength::valid_arg_length);
-	function_type() = delete;
+	function_sig() = delete;
 
 	static constexpr char dim = Dim;
 	using arg_length = ArgLength;
-	using ret_type = RetType;
+	using ret_sig = RetSig;
 
 private:
 	template<bool Match, template<class Original> class Replacement, char... QDims>
 	struct replace_inner;
 	template<template<class Original> class Replacement, char... QDims>
-	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<function_type>::type; };
+	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<function_sig>::type; };
 	template<template<class Original> class Replacement, char... QDims>
-	struct replace_inner<false, Replacement, QDims...> { using type = function_type<Dim, ArgLength, typename RetType::replace<Replacement, QDims...>>; };
+	struct replace_inner<false, Replacement, QDims...> { using type = function_sig<Dim, ArgLength, typename RetSig::replace<Replacement, QDims...>>; };
 public:
 	template<template<class Original> class Replacement, char... QDims>
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
 
 	template<char QDim>
-	static constexpr bool all_accept = (Dim == QDim || RetType::template all_accept<QDim>);
+	static constexpr bool all_accept = (Dim == QDim || RetSig::template all_accept<QDim>);
 	template<char QDim>
-	static constexpr bool any_accept = (Dim == QDim || RetType::template any_accept<QDim>);
+	static constexpr bool any_accept = (Dim == QDim || RetSig::template any_accept<QDim>);
 
 	static constexpr bool dependent = false;
 };
 
-template<char Dim, class... RetTypes>
-struct dep_function_type {
-	dep_function_type() = delete;
+template<char Dim, class... RetSigs>
+struct dep_function_sig {
+	dep_function_sig() = delete;
 
 	static constexpr char dim = Dim;
-	using ret_type_tuple = std::tuple<RetTypes...>;
+	using ret_sig_tuple = std::tuple<RetSigs...>;
 	template<std::size_t N>
-	using ret_type = typename std::tuple_element<N, ret_type_tuple>::type;
+	using ret_sig = typename std::tuple_element<N, ret_sig_tuple>::type;
 
 private:
 	template<bool Match, template<class Original> class Replacement, char... QDims>
 	struct replace_inner;
 	template<template<class Original> class Replacement, char... QDims>
-	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<dep_function_type>::type; };
+	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<dep_function_sig>::type; };
 	template<template<class Original> class Replacement, char... QDims>
-	struct replace_inner<false, Replacement, QDims...> { using type = dep_function_type<Dim, typename RetTypes::replace<Replacement, QDims...>...>; };
+	struct replace_inner<false, Replacement, QDims...> { using type = dep_function_sig<Dim, typename RetSigs::replace<Replacement, QDims...>...>; };
 public:
 	template<template<class Original> class Replacement, char... QDims>
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
 
 	template<char QDim>
-	static constexpr bool all_accept = (Dim == QDim || (RetTypes::template all_accept<QDim> && ...));
+	static constexpr bool all_accept = (Dim == QDim || (RetSigs::template all_accept<QDim> && ...));
 	template<char QDim>
-	static constexpr bool any_accept = (Dim == QDim || (RetTypes::template any_accept<QDim> || ...));
+	static constexpr bool any_accept = (Dim == QDim || (RetSigs::template any_accept<QDim> || ...));
 
 	static constexpr bool dependent = true;
 };
 
 template<class ValueType>
-struct scalar_type {
-	scalar_type() = delete;
+struct scalar_sig {
+	scalar_sig() = delete;
 
 	template<char QDim>
 	static constexpr bool all_accept = false;
@@ -104,14 +104,14 @@ struct scalar_type {
 };
 
 template<class T>
-struct is_struct_type : std::false_type {};
-template<char Dim, class ArgLength, class RetType>
-struct is_struct_type<function_type<Dim, ArgLength, RetType>> : std::true_type {};
-template<char Dim, class... RetTypes>
-struct is_struct_type<dep_function_type<Dim, RetTypes...>> : std::true_type {};
+struct is_signature : std::false_type {};
+template<char Dim, class ArgLength, class RetSig>
+struct is_signature<function_sig<Dim, ArgLength, RetSig>> : std::true_type {};
+template<char Dim, class... RetSigs>
+struct is_signature<dep_function_sig<Dim, RetSigs...>> : std::true_type {};
 template<class ValueType>
-struct is_struct_type<scalar_type<ValueType>> : std::true_type {};
+struct is_signature<scalar_sig<ValueType>> : std::true_type {};
 
 } // namespace noarr
 
-#endif // NOARR_STRUCTURES_TYPES_HPP
+#endif // NOARR_STRUCTURES_SIGNATURE_HPP

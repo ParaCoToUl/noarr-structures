@@ -5,7 +5,7 @@
 #include "contain.hpp"
 #include "scalar.hpp"
 #include "state.hpp"
-#include "type.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
@@ -31,8 +31,8 @@ struct tuple : contain<TS...> {
 	constexpr tuple() noexcept = default;
 	constexpr tuple(TS... ss) noexcept : base(ss...) {}
 
-	static_assert(!(TS::struct_type::template any_accept<Dim> || ...), "Dimension name already used");
-	using struct_type = dep_function_type<Dim, typename TS::struct_type...>;
+	static_assert(!(TS::signature::template any_accept<Dim> || ...), "Dimension name already used");
+	using signature = dep_function_sig<Dim, typename TS::signature...>;
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
@@ -100,8 +100,8 @@ struct array : contain<T> {
 
 	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
 
-	static_assert(!T::struct_type::template any_accept<Dim>, "Dimension name already used");
-	using struct_type = function_type<Dim, static_arg_length<L>, typename T::struct_type>;
+	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
+	using signature = function_sig<Dim, static_arg_length<L>, typename T::signature>;
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
@@ -160,8 +160,8 @@ struct vector : contain<T> {
 
 	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
 
-	static_assert(!T::struct_type::template any_accept<Dim>, "Dimension name already used");
-	using struct_type = function_type<Dim, unknown_arg_length, typename T::struct_type>;
+	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
+	using signature = function_sig<Dim, unknown_arg_length, typename T::signature>;
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
