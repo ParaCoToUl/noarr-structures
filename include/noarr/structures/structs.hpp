@@ -232,6 +232,7 @@ namespace helpers {
 template<class InnerProtoStruct, class OuterProtoStruct, class = std::enable_if_t<InnerProtoStruct::is_proto_struct && OuterProtoStruct::is_proto_struct>>
 struct gcompose : contain<InnerProtoStruct, OuterProtoStruct> {
 	using base = contain<InnerProtoStruct, OuterProtoStruct>;
+	using base::base;
 	explicit constexpr gcompose(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
 
 	static constexpr bool is_proto_struct = true;
