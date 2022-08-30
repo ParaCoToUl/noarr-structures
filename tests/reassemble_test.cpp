@@ -102,3 +102,10 @@ TEST_CASE("tuple reassemble: (int ^ array) * (float ^ array)", "[reassemble]") {
     REQUIRE(std::is_same_v<decltype(array_x_array ^ reorder<>())::signature,   scalar<void>::signature>);
     REQUIRE(             ! decltype(array_x_array ^ reorder<>())::complete     );
 }
+
+TEST_CASE("hoist: array ^ array", "[reassemble]") {
+    array<'x', 10, array<'y', 20, scalar<int>>> array_x_array;
+
+    REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'x'>())::signature, array<'x', 10, array<'y', 20, scalar<int>>>::signature>);
+    REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'y'>())::signature, array<'y', 20, array<'x', 10, scalar<int>>>::signature>);
+}

@@ -159,6 +159,53 @@ struct reorder_proto {
 template<char... Dims>
 using reorder = reorder_proto<Dims...>;
 
+template<char Dim, class T>
+struct hoist_t : contain<T> {
+	using base = contain<T>;
+	using base::base;
+
+	// TODO description
+
+	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+
+private:
+	using hoisted = typename helpers::reassemble_find<Dim, state<>, typename T::signature>::type; // reassemble_find also checks the dimension exists and is not within a tuple.
+	static_assert(!hoisted::dependent, "Cannot hoist tuple dimension, use reorder");
+	template<class Original>
+	struct dim_replacement {
+		static_assert(std::is_same_v<Original, hoisted>, "bug");
+		using type = typename Original::ret_sig;
+	};
+public:
+	using signature = function_sig<Dim, typename hoisted::arg_length, typename T::signature::replace<dim_replacement, Dim>>;
+
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		return sub_structure().size(state);
+	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		return offset_of<Sub>(sub_structure(), state);
+	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		return sub_structure().template length<QDim>(state);
+	}
+};
+
+template<char Dim>
+struct hoist_proto {
+	static constexpr bool is_proto_struct = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) noexcept { return hoist_t<Dim, Struct>(s); }
+};
+
+template<char Dim>
+using hoist = hoist_proto<Dim>;
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_REORDER_HPP
