@@ -104,8 +104,8 @@ constexpr auto into_blocks() {
 	return into_blocks_proto<Dim, DimMajor, DimMinor>();
 }
 
-template<char Dim, char DimMajor, char DimMinor, class MinorSizeT>
-constexpr auto into_blocks(MinorSizeT minor_length) {
+template<char Dim, char DimMajor, char DimMinor, class MinorLengthT>
+constexpr auto into_blocks(MinorLengthT minor_length) {
 	return into_blocks_proto<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
 }
 
