@@ -38,7 +38,7 @@ using transform_dims = typename helpers::transform_dims_impl<Dims>::type;
 namespace helpers {
 
 template<class T>
-struct scalar_name<T, void_t<get_struct_desc_t<T>>> {
+struct scalar_name<T, std::void_t<get_struct_desc_t<T>>> {
 	using type = mangle<T>;
 };
 
