@@ -75,10 +75,13 @@ struct union_t : contain<Structs...> {
 	using is = std::index_sequence_for<Structs...>;
 	using signature = typename helpers::sig_union<typename Structs::signature...>::type;
 
+	template<std::size_t Index>
+	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
+
 private:
 	template<char Dim, std::size_t I>
 	constexpr auto find_first_match() {
-		if constexpr(decltype(base::template get<I>())::signature::template any_accept<Dim>)
+		if constexpr(decltype(sub_structure<I>())::signature::template any_accept<Dim>)
 			return std::integral_constant<std::size_t, I>();
 		else
 			return find_first_match<Dim, I+1>();
