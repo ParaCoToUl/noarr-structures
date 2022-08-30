@@ -126,6 +126,11 @@ public:
 	constexpr std::size_t length(State state) const noexcept {
 		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state<State>(state));
 	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state<State>(state));
+	}
 };
 
 template<char... DimPairs>
@@ -220,6 +225,11 @@ public:
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
 	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
+	}
 };
 
 template<char Dim, class StartT>
@@ -308,6 +318,12 @@ public:
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 

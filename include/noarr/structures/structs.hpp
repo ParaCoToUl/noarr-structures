@@ -64,6 +64,11 @@ struct tuple : contain<TS...> {
 		}
 	}
 
+	template<class Sub, class State>
+	constexpr void strict_state_at(State state) const noexcept {
+		static_assert(always_false_dim<Dim>, "A tuple cannot be used in this context");
+	}
+
 private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
@@ -130,6 +135,11 @@ struct array : contain<T> {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>>());
 		}
 	}
+
+	template<class Sub, class State>
+	constexpr void strict_state_at(State state) const noexcept {
+		static_assert(always_false_dim<Dim>, "An array cannot be used in this context");
+	}
 };
 
 template<char Dim, std::size_t L>
@@ -189,6 +199,11 @@ struct vector : contain<T> {
 		} else {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>, length_in<Dim>>());
 		}
+	}
+
+	template<class Sub, class State>
+	constexpr void strict_state_at(State state) const noexcept {
+		static_assert(always_false_dim<Dim>, "A vector cannot be used in this context");
 	}
 };
 

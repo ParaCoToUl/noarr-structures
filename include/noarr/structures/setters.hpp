@@ -59,6 +59,11 @@ public:
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
+	}
 };
 
 template<char Dim, class IdxT>
@@ -132,6 +137,11 @@ public:
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 

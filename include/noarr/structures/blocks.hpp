@@ -89,6 +89,24 @@ public:
 			}
 		}
 	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		// TODO check
+		auto major_index = state.template get<index_in<DimMajor>>();
+		auto minor_index = state.template get<index_in<DimMinor>>();
+		auto minor_length = state.template get<length_in<DimMinor>>();
+		auto tmp_state = state
+			.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
+			.template with<index_in<Dim>>(major_index*minor_length + minor_index);
+		if constexpr(State::template contains<length_in<DimMajor>>) {
+			auto major_length = state.template get<length_in<DimMajor>>();
+			auto sub_state = tmp_state.template with<length_in<Dim>>(major_length*minor_length);
+			return state_at<Sub>(sub_structure(), sub_state);
+		} else {
+			return state_at<Sub>(sub_structure(), tmp_state);
+		}
+	}
 };
 
 template<char Dim, char DimMajor, char DimMinor>
@@ -185,6 +203,21 @@ public:
 			return sub_structure().template length<DimMajor>(sub_state) * sub_structure().template length<DimMinor>(sub_state);
 		} else {
 			return sub_structure().template length<QDim>(sub_state);
+		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		// TODO check
+		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		auto minor_length = sub_structure().template length<DimMinor>(tmp_state);
+		auto index = state.template get<index_in<Dim>>();
+		auto sub_state = tmp_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
+		if constexpr(State::template contains<length_in<Dim>>) {
+			auto length = state.template get<length_in<Dim>>();
+			return state_at<Sub>(sub_structure(), sub_state.template with<length_in<DimMajor>>(length / minor_length));
+		} else {
+			return state_at<Sub>(sub_structure(), sub_state);
 		}
 	}
 };

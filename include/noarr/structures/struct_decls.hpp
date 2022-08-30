@@ -168,6 +168,15 @@ constexpr std::size_t offset_of(StructOuter structure, State state) noexcept {
 	}
 }
 
+template<class StructInner, class StructOuter, class State>
+constexpr auto state_at(StructOuter structure, State state) noexcept {
+	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+		return state;
+	} else {
+		return structure.template strict_state_at<StructInner>(state);
+	}
+}
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_STRUCT_DECLS_HPP

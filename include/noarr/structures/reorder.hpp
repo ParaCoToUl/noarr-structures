@@ -146,6 +146,11 @@ struct reorder_t : contain<T> {
 		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().template length<QDim>(state);
 	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), state);
+	}
 };
 
 template<char... Dims>
@@ -192,6 +197,11 @@ public:
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), state);
 	}
 };
 
