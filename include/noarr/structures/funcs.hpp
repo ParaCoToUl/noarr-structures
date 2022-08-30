@@ -115,6 +115,11 @@ constexpr auto offset() noexcept {
 	return helpers::offset_impl(empty_state);
 }
 
+template<class State>
+constexpr auto offset(State state) noexcept {
+	return helpers::offset_impl(state);
+}
+
 /**
  * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item
  * 
@@ -169,6 +174,11 @@ static inline constexpr const char *as_cptr(const void *p) noexcept { return (co
 template<class V>
 constexpr auto get_at(V *ptr) noexcept {
 	return helpers::get_at_impl(helpers::as_cptr(ptr), empty_state);
+}
+
+template<class V, class State>
+constexpr auto get_at(V *ptr, State state) noexcept {
+	return helpers::get_at_impl(helpers::as_cptr(ptr), state);
 }
 
 /**
