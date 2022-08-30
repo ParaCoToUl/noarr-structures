@@ -221,3 +221,31 @@ TEST_CASE("Traverser ordered renamed", "[traverser]") {
 
 	REQUIRE(i == 20*30*40);
 }
+
+TEST_CASE("Traverser ordered renamed access", "[traverser]") {
+	using at = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using bt = noarr::array<'y', 30, noarr::array<'z', 40, noarr::scalar<int>>>;
+	using ct = noarr::array<'x', 20, noarr::array<'z', 40, noarr::scalar<int>>>;
+
+	int ad[20*30];
+	int bd[30*40];
+	int cd[20*40];
+
+	void* ap = ad;
+	void* bp = bd;
+	void* cp = cd;
+
+	at a;
+	bt b;
+	ct c;
+
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>() ^ noarr::rename<'y', 't'>()).for_each([&](auto sa, auto sb, auto sc){
+		REQUIRE((a | offset(sa)) / sizeof(int) == sa.template get<index_in<'x'>>() * 30 + sa.template get<index_in<'y'>>());
+		REQUIRE((b | offset(sb)) / sizeof(int) == sb.template get<index_in<'y'>>() * 40 + sb.template get<index_in<'z'>>());
+		REQUIRE((c | offset(sc)) / sizeof(int) == sc.template get<index_in<'x'>>() * 40 + sc.template get<index_in<'z'>>());
+
+		REQUIRE((char*) &(a | get_at(ap, sa)) == (char*) ap + (a | offset(sa)));
+		REQUIRE((char*) &(b | get_at(bp, sb)) == (char*) bp + (b | offset(sb)));
+		REQUIRE((char*) &(c | get_at(cp, sc)) == (char*) cp + (c | offset(sc)));
+	});
+}
