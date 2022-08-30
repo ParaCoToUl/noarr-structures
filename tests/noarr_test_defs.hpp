@@ -7,7 +7,7 @@ namespace noarr_test {
 	template<class T>
 	static constexpr bool is_simple = true
 		&& std::is_standard_layout_v<T>
-		&& (std::is_trivially_default_constructible_v<T> ? true /* TODO std::is_empty_v<T> */ : !std::is_default_constructible_v<T>)
+		&& (std::is_trivially_default_constructible_v<T> ? std::is_empty_v<T> : !std::is_default_constructible_v<T>)
 		&& std::is_trivially_copy_constructible_v<T>
 		&& std::is_trivially_move_constructible_v<T>
 		&& (std::is_trivially_copy_assignable_v<T> || !std::is_copy_assignable_v<T>)

@@ -197,7 +197,7 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 
 	T t_;
 
-	constexpr contain_impl() noexcept = default;
+	constexpr contain_impl() noexcept = delete;
 	explicit constexpr contain_impl(T t) noexcept : t_(t) {}
 
 	template<std::size_t I>
