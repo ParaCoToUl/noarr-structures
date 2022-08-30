@@ -6,6 +6,7 @@
 #include "noarr/structures_extended.hpp"
 #include "noarr/structures/traverser.hpp"
 #include "noarr/structures/reorder.hpp"
+#include "noarr/structures/shortcuts.hpp"
 
 using namespace noarr;
 
@@ -248,4 +249,60 @@ TEST_CASE("Traverser ordered renamed access", "[traverser]") {
 		REQUIRE((char*) &(b | get_at(bp, sb)) == (char*) bp + (b | offset(sb)));
 		REQUIRE((char*) &(c | get_at(cp, sc)) == (char*) cp + (c | offset(sc)));
 	});
+}
+
+TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
+	using at = noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>;
+	using bt = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+
+	at a;
+	bt b;
+
+	std::size_t i = 0;
+
+	traverser(a, b).order(noarr::into_blocks<'x', 'u', 'v'>(4)).for_each([&](auto sa, auto sb){
+		REQUIRE(!decltype(sa)::template contains<index_in<'u'>> & !decltype(sa)::template contains<index_in<'v'>>);
+		REQUIRE(!decltype(sb)::template contains<index_in<'u'>> & !decltype(sb)::template contains<index_in<'v'>>);
+		REQUIRE( decltype(sa)::template contains<index_in<'x'>> &  decltype(sa)::template contains<index_in<'y'>>);
+		REQUIRE( decltype(sb)::template contains<index_in<'x'>> &  decltype(sb)::template contains<index_in<'y'>>);
+
+		REQUIRE(sa.template get<index_in<'x'>>() == sb.template get<index_in<'x'>>());
+		REQUIRE(sa.template get<index_in<'y'>>() == sb.template get<index_in<'y'>>());
+
+		std::size_t x = sa.template get<index_in<'x'>>();
+		std::size_t y = sa.template get<index_in<'y'>>();
+		REQUIRE(y*20 + x == i);
+		i++;
+	});
+
+	REQUIRE(i == 20*30);
+}
+
+TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts blocks]") {
+	using at = noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>;
+	using bt = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+
+	at a;
+	bt b;
+
+	std::size_t i = 0;
+
+	traverser(a, b).order(noarr::strip_mine<'x', 'u', 'v'>(4)).for_each([&](auto sa, auto sb){
+		REQUIRE(!decltype(sa)::template contains<index_in<'u'>> & !decltype(sa)::template contains<index_in<'v'>>);
+		REQUIRE(!decltype(sb)::template contains<index_in<'u'>> & !decltype(sb)::template contains<index_in<'v'>>);
+		REQUIRE( decltype(sa)::template contains<index_in<'x'>> &  decltype(sa)::template contains<index_in<'y'>>);
+		REQUIRE( decltype(sb)::template contains<index_in<'x'>> &  decltype(sb)::template contains<index_in<'y'>>);
+
+		REQUIRE(sa.template get<index_in<'x'>>() == sb.template get<index_in<'x'>>());
+		REQUIRE(sa.template get<index_in<'y'>>() == sb.template get<index_in<'y'>>());
+
+		std::size_t x = sa.template get<index_in<'x'>>();
+		std::size_t y = sa.template get<index_in<'y'>>();
+		std::size_t u = x / 4;
+		std::size_t v = x % 4;
+		REQUIRE(u*30*4 + y*4 + v == i);
+		i++;
+	});
+
+	REQUIRE(i == 20*30);
 }

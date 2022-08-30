@@ -122,3 +122,81 @@ TEST_CASE("Merge set length reused major", "[blocks]") {
 	
 	REQUIRE((m | noarr::offset<'x', 'y'>(1100, 123)) == (1100/700 + 123*500 + 1100%700*500L*600L) * sizeof(float));
 }
+
+TEST_CASE("Split get length, set from inside, array", "[blocks]") {
+	auto m = noarr::scalar<float>()
+		^ noarr::array<'x', 10'000>()
+		^ noarr::into_blocks<'x', 'b', 'a'>(16);
+
+	REQUIRE((m | noarr::get_length<'a'>()) == 16);
+	REQUIRE((m | noarr::get_length<'b'>()) == 10'000/16);
+	REQUIRE((m | noarr::get_size()) == 10'000 * sizeof(float));
+}
+
+TEST_CASE("Split get length, set from inside, vector", "[blocks]") {
+	auto m = noarr::scalar<float>()
+		^ noarr::vector<'x'>()
+		^ noarr::set_length<'x'>(10'000)
+		^ noarr::into_blocks<'x', 'b', 'a'>(16);
+
+	REQUIRE((m | noarr::get_length<'a'>()) == 16);
+	REQUIRE((m | noarr::get_length<'b'>()) == 10'000/16);
+	REQUIRE((m | noarr::get_size()) == 10'000 * sizeof(float));
+}
+
+TEST_CASE("Split get length, set from outside", "[blocks]") {
+	auto m = noarr::scalar<float>()
+		^ noarr::vector<'x'>()
+		^ noarr::into_blocks<'x', 'b', 'a'>(16)
+		^ noarr::set_length<'b'>(625);
+
+	REQUIRE((m | noarr::get_length<'a'>()) == 16);
+	REQUIRE((m | noarr::get_length<'b'>()) == 625);
+	REQUIRE((m | noarr::get_size()) == 625*16 * sizeof(float));
+}
+
+TEST_CASE("Split get length, set from outside, reversed", "[blocks]") {
+	auto m = noarr::scalar<float>()
+		^ noarr::vector<'x'>()
+		^ noarr::into_blocks<'x', 'b', 'a'>()
+		^ noarr::set_length<'b'>(625)
+		^ noarr::set_length<'a'>(16);
+
+	REQUIRE((m | noarr::get_length<'a'>()) == 16);
+	REQUIRE((m | noarr::get_length<'b'>()) == 625);
+	REQUIRE((m | noarr::get_size()) == 625*16 * sizeof(float));
+}
+
+TEST_CASE("Merge get length, set from inside, array", "[blocks]") {
+	auto m = noarr::scalar<float>()
+		^ noarr::array<'a', 16>()
+		^ noarr::array<'b', 625>()
+		^ noarr::merge_blocks<'b', 'a', 'x'>();
+
+	REQUIRE((m | noarr::get_length<'x'>()) == 10'000);
+	REQUIRE((m | noarr::get_size()) == 10'000 * sizeof(float));
+}
+
+TEST_CASE("Merge get length, set from inside, vector", "[blocks]") {
+	auto m = noarr::scalar<float>()
+		^ noarr::vector<'a'>()
+		^ noarr::vector<'b'>()
+		^ noarr::set_length<'a'>(16)
+		^ noarr::set_length<'b'>(625)
+		^ noarr::merge_blocks<'b', 'a', 'x'>();
+
+	REQUIRE((m | noarr::get_length<'x'>()) == 10'000);
+	REQUIRE((m | noarr::get_size()) == 10'000 * sizeof(float));
+}
+
+TEST_CASE("Merge get length, set from outside", "[blocks]") {
+	auto m = noarr::scalar<float>()
+		^ noarr::vector<'a'>()
+		^ noarr::vector<'b'>()
+		^ noarr::set_length<'a'>(16)
+		^ noarr::merge_blocks<'b', 'a', 'x'>()
+		^ noarr::set_length<'x'>(10'000);
+
+	REQUIRE((m | noarr::get_length<'x'>()) == 10'000);
+	REQUIRE((m | noarr::get_size()) == 10'000 * sizeof(float));
+}
