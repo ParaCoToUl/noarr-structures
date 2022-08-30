@@ -2,6 +2,7 @@
 
 #include "noarr/structures_extended.hpp"
 #include "noarr/structures/reorder.hpp"
+#include "noarr/structures/shortcuts.hpp"
 
 using namespace noarr;
 
@@ -108,4 +109,18 @@ TEST_CASE("hoist: array ^ array", "[reassemble]") {
 
     REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'x'>())::signature, array<'x', 10, array<'y', 20, scalar<int>>>::signature>);
     REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'y'>())::signature, array<'y', 20, array<'x', 10, scalar<int>>>::signature>);
+}
+
+using namespace noarr::literals;
+
+template<char Dim, class T>
+using dynarray = set_length_t<Dim, vector<Dim, T>, std::size_t>;
+
+TEST_CASE("strip mine", "[shortcuts blocks reassemble]") {
+    array<'x', 10, array<'y', 20, scalar<int>>> array_x_array;
+
+    //decltype(array_x_array ^ strip_mine<'y', 'a', 'b'>(5))::signature i = 42;
+    //vector<'a', array<'x', 10, vector<'b', scalar<int>>>>::signature j = 42;
+    REQUIRE(std::is_same_v<decltype(array_x_array ^ strip_mine<'y', 'a', 'b'>(5))::signature, dynarray<'a', array<'x', 10, dynarray<'b', scalar<int>>>>::signature>);
+    //REQUIRE(std::is_same_v<decltype(array_x_array ^ strip_mine<'y', 'a', 'b'>(5_idx))::signature, array<'a', 4, array<'x', 10, array<'b', 5, scalar<int>>>>::signature>);
 }
