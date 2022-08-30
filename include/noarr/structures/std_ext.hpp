@@ -7,14 +7,6 @@
 namespace noarr {
 
 /**
- * @brief converts any type(s) to void
- * 
- * @tparam TS: the converted types
- */
-template<class... TS>
-using void_t = void;
-
-/**
  * @brief returns the first of the given types
  * 
  * @tparam T: the type to be returned
