@@ -72,6 +72,7 @@ template<class From, class To, class... StateItem>
 struct rename_state<From, To, state<StateItem...>> {
 	using type = state<state_item<typename rename_state_tag<From, To, typename StateItem::tag>::type, typename StateItem::value_type>...>;
 	static constexpr type convert(state<StateItem...> s) {
+		(void) s; // suppress warning about unused parameter when the pack below is empty
 		return type(s.template get<typename StateItem::tag>()...);
 	}
 };
