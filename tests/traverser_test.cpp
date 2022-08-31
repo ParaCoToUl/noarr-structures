@@ -306,3 +306,91 @@ TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts 
 
 	REQUIRE(i == 20*30);
 }
+
+TEST_CASE("Traverser update_index (reverse example)", "[traverser shortcuts]") {
+	using at = noarr::array<'z', 40, noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>>;
+
+	at a;
+
+	// verify that capture works
+	int last_y = 29, last_z = 39;
+
+	traverser(a).for_each([&](auto sa){
+		auto sa_ry = update_index<'y'>(sa, [&](auto y){return last_y-y;});
+		REQUIRE(sa_ry.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>());
+		REQUIRE(sa_ry.template get<index_in<'y'>>() == 29-sa.template get<index_in<'y'>>());
+		REQUIRE(sa_ry.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+
+		auto sa_rz = update_index<'z'>(sa, [&](auto z){return last_z-z;});
+		REQUIRE(sa_rz.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>());
+		REQUIRE(sa_rz.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>());
+		REQUIRE(sa_rz.template get<index_in<'z'>>() == 39-sa.template get<index_in<'z'>>());
+	});
+}
+
+TEST_CASE("Traverser neighbor (stencil example)", "[traverser shortcuts]") {
+	using at = noarr::array<'z', 40, noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>>;
+
+	at a;
+
+	int i = 0;
+
+	traverser(a).order(slice<'x'>(1, 18) ^ slice<'y'>(1, 28)).for_each([&](auto sa){
+		auto sa7 = neighbor<'y', 'x'>(sa, -1, -1);
+		auto sa8 = neighbor<'y', 'x'>(sa, -1,  0);
+		auto sa9 = neighbor<'y', 'x'>(sa, -1, +1);
+		auto sa4 = neighbor<'y', 'x'>(sa,  0, -1);
+		auto sa6 = neighbor<'y', 'x'>(sa,  0, +1);
+		auto sa1 = neighbor<'y', 'x'>(sa, +1, -1);
+		auto sa2 = neighbor<'y', 'x'>(sa, +1,  0);
+		auto sa3 = neighbor<'y', 'x'>(sa, +1, +1);
+
+		// does not hold generally (`neighbor` could reorder the indices in the state)
+		REQUIRE(std::is_same_v<decltype(sa7), decltype(sa)>);
+		REQUIRE(std::is_same_v<decltype(sa8), decltype(sa)>);
+		REQUIRE(std::is_same_v<decltype(sa9), decltype(sa)>);
+		REQUIRE(std::is_same_v<decltype(sa4), decltype(sa)>);
+		REQUIRE(std::is_same_v<decltype(sa6), decltype(sa)>);
+		REQUIRE(std::is_same_v<decltype(sa1), decltype(sa)>);
+		REQUIRE(std::is_same_v<decltype(sa2), decltype(sa)>);
+		REQUIRE(std::is_same_v<decltype(sa3), decltype(sa)>);
+
+		REQUIRE(sa7.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>() - 1);
+		REQUIRE(sa8.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>());
+		REQUIRE(sa9.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>() + 1);
+		REQUIRE(sa4.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>() - 1);
+		REQUIRE(sa6.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>() + 1);
+		REQUIRE(sa1.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>() - 1);
+		REQUIRE(sa2.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>());
+		REQUIRE(sa3.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>() + 1);
+
+		REQUIRE(sa7.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>() - 1);
+		REQUIRE(sa8.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>() - 1);
+		REQUIRE(sa9.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>() - 1);
+		REQUIRE(sa4.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>());
+		REQUIRE(sa6.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>());
+		REQUIRE(sa1.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>() + 1);
+		REQUIRE(sa2.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>() + 1);
+		REQUIRE(sa3.template get<index_in<'y'>>() == sa.template get<index_in<'y'>>() + 1);
+
+		REQUIRE(sa7.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+		REQUIRE(sa8.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+		REQUIRE(sa9.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+		REQUIRE(sa4.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+		REQUIRE(sa6.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+		REQUIRE(sa1.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+		REQUIRE(sa2.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+		REQUIRE(sa3.template get<index_in<'z'>>() == sa.template get<index_in<'z'>>());
+
+		REQUIRE(sa7.template get<index_in<'x'>>() < 18);
+		REQUIRE(sa7.template get<index_in<'y'>>() < 28);
+		REQUIRE(sa3.template get<index_in<'x'>>() >= 2);
+		REQUIRE(sa3.template get<index_in<'y'>>() >= 2);
+		REQUIRE(sa3.template get<index_in<'x'>>() < 20);
+		REQUIRE(sa3.template get<index_in<'y'>>() < 30);
+
+		i++;
+	});
+
+	REQUIRE(i == 40*28*18);
+}
