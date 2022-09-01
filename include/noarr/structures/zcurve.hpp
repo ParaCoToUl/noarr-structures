@@ -200,7 +200,7 @@ public:
 
 	template<class Sub, class State>
 	constexpr auto strict_state_at(State state) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state, is()));
+		return state_at<Sub>(sub_structure(), sub_state(state, is()));
 	}
 };
 
