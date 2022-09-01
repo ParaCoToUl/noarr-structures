@@ -28,7 +28,7 @@ struct zc_merged_len<static_arg_length<L0>, static_arg_length<L1>> { using type 
 
 template<std::size_t... I, class F>
 constexpr auto zc_static_for(std::index_sequence<I...>, F f) noexcept {
-	return (... * f(std::integral_constant<std::size_t, I>()));
+	return (1 * ... * f(std::integral_constant<std::size_t, I>()));
 }
 
 template<std::size_t Levels, class... SizeTs>
