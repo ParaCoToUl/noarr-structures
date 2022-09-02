@@ -143,7 +143,7 @@ struct reorder_t : contain<T> {
 
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
-		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
+		static_assert(complete || signature::template any_accept<QDim>, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().template length<QDim>(state);
 	}
 
