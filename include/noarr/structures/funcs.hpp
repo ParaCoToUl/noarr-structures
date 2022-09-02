@@ -1,9 +1,12 @@
 #ifndef NOARR_STRUCTURES_FUNCS_HPP
 #define NOARR_STRUCTURES_FUNCS_HPP
 
+#include <type_traits>
+#include <utility>
+
 #include "state.hpp"
-#include "struct_traits.hpp"
 #include "struct_decls.hpp"
+#include "struct_traits.hpp"
 
 namespace noarr {
 
@@ -52,8 +55,7 @@ constexpr auto offset(Idxs... idxs) noexcept { return offset<SubStruct>(empty_st
 
 template<class State>
 constexpr auto offset(State state) noexcept { return [state](auto structure) constexpr noexcept {
-	using struct_type = decltype(structure);
-	using type = scalar_t<typename struct_type::signature, State>;
+	using type = scalar_t<decltype(structure), State>;
 	return offset_of<scalar<type>>(structure, state);
 }; }
 
@@ -90,8 +92,7 @@ constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { ret
  */
 template<class State, class CvVoid>
 constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
-	using struct_type = decltype(structure);
-	using type = scalar_t<typename struct_type::signature, State>;
+	using type = scalar_t<decltype(structure), State>;
 	return *helpers::sub_ptr<type>(ptr, offset_of<scalar<type>>(structure, state));
 }; }
 

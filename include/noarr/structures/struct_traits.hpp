@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 #define NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 
+#include <type_traits>
+
 #include "signature.hpp"
 
 namespace noarr {
@@ -41,28 +43,24 @@ struct is_cube : sig_is_cube<typename T::signature> {};
 
 
 
-namespace helpers {
-
 template<class T, class State>
-struct scalar_t_impl;
+struct sig_get_scalar;
 template<char Dim, class ArgLength, class RetSig, class State>
-struct scalar_t_impl<function_sig<Dim, ArgLength, RetSig>, State> {
+struct sig_get_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
-	using type = typename scalar_t_impl<RetSig, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
+	using type = typename sig_get_scalar<RetSig, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
 template<char Dim, class... RetSigs, class State>
-struct scalar_t_impl<dep_function_sig<Dim, RetSigs...>, State> {
+struct sig_get_scalar<dep_function_sig<Dim, RetSigs...>, State> {
 	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
 	static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
-	using type = typename scalar_t_impl<typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
+	using type = typename sig_get_scalar<typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
 template<class ValueType, class State>
-struct scalar_t_impl<scalar_sig<ValueType>, State> {
+struct sig_get_scalar<scalar_sig<ValueType>, State> {
 	static_assert(State::is_empty, "Superfluous parameters passed in the state");
 	using type = ValueType;
 };
-
-} // namespace helpers
 
 /**
  * @brief returns the type of the value described by a `scalar<...>`
@@ -70,7 +68,7 @@ struct scalar_t_impl<scalar_sig<ValueType>, State> {
  * @tparam T: the `scalar<...>`
  */
 template<class T, class State = state<>>
-using scalar_t = typename helpers::scalar_t_impl<T, State>::type;
+using scalar_t = typename sig_get_scalar<typename T::signature, State>::type;
 
 } // namespace noarr
 
