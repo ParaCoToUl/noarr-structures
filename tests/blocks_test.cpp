@@ -2,6 +2,7 @@
 
 #include "noarr/structures.hpp"
 #include "noarr/structures/blocks.hpp"
+#include "noarr/structures/shortcuts.hpp"
 
 TEST_CASE("Split", "[blocks]") {
 	auto m = noarr::scalar<float>()

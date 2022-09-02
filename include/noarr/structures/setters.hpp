@@ -8,7 +8,6 @@
 
 namespace noarr {
 
-
 template<char Dim, class T, class IdxT>
 struct fix_t : contain<T, IdxT> {
 	using base = contain<T, IdxT>;
@@ -85,12 +84,6 @@ struct fix_proto : contain<IdxT> {
  */
 template<char... Dim, class... IdxT>
 constexpr auto fix(IdxT... idx) noexcept { return (unit_struct ^ ... ^ fix_proto<Dim, good_index_t<IdxT>>(idx)); }
-template<char... Dim, class... IdxT>
-constexpr auto fix(state<state_item<index_in<Dim>, IdxT>...> state) noexcept { return (unit_struct ^ ... ^ fix_proto<Dim, IdxT>(state.template get<index_in<Dim>>)); }
-template<class... StateItem>
-constexpr void fix(state<StateItem...>) {
-	static_assert(always_false<state<StateItem...>>, "Unrecognized items in state. The fix(state) variant can be only used to fix indices (index_in<...>)");
-}
 
 template<char Dim, class T, class LenT>
 struct set_length_t : contain<T, LenT> {

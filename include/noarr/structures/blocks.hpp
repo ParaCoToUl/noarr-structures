@@ -126,11 +126,6 @@ constexpr auto into_blocks() {
 	return into_blocks_proto<Dim, DimMajor, DimMinor>();
 }
 
-template<char Dim, char DimMajor, char DimMinor, class MinorLengthT>
-constexpr auto into_blocks(MinorLengthT minor_length) {
-	return into_blocks_proto<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
-}
-
 template<char DimMajor, char DimMinor, char Dim, class T>
 struct merge_blocks_t : contain<T> {
 	using base = contain<T>;
@@ -253,11 +248,6 @@ struct merge_blocks_proto {
 template<char DimMajor, char DimMinor, char Dim>
 constexpr auto merge_blocks() {
 	return merge_blocks_proto<DimMajor, DimMinor, Dim>();
-}
-
-template<char DimMajor, char DimMinor, char Dim, class MinorSizeT>
-constexpr auto merge_blocks(MinorSizeT minor_length) {
-	return set_length<DimMinor>(minor_length) ^ merge_blocks_proto<DimMajor, DimMinor, Dim>();
 }
 
 } // namespace noarr
