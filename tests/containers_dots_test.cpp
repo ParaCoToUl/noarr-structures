@@ -6,7 +6,7 @@
 
 #include "noarr/structures_extended.hpp"
 
-TEST_CASE("Vector", "[resizing]")
+TEST_CASE("Vector resizing", "[resizing]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto w = noarr::wrap(v);
@@ -46,7 +46,7 @@ TEST_CASE("Vector", "[resizing]")
 	}
 }
 
-TEST_CASE("Vector2", "[is_trivial]")
+TEST_CASE("Vector2 resizing", "[is_trivial]")
 {
 	noarr::vector<'x', noarr::scalar<float>> v;
 	auto w = noarr::wrap(v);
@@ -72,7 +72,7 @@ TEST_CASE("Vector2", "[is_trivial]")
 	}
 }
 
-TEST_CASE("Array", "[is_trivial]")
+TEST_CASE("Array resizing", "[is_trivial]")
 {
 	noarr::array<'x', 1920, noarr::scalar<float>> v;
 	auto w = noarr::wrap(v);
