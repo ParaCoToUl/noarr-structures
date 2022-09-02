@@ -428,3 +428,49 @@ TEST_CASE("Traverser step in structure", "[traverser shortcuts]") {
 
 	REQUIRE(i == 20/5);
 }
+
+TEST_CASE("Nested traverser traditional", "[traverser]") {
+	auto mat = scalar<float>() ^ array<'j', 50>() ^ array<'i', 50>();
+
+	unsigned ei = 0;
+
+	traverser(mat).order(reorder<'i'>()).for_each([&](auto idxs) {
+		auto i = get_index<'i'>(idxs);
+		REQUIRE(i == ei);
+		auto sliced = mat ^ fix<'i'>(i) ^ slice<'j'>(i, 50 - i);
+		unsigned ej = 0;
+		traverser(sliced).order(reorder<'j'>()).for_each([&](auto idxs) {
+			auto j = get_index<'j'>(idxs);
+			REQUIRE(j == ej);
+			auto o = sliced | offset(idxs);
+			REQUIRE(o == (50*ei + ei+ej) * sizeof(float));
+			ej++;
+		});
+		REQUIRE(ej == 50-ei);
+		ei++;
+	});
+	REQUIRE(ei == 50);
+}
+
+TEST_CASE("Nested traverser simplified", "[traverser]") {
+	auto mat = scalar<float>() ^ array<'j', 50>() ^ array<'i', 50>();
+
+	unsigned ei = 0;
+
+	traverser(mat).order(reorder<'i'>()).for_each([&](auto idxs) {
+		auto i = get_index<'i'>(idxs);
+		REQUIRE(i == ei);
+		auto sliced = mat ^ fix(idxs) ^ slice<'j'>(i, 50 - i);
+		unsigned ej = 0;
+		traverser(sliced).for_each([&](auto idxs) {
+			auto j = get_index<'j'>(idxs);
+			REQUIRE(j == ej);
+			auto o = sliced | offset(idxs);
+			REQUIRE(o == (50*ei + ei+ej) * sizeof(float));
+			ej++;
+		});
+		REQUIRE(ej == 50-ei);
+		ei++;
+	});
+	REQUIRE(ei == 50);
+}
