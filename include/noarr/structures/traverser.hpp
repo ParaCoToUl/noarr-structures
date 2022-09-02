@@ -23,7 +23,7 @@ struct sig_union2<Sig1, function_sig<Dim, ArgLength, RetSig>> {
 template<class Sig1, char Dim, class... RetSigs>
 struct sig_union2<Sig1, dep_function_sig<Dim, RetSigs...>> {
 	// TODO
-	static_assert(always_false<Dim>, "Unsupported");
+	static_assert(always_false_dim<Dim>, "Unsupported");
 };
 template<class Sig1, class ValueType>
 struct sig_union2<Sig1, scalar_sig<ValueType>> {
@@ -45,18 +45,18 @@ template<class Signature, class State>
 struct union_filter_accepted;
 template<class Signature, class HeadStateItem, class... TailStateItems>
 struct union_filter_accepted<Signature, state<HeadStateItem, TailStateItems...>> {
-	using tail = typename union_filter_accepted<Signature, state<TailStateItems...>>::res<>::ult;
+	using tail = typename union_filter_accepted<Signature, state<TailStateItems...>>::template res<>::ult;
 	template<class = HeadStateItem, class = void>
 	struct res {
 		using ult = tail;
 	};
 	template<char Dim, class ValueType>
 	struct res<state_item<index_in<Dim>, ValueType>, std::enable_if_t<Signature::template any_accept<Dim>>> {
-		using ult = typename tail::prepend<HeadStateItem>;
+		using ult = typename tail::template prepend<HeadStateItem>;
 	};
 	template<char Dim, class ValueType>
 	struct res<state_item<length_in<Dim>, ValueType>, std::enable_if_t<Signature::template any_accept<Dim>>> {
-		using ult = typename tail::prepend<HeadStateItem>;
+		using ult = typename tail::template prepend<HeadStateItem>;
 	};
 };
 template<class Signature>
@@ -97,7 +97,7 @@ public:
 
 	template<class F, class State>
 	static constexpr void single_iter(F f, State state) noexcept {
-		f(state.restrict(typename helpers::union_filter_accepted<typename Structs::signature, State>::res<>::ult())...);
+		f(state.restrict(typename helpers::union_filter_accepted<typename Structs::signature, State>::template res<>::ult())...);
 	}
 };
 

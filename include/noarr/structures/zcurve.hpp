@@ -135,7 +135,7 @@ private:
 			static constexpr int remaining = Remaining - 1;
 			using arg_len_acc = typename helpers::zc_merged_len<ArgLenAcc, typename Original::arg_length>::type;
 
-			using type = typename Original::ret_sig::replace<dim_replacer<remaining, arg_len_acc>::template replacement, Dims...>;
+			using type = typename Original::ret_sig::template replace<dim_replacer<remaining, arg_len_acc>::template replacement, Dims...>;
 		};
 	};
 	template<class ArgLenAcc>
@@ -152,7 +152,7 @@ private:
 	};
 	using outer_dim_replacer = dim_replacer<sizeof...(Dims), static_arg_length<1>>;
 public:
-	using signature = typename T::signature::replace<outer_dim_replacer::template replacement, Dims...>;
+	using signature = typename T::signature::template replace<outer_dim_replacer::template replacement, Dims...>;
 
 	using is = std::make_index_sequence<sizeof...(Dims)>;
 

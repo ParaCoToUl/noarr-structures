@@ -64,12 +64,12 @@ struct scalar : contain<> {
 	}
 
 	template<char QDim, class State>
-	constexpr void length(State state) const noexcept {
+	constexpr void length(State) const noexcept {
 		static_assert(always_false_dim<QDim>, "Index in this dimension is not accepted by any substructure");
 	}
 
 	template<class Sub, class State>
-	constexpr void strict_state_at(State state) const noexcept {
+	constexpr void strict_state_at(State) const noexcept {
 		static_assert(always_false<scalar<T>>, "A scalar cannot be used in this context");
 	}
 };

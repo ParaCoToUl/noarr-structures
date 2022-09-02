@@ -52,7 +52,7 @@ private:
 	template<template<class Original> class Replacement, char... QDims>
 	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<function_sig>::type; };
 	template<template<class Original> class Replacement, char... QDims>
-	struct replace_inner<false, Replacement, QDims...> { using type = function_sig<Dim, ArgLength, typename RetSig::replace<Replacement, QDims...>>; };
+	struct replace_inner<false, Replacement, QDims...> { using type = function_sig<Dim, ArgLength, typename RetSig::template replace<Replacement, QDims...>>; };
 public:
 	template<template<class Original> class Replacement, char... QDims>
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
@@ -72,7 +72,7 @@ struct dep_function_sig {
 	static constexpr char dim = Dim;
 	using ret_sig_tuple = std::tuple<RetSigs...>;
 	template<std::size_t N>
-	using ret_sig = typename std::tuple_element<N, ret_sig_tuple>::type;
+	using ret_sig = std::tuple_element_t<N, ret_sig_tuple>;
 
 private:
 	template<bool Match, template<class Original> class Replacement, char... QDims>
@@ -80,7 +80,7 @@ private:
 	template<template<class Original> class Replacement, char... QDims>
 	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<dep_function_sig>::type; };
 	template<template<class Original> class Replacement, char... QDims>
-	struct replace_inner<false, Replacement, QDims...> { using type = dep_function_sig<Dim, typename RetSigs::replace<Replacement, QDims...>...>; };
+	struct replace_inner<false, Replacement, QDims...> { using type = dep_function_sig<Dim, typename RetSigs::template replace<Replacement, QDims...>...>; };
 public:
 	template<template<class Original> class Replacement, char... QDims>
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;

@@ -187,12 +187,12 @@ private:
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::ret_sig<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices-start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -289,12 +289,12 @@ private:
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::ret_sig<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices-start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {

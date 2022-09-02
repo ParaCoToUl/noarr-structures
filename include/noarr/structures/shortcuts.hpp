@@ -30,7 +30,7 @@ using always_ssize_t = ssize_t;
 template<char... Dims, class State>
 constexpr auto neighbor(State state, helpers::always_ssize_t<Dims>... diffs) noexcept {
 	static_assert((... && State::template contains<index_in<Dims>>), "Requested dimension does not exist");
-	static_assert((... && std::is_same_v<typename State::get_t<index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
+	static_assert((... && std::is_same_v<state_get_t<State, index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
 	return state.template remove<index_in<Dims>...>().template with<index_in<Dims>...>(std::size_t((helpers::ssize_t) state.template get<index_in<Dims>>() + diffs)...);
 }
 

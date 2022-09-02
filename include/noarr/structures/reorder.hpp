@@ -30,8 +30,8 @@ struct reassemble_find<QDim, State, function_sig<Dim, ArgLength, RetSig>> {
 template<char QDim, class State, char Dim, class... RetSigs>
 struct reassemble_find<QDim, State, dep_function_sig<Dim, RetSigs...>> {
 	static_assert(State::template contains<index_in<Dim>>, "Tuple indices must not be omitted or moved down");
-	static constexpr std::size_t idx = State::template get_t<index_in<Dim>>::value;
-	using ret_sig = typename dep_function_sig<Dim, RetSigs...>::ret_sig<idx>;
+	static constexpr std::size_t idx = state_get_t<State, index_in<Dim>>::value;
+	using ret_sig = typename dep_function_sig<Dim, RetSigs...>::template ret_sig<idx>;
 	using type = typename reassemble_find<QDim, State, ret_sig>::type;
 };
 template<char QDim, class State, class ValueType>
@@ -46,7 +46,7 @@ struct reassemble_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 	template<bool cond = State::template contains<index_in<Dim>>, class = void>
 	struct ty;
 	template<class Useless>
-	struct ty<true, Useless> { using pe = typename reassemble_scalar<RetSig, State>::ty<>::pe; };
+	struct ty<true, Useless> { using pe = typename reassemble_scalar<RetSig, State>::template ty<>::pe; };
 	template<class Useless>
 	struct ty<false, Useless> { using pe = scalar_sig<void>; };
 };
@@ -55,7 +55,7 @@ struct reassemble_scalar<dep_function_sig<Dim, RetSigs...>, State> {
 	template<bool cond = State::template contains<index_in<Dim>>, class = void>
 	struct ty;
 	template<class Useless>
-	struct ty<true, Useless> { using pe = typename reassemble_scalar<typename dep_function_sig<Dim, RetSigs...>::ret_sig<State::template get_t<index_in<Dim>>::value>, State>::ty<>::pe; };
+	struct ty<true, Useless> { using pe = typename reassemble_scalar<typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>, State>::template ty<>::pe; };
 	template<class Useless>
 	struct ty<false, Useless> { using pe = scalar_sig<void>; };
 };
@@ -76,7 +76,7 @@ struct reassemble_build<TopSig, State, Dim, Dims...> {
 	template<class ArgLength, class RetSig>
 	struct ty<function_sig<Dim, ArgLength, RetSig>> {
 		using sub_state = decltype(std::declval<State>().template with<index_in<Dim>>(std::size_t()));
-		using sub_sig = typename reassemble_build<TopSig, sub_state, Dims...>::ty<>::pe;
+		using sub_sig = typename reassemble_build<TopSig, sub_state, Dims...>::template ty<>::pe;
 		using pe = function_sig<Dim, ArgLength, sub_sig>;
 	};
 	template<class... RetSigs>
@@ -84,7 +84,7 @@ struct reassemble_build<TopSig, State, Dim, Dims...> {
 		template<std::size_t N>
 		using sub_state = decltype(std::declval<State>().template with<index_in<Dim>>(std::integral_constant<std::size_t, N>()));
 		template<std::size_t N>
-		using sub_sig = typename reassemble_build<TopSig, sub_state<N>, Dims...>::ty<>::pe;
+		using sub_sig = typename reassemble_build<TopSig, sub_state<N>, Dims...>::template ty<>::pe;
 
 		template<class = std::index_sequence_for<RetSigs...>>
 		struct pack_helper;
@@ -93,7 +93,7 @@ struct reassemble_build<TopSig, State, Dim, Dims...> {
 
 		using pe = typename pack_helper<>::type;
 	};
-	using type = typename reassemble_scalar<TopSig, State>::ty<>::pe;
+	using type = typename reassemble_scalar<TopSig, State>::template ty<>::pe;
 };
 template<class TopSig, class State>
 struct reassemble_build<TopSig, State> : reassemble_scalar<TopSig, State> {};
@@ -112,7 +112,7 @@ struct reassemble_completeness<scalar_sig<void>> : std::false_type {};
 } // namespace helpers
 
 template<class Signature, char... Dims>
-using reassemble_sig = typename helpers::reassemble_build<Signature, state<>, Dims...>::ty<>::pe;
+using reassemble_sig = typename helpers::reassemble_build<Signature, state<>, Dims...>::template ty<>::pe;
 
 template<class ReassembledSignature>
 static constexpr bool reassemble_is_complete = helpers::reassemble_completeness<ReassembledSignature>::value;
@@ -182,7 +182,7 @@ private:
 		using type = typename Original::ret_sig;
 	};
 public:
-	using signature = function_sig<Dim, typename hoisted::arg_length, typename T::signature::replace<dim_replacement, Dim>>;
+	using signature = function_sig<Dim, typename hoisted::arg_length, typename T::signature::template replace<dim_replacement, Dim>>;
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {

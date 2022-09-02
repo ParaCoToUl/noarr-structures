@@ -37,7 +37,7 @@ private:
 		using type = function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, typename Original::ret_sig>>;
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -173,10 +173,10 @@ private:
 			using type = function_sig<Dim, typename merged_len<>::type, typename OriginalInner::ret_sig>;
 		};
 
-		using type = typename Original::ret_sig::replace<inner_dim_replacement, DimMinor, DimMajor>;
+		using type = typename Original::ret_sig::template replace<inner_dim_replacement, DimMinor, DimMajor>;
 	};
 public:
-	using signature = typename T::signature::replace<outer_dim_replacement, DimMajor, DimMinor>;
+	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
