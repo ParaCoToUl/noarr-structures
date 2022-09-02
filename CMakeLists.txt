@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.10)
 Include(FetchContent)
 
 # set the project name
-project(Noarr VERSION 0.14.0)
+project(Noarr VERSION 0.1)
 
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # download testing library Catch2

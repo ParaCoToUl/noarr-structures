@@ -1,12 +1,11 @@
-#ifndef NOARR_ITERATOR_HPP
-#define NOARR_ITERATOR_HPP
+#ifndef NOARR_ITRERATOR_HPP
+#define NOARR_ITRERATOR_HPP
 
 #include <tuple>
 
 #include "dimension_map.hpp"
 #include "std_ext.hpp"
 #include "pipes.hpp"
-#include "funcs.hpp"
 
 namespace noarr {
 
@@ -71,7 +70,7 @@ private:
 
 public:
     template<class Struct>
-    static bool increment(DimensionMap &dims, const Struct &s) noexcept {
+    static bool increment(DimensionMap &dims, Struct &s) noexcept {
         auto &&dim = dims.template get<symbol>();
         ++dim;
 
@@ -102,17 +101,17 @@ struct iterator {
     Struct *structure;
     dimension_map<index_pair<Dims, std::size_t>...> dims;
 
-    using value_type = decltype(*structure | fix<Dims...>(const_v<std::size_t>(0U, Dims)...));
+    using value_type = decltype(*structure | fix<Dims...>((Dims, (std::size_t)0U) ...));
 
 private:
     static constexpr std::size_t NDims = sizeof...(Dims);
 
 public:
-    constexpr iterator() noexcept : structure(nullptr), dims(const_v<std::size_t>(0U, Dims)...) {}
-    constexpr iterator(Struct *structure) noexcept : structure(structure), dims(const_v<std::size_t>(0U, Dims)...) {}
+    constexpr iterator() noexcept : structure(nullptr), dims(((void)Dims, (std::size_t)0U)...) {}
+    constexpr iterator(Struct &structure) noexcept : structure(&structure), dims(((void)Dims, (std::size_t)0U)...) {}
 
     template<class ...Idxs>
-    constexpr iterator(Struct *structure, Idxs ...idxs) noexcept : structure(structure), dims(idxs...) {}
+    constexpr iterator(Struct &structure, Idxs ...idxs) noexcept : structure(&structure), dims(idxs...) {}
 
     constexpr iterator &operator*() noexcept {
         return *this;
@@ -168,14 +167,13 @@ struct range {
     Struct structure;
     using Iterator = iterator<Struct, Dims...>;
 
-    explicit constexpr range(const Struct &structure) noexcept : structure(structure) {}
-    explicit constexpr range(Struct &&structure) noexcept : structure(std::move(structure)) {}
+    range(const Struct &structure) : structure(structure) {}
 
-    constexpr Iterator begin() noexcept {
-        return Iterator(&structure);
+    Iterator begin() noexcept {
+        return Iterator(structure);
     }
 
-    static constexpr Iterator end() noexcept {
+    Iterator end() const noexcept {
         return Iterator();
     }
 };
@@ -209,9 +207,9 @@ namespace std {
     };
 
     template<std::size_t I, class Struct, char ...Dims>
-    constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
+    decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
         return noarr::helpers::iterator_get_helper<I, Struct, Dims...>::get(it);
     }
 }
 
-#endif // NOARR_ITERATOR_HPP
+#endif // NOARR_ITRERATOR_HPP

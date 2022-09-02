@@ -10,8 +10,9 @@
 #include <iostream>
 
 #include "noarr/structures_extended.hpp"
+#include "noarr/structures/iterator.hpp"
 
-TEST_CASE("Iterator trivial", "[iterator]") {
+TEST_CASE("Iterator Trivial", "[iterator]") {
 	auto array = noarr::array<'x', 20, noarr::scalar<int>>();
 
 	auto data = std::array<int, 20>();
@@ -27,8 +28,8 @@ TEST_CASE("Iterator trivial", "[iterator]") {
 	}
 
 	auto it = range.begin();
-	bool consistent = true;
-	bool consistent_length = true;
+	bool consistent;
+	bool consistent_length;
 
 	for (std::size_t x = 0; x != 20; ++x) {
 		auto idx = std::get<0>(it);
@@ -65,8 +66,8 @@ TEST_CASE("Iterator composite", "[iterator]") {
 	}
 
 	auto it = range.begin();
-	bool consistent = true;
-	bool consistent_length = true;
+	bool consistent;
+	bool consistent_length;
 
 	for (std::size_t x = 0; x != 20; ++x) {
 		for(std::size_t y = 0; y != 30; ++y) {
@@ -105,8 +106,8 @@ TEST_CASE("Iterator composite reversed", "[iterator]") {
 	}
 
 	auto it = range.begin();
-	bool consistent = true;
-	bool consistent_length = true;
+	bool consistent;
+	bool consistent_length;
 
 	for(std::size_t y = 0; y != 30; ++y) {
 		for (std::size_t x = 0; x != 20; ++x) {

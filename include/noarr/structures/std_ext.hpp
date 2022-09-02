@@ -23,11 +23,6 @@ using void_t = void;
 template<class T, class... TS>
 using first_t = T;
 
-template<class R, class T>
-constexpr decltype(auto) const_v(R &&ret, const T &&) noexcept {
-	return std::forward<R>(ret);
-}
-
 /**
  * @brief a shortcut for applying std::remove_cv and std::remove_reference
  * 
