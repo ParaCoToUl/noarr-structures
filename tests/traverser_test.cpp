@@ -67,6 +67,10 @@ TEST_CASE("Traverser trivial", "[traverser]") {
 		REQUIRE(sb.template get<index_in<'y'>>() < 30);
 		REQUIRE(sc.template get<index_in<'z'>>() < 40);
 
+		REQUIRE(get_index<'x'>(sa) == sa.template get<index_in<'x'>>());
+		REQUIRE(get_index<'y'>(sb) == sb.template get<index_in<'y'>>());
+		REQUIRE(get_index<'z'>(sc) == sc.template get<index_in<'z'>>());
+
 		int j =
 			+ sc.template get<index_in<'z'>>() * 30 * 20
 			+ sa.template get<index_in<'x'>>() * 30
@@ -393,4 +397,34 @@ TEST_CASE("Traverser neighbor (stencil example)", "[traverser shortcuts]") {
 	});
 
 	REQUIRE(i == 40*28*18);
+}
+
+TEST_CASE("Traverser step in order", "[traverser shortcuts]") {
+	auto a = noarr::scalar<int>() ^ noarr::array<'x', 20>();
+
+	unsigned i = 0;
+
+	traverser(a).order(noarr::step<'x'>(3, 5)).for_each([&](auto sa){
+		auto o = a | offset(sa);
+		REQUIRE(get_index<'x'>(sa) == (5*i+3));
+		REQUIRE(o == (5*i+3) * sizeof(int));
+		i++;
+	});
+
+	REQUIRE(i == 20/5);
+}
+
+TEST_CASE("Traverser step in structure", "[traverser shortcuts]") {
+	auto a = noarr::scalar<int>() ^ noarr::array<'x', 20>() ^ noarr::step<'x'>(3, 5);
+
+	unsigned i = 0;
+
+	traverser(a).for_each([&](auto sa){
+		auto o = a | offset(sa);
+		REQUIRE(get_index<'x'>(sa) == i);
+		REQUIRE(o == (5*i+3) * sizeof(int));
+		i++;
+	});
+
+	REQUIRE(i == 20/5);
 }
