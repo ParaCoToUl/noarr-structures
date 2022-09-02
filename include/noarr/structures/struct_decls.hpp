@@ -45,7 +45,7 @@ template<class T>
 using get_struct_desc_t = typename get_struct_desc<T>::type;
 
 template<class T>
-struct get_struct_desc<T, void_t<typename T::description>> {
+struct get_struct_desc<T, std::void_t<typename T::description>> {
 	using type = typename T::description;
 };
 
@@ -70,7 +70,7 @@ template<class T, class = void>
 struct sub_structures_are_static : std::false_type {};
 
 template<class T>
-struct sub_structures_are_static<T, void_t<decltype(T::sub_structures())>> : std::true_type {};
+struct sub_structures_are_static<T, std::void_t<decltype(T::sub_structures())>> : std::true_type {};
 
 }
 
@@ -84,7 +84,7 @@ struct sub_structures<T, std::enable_if_t<helpers::sub_structures_are_static<T>:
 };
 
 template<class T>
-struct sub_structures<T, std::enable_if_t<!helpers::sub_structures_are_static<T>::value, void_t<decltype(std::declval<T>().sub_structures())>>> {
+struct sub_structures<T, std::enable_if_t<!helpers::sub_structures_are_static<T>::value, std::void_t<decltype(std::declval<T>().sub_structures())>>> {
 	explicit constexpr sub_structures() noexcept = delete;
 	explicit constexpr sub_structures(T t) noexcept : value(t.sub_structures()) {}
 
@@ -156,6 +156,16 @@ constexpr auto construct(T t, TS... ts) noexcept {
 template<class T, class... TS>
 constexpr auto construct(T t, std::tuple<TS...> ts) noexcept {
 	return helpers::construct_impl<T>::construct(t, ts);
+}
+
+template<class StructInner, class StructOuter, class State>
+constexpr std::size_t offset_of(StructOuter structure, State state) noexcept {
+	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+		// TODO check that state only contains relevant lengths
+		return 0;
+	} else {
+		return structure.template strict_offset_of<StructInner>(state);
+	}
 }
 
 } // namespace noarr

@@ -7,14 +7,6 @@
 namespace noarr {
 
 /**
- * @brief converts any type(s) to void
- * 
- * @tparam TS: the converted types
- */
-template<class... TS>
-using void_t = void;
-
-/**
  * @brief returns the first of the given types
  * 
  * @tparam T: the type to be returned
@@ -188,6 +180,11 @@ struct tuple_forall_impl<Function, std::tuple<>> : std::true_type {};
  */
 template<template<class> class Function, class Tuple>
 using tuple_forall = helpers::tuple_forall_impl<Function, Tuple>;
+
+template<class>
+static constexpr bool always_false = false;
+template<char>
+static constexpr bool always_false_dim = false;
 
 } // namespace noarr
 

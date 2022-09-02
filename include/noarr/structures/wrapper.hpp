@@ -23,12 +23,7 @@ constexpr wrapper<Structure> wrap(Structure s) noexcept;
 
 namespace helpers {
 
-template<class T>
-struct is_cube_impl<wrapper<T>> : is_cube<T> {};
-
 struct wrap_impl {
-	using func_family = top_tag;
-
 	template<class Structure>
 	constexpr auto operator()(Structure structure) const noexcept {
 		return wrap(structure);
@@ -36,6 +31,9 @@ struct wrap_impl {
 };
 
 }
+
+template<class T>
+struct is_cube<wrapper<T>> : is_cube<T> {};
 
 template<class Structure>
 class wrapper : private contain<Structure> {
@@ -53,7 +51,7 @@ public:
 	 */
 	template<char Dim>
 	constexpr auto set_length(std::size_t length) const noexcept {
-		return wrap(base::template get<0>() | noarr::set_length<Dim>(length));
+		return wrap(base::template get<0>() ^ noarr::set_length<Dim>(length));
 	}
 
 	/**
@@ -64,7 +62,7 @@ public:
 	 */
 	template<char... Dims, class... Ts>
 	constexpr auto fix(Ts... ts) const noexcept {
-		return wrap(base::template get<0>() | noarr::fix<Dims...>(ts...));
+		return wrap(base::template get<0>() ^ noarr::fix<Dims...>(ts...));
 	}
 
 	/**
@@ -86,7 +84,7 @@ public:
 	 */
 	template<char... Dims, class... Ts>
 	constexpr auto shift(Ts... ts) const noexcept {
-		return wrap(base::template get<0>() | noarr::shift<Dims...>(ts...));
+		return wrap(base::template get<0>() ^ noarr::shift<Dims...>(ts...));
 	}
 
 	/**

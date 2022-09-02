@@ -264,6 +264,7 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 	}
 }
 
+#if 0 // TODO reassemble?
 template<MatrixDataLayout layout>
 void matrix_multiply_demo_template(std::size_t size)
 {
@@ -320,6 +321,7 @@ TEST_CASE("Small matrix demo 2", "[Small matrix demo 2]")
 {
 	matrix_multiply_demo(MatrixDataLayout::Rows, 20);
 }
+#endif
 
 TEST_CASE("Small matrix multimplication Rows", "[Small matrix multimplication Rows]")
 {

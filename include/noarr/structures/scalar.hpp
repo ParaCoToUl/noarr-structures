@@ -4,6 +4,7 @@
 #include "pipes.hpp"
 #include "struct_decls.hpp"
 #include "contain.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
@@ -48,6 +49,24 @@ struct scalar : contain<> {
 	static constexpr std::size_t size() noexcept { return sizeof(T); }
 	static constexpr std::size_t offset() noexcept { return 0; }
 	static constexpr std::size_t length() noexcept { return 0; }
+
+	using signature = scalar_sig<T>;
+
+	template<class State>
+	constexpr std::size_t size(State) const noexcept {
+		static_assert(State::is_empty, "Unused items in state");
+		return sizeof(T);
+	}
+
+	template<class Sub, class State>
+	constexpr void strict_offset_of(State) const noexcept {
+		static_assert(always_false<Sub>, "Substructure was not found");
+	}
+
+	template<char QDim, class State>
+	constexpr void length(State state) const noexcept {
+		static_assert(always_false_dim<QDim>, "Index in this dimension is not accepted by any substructure");
+	}
 };
 
 } // namespace noarr

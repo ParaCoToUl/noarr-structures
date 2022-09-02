@@ -1,82 +1,16 @@
 #ifndef NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 #define NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 
-#include <type_traits>
-
-#include "std_ext.hpp"
-#include "struct_decls.hpp"
-#include "scalar.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
-namespace helpers {
-
-template<class T, class = void>
-struct is_static_dimension_impl
-	: std::false_type {};
-
 template<class T>
-struct is_static_dimension_impl<T, void_t<decltype(std::declval<T>().template offset<std::size_t(0)>())>>
-	: std::true_type {};
-
-template<class T, class = void>
-struct is_dynamic_dimension_impl : std::false_type {};
-
-template<class T, std::size_t O, class = void>
-struct has_static_offset_impl : std::false_type {};
-
-template<class T, std::size_t O>
-struct has_static_offset_impl<T, O, void_t<decltype(static_cast<std::size_t (T::*)(std::size_t) const>(&T::template offset<O>))>>
-	: std::true_type {};
-
-template<class T, class = void>
-struct has_dynamic_offset_impl : std::false_type {};
-
-template<class T>
-struct has_dynamic_offset_impl<T, void_t<decltype(static_cast<std::size_t (T::*)(std::size_t) const>(&T::offset))>>
-	: std::true_type {};
-
-template<class T>
-struct is_dynamic_dimension_impl<T, void_t<decltype(std::declval<T>().offset(std::declval<std::size_t>()))>>
-	: std::true_type {};
-
-template<class T>
-struct is_scalar_impl : std::false_type {};
-
-template<class T>
-struct is_scalar_impl<scalar<T>> : std::true_type {};
-
-template<class T, class = void>
-struct is_point_impl : std::false_type {};
-
-template<class T, class = void>
-struct is_cube_impl : std::false_type {};
-
-} // namespace helpers
-
-/**
- * @brief returns whether a structure is a `scalar<...>`
- * 
- * @tparam T: the structure
- */
-template<class T>
-using is_scalar = helpers::is_scalar_impl<T>;
-
-/**
- * @brief returns whether the structure has a static dimension (accepts static indices)
- * 
- * @tparam T: the structure
- */
-template<class T>
-using is_static_dimension = std::conditional_t<helpers::has_static_offset_impl<T, 0>::value, typename helpers::is_static_dimension_impl<T>, std::false_type>;
-
-/**
- * @brief returns whether the structure has a dynamic dimension (accepts dynamic indices)
- * 
- * @tparam T: the structure
- */
-template<class T>
-using is_dynamic_dimension = std::conditional_t<helpers::has_dynamic_offset_impl<T>::value, typename helpers::is_dynamic_dimension_impl<T>, std::false_type>;
+struct sig_is_point : std::false_type {
+	static_assert(is_signature<T>(), "sig_is_point is only applicable to struct signatures");
+};
+template<class ValueType>
+struct sig_is_point<scalar_sig<ValueType>> : std::true_type {};
 
 /**
  * @brief returns whether the structure is a point (a structure with no dimensions, or with all dimensions being fixed)
@@ -84,7 +18,18 @@ using is_dynamic_dimension = std::conditional_t<helpers::has_dynamic_offset_impl
  * @tparam T: the structure
  */
 template<class T>
-using is_point = helpers::is_point_impl<remove_cvref<T>>;
+struct is_point : sig_is_point<typename T::signature> {};
+
+
+
+template<class T>
+struct sig_is_cube : std::false_type {
+	static_assert(is_signature<T>(), "sig_is_cube is only applicable to struct signatures");
+};
+template<class ValueType>
+struct sig_is_cube<scalar_sig<ValueType>> : std::true_type {};
+template<char Dim, class ArgLength, class RetSig>
+struct sig_is_cube<function_sig<Dim, ArgLength, RetSig>> : std::integral_constant<bool, ArgLength::is_known && sig_is_cube<RetSig>()> {};
 
 /**
  * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all dynamic)
@@ -92,35 +37,30 @@ using is_point = helpers::is_point_impl<remove_cvref<T>>;
  * @tparam T: the structure
  */
 template<class T>
-using is_cube = helpers::is_cube_impl<remove_cvref<T>>;
+struct is_cube : sig_is_cube<typename T::signature> {};
+
+
 
 namespace helpers {
 
-template<class T>
-struct is_point_impl<T, std::enable_if_t<(std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && !is_scalar<T>::value)>>
-	: is_point<typename T::template get_t<>> {};
-
-template<class T>
-struct is_point_impl<T, std::enable_if_t<is_scalar<T>::value>> : std::true_type {};
-
-template<class T>
-struct is_cube_impl_recurse
-	: is_cube<typename T::template get_t<>> {};
-
-template<class T>
-struct is_cube_impl<T, std::enable_if_t<!std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value>>
-	: std::conditional_t<is_dynamic_dimension<T>::value, is_cube_impl_recurse<T>, std::false_type> {};
-
-template<class T>
-struct is_cube_impl<T, std::enable_if_t<std::is_same<typename get_struct_desc_t<T>::dims, dims_impl<>>::value && !is_scalar<T>::value>>
-	: is_cube_impl_recurse<T> {};
-
-template<class T>
-struct is_cube_impl<T, std::enable_if_t<is_scalar<T>::value>>
-	: std::true_type {};
-
-template<class T, class = void>
+template<class T, class State>
 struct scalar_t_impl;
+template<char Dim, class ArgLength, class RetSig, class State>
+struct scalar_t_impl<function_sig<Dim, ArgLength, RetSig>, State> {
+	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
+	using type = typename scalar_t_impl<RetSig, typename State::remove_t<index_in<Dim>, length_in<Dim>>>::type;
+};
+template<char Dim, class... RetSigs, class State>
+struct scalar_t_impl<dep_function_sig<Dim, RetSigs...>, State> {
+	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
+	static_assert(State::template get_t<index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
+	using type = typename scalar_t_impl<typename dep_function_sig<Dim, RetSigs...>::ret_sig<State::template get_t<index_in<Dim>>::value>, typename State::template remove_t<index_in<Dim>, length_in<Dim>>>::type;
+};
+template<class ValueType, class State>
+struct scalar_t_impl<scalar_sig<ValueType>, State> {
+	static_assert(State::is_empty, "Superfluous parameters passed in the state");
+	using type = ValueType;
+};
 
 } // namespace helpers
 
@@ -129,22 +69,8 @@ struct scalar_t_impl;
  * 
  * @tparam T: the `scalar<...>`
  */
-template<class T>
-using scalar_t = typename helpers::scalar_t_impl<T>::type;
-
-namespace helpers {
-
-template<class T>
-struct scalar_t_impl<T, std::enable_if_t<!is_scalar<T>::value && is_cube<T>::value>> {
-	using type = scalar_t<typename T::template get_t<>>;
-};
-
-template<class T>
-struct scalar_t_impl<scalar<T>> {
-	using type = T;
-};
-
-}
+template<class T, class State = state<>>
+using scalar_t = typename helpers::scalar_t_impl<T, State>::type;
 
 } // namespace noarr
 
