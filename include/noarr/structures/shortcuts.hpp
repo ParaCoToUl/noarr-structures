@@ -18,6 +18,11 @@ constexpr auto update_index(State state, F f) {
 	return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
 
+template<char Dim>
+constexpr auto sized_vector(std::size_t length) {
+	return vector<Dim>() ^ set_length<Dim>(length);
+}
+
 namespace helpers {
 
 using ssize_t = std::make_signed_t<std::size_t>;
