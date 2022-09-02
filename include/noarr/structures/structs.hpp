@@ -6,6 +6,7 @@
 #include "scalar.hpp"
 #include "state.hpp"
 #include "signature.hpp"
+#include "is_struct.hpp"
 
 namespace noarr {
 

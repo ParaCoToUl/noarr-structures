@@ -2,6 +2,8 @@
 #define NOARR_STRUCTURES_WRAPPER_HPP
 
 #include "funcs.hpp"
+#include "setters.hpp"
+#include "view.hpp"
 
 namespace noarr {
 
@@ -20,17 +22,6 @@ class wrapper;
  */
 template<class Structure>
 constexpr wrapper<Structure> wrap(Structure s) noexcept;
-
-namespace helpers {
-
-struct wrap_impl {
-	template<class Structure>
-	constexpr auto operator()(Structure structure) const noexcept {
-		return wrap(structure);
-	}
-};
-
-}
 
 template<class T>
 struct is_cube<wrapper<T>> : is_cube<T> {};
@@ -88,14 +79,13 @@ public:
 	}
 
 	/**
-	 * @brief returns an offset of a substructure with a certain index in a structure given by its dimension name
+	 * @brief returns an offset of a substructure
 	 * 
-	 * @tparam Dim: the dimension name
-	 * @param t: the index of the substructure
+	 * @tparam SubStruct: the substructure
 	 */
-	template<char Dim, class T>
-	constexpr auto get_offset(T t) const noexcept {
-		return base::template get<0>() | noarr::get_offset<Dim>(t);
+	template<class SubStruct, char... Dims, class... Ts>
+	constexpr auto offset(Ts... ts) const noexcept {
+		return base::template get<0>() | noarr::offset<SubStruct, Dims...>(ts...);
 	}
 
 	/**
@@ -111,8 +101,9 @@ public:
 	/**
 	 * @brief returns the size (in bytes) of the wrapped structure
 	 */
-	constexpr auto get_size() const noexcept {
-		return base::template get<0>() | noarr::get_size();
+	template<class... Ts>
+	constexpr auto get_size(Ts... ts) const noexcept {
+		return base::template get<0>() | noarr::get_size(ts...);
 	}
 
 	/**
@@ -142,9 +133,9 @@ constexpr wrapper<Structure> wrap(Structure s) noexcept {
  * @brief wraps a structure into a `wrapper`
  * 
  */
-constexpr auto wrap() noexcept {
-	return helpers::wrap_impl();
-}
+constexpr auto wrap() noexcept { return [](auto structure) constexpr noexcept {
+	return wrap(structure);
+}; }
 
 } // namespace noarr
 

@@ -1,31 +1,13 @@
 #ifndef NOARR_STRUCTURES_FUNCS_HPP
 #define NOARR_STRUCTURES_FUNCS_HPP
 
-#include "std_ext.hpp"
-#include "structs.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"
-#include "pipes.hpp"
-#include "setters.hpp"
+#include "struct_decls.hpp"
 
 namespace noarr {
 
 namespace literals {
-
-namespace helpers {
-
-template<std::size_t Accum, char... Chars>
-struct idx_translate;
-
-template<std::size_t Accum, char Char, char... Chars>
-struct idx_translate<Accum, Char, Chars...> : idx_translate<Accum * 10 + (std::size_t)(Char - '0'), Chars...> {};
-
-template<std::size_t Accum, char Char>
-struct idx_translate<Accum, Char> {
-	using type = std::integral_constant<std::size_t, Accum * 10 + (std::size_t)(Char - '0')>;
-};
-
-} // namespace helpers
 
 /**
  * @brief Converts an integer literal into a corresponding std::integral_constant<std::size_t, ...>
@@ -35,37 +17,22 @@ struct idx_translate<Accum, Char> {
  */
 template<char... Chars>
 constexpr auto operator""_idx() noexcept {
-	return typename helpers::idx_translate<0, Chars...>::type();
+	static_assert((... && ('0' <= Chars && Chars <= '9')), "Invalid or unsupported _idx literal");
+	struct acc {
+		std::size_t value;
+		constexpr acc operator+(char right) const noexcept {
+			return acc{value * 10 + (right - '0')};
+		}
+	};
+	return std::integral_constant<std::size_t, (acc{0} + ... + Chars).value>();
 }
 
 }
 
-namespace helpers {
-
-template<class F, class G>
-struct compose_impl : contain<F, G> {
-	using base = contain<F, G>;
-
-	constexpr compose_impl(F f, G g) noexcept : base(f, g) {}
-
-	template<class T>
-	constexpr decltype(auto) operator()(T t) const noexcept {
-		return t | base::template get<0>() | base::template get<1>();
-	}
-};
-
-}
-
-/**
- * @brief composes functions `F` and `G` together
- * 
- * @param f: the inner function (the one applied first)
- * @param g: the outer function
- */
-template<class F, class G>
-constexpr auto compose(F f, G g) noexcept {
-	return helpers::compose_impl<F, G>(f, g);
-}
+template<char Dim, class State>
+constexpr auto get_length(State state) noexcept { return [state](auto structure) constexpr noexcept {
+	return structure.template length<Dim>(state);
+}; }
 
 /**
  * @brief returns the number of indices in the structure specified by the dimension name
@@ -73,140 +40,83 @@ constexpr auto compose(F f, G g) noexcept {
  * @tparam Dim: the dimension name of the desired structure
  */
 template<char Dim>
-struct get_length {
-	explicit constexpr get_length() noexcept {}
+constexpr auto get_length() noexcept { return get_length<Dim, state<>>(empty_state); }
 
-	template<class T>
-	constexpr std::size_t operator()(T t) const noexcept {
-		return t.template length<Dim>(empty_state);
-	}
-};
+template<class SubStruct, class State>
+constexpr auto offset(State state) noexcept { return [state](auto structure) constexpr noexcept {
+	return offset_of<SubStruct>(structure, state);
+}; }
 
-/**
- * @brief returns the offset of a substructure given by a dimension name in a structure
- * 
- * @tparam Dim: the dimension name
- */
-template<char Dim>
-constexpr auto get_offset(std::size_t idx) noexcept; // TODO
-
-template<char Dim, std::size_t Idx>
-constexpr auto get_offset(std::integral_constant<std::size_t, Idx>) noexcept; // TODO
-
-namespace helpers {
+template<class SubStruct, char... Dims, class... Idxs>
+constexpr auto offset(Idxs... idxs) noexcept { return offset<SubStruct>(empty_state.with<index_in<Dims>...>(idxs...)); }
 
 template<class State>
-struct offset_impl : contain<State> {
-	explicit constexpr offset_impl() noexcept = delete;
-	explicit constexpr offset_impl(const State& state) : contain<State>(state) {}
+constexpr auto offset(State state) noexcept { return [state](auto structure) constexpr noexcept {
+	using struct_type = decltype(structure);
+	using type = scalar_t<typename struct_type::signature, State>;
+	return offset_of<scalar<type>>(structure, state);
+}; }
 
-	template<class T>
-	constexpr auto operator()(T t) const noexcept {
-		return offset_of<scalar<scalar_t<typename T::signature, State>>>(t, contain<State>::template get<0>());
-	}
-};
-
-}
-
-/**
- * @brief returns the offset of the value described by the structure
- */
-constexpr auto offset() noexcept {
-	return helpers::offset_impl(empty_state);
-}
+template<char... Dims, class... Idxs>
+constexpr auto offset(Idxs... idxs) noexcept { return offset(empty_state.with<index_in<Dims>...>(idxs...)); }
 
 template<class State>
-constexpr auto offset(State state) noexcept {
-	return helpers::offset_impl(state);
-}
-
-/**
- * @brief optionally fixes indices (see `fix`) and then returns the offset of the resulting item
- * 
- * @tparam Dims: the dimension names of fixed indices
- * @param ts: parameters for fixing the indices
- */
-template<char... Dims, class... Ts>
-constexpr auto offset(Ts... ts) noexcept {
-	return helpers::offset_impl(empty_state.with<index_in<Dims>...>(ts...));
-}
+constexpr auto get_size(State state) noexcept { return [state](auto structure) constexpr noexcept {
+	return structure.size(state);
+}; }
 
 /**
  * @brief returns the size (in bytes) of the structure
  */
-struct get_size {
-	constexpr get_size() noexcept = default;
-
-	template<class T>
-	constexpr auto operator()(T t) const noexcept {
-		return t.size(empty_state);
-	}
-};
+constexpr auto get_size() noexcept { return get_size(empty_state); }
 
 namespace helpers {
 
-template<class Ptr, class State>
-struct get_at_impl : private contain<Ptr, State> {
-	explicit constexpr get_at_impl() noexcept = delete;
-	explicit constexpr get_at_impl(Ptr ptr, const State &state) noexcept : contain<Ptr, State>(ptr, state) {}
+template<class T>
+constexpr auto sub_ptr(void *ptr, std::size_t off) noexcept { return (T*) ((char*) ptr + off); }
+template<class T>
+constexpr auto sub_ptr(const void *ptr, std::size_t off) noexcept { return (const T*) ((const char*) ptr + off); }
+template<class T>
+constexpr auto sub_ptr(volatile void *ptr, std::size_t off) noexcept { return (volatile T*) ((volatile char*) ptr + off); }
+template<class T>
+constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { return (const volatile T*) ((const volatile char*) ptr + off); }
 
-	template<class T>
-	using scalar_type = scalar_t<typename T::signature, State>;
-
-	// the return type checks whether the structure `t` is a cube and it also chooses `scalar_t<T> &` or `const scalar_t<T> &` according to constness of `Ptr` pointee
-	template<class T>
-	constexpr auto operator()(T t) const noexcept -> std::conditional_t<std::is_const<std::remove_pointer_t<Ptr>>::value, const scalar_type<T> &, scalar_type<T> &> {
-		// accesses reference to a value with the given offset and casted to its corresponding type
-		return *reinterpret_cast<std::conditional_t<std::is_const<std::remove_pointer_t<Ptr>>::value, const scalar_type<T> *, scalar_type<T> *>>(contain<Ptr, State>::template get<0>() + (t | helpers::offset_impl(contain<Ptr, State>::template get<1>())));
-	}
-};
-
-static inline constexpr char *as_cptr(void *p) noexcept { return (char*)(p); }
-static inline constexpr const char *as_cptr(const void *p) noexcept { return (const char*)(p); }
-
-}
+} // namespace helpers
 
 /**
  * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure
  * 
  * @param ptr: the pointer to blob structure
  */
-template<class V>
-constexpr auto get_at(V *ptr) noexcept {
-	return helpers::get_at_impl(helpers::as_cptr(ptr), empty_state);
-}
-
-template<class V, class State>
-constexpr auto get_at(V *ptr, State state) noexcept {
-	return helpers::get_at_impl(helpers::as_cptr(ptr), state);
-}
+template<class State, class CvVoid>
+constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
+	using struct_type = decltype(structure);
+	using type = scalar_t<typename struct_type::signature, State>;
+	return *helpers::sub_ptr<type>(ptr, offset_of<scalar<type>>(structure, state));
+}; }
 
 /**
  * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure with some fixed indices (see `fix`)
  * @tparam Dims: the dimension names of the fixed dimensions
  * @param ptr: the pointer to blob structure
  */
-template<char... Dims, class V, class... Ts>
-constexpr auto get_at(V *ptr, Ts... ts) noexcept {
-	return helpers::get_at_impl(helpers::as_cptr(ptr), empty_state.with<index_in<Dims>...>(ts...));
-}
+template<char... Dims, class... Idxs, class CvVoid>
+constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept { return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...)); }
 
 /**
- * @brief returns the topmost dims of a structure (if the topmost structure in the substructure tree has no dims and it has only one substructure it returns the topmost dims of this substructure, recursively)
+ * @brief performs a simple application of `F` to `S`
+ * 
+ * @tparam S: the structure type
+ * @tparam F: the function type
+ * @param s: the structure
+ * @param f: the function
+ * @return the result of the piping
  */
-struct top_dims {
-	// recursion case for when the topmost structure offers no dims but it has 1 substructure
-	template<class T>
-	constexpr auto operator()(T t) const noexcept -> decltype(std::enable_if_t<std::is_same<get_dims<T>, char_pack<>>::value, typename sub_structures<T>::value_type>(std::get<0>(sub_structures<T>(t).value)) | *this) {
-		return std::get<0>(sub_structures<T>(t).value) | *this;
-	}
-
-	// bottom case
-	template<class T>
-	constexpr auto operator()(T) const noexcept -> std::enable_if_t<!std::is_same<get_dims<T>, char_pack<>>::value, get_dims<T>> {
-		return get_dims<T>();
-	}
-};
+template<class S, class F>
+constexpr auto operator|(S s, F f) noexcept ->
+std::enable_if_t<is_struct<std::enable_if_t<std::is_class<S>::value, S>>::value, decltype(std::declval<F>()(std::declval<S>()))> {
+	return f(s);
+}
 
 } // namespace noarr
 
