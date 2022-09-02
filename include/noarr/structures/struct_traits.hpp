@@ -48,13 +48,13 @@ struct scalar_t_impl;
 template<char Dim, class ArgLength, class RetSig, class State>
 struct scalar_t_impl<function_sig<Dim, ArgLength, RetSig>, State> {
 	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
-	using type = typename scalar_t_impl<RetSig, typename State::remove_t<index_in<Dim>, length_in<Dim>>>::type;
+	using type = typename scalar_t_impl<RetSig, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
 template<char Dim, class... RetSigs, class State>
 struct scalar_t_impl<dep_function_sig<Dim, RetSigs...>, State> {
 	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
-	static_assert(State::template get_t<index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
-	using type = typename scalar_t_impl<typename dep_function_sig<Dim, RetSigs...>::ret_sig<State::template get_t<index_in<Dim>>::value>, typename State::template remove_t<index_in<Dim>, length_in<Dim>>>::type;
+	static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
+	using type = typename scalar_t_impl<typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
 template<class ValueType, class State>
 struct scalar_t_impl<scalar_sig<ValueType>, State> {

@@ -71,6 +71,10 @@ struct rename_state;
 template<class From, class To, class... StateItem>
 struct rename_state<From, To, state<StateItem...>> {
 	using type = state<state_item<typename rename_state_tag<From, To, typename StateItem::tag>::type, typename StateItem::value_type>...>;
+	static constexpr type convert(state<StateItem...> s) {
+		(void) s; // suppress warning about unused parameter when the pack below is empty
+		return type(s.template get<typename StateItem::tag>()...);
+	}
 };
 
 } // namespace helpers
@@ -86,7 +90,7 @@ private:
 	using internal = typename unzip::even;
 	using external = typename unzip::odd;
 	template<class State>
-	using sub_state = typename helpers::rename_state<external, internal, State>::type;
+	using rename_state = typename helpers::rename_state<external, internal, State>;
 public:
 	static_assert(helpers::rename_uniquity<internal>::value, "A dimension is renamed twice. Usage: rename<Old1, New1, Old2, New2, ...>()");
 	static_assert(helpers::rename_uniquity<external>::value, "Multiple dimensions are renamed to the same name. Usage: rename<Old1, New1, Old2, New2, ...>()");
@@ -113,6 +117,11 @@ public:
 	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
 	template<class State>
+	constexpr auto sub_state(State state) const noexcept {
+		return rename_state<State>::convert(state);
+	}
+
+	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
 		return sub_structure().size(sub_state<State>(state));
 	}
@@ -125,6 +134,11 @@ public:
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
 		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state<State>(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state<State>(state));
 	}
 };
 
@@ -173,12 +187,12 @@ private:
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::ret_sig<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices-start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -219,6 +233,11 @@ public:
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
@@ -270,12 +289,12 @@ private:
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::ret_sig<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices-start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -308,6 +327,12 @@ public:
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 

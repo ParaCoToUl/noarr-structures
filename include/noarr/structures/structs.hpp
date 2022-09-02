@@ -44,8 +44,8 @@ struct tuple : contain<TS...> {
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
-		static_assert(State::template get_t<index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
-		constexpr std::size_t index = State::template get_t<index_in<Dim>>::value;
+		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
+		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 		auto sub_state = state.template remove<index_in<Dim>>(); // TODO remove all indices for size_inner
 		return size_inner(std::make_index_sequence<index>(), sub_state) + offset_of<Sub>(sub_structure<index>(), sub_state);
 	}
@@ -62,6 +62,11 @@ struct tuple : contain<TS...> {
 			constexpr std::size_t index = state.template get<index_in<Dim>>();
 			return sub_structure<index>().template length<QDim>(state.template remove<index_in<Dim>>());
 		}
+	}
+
+	template<class Sub, class State>
+	constexpr void strict_state_at(State) const noexcept {
+		static_assert(always_false_dim<Dim>, "A tuple cannot be used in this context");
 	}
 
 private:
@@ -130,6 +135,11 @@ struct array : contain<T> {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>>());
 		}
 	}
+
+	template<class Sub, class State>
+	constexpr void strict_state_at(State) const noexcept {
+		static_assert(always_false_dim<Dim>, "An array cannot be used in this context");
+	}
 };
 
 template<char Dim, std::size_t L>
@@ -190,6 +200,11 @@ struct vector : contain<T> {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>, length_in<Dim>>());
 		}
 	}
+
+	template<class Sub, class State>
+	constexpr void strict_state_at(State) const noexcept {
+		static_assert(always_false_dim<Dim>, "A vector cannot be used in this context");
+	}
 };
 
 template<char Dim>
@@ -217,6 +232,7 @@ namespace helpers {
 template<class InnerProtoStruct, class OuterProtoStruct, class = std::enable_if_t<InnerProtoStruct::is_proto_struct && OuterProtoStruct::is_proto_struct>>
 struct gcompose : contain<InnerProtoStruct, OuterProtoStruct> {
 	using base = contain<InnerProtoStruct, OuterProtoStruct>;
+	using base::base;
 	explicit constexpr gcompose(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
 
 	static constexpr bool is_proto_struct = true;

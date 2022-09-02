@@ -37,57 +37,79 @@ private:
 		using type = function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, typename Original::ret_sig>>;
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+
+	template<class State>
+	constexpr auto sub_state(State state) const noexcept {
+		if constexpr(Dim != DimMajor && Dim != DimMinor) {
+			static_assert(!State::template contains<index_in<Dim>>, "Index in this dimension is overriden by a substructure");
+			static_assert(!State::template contains<length_in<Dim>>, "Index in this dimension is overriden by a substructure");
+		}
+		auto clean_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
+		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>;
+		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
+			auto major_length = state.template get<length_in<DimMajor>>();
+			auto minor_length = state.template get<length_in<DimMinor>>();
+			if constexpr(have_indices) {
+				auto major_index = state.template get<index_in<DimMajor>>();
+				auto minor_index = state.template get<index_in<DimMinor>>();
+				return clean_state.template with<length_in<Dim>, index_in<Dim>>(major_length*minor_length, major_index*minor_length + minor_index);
+			} else {
+				return clean_state.template with<length_in<Dim>>(major_length*minor_length);
+			}
+		} else if constexpr(State::template contains<length_in<DimMinor>>) {
+			auto minor_length = state.template get<length_in<DimMinor>>();
+			if constexpr(have_indices) {
+				auto major_index = state.template get<index_in<DimMajor>>();
+				auto minor_index = state.template get<index_in<DimMinor>>();
+				return clean_state.template with<index_in<Dim>>(major_index*minor_length + minor_index);
+			} else {
+				return clean_state;
+			}
+		} else {
+			return clean_state;
+		}
+	}
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
-		// TODO check and translate
-		return sub_structure().size(state);
+		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, class State>
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
-		// TODO check
-		auto major_index = state.template get<index_in<DimMajor>>();
-		auto minor_index = state.template get<index_in<DimMinor>>();
-		auto minor_length = state.template get<length_in<DimMinor>>();
-		auto tmp_state = state
-			.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
-			.template with<index_in<Dim>>(major_index*minor_length + minor_index);
-		if constexpr(State::template contains<length_in<DimMajor>>) {
-			auto major_length = state.template get<length_in<DimMajor>>();
-			auto sub_state = tmp_state.template with<length_in<Dim>>(major_length*minor_length);
-			return offset_of<Sub>(sub_structure(), sub_state);
-		} else {
-			return offset_of<Sub>(sub_structure(), tmp_state);
-		}
+		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
+		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
+		static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
+		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
-		// TODO check and translate
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimMinor) {
-			static_assert(always_false_dim<QDim>, "Length has not been set");
-			return 0;
+			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
+			// TODO check remaining state
+			return state.template get<length_in<DimMinor>>();
 		} else if constexpr(QDim == DimMajor) {
-			auto minor_length = state.template get<length_in<DimMinor>>();
-			auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-			return sub_structure().template length<Dim>(sub_state) / minor_length;
+			if constexpr(State::template contains<length_in<DimMajor>>) {
+				// TODO check remaining state
+				return state.template get<length_in<DimMajor>>();
+			} else if constexpr(State::template contains<length_in<DimMinor>>) {
+				auto minor_length = state.template get<length_in<DimMinor>>();
+				return sub_structure().template length<Dim>(sub_state(state)) / minor_length;
+			} else {
+				static_assert(always_false_dim<QDim>, "Length has not been set (and cannot be computed from the total size because block size has also not been set)");
+			}
 		} else {
 			static_assert(QDim != Dim, "Index in this dimension is overriden by a substructure");
-			if constexpr(State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
-				auto major_index = state.template get<index_in<DimMajor>>();
-				auto minor_index = state.template get<index_in<DimMinor>>();
-				auto minor_length = state.template get<length_in<DimMinor>>();
-				auto sub_state = state
-					.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>()
-					.template with<index_in<Dim>>(major_index*minor_length + minor_index);
-				return sub_structure().template length<QDim>(sub_state);
-			} else {
-				auto sub_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-				return sub_structure().template length<QDim>(sub_state);
-			}
+			return sub_structure().template length<QDim>(sub_state(state));
 		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
@@ -151,41 +173,72 @@ private:
 			using type = function_sig<Dim, typename merged_len<>::type, typename OriginalInner::ret_sig>;
 		};
 
-		using type = typename Original::ret_sig::replace<inner_dim_replacement, DimMinor, DimMajor>;
+		using type = typename Original::ret_sig::template replace<inner_dim_replacement, DimMinor, DimMajor>;
 	};
 public:
-	using signature = typename T::signature::replace<outer_dim_replacement, DimMajor, DimMinor>;
+	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
+
+	template<class State>
+	constexpr auto sub_state(State state) const noexcept {
+		if constexpr(DimMajor != Dim) {
+			static_assert(!State::template contains<index_in<DimMajor>>, "Index in this dimension is overriden by a substructure");
+			static_assert(!State::template contains<length_in<DimMajor>>, "Index in this dimension is overriden by a substructure");
+		}
+		if constexpr(DimMinor != Dim) {
+			static_assert(!State::template contains<index_in<DimMinor>>, "Index in this dimension is overriden by a substructure");
+			static_assert(!State::template contains<length_in<DimMinor>>, "Index in this dimension is overriden by a substructure");
+		}
+		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		auto minor_length = sub_structure().template length<DimMinor>(clean_state);
+		if constexpr(State::template contains<length_in<Dim>>) {
+			auto length = state.template get<length_in<Dim>>();
+			auto major_length = length / minor_length;
+			if constexpr(State::template contains<index_in<Dim>>) {
+				auto index = state.template get<index_in<Dim>>();
+				return clean_state.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(index / minor_length, index % minor_length, major_length);
+			} else {
+				return clean_state.template with<length_in<DimMajor>>(major_length);
+			}
+		} else {
+			if constexpr(State::template contains<index_in<Dim>>) {
+				auto index = state.template get<index_in<Dim>>();
+				return clean_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
+			} else {
+				return clean_state;
+			}
+		}
+	}
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
-		// TODO check and translate
-		return sub_structure().size(state);
+		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, class State>
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
-		// TODO check
-		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		auto minor_length = sub_structure().template length<DimMinor>(tmp_state);
-		auto index = state.template get<index_in<Dim>>();
-		auto sub_state = tmp_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
-		if constexpr(State::template contains<length_in<Dim>>) {
-			auto length = state.template get<length_in<Dim>>();
-			return offset_of<Sub>(sub_structure(), sub_state.template with<length_in<DimMajor>>(length / minor_length));
-		} else {
-			return offset_of<Sub>(sub_structure(), sub_state);
-		}
+		static_assert(State::template contains<index_in<Dim>>, "Index has not been set");
+		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
-		// TODO use length?
-		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == Dim) {
-			return sub_structure().template length<DimMajor>(sub_state) * sub_structure().template length<DimMinor>(sub_state);
+			if constexpr(State::template contains<length_in<Dim>>) {
+				// TODO check remaining state
+				return state.template get<length_in<Dim>>();
+			} else {
+				auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+				return sub_structure().template length<DimMajor>(clean_state) * sub_structure().template length<DimMinor>(clean_state);
+			}
 		} else {
-			return sub_structure().template length<QDim>(sub_state);
+			return sub_structure().template length<QDim>(sub_state(state));
 		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 

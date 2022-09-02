@@ -55,7 +55,7 @@ namespace helpers {
 
 	template<class Tag, class HeadStateItem, class... TailStateItems>
 	struct state_remove_item<Tag, HeadStateItem, TailStateItems...> {
-		using result = typename state_remove_item<Tag, TailStateItems...>::result::prepend<HeadStateItem>;
+		using result = typename state_remove_item<Tag, TailStateItems...>::result::template prepend<HeadStateItem>;
 	};
 
 	template<class Tag>
@@ -92,7 +92,7 @@ struct state : contain<typename StateItems::value_type...> {
 	static constexpr bool is_empty = !sizeof...(StateItems);
 
 	template<class Tag>
-	constexpr decltype(auto) get() const noexcept {
+	constexpr auto get() const noexcept {
 		static_assert(contains<Tag>, "No such item");
 		return base::template get<index_of<Tag>::value>();
 	}
@@ -116,13 +116,13 @@ struct state : contain<typename StateItems::value_type...> {
 	constexpr state<StateItems..., NewStateItems...> merge(const state<NewStateItems...> &other) const noexcept {
 		return state<StateItems..., NewStateItems...>(get<typename StateItems::tag>()..., other.template get<typename NewStateItems::tag>()...);
 	}
-
-	template<class Tag>
-	using get_t = decltype(std::declval<state>().template get<Tag>());
-
-	template<class... Tags>
-	using remove_t = decltype(std::declval<state>().template remove<Tags...>());
 };
+
+template<class State, class Tag>
+using state_get_t = decltype(std::declval<State>().template get<Tag>());
+
+template<class State, class... Tags>
+using state_remove_t = decltype(std::declval<State>().template remove<Tags...>());
 
 static constexpr state<> empty_state;
 

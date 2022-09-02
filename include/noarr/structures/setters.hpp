@@ -32,10 +32,10 @@ private:
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(IdxT::value || true, "Tuple index must be set statically, add _idx to the index (e.g. replace 42 with 42_idx)");
-		using type = typename original::ret_sig<IdxT::value>;
+		using type = typename original::template ret_sig<IdxT::value>;
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -58,6 +58,11 @@ public:
 	constexpr std::size_t length(State state) const noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure().template length<QDim>(sub_state(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
@@ -108,10 +113,10 @@ private:
 	};
 	template<class... RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
-		static_assert(always_false<Dim>, "Cannot set tuple length");
+		static_assert(always_false_dim<Dim>, "Cannot set tuple length");
 	};
 public:
-	using signature = typename T::signature::replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
@@ -132,6 +137,11 @@ public:
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
