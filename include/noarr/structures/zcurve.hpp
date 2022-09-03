@@ -39,15 +39,15 @@ constexpr std::tuple<SizeTs...> zc_general(std::size_t z, SizeTs... sizes) noexc
 	std::tuple<SizeTs...> result = {SizeTs(0)...};
 	zc_static_for(std::make_index_sequence<Levels>(), [&](auto k) {
 		constexpr std::size_t level = Levels - k - 1;
-		zc_static_for(EachDim(), [&](auto i) {
-			std::size_t small_tile_size = (std::size_t) 1 << level;
-			std::size_t facet = zc_static_for(EachDim(), [&](auto j) {
+		zc_static_for(EachDim(), [&](auto ic) {
+			constexpr std::size_t i = ic;
+			constexpr std::size_t small_tile_size = (std::size_t) 1 << level;
+			std::size_t facet = zc_static_for(EachDim(), [&](auto jc) {
+				constexpr std::size_t j = jc;
 				if constexpr(j == i) {
 					return 1;
 				} else {
-					std::size_t tile_size = small_tile_size;
-					if constexpr(j > i)
-						tile_size *= 2;
+					constexpr std::size_t tile_size = (j > i ? 2 : 1) * small_tile_size;
 					return (std::get<j>(size) & -tile_size) == std::get<j>(result) ? (std::get<j>(size)-1 & tile_size-1) + 1 : tile_size;
 				}
 			});
