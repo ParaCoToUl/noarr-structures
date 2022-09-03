@@ -43,6 +43,7 @@ namespace helpers {
 	template<class Tag>
 	struct state_index_of<Tag> {
 		static constexpr bool present = false;
+		static constexpr std::size_t value = -1;
 	};
 
 	template<class Tag, class... StateItems>
