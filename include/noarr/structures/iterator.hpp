@@ -6,7 +6,7 @@
 #include "dimension_map.hpp"
 #include "std_ext.hpp"
 #include "funcs.hpp"
-#include "is_struct.hpp"
+#include "struct_decls.hpp"
 #include "setters.hpp"
 
 namespace noarr {

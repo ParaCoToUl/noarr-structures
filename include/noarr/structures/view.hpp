@@ -259,7 +259,7 @@ struct shift_proto : contain<StartT> {
  * @param start: parameters for shifting the indices
  */
 template<char... Dim, class... StartT>
-constexpr auto shift(StartT... start) noexcept { return (unit_struct ^ ... ^ shift_proto<Dim, good_index_t<StartT>>(start)); }
+constexpr auto shift(StartT... start) noexcept { return (neutral_proto() ^ ... ^ shift_proto<Dim, good_index_t<StartT>>(start)); }
 
 template<char Dim, class T, class StartT, class LenT>
 struct slice_t : contain<T, StartT, LenT> {
