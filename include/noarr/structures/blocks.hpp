@@ -15,7 +15,6 @@ struct into_blocks_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
 
-	constexpr std::tuple<T> sub_structures() const noexcept { return std::tuple<T>(base::template get<0>()); }
 	using description = struct_description<
 		char_pack<'d', 'e', 'c', 'o', 'm', 'p', 'o', 's', 'e'>,
 		dims_impl<DimMajor, DimMinor>,
@@ -131,7 +130,6 @@ struct merge_blocks_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
 
-	constexpr std::tuple<T> sub_structures() const noexcept { return std::tuple<T>(base::template get<0>()); }
 	using description = struct_description<
 		char_pack<'c', 'o', 'm', 'p', 'o', 's', 'e'>,
 		dims_impl<Dim>,

@@ -22,7 +22,6 @@ struct tuple : contain<TS...> {
 
 	template<std::size_t Index>
 	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
-	constexpr std::tuple<TS...> sub_structures() const noexcept { return sub_structures(is); }
 	using description = struct_description<
 		char_pack<'t', 'u', 'p', 'l', 'e'>,
 		dims_impl<Dim>,
@@ -73,11 +72,6 @@ struct tuple : contain<TS...> {
 private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
-	template<std::size_t... IS>
-	constexpr std::tuple<TS...> sub_structures(std::index_sequence<IS...>) const noexcept {
-		return std::tuple(sub_structure<IS>()...);
-	}
-
 	template<std::size_t... IS, class State>
 	constexpr std::size_t size_inner(std::index_sequence<IS...>, State sub_state) const noexcept {
 		(void) sub_state; // don't complain about unused parameter in case of empty fold
@@ -93,7 +87,6 @@ private:
  */
 template<char Dim, std::size_t L, class T = void>
 struct array : contain<T> {
-	constexpr std::tuple<T> sub_structures() const noexcept { return std::tuple<T>(contain<T>::template get<0>()); }
 	using description = struct_description<
 		char_pack<'a', 'r', 'r', 'a', 'y'>,
 		dims_impl<Dim>,
@@ -159,7 +152,6 @@ struct array<Dim, L> {
  */
 template<char Dim, class T = void>
 struct vector : contain<T> {
-	constexpr std::tuple<T> sub_structures() const noexcept { return std::tuple<T>(contain<T>::template get<0>()); }
 	using description = struct_description<
 		char_pack<'v', 'e', 'c', 't', 'o', 'r'>,
 		dims_impl<Dim>,
