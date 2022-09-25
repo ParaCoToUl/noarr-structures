@@ -50,49 +50,6 @@ struct get_struct_desc<T, std::void_t<typename T::description>> {
 };
 
 /**
- * @brief retrieves sub_structures from the given structure
- * 
- * @return value of type value_type will hold the list of sub_structures in a tuple
- * @tparam T the type of the given structure
- */
-template<class T, class = void>
-struct sub_structures {
-	explicit constexpr sub_structures() noexcept = default;
-	explicit constexpr sub_structures(T) noexcept {}
-
-	using value_type = std::tuple<>;
-	static constexpr std::tuple<> value = std::make_tuple<>();
-};
-
-namespace helpers {
-
-template<class T, class = void>
-struct sub_structures_are_static : std::false_type {};
-
-template<class T>
-struct sub_structures_are_static<T, std::void_t<decltype(T::sub_structures())>> : std::true_type {};
-
-}
-
-template<class T>
-struct sub_structures<T, std::enable_if_t<helpers::sub_structures_are_static<T>::value>> {
-	explicit constexpr sub_structures() noexcept = default;
-	explicit constexpr sub_structures(T) noexcept {}
-
-	using value_type = remove_cvref<decltype(T::sub_structures())>;
-	static constexpr value_type value = T::sub_structures();
-};
-
-template<class T>
-struct sub_structures<T, std::enable_if_t<!helpers::sub_structures_are_static<T>::value, std::void_t<decltype(std::declval<T>().sub_structures())>>> {
-	explicit constexpr sub_structures() noexcept = delete;
-	explicit constexpr sub_structures(T t) noexcept : value(t.sub_structures()) {}
-
-	using value_type = remove_cvref<decltype(std::declval<T>().sub_structures())>;
-	value_type value;
-};
-
-/**
  * @brief The type that holds all the dimensions of a structure
  * 
  * @tparam Dims: the dimensions

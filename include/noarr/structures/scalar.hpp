@@ -14,7 +14,6 @@ namespace noarr {
  */
 template<class T>
 struct scalar : contain<> {
-	static constexpr std::tuple<> sub_structures() noexcept { return {}; }
 	using description = struct_description<
 		char_pack<'s', 'c', 'a', 'l', 'a', 'r'>,
 		dims_impl<>,
