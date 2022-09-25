@@ -3,6 +3,7 @@
 
 #include "blocks.hpp"
 #include "reorder.hpp"
+#include "setters.hpp"
 
 namespace noarr {
 

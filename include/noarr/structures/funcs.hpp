@@ -7,6 +7,7 @@
 #include "state.hpp"
 #include "struct_decls.hpp"
 #include "struct_traits.hpp"
+#include "scalar.hpp"
 
 namespace noarr {
 

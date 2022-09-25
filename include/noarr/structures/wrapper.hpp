@@ -1,6 +1,7 @@
 #ifndef NOARR_STRUCTURES_WRAPPER_HPP
 #define NOARR_STRUCTURES_WRAPPER_HPP
 
+#include "scalar.hpp"
 #include "funcs.hpp"
 #include "setters.hpp"
 #include "view.hpp"
