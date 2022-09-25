@@ -42,9 +42,6 @@ struct scalar : contain<> {
 	using get_t = typename helpers::scalar_get_t<T, KS...>::type;
 
 	constexpr scalar() noexcept = default;
-	static constexpr auto construct() noexcept {
-		return scalar<T>();
-	}
 	static constexpr std::size_t size() noexcept { return sizeof(T); }
 	static constexpr std::size_t offset() noexcept { return 0; }
 	static constexpr std::size_t length() noexcept { return 0; }

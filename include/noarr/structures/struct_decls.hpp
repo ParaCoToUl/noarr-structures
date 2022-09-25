@@ -108,56 +108,6 @@ using dims_impl = char_pack<Dims...>;
 template<class T>
 using get_dims = typename T::description::dims;
 
-namespace helpers {
-
-template<class T, std::size_t I = std::tuple_size<typename sub_structures<T>::value_type>::value>
-struct construct_impl;
-
-template<class T, std::size_t I>
-struct construct_impl {
-	template<std::size_t... IS, class... TS>
-	static constexpr auto construct(T t, std::tuple<TS...> sub_structures) noexcept {
-		return construct_impl<T, I - 1>::template construct<I - 1, IS...>(t, sub_structures);
-	}
-};
-
-template<class T>
-struct construct_impl<T, 0> {
-	template<std::size_t... IS, class... TS>
-	static constexpr auto construct(T t, std::tuple<TS...> sub_structures) noexcept {
-		return t.construct(std::get<IS>(sub_structures)...);
-	}
-
-	template<std::size_t... IS>
-	static constexpr auto construct(T t, std::tuple<>) noexcept {
-		return t.construct();
-	}
-};
-
-}
-
-/**
- * @brief constructs a structure using a prototype `t` and substructures `ts`
- * 
- * @param t: the prototype for constructing the structure
- * @param ts: the desired substructures
- */
-template<class T, class... TS>
-constexpr auto construct(T t, TS... ts) noexcept {
-	return t.construct(ts...);
-}
-
-/**
- * @brief constructs a structure using a prototype `t` and substructures `ts` contained in a `std::tuple`
- * 
- * @param t: the prototype for constructing the structure
- * @param ts: the desired substructures contained in a `std::tuple`
- */
-template<class T, class... TS>
-constexpr auto construct(T t, std::tuple<TS...> ts) noexcept {
-	return helpers::construct_impl<T>::construct(t, ts);
-}
-
 template<class StructInner, class StructOuter, class State>
 constexpr std::size_t offset_of(StructOuter structure, State state) noexcept {
 	if constexpr(std::is_same_v<StructInner, StructOuter>) {
