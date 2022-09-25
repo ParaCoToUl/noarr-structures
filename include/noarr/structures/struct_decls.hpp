@@ -4,6 +4,7 @@
 #include <tuple>
 
 #include "std_ext.hpp"
+#include "signature.hpp"
 
 namespace noarr {
 
@@ -82,6 +83,56 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 	} else {
 		return structure.template strict_state_at<StructInner>(state);
 	}
+}
+
+namespace helpers {
+
+template<class T, class = void>
+struct is_struct_impl : std::false_type {};
+template<class T>
+struct is_struct_impl<T, std::void_t<typename T::signature>> : std::true_type {
+	static_assert(is_signature<typename T::signature>());
+};
+
+} // namespace helpers
+
+/**
+ * @brief returns whether the type `T` meets the criteria for structures
+ * 
+ * @tparam T: the input type
+ */
+template<class T>
+using is_struct = helpers::is_struct_impl<T>;
+
+template<class Struct, class ProtoStruct, class = std::enable_if_t<is_struct<Struct>::value && ProtoStruct::is_proto_struct>>
+constexpr auto operator ^(Struct s, ProtoStruct p) {
+	return p.instantiate_and_construct(s);
+}
+
+struct neutral_proto {
+	static constexpr bool is_proto_struct = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) noexcept { return s; }
+};
+
+template<class InnerProtoStruct, class OuterProtoStruct, class = std::enable_if_t<InnerProtoStruct::is_proto_struct && OuterProtoStruct::is_proto_struct>>
+struct compose_proto : contain<InnerProtoStruct, OuterProtoStruct> {
+	using base = contain<InnerProtoStruct, OuterProtoStruct>;
+	using base::base;
+	explicit constexpr compose_proto(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
+
+	static constexpr bool is_proto_struct = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) noexcept {
+		return base::template get<1>().instantiate_and_construct(base::template get<0>().instantiate_and_construct(s));
+	}
+};
+
+template<class InnerProtoStruct, class OuterProtoStruct>
+constexpr compose_proto<InnerProtoStruct, OuterProtoStruct> operator ^(InnerProtoStruct i, OuterProtoStruct o) {
+	return compose_proto(i, o);
 }
 
 } // namespace noarr

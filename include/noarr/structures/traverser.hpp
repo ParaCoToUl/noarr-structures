@@ -155,7 +155,7 @@ private:
 };
 
 template<class... Structs>
-constexpr traverser_t<union_t<Structs...>, unit_struct_t> traverser(Structs... s) noexcept { return traverser_t<union_t<Structs...>, unit_struct_t>(union_t<Structs...>(s...), unit_struct); }
+constexpr traverser_t<union_t<Structs...>, neutral_proto> traverser(Structs... s) noexcept { return traverser_t<union_t<Structs...>, neutral_proto>(union_t<Structs...>(s...), neutral_proto()); }
 
 } // namespace noarr
 

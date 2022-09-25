@@ -6,7 +6,6 @@
 #include "scalar.hpp"
 #include "state.hpp"
 #include "signature.hpp"
-#include "is_struct.hpp"
 
 namespace noarr {
 
@@ -207,41 +206,6 @@ struct vector<Dim> {
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) noexcept { return vector<Dim, Struct>(s); }
 };
-
-template<class Struct, class ProtoStruct, class = std::enable_if_t<is_struct<Struct>::value && ProtoStruct::is_proto_struct>>
-constexpr auto operator ^(Struct s, ProtoStruct p) {
-	return p.instantiate_and_construct(s);
-}
-
-static constexpr struct unit_struct_t {
-	static constexpr bool is_proto_struct = true;
-
-	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return s; }
-} unit_struct;
-
-namespace helpers {
-
-template<class InnerProtoStruct, class OuterProtoStruct, class = std::enable_if_t<InnerProtoStruct::is_proto_struct && OuterProtoStruct::is_proto_struct>>
-struct gcompose : contain<InnerProtoStruct, OuterProtoStruct> {
-	using base = contain<InnerProtoStruct, OuterProtoStruct>;
-	using base::base;
-	explicit constexpr gcompose(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
-
-	static constexpr bool is_proto_struct = true;
-
-	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept {
-		return base::template get<1>().instantiate_and_construct(base::template get<0>().instantiate_and_construct(s));
-	}
-};
-
-}
-
-template<class InnerProtoStruct, class OuterProtoStruct>
-constexpr helpers::gcompose<InnerProtoStruct, OuterProtoStruct> operator ^(InnerProtoStruct i, OuterProtoStruct o) {
-	return helpers::gcompose(i, o);
-}
 
 } // namespace noarr
 
