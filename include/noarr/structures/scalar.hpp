@@ -7,23 +7,6 @@
 
 namespace noarr {
 
-namespace helpers {
-
-template<class T, class... KS>
-struct scalar_get_t;
-
-template<class T>
-struct scalar_get_t<T> {
-	using type = T;
-};
-
-template<class T>
-struct scalar_get_t<T, void> {
-	using type = T;
-};
-
-}
-
 /**
  * @brief The ground structure for stored data
  * 
@@ -37,9 +20,6 @@ struct scalar : contain<> {
 		dims_impl<>,
 		dims_impl<>,
 		type_param<T>>;
-
-	template<class... KS>
-	using get_t = typename helpers::scalar_get_t<T, KS...>::type;
 
 	constexpr scalar() noexcept = default;
 	static constexpr std::size_t size() noexcept { return sizeof(T); }
