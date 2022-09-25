@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "signature.hpp"
+#include "state.hpp"
 
 namespace noarr {
 

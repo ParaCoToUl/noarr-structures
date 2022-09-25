@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include "wrapper.hpp"
+
 namespace noarr {
 
 namespace helpers {

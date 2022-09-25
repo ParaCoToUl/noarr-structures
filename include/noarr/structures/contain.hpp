@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_CONTAIN_HPP
 
 #include <type_traits>
+#include <tuple>
 
 namespace noarr {
 
