@@ -346,6 +346,12 @@ constexpr auto make_bag(noarr::wrapper<Structure> s, const char *data) noexcept 
 	return bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, data);
 }
 
+template<class T, class P>
+struct to_struct<bag<T, P>> {
+	using type = T;
+	static constexpr T convert(const bag<T, P> &b) noexcept { return b.structure().unwrap(); }
+};
+
 } // namespace noarr
 
 #endif // NOARR_BAG_HPP

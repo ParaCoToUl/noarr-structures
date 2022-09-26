@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_TRAVERSER_HPP
 
 #include "funcs.hpp"
+#include "to_struct.hpp"
 
 namespace noarr {
 
@@ -154,8 +155,8 @@ private:
 	};
 };
 
-template<class... Structs>
-constexpr traverser_t<union_t<Structs...>, neutral_proto> traverser(Structs... s) noexcept { return traverser_t<union_t<Structs...>, neutral_proto>(union_t<Structs...>(s...), neutral_proto()); }
+template<class... Ts, class U = union_t<typename to_struct<Ts>::type...>>
+constexpr traverser_t<U, neutral_proto> traverser(const Ts &... s) noexcept { return traverser_t<U, neutral_proto>(U(to_struct<Ts>::convert(s)...), neutral_proto()); }
 
 } // namespace noarr
 

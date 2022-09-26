@@ -5,6 +5,7 @@
 #include "funcs.hpp"
 #include "setters.hpp"
 #include "view.hpp"
+#include "to_struct.hpp"
 
 namespace noarr {
 
@@ -137,6 +138,12 @@ constexpr wrapper<Structure> wrap(Structure s) noexcept {
 constexpr auto wrap() noexcept { return [](auto structure) constexpr noexcept {
 	return wrap(structure);
 }; }
+
+template<class T>
+struct to_struct<wrapper<T>> {
+	using type = T;
+	static constexpr T convert(wrapper<T> w) noexcept { return w.unwrap(); }
+};
 
 } // namespace noarr
 
