@@ -11,7 +11,7 @@ namespace noarr {
 
 namespace helpers {
 
-template<class T, class Pre = char_pack<>, class Post = char_pack<>>
+template<class T>
 struct mangle_impl;
 
 }
@@ -31,34 +31,32 @@ struct scalar_name<T, std::void_t<get_struct_desc_t<T>>> {
 	using type = mangle<T>;
 };
 
-template<class T, class Pre, class Post>
-struct mangle_impl : mangle_impl<get_struct_desc_t<T>, Pre, Post> {};
+template<class T>
+struct mangle_impl : mangle_impl<get_struct_desc_t<T>> {};
 
-template<class Name, class... Params, class Pre, class Post>
-struct mangle_impl<struct_description<Name, Params...>, Pre, Post>
+template<class Name, class... Params>
+struct mangle_impl<struct_description<Name, Params...>>
 	: integral_pack_concat<
-		Pre,
 		Name,
 		char_pack<'<'>,
 		integral_pack_concat_sep<char_pack<','>, mangle<Params>...>,
-		char_pack<'>'>,
-		Post> {};
+		char_pack<'>'>> {};
 
-template<class T, class Pre, class Post>
-struct mangle_impl<structure_param<T>, Pre, Post>
-	: integral_pack_concat<Pre, mangle<T>, Post> {};
+template<class T>
+struct mangle_impl<structure_param<T>>
+	: integral_pack_concat<mangle<T>> {};
 
-template<class T, class Pre, class Post>
-struct mangle_impl<type_param<T>, Pre, Post>
-	: integral_pack_concat<Pre, scalar_name_t<T>, Post> {};
+template<class T>
+struct mangle_impl<type_param<T>>
+	: integral_pack_concat<scalar_name_t<T>> {};
 
-template<class T, T V, class Pre, class Post>
-struct mangle_impl<value_param<T, V>, Pre, Post>
-	: integral_pack_concat<Pre, char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>, Post> {};
+template<class T, T V>
+struct mangle_impl<value_param<T, V>>
+	: integral_pack_concat<char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>> {};
 
-template<char Dim, class Pre, class Post>
-struct mangle_impl<dim_param<Dim>, Pre, Post>
-	: integral_pack_concat<Pre, char_pack<'\'', Dim, '\''>, Post> {};
+template<char Dim>
+struct mangle_impl<dim_param<Dim>>
+	: integral_pack_concat<char_pack<'\'', Dim, '\''>> {};
 
 } // namespace helpers
 
