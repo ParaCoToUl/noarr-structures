@@ -34,9 +34,6 @@ struct scalar_name<T, std::void_t<get_struct_desc_t<T>>> {
 template<class T, class Pre, class Post>
 struct mangle_impl : mangle_impl<get_struct_desc_t<T>, Pre, Post> {};
 
-template<class T, class Pre, class Post>
-struct mangle_scalar;
-
 template<class Name, class... Params, class Pre, class Post>
 struct mangle_impl<struct_description<Name, Params...>, Pre, Post>
 	: integral_pack_concat<
@@ -46,10 +43,6 @@ struct mangle_impl<struct_description<Name, Params...>, Pre, Post>
 		integral_pack_concat_sep<char_pack<','>, mangle<Params>...>,
 		char_pack<'>'>,
 		Post> {};
-
-template<class Name, class Param, class Pre, class Post>
-struct mangle_scalar<struct_description<Name, type_param<Param>>, Pre, Post>
-	: integral_pack_concat<Pre, Name, char_pack<'<'>, scalar_name_t<Param>, char_pack<'>'>, Post> {};
 
 template<class T, class Pre, class Post>
 struct mangle_impl<structure_param<T>, Pre, Post>
@@ -66,14 +59,6 @@ struct mangle_impl<value_param<T, V>, Pre, Post>
 template<char Dim, class Pre, class Post>
 struct mangle_impl<dim_param<Dim>, Pre, Post>
 	: integral_pack_concat<Pre, char_pack<'\'', Dim, '\''>, Post> {};
-
-template<class T, class Pre, class Post>
-struct mangle_impl<scalar<T>, Pre, Post>
-	: mangle_scalar<get_struct_desc_t<scalar<T>>, Pre, Post> {};
-
-template<class Pre, class Post>
-struct mangle_impl<std::tuple<>, Pre, Post>
-	: integral_pack_concat<Pre, Post> {};
 
 } // namespace helpers
 
