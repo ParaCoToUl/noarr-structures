@@ -16,8 +16,6 @@ template<class T>
 struct scalar : contain<> {
 	using description = struct_description<
 		char_pack<'s', 'c', 'a', 'l', 'a', 'r'>,
-		dims_impl<>,
-		dims_impl<>,
 		type_param<T>>;
 
 	constexpr scalar() noexcept = default;

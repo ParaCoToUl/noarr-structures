@@ -12,15 +12,11 @@ namespace noarr {
  * @brief a struct that describes a structure
  * 
  * @tparam Name: the name of the structure
- * @tparam Dims: the dimensions the structure introduces
- * @tparam ADims: the dimensions the structure consumes
  * @tparam Params: template parameters of the structure
  */
-template<class Name, class Dims, class ADims, class... Params>
+template<class Name, class... Params>
 struct struct_description {
 	using name = Name;
-	using dims = Dims;
-	using adims = ADims;
 	using description = struct_description;
 };
 
@@ -32,6 +28,9 @@ struct type_param;
 
 template<class T, T V>
 struct value_param;
+
+template<char Dim>
+struct dim_param;
 
 /**
  * @brief returns the `struct_description` of a structure
@@ -49,22 +48,6 @@ template<class T>
 struct get_struct_desc<T, std::void_t<typename T::description>> {
 	using type = typename T::description;
 };
-
-/**
- * @brief The type that holds all the dimensions of a structure
- * 
- * @tparam Dims: the dimensions
- */
-template<char... Dims>
-using dims_impl = char_pack<Dims...>;
-
-/**
- * @brief returns the dimensions introduced by the structure
- * 
- * @tparam T: the structure
- */
-template<class T>
-using get_dims = typename T::description::dims;
 
 template<class StructInner, class StructOuter, class State>
 constexpr std::size_t offset_of(StructOuter structure, State state) noexcept {

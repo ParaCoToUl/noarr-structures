@@ -23,8 +23,7 @@ struct tuple : contain<TS...> {
 	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
 	using description = struct_description<
 		char_pack<'t', 'u', 'p', 'l', 'e'>,
-		dims_impl<Dim>,
-		dims_impl<>,
+		dim_param<Dim>,
 		structure_param<TS>...>;
 
 	constexpr tuple() noexcept = default;
@@ -88,8 +87,7 @@ template<char Dim, std::size_t L, class T = void>
 struct array : contain<T> {
 	using description = struct_description<
 		char_pack<'a', 'r', 'r', 'a', 'y'>,
-		dims_impl<Dim>,
-		dims_impl<>,
+		dim_param<Dim>,
 		value_param<std::size_t, L>,
 		structure_param<T>>;
 
@@ -153,8 +151,7 @@ template<char Dim, class T = void>
 struct vector : contain<T> {
 	using description = struct_description<
 		char_pack<'v', 'e', 'c', 't', 'o', 'r'>,
-		dims_impl<Dim>,
-		dims_impl<>,
+		dim_param<Dim>,
 		structure_param<T>>;
 
 	constexpr vector() noexcept = default;

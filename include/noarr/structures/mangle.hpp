@@ -14,9 +14,6 @@ namespace helpers {
 template<class T, class Pre = char_pack<>, class Post = char_pack<>>
 struct mangle_impl;
 
-template<class Dims>
-struct transform_dims_impl;
-
 }
 
 /**
@@ -26,14 +23,6 @@ struct transform_dims_impl;
  */
 template<class T>
 using mangle = typename helpers::mangle_impl<T>::type;
-
-/**
- * @brief encloses dimensions in single quotes
- * 
- * @tparam Dims: the dimensions to be transformed
- */
-template<class Dims>
-using transform_dims = typename helpers::transform_dims_impl<Dims>::type;
 
 namespace helpers {
 
@@ -48,28 +37,18 @@ struct mangle_impl : mangle_impl<get_struct_desc_t<T>, Pre, Post> {};
 template<class T, class Pre, class Post>
 struct mangle_scalar;
 
-template<char Dim>
-struct transform_dims_impl<dims_impl<Dim>> {
-	using type = char_pack<'\'', Dim, '\''>;
-};
-
-template<>
-struct transform_dims_impl<dims_impl<>> {
-	using type = dims_impl<>;
-};
-
-template<class Name, class Dims, class ADims, class... Params, class Pre, class Post>
-struct mangle_impl<struct_description<Name, Dims, ADims, Params...>, Pre, Post>
+template<class Name, class... Params, class Pre, class Post>
+struct mangle_impl<struct_description<Name, Params...>, Pre, Post>
 	: integral_pack_concat<
 		Pre,
 		Name,
 		char_pack<'<'>,
-		integral_pack_concat_sep<char_pack<','>, transform_dims<Dims>, transform_dims<ADims>, mangle<Params>...>,
+		integral_pack_concat_sep<char_pack<','>, mangle<Params>...>,
 		char_pack<'>'>,
 		Post> {};
 
 template<class Name, class Param, class Pre, class Post>
-struct mangle_scalar<struct_description<Name, dims_impl<>, dims_impl<>, type_param<Param>>, Pre, Post>
+struct mangle_scalar<struct_description<Name, type_param<Param>>, Pre, Post>
 	: integral_pack_concat<Pre, Name, char_pack<'<'>, scalar_name_t<Param>, char_pack<'>'>, Post> {};
 
 template<class T, class Pre, class Post>
@@ -83,6 +62,10 @@ struct mangle_impl<type_param<T>, Pre, Post>
 template<class T, T V, class Pre, class Post>
 struct mangle_impl<value_param<T, V>, Pre, Post>
 	: integral_pack_concat<Pre, char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>, Post> {};
+
+template<char Dim, class Pre, class Post>
+struct mangle_impl<dim_param<Dim>, Pre, Post>
+	: integral_pack_concat<Pre, char_pack<'\'', Dim, '\''>, Post> {};
 
 template<class T, class Pre, class Post>
 struct mangle_impl<scalar<T>, Pre, Post>
