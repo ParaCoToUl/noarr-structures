@@ -17,8 +17,9 @@ struct into_blocks_t : contain<T> {
 
 	using description = struct_description<
 		char_pack<'d', 'e', 'c', 'o', 'm', 'p', 'o', 's', 'e'>,
-		dims_impl<DimMajor, DimMinor>,
-		dims_impl<Dim>,
+		dim_param<Dim>,
+		dim_param<DimMajor>,
+		dim_param<DimMinor>,
 		structure_param<T>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
@@ -132,8 +133,9 @@ struct merge_blocks_t : contain<T> {
 
 	using description = struct_description<
 		char_pack<'c', 'o', 'm', 'p', 'o', 's', 'e'>,
-		dims_impl<Dim>,
-		dims_impl<DimMajor, DimMinor>,
+		dim_param<DimMajor>,
+		dim_param<DimMinor>,
+		dim_param<Dim>,
 		structure_param<T>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
