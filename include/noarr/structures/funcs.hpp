@@ -11,27 +11,13 @@
 
 namespace noarr {
 
-namespace literals {
+template<std::size_t I>
+struct idx_t : std::integral_constant<std::size_t, I> {
+    auto operator()() = delete; // using `idx<42>()` by mistake should be rejected, not evaluate to dynamic size_t of 42
+};
 
-/**
- * @brief Converts an integer literal into a corresponding std::integral_constant<std::size_t, ...>
- * 
- * @tparam Chars the digits of the integer literal
- * @return constexpr auto the corresponding std::integral_constant
- */
-template<char... Chars>
-constexpr auto operator""_idx() noexcept {
-	static_assert((... && ('0' <= Chars && Chars <= '9')), "Invalid or unsupported _idx literal");
-	struct acc {
-		std::size_t value;
-		constexpr acc operator+(char right) const noexcept {
-			return acc{value * 10 + (right - '0')};
-		}
-	};
-	return std::integral_constant<std::size_t, (acc{0} + ... + Chars).value>();
-}
-
-}
+template<std::size_t I>
+constexpr idx_t<I> idx;
 
 template<char Dim, class State>
 constexpr auto get_length(State state) noexcept { return [state](auto structure) constexpr noexcept {

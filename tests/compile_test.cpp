@@ -103,6 +103,6 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	// we can put this at the beginning of the file
 	using namespace noarr::literals;
 	// we index tuple like this
-	float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
+	float& value = tuple_bag.at<'t', 'x'>(idx<0>, 1);
 	value = 0.f;
 }

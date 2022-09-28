@@ -38,9 +38,9 @@ TEST_CASE("Pipes sizes", "[sizes sizes]") {
 	SECTION("check sizes") {
 		REQUIRE((v_sized | noarr::get_length<'x'>()) == 20);
 		REQUIRE((v2 | noarr::get_length<'y'>()) == 20000);
-		REQUIRE((t ^ noarr::fix<'t'>(0_idx) | noarr::get_length<'x'>()) == 10);
-		REQUIRE((t2 ^ noarr::fix<'t'>(0_idx) | noarr::get_length<'y'>()) == 20000);
-		REQUIRE((t2 ^ noarr::fix<'t'>(1_idx) | noarr::get_length<'b'>()) == 20);
+		REQUIRE((t ^ noarr::fix<'t'>(idx<0>) | noarr::get_length<'x'>()) == 10);
+		REQUIRE((t2 ^ noarr::fix<'t'>(idx<0>) | noarr::get_length<'y'>()) == 20000);
+		REQUIRE((t2 ^ noarr::fix<'t'>(idx<1>) | noarr::get_length<'b'>()) == 20);
 	}
 }
 
@@ -91,7 +91,7 @@ TEST_CASE("Pipes resize 2", "[Resizing]") {
 
 TEST_CASE("Pipes resize 3", "[Resizing]") {
 	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	auto vs3 = v2 ^ noarr::set_length<'x'>(10_idx);
+	auto vs3 = v2 ^ noarr::set_length<'x'>(idx<10>);
 
 	SECTION("check is_cube") {
 		REQUIRE(noarr::is_cube<decltype(vs3)>::value);
