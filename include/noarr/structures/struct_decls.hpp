@@ -11,12 +11,10 @@ namespace noarr {
 /**
  * @brief a struct that describes a structure
  * 
- * @tparam Name: the name of the structure
  * @tparam Params: template parameters of the structure
  */
-template<class Name, class... Params>
+template<class... Params>
 struct struct_description {
-	using name = Name;
 	using description = struct_description;
 };
 
