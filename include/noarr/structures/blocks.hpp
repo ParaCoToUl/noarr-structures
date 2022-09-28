@@ -16,7 +16,7 @@ struct into_blocks_t : contain<T> {
 	using base::base;
 
 	static constexpr char name[] = "into_blocks_t";
-	using description = struct_description<
+	using params = struct_params<
 		dim_param<Dim>,
 		dim_param<DimMajor>,
 		dim_param<DimMinor>,
@@ -132,7 +132,7 @@ struct merge_blocks_t : contain<T> {
 	using base::base;
 
 	static constexpr char name[] = "merge_blocks_t";
-	using description = struct_description<
+	using params = struct_params<
 		dim_param<DimMajor>,
 		dim_param<DimMinor>,
 		dim_param<Dim>,
