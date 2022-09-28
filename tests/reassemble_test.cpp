@@ -119,8 +119,5 @@ using dynarray = set_length_t<Dim, vector<Dim, T>, std::size_t>;
 TEST_CASE("strip mine", "[shortcuts blocks reassemble]") {
     array<'x', 10, array<'y', 20, scalar<int>>> array_x_array;
 
-    //decltype(array_x_array ^ strip_mine<'y', 'a', 'b'>(5))::signature i = 42;
-    //vector<'a', array<'x', 10, vector<'b', scalar<int>>>>::signature j = 42;
     REQUIRE(std::is_same_v<decltype(array_x_array ^ strip_mine<'y', 'a', 'b'>(5))::signature, dynarray<'a', array<'x', 10, dynarray<'b', scalar<int>>>>::signature>);
-    //REQUIRE(std::is_same_v<decltype(array_x_array ^ strip_mine<'y', 'a', 'b'>(5_idx))::signature, array<'a', 4, array<'x', 10, array<'b', 5, scalar<int>>>>::signature>);
 }
