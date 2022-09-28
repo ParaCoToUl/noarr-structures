@@ -11,8 +11,8 @@ namespace noarr {
 
 namespace helpers {
 
-template<class T>
-struct mangle_impl;
+template<class Desc>
+struct mangle_desc;
 
 }
 
@@ -22,41 +22,36 @@ struct mangle_impl;
  * @tparam T: the structure
  */
 template<class T>
-using mangle = typename helpers::mangle_impl<T>::type;
+using mangle = typename helpers::mangle_desc<typename T::description>::type;
 
 namespace helpers {
 
 template<class T>
-struct scalar_name<T, std::void_t<get_struct_desc_t<T>>> {
-	using type = mangle<T>;
-};
+struct mangle_param;
 
 template<class T>
-struct mangle_impl : mangle_impl<get_struct_desc_t<T>> {};
-
-template<class Name, class... Params>
-struct mangle_impl<struct_description<Name, Params...>>
-	: integral_pack_concat<
-		Name,
-		char_pack<'<'>,
-		integral_pack_concat_sep<char_pack<','>, mangle<Params>...>,
-		char_pack<'>'>> {};
-
-template<class T>
-struct mangle_impl<structure_param<T>>
+struct mangle_param<structure_param<T>>
 	: integral_pack_concat<mangle<T>> {};
 
 template<class T>
-struct mangle_impl<type_param<T>>
+struct mangle_param<type_param<T>>
 	: integral_pack_concat<scalar_name_t<T>> {};
 
 template<class T, T V>
-struct mangle_impl<value_param<T, V>>
+struct mangle_param<value_param<T, V>>
 	: integral_pack_concat<char_pack<'('>, scalar_name_t<T>, char_pack<')'>, mangle_value<T, V>> {};
 
 template<char Dim>
-struct mangle_impl<dim_param<Dim>>
+struct mangle_param<dim_param<Dim>>
 	: integral_pack_concat<char_pack<'\'', Dim, '\''>> {};
+
+template<class Name, class... Params>
+struct mangle_desc<struct_description<Name, Params...>>
+	: integral_pack_concat<
+		Name,
+		char_pack<'<'>,
+		integral_pack_concat_sep<char_pack<','>, mangle_param<Params>...>,
+		char_pack<'>'>> {};
 
 } // namespace helpers
 
