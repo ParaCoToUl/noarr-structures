@@ -9,14 +9,12 @@
 namespace noarr {
 
 /**
- * @brief a struct that describes a structure
+ * @brief a pack of the template parameters of the structure
  * 
  * @tparam Params: template parameters of the structure
  */
 template<class... Params>
-struct struct_description {
-	using description = struct_description;
-};
+struct struct_params;
 
 template<class>
 struct structure_param;
@@ -29,23 +27,6 @@ struct value_param;
 
 template<char Dim>
 struct dim_param;
-
-/**
- * @brief returns the `struct_description` of a structure
- * 
- * @tparam T: the structure
- * @tparam class: a placeholder type
- */
-template<class T, class = void>
-struct get_struct_desc;
-
-template<class T>
-using get_struct_desc_t = typename get_struct_desc<T>::type;
-
-template<class T>
-struct get_struct_desc<T, std::void_t<typename T::description>> {
-	using type = typename T::description;
-};
 
 template<class StructInner, class StructOuter, class State>
 constexpr std::size_t offset_of(StructOuter structure, State state) noexcept {
