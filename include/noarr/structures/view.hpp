@@ -95,7 +95,10 @@ public:
 	static_assert(helpers::rename_uniquity<internal>::value, "A dimension is renamed twice. Usage: rename<Old1, New1, Old2, New2, ...>()");
 	static_assert(helpers::rename_uniquity<external>::value, "Multiple dimensions are renamed to the same name. Usage: rename<Old1, New1, Old2, New2, ...>()");
 
-	// TODO description
+	static constexpr char name[] = "rename_t";
+	using params = struct_params<
+		structure_param<T>,
+		dim_param<DimPairs>...>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
@@ -158,7 +161,11 @@ struct shift_t : contain<T, StartT> {
 	using base = contain<T, StartT>;
 	using base::base;
 
-	// TODO description
+	static constexpr char name[] = "shift_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>,
+		type_param<StartT>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr StartT start() const noexcept { return base::template get<1>(); }
@@ -266,7 +273,12 @@ struct slice_t : contain<T, StartT, LenT> {
 	using base = contain<T, StartT, LenT>;
 	using base::base;
 
-	// TODO description
+	static constexpr char name[] = "shift_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>,
+		type_param<StartT>,
+		type_param<LenT>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr StartT start() const noexcept { return base::template get<1>(); }

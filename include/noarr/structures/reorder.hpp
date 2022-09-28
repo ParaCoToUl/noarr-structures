@@ -122,7 +122,10 @@ struct reorder_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
 
-	// TODO description
+	static constexpr char name[] = "reorder_t";
+	using params = struct_params<
+		structure_param<T>,
+		dim_param<Dims>...>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
@@ -169,7 +172,10 @@ struct hoist_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
 
-	// TODO description
+	static constexpr char name[] = "hoist_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 

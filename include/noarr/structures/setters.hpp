@@ -13,7 +13,11 @@ struct fix_t : contain<T, IdxT> {
 	using base = contain<T, IdxT>;
 	using base::base;
 
-	// TODO description
+	static constexpr char name[] = "fix_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>,
+		type_param<IdxT>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr IdxT idx() const noexcept { return base::template get<1>(); }
@@ -90,7 +94,11 @@ struct set_length_t : contain<T, LenT> {
 	using base = contain<T, LenT>;
 	using base::base;
 
-	// TODO description
+	static constexpr char name[] = "set_length_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>,
+		type_param<LenT>>;
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr LenT len() const noexcept { return base::template get<1>(); }
