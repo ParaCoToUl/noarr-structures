@@ -11,7 +11,7 @@ namespace noarr {
 
 namespace helpers {
 
-template<class Desc>
+template<const char Name[], class Indices, class Desc>
 struct mangle_desc;
 
 }
@@ -22,7 +22,7 @@ struct mangle_desc;
  * @tparam T: the structure
  */
 template<class T>
-using mangle = typename helpers::mangle_desc<typename T::description>::type;
+using mangle = typename helpers::mangle_desc<T::name, std::make_index_sequence<sizeof(T::name - 1)>, typename T::description>::type;
 
 namespace helpers {
 
@@ -45,11 +45,10 @@ template<char Dim>
 struct mangle_param<dim_param<Dim>>
 	: integral_pack_concat<char_pack<'\'', Dim, '\''>> {};
 
-template<class Name, class... Params>
-struct mangle_desc<struct_description<Name, Params...>>
+template<const char Name[], std::size_t... Indices, class... Params>
+struct mangle_desc<Name, std::index_sequence<Indices...>, struct_description<Params...>>
 	: integral_pack_concat<
-		Name,
-		char_pack<'<'>,
+		char_pack<Name[Indices]..., '<'>,
 		integral_pack_concat_sep<char_pack<','>, mangle_param<Params>...>,
 		char_pack<'>'>> {};
 

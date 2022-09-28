@@ -14,8 +14,8 @@ namespace noarr {
  */
 template<class T>
 struct scalar : contain<> {
+	static constexpr char name[] = "scalar";
 	using description = struct_description<
-		char_pack<'s', 'c', 'a', 'l', 'a', 'r'>,
 		type_param<T>>;
 
 	constexpr scalar() noexcept = default;
