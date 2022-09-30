@@ -13,8 +13,9 @@
 // matrix implementation in noarr will be referred to as "noarr matrix"
 // whole example assumes int matrices
 
-// definion of z-curve data stricture
-#include "z_curve.hpp"
+#include "noarr/structures/structs.hpp"
+#include "noarr/structures/struct_traits.hpp"
+
 // definitions of basic matrix functions: matrix multiplication, scalar multiplication, copy and matrix transpose
 #include "noarr_matrix_functions.hpp"
 
