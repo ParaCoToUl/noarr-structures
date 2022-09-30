@@ -6,7 +6,7 @@
 #include "noarr/structures_extended.hpp"
 #include "noarr_test_defs.hpp"
 
-using namespace noarr::literals;
+using noarr::idx;
 
 TEST_CASE("Sizes is_cube is_simple", "[sizes is_cube is_simple]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
