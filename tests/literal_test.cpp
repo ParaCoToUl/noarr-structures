@@ -3,7 +3,6 @@
 #include "noarr/structures.hpp"
 
 using namespace noarr;
-using namespace noarr::literals;
 
 TEST_CASE("Literality test", "[low-lvl]") {
     constexpr auto test_array = array<'x', 100, scalar<int>>();

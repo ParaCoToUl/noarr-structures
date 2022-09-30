@@ -99,10 +99,7 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::array<'x', 20, noarr::scalar<int>>> tuple;
 	// we will create a bag
 	auto tuple_bag = noarr::make_bag(tuple);
-	// we have to use noarr::literals namespace to be able to index tuples
-	// we can put this at the beginning of the file
-	using namespace noarr::literals;
 	// we index tuple like this
-	float& value = tuple_bag.at<'t', 'x'>(idx<0>, 1);
+	float& value = tuple_bag.at<'t', 'x'>(noarr::idx<0>, 1);
 	value = 0.f;
 }

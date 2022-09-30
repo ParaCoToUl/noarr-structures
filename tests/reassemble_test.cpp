@@ -111,8 +111,6 @@ TEST_CASE("hoist: array ^ array", "[reassemble]") {
     REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'y'>())::signature, array<'y', 20, array<'x', 10, scalar<int>>>::signature>);
 }
 
-using namespace noarr::literals;
-
 template<char Dim, class T>
 using dynarray = set_length_t<Dim, vector<Dim, T>, std::size_t>;
 
