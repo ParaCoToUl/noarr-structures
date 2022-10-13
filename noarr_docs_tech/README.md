@@ -30,7 +30,7 @@ For a structure `T`:
   - it shall satisfy `consteval` if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
   - it shall be a *pure function* if it is allowed by the semantics of the structure (possible exceptions: structures implemented for debugging purposes)
 - the structure shall define `description`, a type that is an instance of `struct_description`, and describes the structure and its type parameters
-  - the first entry shall be a `char_pack` instance containing the structure's name
+  - the first entry shall be a `char_sequence` instance containing the structure's name
   - the second entry shall be a `dims_impl` instance containing the dimension (if any - *e.g. `scalar<T>` does not introduce a dimension*) the structure introduces
   - the third entry shall be a `dims_impl` instance containing the dimensions (if any) the structure consumes from its sub-structures
   - the other entries shall each be a either `structure_param` or `type_param`, `type_param` for (scalar) type parameters and `structure_param` for types that represent structures

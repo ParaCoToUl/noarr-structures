@@ -36,7 +36,7 @@ struct reassemble_find<QDim, State, dep_function_sig<Dim, RetSigs...>> {
 };
 template<char QDim, class State, class ValueType>
 struct reassemble_find<QDim, State, scalar_sig<ValueType>> {
-	static_assert(always_false_dim<QDim>, "The structure does not have a dimension of this name");
+	static_assert(value_always_false<QDim>, "The structure does not have a dimension of this name");
 };
 
 template<class T, class State>

@@ -13,16 +13,16 @@ struct mangle_value_impl;
 template<class T, T V>
 using mangle_value = typename mangle_value_impl<T, V>::type;
 
-template<class T, T V, class Acc = integral_pack<char>, class = void>
+template<class T, T V, class Acc = std::integer_sequence<char>, class = void>
 struct mangle_integral;
 
 template<class T, char... Acc, T V>
-struct mangle_integral<T, V, char_pack<Acc...>, std::enable_if_t<(V >= 10)>>
-	: mangle_integral<T, V / 10, char_pack<(char)(V % 10) + '0', Acc...>> {};
+struct mangle_integral<T, V, char_sequence<Acc...>, std::enable_if_t<(V >= 10)>>
+	: mangle_integral<T, V / 10, char_sequence<(char)(V % 10) + '0', Acc...>> {};
 
 template<class T, char... Acc, T V>
-struct mangle_integral<T, V, char_pack<Acc...>, std::enable_if_t<(V < 10 && V >= 0)>> {
-	using type = char_pack<(char)(V % 10) + '0', Acc...>;
+struct mangle_integral<T, V, char_sequence<Acc...>, std::enable_if_t<(V < 10 && V >= 0)>> {
+	using type = char_sequence<(char)(V % 10) + '0', Acc...>;
 };
 
 template<class T, T V>

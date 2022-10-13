@@ -99,7 +99,7 @@ public:
 				auto minor_length = state.template get<length_in<DimMinor>>();
 				return sub_structure().template length<Dim>(sub_state(state)) / minor_length;
 			} else {
-				static_assert(always_false_dim<QDim>, "Length has not been set (and cannot be computed from the total size because block size has also not been set)");
+				static_assert(value_always_false<QDim>, "Length has not been set (and cannot be computed from the total size because block size has also not been set)");
 			}
 		} else {
 			static_assert(QDim != Dim, "Index in this dimension is overriden by a substructure");

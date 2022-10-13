@@ -14,10 +14,10 @@ template<class T>
 struct print_struct_impl;
 
 template<char... Name>
-struct print_struct_impl<char_pack<Name...>> {
+struct print_struct_impl<char_sequence<Name...>> {
+	// translates a `char_sequence<Name...>` to the corresponding c string
+	static constexpr char name[] = {Name..., '\0'};
 	static constexpr std::ostream &print(std::ostream &out) noexcept {
-		// translates a `char_pack<Name...>` to the corresponding c string
-		constexpr const char name[] = {Name..., '\0'};
 		return out << name;
 	}
 };
