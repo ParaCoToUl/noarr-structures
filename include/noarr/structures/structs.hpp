@@ -64,7 +64,7 @@ struct tuple : contain<TS...> {
 
 	template<class Sub, class State>
 	constexpr void strict_state_at(State) const noexcept {
-		static_assert(always_false_dim<Dim>, "A tuple cannot be used in this context");
+		static_assert(value_always_false<Dim>, "A tuple cannot be used in this context");
 	}
 
 private:
@@ -129,7 +129,7 @@ struct array : contain<T> {
 
 	template<class Sub, class State>
 	constexpr void strict_state_at(State) const noexcept {
-		static_assert(always_false_dim<Dim>, "An array cannot be used in this context");
+		static_assert(value_always_false<Dim>, "An array cannot be used in this context");
 	}
 };
 
@@ -192,7 +192,7 @@ struct vector : contain<T> {
 
 	template<class Sub, class State>
 	constexpr void strict_state_at(State) const noexcept {
-		static_assert(always_false_dim<Dim>, "A vector cannot be used in this context");
+		static_assert(value_always_false<Dim>, "A vector cannot be used in this context");
 	}
 };
 

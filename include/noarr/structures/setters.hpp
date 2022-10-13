@@ -114,7 +114,7 @@ private:
 	};
 	template<class... RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
-		static_assert(always_false_dim<Dim>, "Cannot set tuple length");
+		static_assert(value_always_false<Dim>, "Cannot set tuple length");
 	};
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;

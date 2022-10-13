@@ -6,7 +6,7 @@
 #include <string>
 
 template<char... Chars>
-std::string cp2a(noarr::char_pack<Chars...>) { return {Chars...}; }
+std::string cp2a(noarr::char_sequence<Chars...>) { return {Chars...}; }
 
 static std::string int_name = "i" + std::to_string(sizeof(int) * 8);
 static std::string size_name = "u" + std::to_string(sizeof(std::size_t) * 8);

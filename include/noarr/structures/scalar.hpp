@@ -38,7 +38,7 @@ struct scalar : contain<> {
 
 	template<char QDim, class State>
 	constexpr void length(State) const noexcept {
-		static_assert(always_false_dim<QDim>, "Index in this dimension is not accepted by any substructure");
+		static_assert(value_always_false<QDim>, "Index in this dimension is not accepted by any substructure");
 	}
 
 	template<class Sub, class State>

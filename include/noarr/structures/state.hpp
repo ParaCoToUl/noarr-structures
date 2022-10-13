@@ -94,7 +94,7 @@ struct state : contain<typename StateItems::value_type...> {
 
 	template<class Tag>
 	constexpr auto get() const noexcept {
-		static_assert(contains<Tag>, "No such item");
+		static_assert(contains<Tag>, "No such item is present");
 		return base::template get<index_of<Tag>::value>();
 	}
 

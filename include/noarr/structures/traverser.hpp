@@ -24,7 +24,7 @@ struct sig_union2<Sig1, function_sig<Dim, ArgLength, RetSig>> {
 template<class Sig1, char Dim, class... RetSigs>
 struct sig_union2<Sig1, dep_function_sig<Dim, RetSigs...>> {
 	// TODO
-	static_assert(always_false_dim<Dim>, "Unsupported");
+	static_assert(value_always_false<Dim>, "Unsupported");
 };
 template<class Sig1, class ValueType>
 struct sig_union2<Sig1, scalar_sig<ValueType>> {
