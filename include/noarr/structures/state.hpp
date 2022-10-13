@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_STATE_HPP
 
 #include "contain.hpp"
+#include "std_ext.hpp"
 
 namespace noarr {
 
@@ -29,21 +30,17 @@ namespace helpers {
 
 	template<class Tag, class ValueType, class... TailStateItems>
 	struct state_index_of<Tag, state_item<Tag, ValueType>, TailStateItems...> {
-		static constexpr bool present = true;
-		static constexpr std::size_t value = 0;
+		static constexpr auto result = some<std::size_t>{0};
 	};
 
 	template<class Tag, class HeadStateItem, class... TailStateItems>
 	struct state_index_of<Tag, HeadStateItem, TailStateItems...> {
-		using recursion = state_index_of<Tag, TailStateItems...>;
-		static constexpr bool present = recursion::present;
-		static constexpr std::size_t value = 1 + recursion::value;
+		static constexpr auto result = state_index_of<Tag, TailStateItems...>::result.and_then([](auto v){return v+1;});
 	};
 
 	template<class Tag>
 	struct state_index_of<Tag> {
-		static constexpr bool present = false;
-		static constexpr std::size_t value = -1;
+		static constexpr auto result = none{};
 	};
 
 	template<class Tag, class... StateItems>
@@ -85,17 +82,17 @@ struct state : contain<typename StateItems::value_type...> {
 	using base::base;
 
 	template<class Tag>
-	using index_of = helpers::state_index_of<Tag, StateItems...>;
+	static constexpr auto index_of = helpers::state_index_of<Tag, StateItems...>::result;
 
 	template<class Tag>
-	static constexpr bool contains = index_of<Tag>::present;
+	static constexpr bool contains = index_of<Tag>.present;
 
 	static constexpr bool is_empty = !sizeof...(StateItems);
 
 	template<class Tag>
 	constexpr auto get() const noexcept {
-		static_assert(contains<Tag>, "No such item is present");
-		return base::template get<index_of<Tag>::value>();
+		static_assert(contains<Tag>, "No such item");
+		return base::template get<index_of<Tag>.value>();
 	}
 
 	template<class... NewStateItems>

@@ -83,6 +83,26 @@ static constexpr bool always_false = false;
 template<auto>
 static constexpr bool value_always_false = false;
 
+template<class T>
+struct some {
+	static constexpr bool present = true;
+	T value;
+
+	template<class F>
+	constexpr some<decltype(std::declval<F>()(std::declval<T>()))> and_then(const F &f) const noexcept {
+		return {f(value)};
+	}
+};
+
+struct none {
+	static constexpr bool present = false;
+
+	template<class F>
+	constexpr none and_then(const F &) const noexcept {
+		return {};
+	}
+};
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_STD_EXT_HPP
