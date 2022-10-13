@@ -128,7 +128,7 @@ public:
 
 template<class Structure>
 constexpr wrapper<Structure> wrap(Structure s) noexcept {
-	return wrapper<Structure>(s);
+	return {s};
 }
 
 /**

@@ -94,7 +94,7 @@ struct compose_proto : contain<InnerProtoStruct, OuterProtoStruct> {
 
 template<class InnerProtoStruct, class OuterProtoStruct>
 constexpr compose_proto<InnerProtoStruct, OuterProtoStruct> operator ^(InnerProtoStruct i, OuterProtoStruct o) {
-	return compose_proto(i, o);
+	return {i, o};
 }
 
 } // namespace noarr
