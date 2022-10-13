@@ -161,7 +161,7 @@ struct reorder_proto {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return reorder_t<Struct, Dims...>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reorder_t<Struct, Dims...>(s); }
 };
 
 template<char... Dims>
@@ -216,7 +216,7 @@ struct hoist_proto {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return hoist_t<Dim, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return hoist_t<Dim, Struct>(s); }
 };
 
 template<char Dim>

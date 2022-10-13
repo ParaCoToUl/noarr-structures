@@ -71,7 +71,7 @@ struct rename_state;
 template<class From, class To, class... StateItem>
 struct rename_state<From, To, state<StateItem...>> {
 	using type = state<state_item<typename rename_state_tag<From, To, typename StateItem::tag>::type, typename StateItem::value_type>...>;
-	static constexpr type convert(state<StateItem...> s) {
+	static constexpr type convert(state<StateItem...> s) noexcept {
 		(void) s; // suppress warning about unused parameter when the pack below is empty
 		return type(s.template get<typename StateItem::tag>()...);
 	}
@@ -150,7 +150,7 @@ struct rename_proto {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return rename_t<Struct, DimPairs...>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return rename_t<Struct, DimPairs...>(s); }
 };
 
 template<char... DimPairs>
@@ -256,7 +256,7 @@ struct shift_proto : contain<StartT> {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return shift_t<Dim, Struct, StartT>(s, base::template get<0>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return shift_t<Dim, Struct, StartT>(s, base::template get<0>()); }
 };
 
 /**
@@ -356,7 +356,7 @@ struct slice_proto : contain<StartT, LenT> {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return slice_t<Dim, Struct, StartT, LenT>(s, base::template get<0>(), base::template get<1>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return slice_t<Dim, Struct, StartT, LenT>(s, base::template get<0>(), base::template get<1>()); }
 };
 
 template<char Dim, class StartT, class LenT>

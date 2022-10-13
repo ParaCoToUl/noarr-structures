@@ -75,7 +75,7 @@ struct neutral_proto {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return s; }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s; }
 };
 
 template<class InnerProtoStruct, class OuterProtoStruct, class = std::enable_if_t<InnerProtoStruct::is_proto_struct && OuterProtoStruct::is_proto_struct>>
@@ -87,7 +87,7 @@ struct compose_proto : contain<InnerProtoStruct, OuterProtoStruct> {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept {
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
 		return base::template get<1>().instantiate_and_construct(base::template get<0>().instantiate_and_construct(s));
 	}
 };

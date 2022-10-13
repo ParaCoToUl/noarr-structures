@@ -138,7 +138,7 @@ struct array<Dim, L> {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return array<Dim, L, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return array<Dim, L, Struct>(s); }
 };
 
 /**
@@ -201,7 +201,7 @@ struct vector<Dim> {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return vector<Dim, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return vector<Dim, Struct>(s); }
 };
 
 } // namespace noarr

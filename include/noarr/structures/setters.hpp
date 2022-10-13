@@ -77,7 +77,7 @@ struct fix_proto : contain<IdxT> {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return fix_t<Dim, Struct, IdxT>(s, base::template get<0>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return fix_t<Dim, Struct, IdxT>(s, base::template get<0>()); }
 };
 
 /**
@@ -154,7 +154,7 @@ struct set_length_proto : contain<LenT> {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return set_length_t<Dim, Struct, LenT>(s, base::template get<0>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return set_length_t<Dim, Struct, LenT>(s, base::template get<0>()); }
 };
 
 /**

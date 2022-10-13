@@ -118,7 +118,7 @@ struct into_blocks_proto {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return into_blocks_t<Dim, DimMajor, DimMinor, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_t<Dim, DimMajor, DimMinor, Struct>(s); }
 };
 
 template<char Dim, char DimMajor, char DimMinor>
@@ -242,7 +242,7 @@ struct merge_blocks_proto {
 	static constexpr bool is_proto_struct = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) noexcept { return merge_blocks_t<DimMajor, DimMinor, Dim, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_blocks_t<DimMajor, DimMinor, Dim, Struct>(s); }
 };
 
 template<char DimMajor, char DimMinor, char Dim>
