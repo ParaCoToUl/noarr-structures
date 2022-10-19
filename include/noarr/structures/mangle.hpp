@@ -3,8 +3,6 @@
 
 #include "std_ext.hpp"
 #include "scalar.hpp"
-#include "mangle_value.hpp"
-#include "scalar_names.hpp"
 #include "struct_decls.hpp"
 
 namespace noarr {
@@ -26,6 +24,62 @@ using mangle = typename helpers::mangle_desc<T::name, std::make_index_sequence<s
 
 namespace helpers {
 
+template<class T, T V, class = void>
+struct mangle_value_impl;
+
+template<class T, T V>
+using mangle_value = typename mangle_value_impl<T, V>::type;
+
+template<class T, T V, class Acc = std::integer_sequence<char>, class = void>
+struct mangle_integral;
+
+template<class T, char... Acc, T V>
+struct mangle_integral<T, V, char_sequence<Acc...>, std::enable_if_t<(V >= 10)>>
+	: mangle_integral<T, V / 10, char_sequence<(char)(V % 10) + '0', Acc...>> {};
+
+template<class T, char... Acc, T V>
+struct mangle_integral<T, V, char_sequence<Acc...>, std::enable_if_t<(V < 10 && V >= 0)>> {
+	using type = char_sequence<(char)(V % 10) + '0', Acc...>;
+};
+
+template<class T, T V>
+struct mangle_value_impl<T, V, std::enable_if_t<std::is_integral<T>::value>>
+	: mangle_integral<T, V> {};
+
+/**
+ * @brief returns a textual representation of a scalar type using `char_sequence`
+ * 
+ * @tparam T: the scalar type
+ */
+template<class T, class = void>
+struct scalar_name;
+
+template<class T, class>
+struct scalar_name {
+	static_assert(always_false<T>, "scalar_name<T> has to be implemented");
+	using type = void;
+};
+
+template<class T>
+struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>> {
+	using type = integer_sequence_concat<char_sequence<'i'>, mangle_value<int, 8 * sizeof(T)>>;
+};
+
+template<class T>
+struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value>> {
+	using type = integer_sequence_concat<char_sequence<'u'>, mangle_value<int, 8 * sizeof(T)>>;
+};
+
+template<class T>
+struct scalar_name<T, std::enable_if_t<std::is_floating_point<T>::value>> {
+	using type = integer_sequence_concat<char_sequence<'f'>, mangle_value<int, 8 * sizeof(T)>>;
+};
+
+/**
+ * @brief returns a textual representation of a template parameter description using `char_sequence`
+ * 
+ * @tparam T: one of the arguments to struct_params
+ */
 template<class T>
 struct mangle_param;
 
@@ -33,10 +87,10 @@ template<class T>
 struct mangle_param<structure_param<T>> { using type = integer_sequence_concat<mangle<T>>; };
 
 template<class T>
-struct mangle_param<type_param<T>> { using type = integer_sequence_concat<scalar_name_t<T>>; };
+struct mangle_param<type_param<T>> { using type = integer_sequence_concat<typename scalar_name<T>::type>; };
 
 template<class T, T V>
-struct mangle_param<value_param<T, V>> { using type = integer_sequence_concat<char_sequence<'('>, scalar_name_t<T>, char_sequence<')'>, mangle_value<T, V>>; };
+struct mangle_param<value_param<T, V>> { using type = integer_sequence_concat<char_sequence<'('>, typename scalar_name<T>::type, char_sequence<')'>, mangle_value<T, V>>; };
 
 template<char Dim>
 struct mangle_param<dim_param<Dim>> { using type = integer_sequence_concat<char_sequence<'\'', Dim, '\''>>; };
