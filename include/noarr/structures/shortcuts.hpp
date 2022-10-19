@@ -1,6 +1,7 @@
 #ifndef NOARR_STRUCTURES_SHORTCUTS_HPP
 #define NOARR_STRUCTURES_SHORTCUTS_HPP
 
+#include "layouts.hpp"
 #include "blocks.hpp"
 #include "reorder.hpp"
 #include "setters.hpp"

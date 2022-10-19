@@ -18,34 +18,34 @@
 
   - `scalar`: the simplest possible structure referring to a single value of a certain type
 
-- [structs.hpp](structs.hpp): contains implementations of the structures defined by the library (other than `scalar`).
+- [layouts.hpp](layouts.hpp): contains implementations of the structures that influence the layout (as opposed to just changing the way to access the layout).
 
   - `tuple`: introduces a static dimension with many substructures (similar to `std::tuple`)
   - `array`: introduces a dynamic dimension of a static length with a single substructure (similar to `std::array`)
   - `vector`: introduces a dynamic dimension of a dynamic length (has to be specified ad-hoc) with a single substructure (similar to `std::vector, .resize`)
 
-- [setters.hpp](structs.hpp): contains structures that fix free variables in the structure definition
+- [setters.hpp](setters.hpp): contains structures that fix free variables in the structure definition
 
   - `fix`: fixes an index in a structure
   - `set_length`: changes the length (number of indices) of arrays and vectors
 
-- [reorder.hpp](structs.hpp): contains structures that change the signature of a structure without changing its layout
+- [reorder.hpp](reorder.hpp): contains structures that change the signature of a structure without changing its layout
 
   - `reorder`: reorders the dimensions according to the specified list of dimension names. Dimensions may be omitted.
   - `hoist`: selects one dimension by its name and moves it to the top level
 
-- [view.hpp](structs.hpp): contains structures that change the way each dimension is accessed from outside
+- [view.hpp](view.hpp): contains structures that change the way each dimension is accessed from outside
 
   - `rename`: assigns different names to zero or more dimensions. Swapping names is allowed.
   - `shift`: makes the specified dimension start at the specified index, making the prefix of each row/column inaccessible
   - `slice`: makes the specified dimension start at some index and end at another index, making a prefix and a suffix inaccessible
 
-- [blocks.hpp](structs.hpp): contains structures that compose or decompose existing dimensions into blocks
+- [blocks.hpp](blocks.hpp): contains structures that compose or decompose existing dimensions into blocks
 
   - `into_blocks`: splits one dimension into two dimensions, one of which becomes the index of a block, and the other the index within a block
   - `merge_blocks`: the inverse of `into_blocks` - takes two existing dimensions and merges them into one dimension, making one of the original dimensions the index of a block and the other the index within a block
 
-- [zcurve.hpp](structs.hpp): contains structures that compute indices using the z-order curve
+- [zcurve.hpp](zcurve.hpp): contains structures that compute indices using the z-order curve
 
   - `merge_zcurve`: like `merge_blocks`, but does not compose the dimensions using blocks but a z-order curve instead. This structure also supports any number of dimensions, not just two
 

@@ -2,7 +2,6 @@
 #define NOARR_STRUCTURES_REORDER_HPP
 
 #include "utility.hpp"
-#include "structs.hpp"
 #include "struct_decls.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"

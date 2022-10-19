@@ -1,5 +1,5 @@
-#ifndef NOARR_STRUCTURES_STRUCTS_HPP
-#define NOARR_STRUCTURES_STRUCTS_HPP
+#ifndef NOARR_STRUCTURES_LAYOUTS_HPP
+#define NOARR_STRUCTURES_LAYOUTS_HPP
 
 #include "struct_decls.hpp"
 #include "contain.hpp"
@@ -206,4 +206,4 @@ struct vector<Dim> {
 
 } // namespace noarr
 
-#endif // NOARR_STRUCTURES_STRUCTS_HPP
+#endif // NOARR_STRUCTURES_LAYOUTS_HPP

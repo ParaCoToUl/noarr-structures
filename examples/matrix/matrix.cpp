@@ -13,7 +13,7 @@
 // matrix implementation in noarr will be referred to as "noarr matrix"
 // whole example assumes int matrices
 
-#include "noarr/structures/structs.hpp"
+#include "noarr/structures/layouts.hpp"
 #include "noarr/structures/struct_traits.hpp"
 
 // definitions of basic matrix functions: matrix multiplication, scalar multiplication, copy and matrix transpose

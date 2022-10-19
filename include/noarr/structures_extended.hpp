@@ -3,7 +3,7 @@
  * @brief this file aggregates low-level and high-level includes for the entire "structures" module
  */
 
-#include "structures/structs.hpp"
+#include "structures/layouts.hpp"
 #include "structures/view.hpp"
 #include "structures/contain_serialize.hpp"
 #include "structures/iterator.hpp"
