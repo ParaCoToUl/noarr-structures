@@ -1,5 +1,5 @@
-#ifndef NOARR_STRUCTURES_STD_EXT_HPP
-#define NOARR_STRUCTURES_STD_EXT_HPP
+#ifndef NOARR_STRUCTURES_UTILITY_HPP
+#define NOARR_STRUCTURES_UTILITY_HPP
 
 #include <cstddef>
 #include <type_traits>
@@ -105,4 +105,4 @@ struct none {
 
 } // namespace noarr
 
-#endif // NOARR_STRUCTURES_STD_EXT_HPP
+#endif // NOARR_STRUCTURES_UTILITY_HPP

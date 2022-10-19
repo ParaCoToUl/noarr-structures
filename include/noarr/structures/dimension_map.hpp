@@ -1,7 +1,7 @@
 #ifndef NOARR_DIMENSION_MAP_HPP
 #define NOARR_DIMENSION_MAP_HPP
 
-#include "std_ext.hpp"
+#include "utility.hpp"
 #include "contain.hpp"
 
 namespace noarr {
