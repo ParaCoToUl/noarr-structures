@@ -97,7 +97,7 @@ struct state : contain<typename StateItems::value_type...> {
 
 	template<class... NewStateItems>
 	constexpr state<NewStateItems...> restrict(helpers::state_items_pack<NewStateItems...> = {}) const noexcept {
-		return {get<typename NewStateItems::tag>()...};
+		return state<NewStateItems...>(get<typename NewStateItems::tag>()...);
 	}
 
 	template<class... Tags>
@@ -112,7 +112,7 @@ struct state : contain<typename StateItems::value_type...> {
 
 	template<class... NewStateItems>
 	constexpr state<StateItems..., NewStateItems...> merge(const state<NewStateItems...> &other) const noexcept {
-		return {get<typename StateItems::tag>()..., other.template get<typename NewStateItems::tag>()...};
+		return state<StateItems..., NewStateItems...>(get<typename StateItems::tag>()..., other.template get<typename NewStateItems::tag>()...);
 	}
 };
 

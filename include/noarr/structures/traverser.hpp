@@ -156,7 +156,7 @@ private:
 };
 
 template<class... Ts, class U = union_t<typename to_struct<Ts>::type...>>
-constexpr traverser_t<U, neutral_proto> traverser(const Ts &... s) noexcept { return {U(to_struct<Ts>::convert(s)...), neutral_proto()}; }
+constexpr traverser_t<U, neutral_proto> traverser(const Ts &... s) noexcept { return traverser_t<U, neutral_proto>(U(to_struct<Ts>::convert(s)...), neutral_proto()); }
 
 } // namespace noarr
 
