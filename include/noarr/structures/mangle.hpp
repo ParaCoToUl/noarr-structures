@@ -3,7 +3,7 @@
 
 #include "utility.hpp"
 #include "scalar.hpp"
-#include "struct_decls.hpp"
+#include "structs_common.hpp"
 
 namespace noarr {
 

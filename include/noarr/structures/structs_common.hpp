@@ -1,5 +1,5 @@
-#ifndef NOARR_STRUCTURES_STRUCT_DECLS_HPP
-#define NOARR_STRUCTURES_STRUCT_DECLS_HPP
+#ifndef NOARR_STRUCTURES_STRUCTS_COMMON_HPP
+#define NOARR_STRUCTURES_STRUCTS_COMMON_HPP
 
 #include <tuple>
 
@@ -99,4 +99,4 @@ constexpr compose_proto<InnerProtoStruct, OuterProtoStruct> operator ^(InnerProt
 
 } // namespace noarr
 
-#endif // NOARR_STRUCTURES_STRUCT_DECLS_HPP
+#endif // NOARR_STRUCTURES_STRUCTS_COMMON_HPP

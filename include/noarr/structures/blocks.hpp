@@ -2,7 +2,7 @@
 #define NOARR_STRUCTURES_BLOCKS_HPP
 
 #include "utility.hpp"
-#include "struct_decls.hpp"
+#include "structs_common.hpp"
 #include "state.hpp"
 #include "struct_traits.hpp"
 #include "funcs.hpp"

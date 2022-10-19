@@ -1,7 +1,7 @@
 #ifndef NOARR_STRUCTURES_TO_STRUCT_HPP
 #define NOARR_STRUCTURES_TO_STRUCT_HPP
 
-#include "struct_decls.hpp"
+#include "structs_common.hpp"
 
 namespace noarr {
 

@@ -1,7 +1,7 @@
 #ifndef NOARR_STRUCTURES_SCALAR_HPP
 #define NOARR_STRUCTURES_SCALAR_HPP
 
-#include "struct_decls.hpp"
+#include "structs_common.hpp"
 #include "contain.hpp"
 #include "signature.hpp"
 

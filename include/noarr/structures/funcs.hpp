@@ -5,7 +5,7 @@
 #include <utility>
 
 #include "state.hpp"
-#include "struct_decls.hpp"
+#include "structs_common.hpp"
 #include "struct_traits.hpp"
 #include "scalar.hpp"
 

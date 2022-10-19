@@ -1,7 +1,7 @@
 #ifndef NOARR_STRUCTURES_LAYOUTS_HPP
 #define NOARR_STRUCTURES_LAYOUTS_HPP
 
-#include "struct_decls.hpp"
+#include "structs_common.hpp"
 #include "contain.hpp"
 #include "scalar.hpp"
 #include "state.hpp"

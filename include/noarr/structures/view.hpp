@@ -1,7 +1,7 @@
 #ifndef NOARR_STRUCTURES_VIEW_HPP
 #define NOARR_STRUCTURES_VIEW_HPP
 
-#include "struct_decls.hpp"
+#include "structs_common.hpp"
 #include "contain.hpp"
 #include "state.hpp"
 #include "signature.hpp"
