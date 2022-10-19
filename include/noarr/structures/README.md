@@ -27,14 +27,14 @@
   - `fix`: fixes an index in a structure
   - `set_length`: changes the length (number of indices) of arrays and vectors
 
-- [reorder.hpp](reorder.hpp): contains structures that change the signature of a structure without changing its layout
+- [views.hpp](views.hpp): contains structures that change the dimensions of a structure without changing their properties
 
   - `reorder`: reorders the dimensions according to the specified list of dimension names. Dimensions may be omitted.
   - `hoist`: selects one dimension by its name and moves it to the top level
-
-- [view.hpp](view.hpp): contains structures that change the way each dimension is accessed from outside
-
   - `rename`: assigns different names to zero or more dimensions. Swapping names is allowed.
+
+- [slice.hpp](slice.hpp): contains structures that narrow a dimension to a subset of its indices
+
   - `shift`: makes the specified dimension start at the specified index, making the prefix of each row/column inaccessible
   - `slice`: makes the specified dimension start at some index and end at another index, making a prefix and a suffix inaccessible
 

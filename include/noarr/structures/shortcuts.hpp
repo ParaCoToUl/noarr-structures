@@ -3,7 +3,7 @@
 
 #include "layouts.hpp"
 #include "blocks.hpp"
-#include "reorder.hpp"
+#include "views.hpp"
 #include "setters.hpp"
 
 namespace noarr {

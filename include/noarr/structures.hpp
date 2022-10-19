@@ -4,6 +4,7 @@
  */
 
 #include "structures/layouts.hpp"
-#include "structures/view.hpp"
+#include "structures/views.hpp"
+#include "structures/slice.hpp"
 #include "structures/funcs.hpp"
 #include "structures/wrapper.hpp"

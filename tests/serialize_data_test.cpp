@@ -4,7 +4,6 @@
 
 #include "noarr/structures_extended.hpp"
 #include "noarr/structures/serialize_data.hpp"
-#include "noarr/structures/reorder.hpp"
 
 TEST_CASE("Deserialize data", "[serialize_data]") {
 	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;

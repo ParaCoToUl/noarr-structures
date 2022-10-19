@@ -5,7 +5,6 @@
 
 #include "noarr/structures_extended.hpp"
 #include "noarr/structures/traverser.hpp"
-#include "noarr/structures/reorder.hpp"
 #include "noarr/structures/shortcuts.hpp"
 
 using namespace noarr;

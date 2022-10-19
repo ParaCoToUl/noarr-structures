@@ -1,11 +1,8 @@
-#ifndef NOARR_STRUCTURES_REORDER_HPP
-#define NOARR_STRUCTURES_REORDER_HPP
+#ifndef NOARR_STRUCTURES_VIEWS_HPP
+#define NOARR_STRUCTURES_VIEWS_HPP
 
-#include "utility.hpp"
 #include "structs_common.hpp"
 #include "state.hpp"
-#include "struct_traits.hpp"
-#include "funcs.hpp"
 
 namespace noarr {
 
@@ -221,6 +218,154 @@ struct hoist_proto {
 template<char Dim>
 using hoist = hoist_proto<Dim>;
 
+namespace helpers {
+
+template<class EvenAcc, class OddAcc, char... DimPairs>
+struct rename_unzip_dim_pairs;
+template<char... EvenAcc, char... OddAcc, char Even, char Odd, char... DimPairs>
+struct rename_unzip_dim_pairs<std::integer_sequence<char, EvenAcc...>, std::integer_sequence<char, OddAcc...>, Even, Odd, DimPairs...>
+	: rename_unzip_dim_pairs<std::integer_sequence<char, EvenAcc..., Even>, std::integer_sequence<char, OddAcc..., Odd>, DimPairs...> {};
+template<class EvenAcc, class OddAcc>
+struct rename_unzip_dim_pairs<EvenAcc, OddAcc> {
+	using even = EvenAcc;
+	using odd = OddAcc;
+};
+
+template<class>
+struct rename_uniquity;
+template<char Dim, char... Dims>
+struct rename_uniquity<std::integer_sequence<char, Dim, Dims...>> {
+	static constexpr bool value = (... && (Dims != Dim)) && rename_uniquity<std::integer_sequence<char, Dims...>>::value;
+};
+template<>
+struct rename_uniquity<std::integer_sequence<char>> : std::true_type {};
+
+template<char QDim, class From, class To>
+struct rename_dim;
+template<char QDim, char FromHead, char... FromTail, char ToHead, char... ToTail>
+struct rename_dim<QDim, std::integer_sequence<char, FromHead, FromTail...>, std::integer_sequence<char, ToHead, ToTail...>>
+	: rename_dim<QDim, std::integer_sequence<char, FromTail...>, std::integer_sequence<char, ToTail...>> {};
+template<char FromHead, char... FromTail, char ToHead, char... ToTail>
+struct rename_dim<FromHead, std::integer_sequence<char, FromHead, FromTail...>, std::integer_sequence<char, ToHead, ToTail...>> {
+	static constexpr char dim = ToHead;
+};
+template<char QDim>
+struct rename_dim<QDim, std::integer_sequence<char>, std::integer_sequence<char>> {
+	static constexpr char dim = QDim;
+};
+
+template<class From, class To, class Signature>
+struct rename_sig;
+template<class From, class To, char Dim, class ArgLength, class RetSig>
+struct rename_sig<From, To, function_sig<Dim, ArgLength, RetSig>> {
+	using type = function_sig<rename_dim<Dim, From, To>::dim, ArgLength, typename rename_sig<From, To, RetSig>::type>;
+};
+template<class From, class To, char Dim, class... RetSigs>
+struct rename_sig<From, To, dep_function_sig<Dim, RetSigs...>> {
+	using type = dep_function_sig<rename_dim<Dim, From, To>::dim, typename rename_sig<From, To, RetSigs>::type...>;
+};
+template<class From, class To, class ValueType>
+struct rename_sig<From, To, scalar_sig<ValueType>> {
+	using type = scalar_sig<ValueType>;
+};
+
+template<class From, class To, class StateTag>
+struct rename_state_tag;
+template<class From, class To, char Dim>
+struct rename_state_tag<From, To, index_in<Dim>> { using type = index_in<rename_dim<Dim, From, To>::dim>; };
+template<class From, class To, char Dim>
+struct rename_state_tag<From, To, length_in<Dim>> { using type = length_in<rename_dim<Dim, From, To>::dim>; };
+
+template<class From, class To, class State>
+struct rename_state;
+template<class From, class To, class... StateItem>
+struct rename_state<From, To, state<StateItem...>> {
+	using type = state<state_item<typename rename_state_tag<From, To, typename StateItem::tag>::type, typename StateItem::value_type>...>;
+	static constexpr type convert(state<StateItem...> s) noexcept {
+		(void) s; // suppress warning about unused parameter when the pack below is empty
+		return type(s.template get<typename StateItem::tag>()...);
+	}
+};
+
+} // namespace helpers
+
+template<class T, char... DimPairs>
+struct rename_t : contain<T> {
+	using base = contain<T>;
+	using base::base;
+
+	static_assert(sizeof...(DimPairs) % 2 == 0, "Expected an even number of dimensions. Usage: rename<Old1, New1, Old2, New2, ...>()");
+private:
+	using unzip = helpers::rename_unzip_dim_pairs<std::integer_sequence<char>, std::integer_sequence<char>, DimPairs...>;
+	using internal = typename unzip::even;
+	using external = typename unzip::odd;
+	template<class State>
+	using rename_state = typename helpers::rename_state<external, internal, State>;
+public:
+	static_assert(helpers::rename_uniquity<internal>::value, "A dimension is renamed twice. Usage: rename<Old1, New1, Old2, New2, ...>()");
+	static_assert(helpers::rename_uniquity<external>::value, "Multiple dimensions are renamed to the same name. Usage: rename<Old1, New1, Old2, New2, ...>()");
+
+	static constexpr char name[] = "rename_t";
+	using params = struct_params<
+		structure_param<T>,
+		dim_param<DimPairs>...>;
+
+	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+
+private:
+	template<class = external, class = internal>
+	struct assertion;
+	template<char... ExternalDims, char... InternalDims>
+	struct assertion<std::integer_sequence<char, ExternalDims...>, std::integer_sequence<char, InternalDims...>> {
+		template<char Dim>
+		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
+		static_assert((... && T::signature::template any_accept<InternalDims>), "The structure does not have a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
+		static_assert((... && is_free<ExternalDims>), "The structure already has a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
+		// Note: in case a dimension is renamed to itself, is_free returns true. This is necessary to make the above assertion pass.
+		// The `rename_uniquity<external>` check already ensures that if a dimension is renamed to itself, no other dimension is renamed to its name.
+		static constexpr bool success = true;
+	};
+public:
+	static_assert(assertion<>::success);
+	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
+
+	template<class State>
+	constexpr auto sub_state(State state) const noexcept {
+		return rename_state<State>::convert(state);
+	}
+
+	template<class State>
+	constexpr std::size_t size(State state) const noexcept {
+		return sub_structure().size(sub_state<State>(state));
+	}
+
+	template<class Sub, class State>
+	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		return offset_of<Sub>(sub_structure(), sub_state<State>(state));
+	}
+
+	template<char QDim, class State>
+	constexpr std::size_t length(State state) const noexcept {
+		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state<State>(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state<State>(state));
+	}
+};
+
+template<char... DimPairs>
+struct rename_proto {
+	static constexpr bool is_proto_struct = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return rename_t<Struct, DimPairs...>(s); }
+};
+
+template<char... DimPairs>
+using rename = rename_proto<DimPairs...>;
+
 } // namespace noarr
 
-#endif // NOARR_STRUCTURES_REORDER_HPP
+#endif // NOARR_STRUCTURES_VIEWS_HPP

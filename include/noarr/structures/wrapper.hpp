@@ -4,7 +4,7 @@
 #include "scalar.hpp"
 #include "funcs.hpp"
 #include "setters.hpp"
-#include "view.hpp"
+#include "slice.hpp"
 #include "to_struct.hpp"
 
 namespace noarr {
