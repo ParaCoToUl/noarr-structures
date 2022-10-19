@@ -7,6 +7,15 @@
 
 namespace noarr {
 
+template<class CharPack>
+struct char_seq_to_str;
+
+template<char... C>
+struct char_seq_to_str<char_sequence<C...>> {
+	static constexpr char c_str[] = {C..., '\0'};
+	static constexpr std::size_t length = sizeof...(C);
+};
+
 namespace helpers {
 
 template<const char Name[], class Indices, class Params>
@@ -21,6 +30,9 @@ struct mangle_desc;
  */
 template<class T>
 using mangle = typename helpers::mangle_desc<T::name, std::make_index_sequence<sizeof(T::name) - 1>, typename T::params>::type;
+
+template<class T>
+using mangle_to_str = char_seq_to_str<mangle<T>>;
 
 namespace helpers {
 
