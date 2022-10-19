@@ -5,7 +5,6 @@
 
 #include "structures/layouts.hpp"
 #include "structures/view.hpp"
-#include "structures/contain_serialize.hpp"
 #include "structures/iterator.hpp"
 #include "structures/funcs.hpp"
 #include "structures/wrapper.hpp"
