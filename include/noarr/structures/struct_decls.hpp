@@ -82,7 +82,7 @@ template<class InnerProtoStruct, class OuterProtoStruct, class = std::enable_if_
 struct compose_proto : contain<InnerProtoStruct, OuterProtoStruct> {
 	using base = contain<InnerProtoStruct, OuterProtoStruct>;
 	using base::base;
-	explicit constexpr compose_proto(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
+	constexpr compose_proto(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
 
 	static constexpr bool is_proto_struct = true;
 

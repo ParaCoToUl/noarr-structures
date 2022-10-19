@@ -3,15 +3,15 @@
 #include <sstream>
 
 #include "noarr/structures_extended.hpp"
-#include "noarr/structures/stream_lifting.hpp"
+#include "noarr/structures/serialize_data.hpp"
 #include "noarr/structures/reorder.hpp"
 
-TEST_CASE("Lift", "[stream_lifting]") {
+TEST_CASE("Deserialize data", "[serialize_data]") {
 	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	std::stringstream stream("111 222 333 444 555\n666 777 888 999");
-	bool ok = !!stream_lift(stream, structure, ptr);
+	bool ok = !!deserialize_data(stream, structure, ptr);
 
 	REQUIRE(ok);
 	REQUIRE((structure | noarr::get_at<'x', 'y'>(ptr, 0, 0)) == 111);
@@ -25,12 +25,12 @@ TEST_CASE("Lift", "[stream_lifting]") {
 	REQUIRE((structure | noarr::get_at<'x', 'y'>(ptr, 2, 2)) == 999);
 }
 
-TEST_CASE("Lift reordered", "[stream_lifting]") {
+TEST_CASE("Deserialize data reordered", "[serialize_data]") {
 	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	std::stringstream stream("111 222 333 444 555\n666 777 888 999\n");
-	bool ok = !!stream_lift(stream, structure ^ noarr::reorder<'y', 'x'>(), ptr);
+	bool ok = !!deserialize_data(stream, structure ^ noarr::reorder<'y', 'x'>(), ptr);
 
 	REQUIRE(ok);
 	REQUIRE((structure | noarr::get_at<'x', 'y'>(ptr, 0, 0)) == 111);
@@ -44,17 +44,17 @@ TEST_CASE("Lift reordered", "[stream_lifting]") {
 	REQUIRE((structure | noarr::get_at<'x', 'y'>(ptr, 2, 2)) == 999);
 }
 
-TEST_CASE("Lift incomplete", "[stream_lifting]") {
+TEST_CASE("Deserialize data incomplete", "[serialize_data]") {
 	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	std::stringstream stream("111 222 333 444 555");
-	bool ok = !!stream_lift(stream, structure, ptr);
+	bool ok = !!deserialize_data(stream, structure, ptr);
 
 	REQUIRE(!ok);
 }
 
-TEST_CASE("Unlift", "[stream_lifting]") {
+TEST_CASE("Serialize data", "[serialize_data]") {
 	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
@@ -69,12 +69,12 @@ TEST_CASE("Unlift", "[stream_lifting]") {
 	(structure | noarr::get_at<'x', 'y'>(ptr, 2, 2)) = 999;
 
 	std::stringstream stream;
-	bool ok = !!stream_unlift(stream, structure, ptr);
+	bool ok = !!serialize_data(stream, structure, ptr);
 	REQUIRE(ok);
 	REQUIRE(stream.str() == "111\n222\n333\n444\n555\n666\n777\n888\n999\n");
 }
 
-TEST_CASE("Unlift reordered", "[stream_lifting]") {
+TEST_CASE("Serialize data reordered", "[serialize_data]") {
 	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
@@ -89,7 +89,7 @@ TEST_CASE("Unlift reordered", "[stream_lifting]") {
 	(structure | noarr::get_at<'x', 'y'>(ptr, 2, 2)) = 999;
 
 	std::stringstream stream;
-	bool ok = !!stream_unlift(stream, structure ^ noarr::reorder<'y', 'x'>(), ptr);
+	bool ok = !!serialize_data(stream, structure ^ noarr::reorder<'y', 'x'>(), ptr);
 	REQUIRE(ok);
 	REQUIRE(stream.str() == "111\n222\n333\n444\n555\n666\n777\n888\n999\n");
 }
