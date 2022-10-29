@@ -25,14 +25,18 @@ struct zc_merged_len { using type = dynamic_arg_length; };
 template<std::size_t L0, std::size_t L1>
 struct zc_merged_len<static_arg_length<L0>, static_arg_length<L1>> { using type = static_arg_length<L0 * L1>; };
 
+// std::integral_constant but less annoying
+template<std::size_t Value>
+struct zc_constexpr { static constexpr auto v = Value; };
+
 template<std::size_t... I, class F>
 constexpr void zc_static_for(std::index_sequence<I...>, F f) noexcept {
-	(..., f(std::integral_constant<std::size_t, I>()));
+	(..., f(zc_constexpr<I>()));
 }
 
 template<std::size_t... I, class F>
 constexpr auto zc_product_static_for(std::index_sequence<I...>, F f) noexcept {
-	return (... * f(std::integral_constant<std::size_t, I>()));
+	return (... * f(zc_constexpr<I>()));
 }
 
 template<std::size_t Levels, class... SizeTs>
@@ -42,23 +46,23 @@ constexpr std::tuple<SizeTs...> zc_general(std::size_t z, SizeTs... sizes) noexc
 	std::tuple<SizeTs...> size = {sizes...};
 	std::tuple<SizeTs...> result = {SizeTs(0)...};
 	zc_static_for(std::make_index_sequence<Levels>(), [&](auto k) {
-		constexpr std::size_t level = Levels - decltype(k)::value - 1;
+		using level = zc_constexpr<Levels - decltype(k)::v - 1>;
+		using small_tile_size = zc_constexpr<(std::size_t) 1 << level::v>;
 		zc_static_for(EachDim(), [&](auto ic) {
-			constexpr std::size_t i = decltype(ic)::value;
-			constexpr std::size_t small_tile_size = (std::size_t) 1 << level;
+			using i = decltype(ic);
 			std::size_t facet = zc_product_static_for(EachDim(), [&](auto jc) {
-				constexpr std::size_t j = decltype(jc)::value;
-				if constexpr(j == i) {
+				using j = decltype(jc);
+				if constexpr(j::v == i::v) {
 					return 1;
 				} else {
-					constexpr std::size_t tile_size = (j > i ? 2 : 1) * small_tile_size;
-					return (std::get<j>(size) & -tile_size) == std::get<j>(result) ? (std::get<j>(size)-1 & tile_size-1) + 1 : tile_size;
+					constexpr std::size_t tile_size = (j::v > i::v ? 2 : 1) * small_tile_size::v;
+					return (std::get<j::v>(size) & -tile_size) == std::get<j::v>(result) ? (std::get<j::v>(size)-1 & tile_size-1) + 1 : tile_size;
 				}
 			});
-			std::size_t half_volume = facet << level;
+			std::size_t half_volume = facet << level::v;
 			if(z >= half_volume) {
 				z -= half_volume;
-				std::get<i>(result) += small_tile_size;
+				std::get<i::v>(result) += small_tile_size::v;
 			}
 		});
 	});
