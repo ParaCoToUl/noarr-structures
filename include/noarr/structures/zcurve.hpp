@@ -42,12 +42,12 @@ constexpr std::tuple<SizeTs...> zc_general(std::size_t z, SizeTs... sizes) noexc
 	std::tuple<SizeTs...> size = {sizes...};
 	std::tuple<SizeTs...> result = {SizeTs(0)...};
 	zc_static_for(std::make_index_sequence<Levels>(), [&](auto k) {
-		constexpr std::size_t level = Levels - k - 1;
+		constexpr std::size_t level = Levels - decltype(k)::value - 1;
 		zc_static_for(EachDim(), [&](auto ic) {
-			constexpr std::size_t i = ic;
+			constexpr std::size_t i = decltype(ic)::value;
 			constexpr std::size_t small_tile_size = (std::size_t) 1 << level;
 			std::size_t facet = zc_product_static_for(EachDim(), [&](auto jc) {
-				constexpr std::size_t j = jc;
+				constexpr std::size_t j = decltype(jc)::value;
 				if constexpr(j == i) {
 					return 1;
 				} else {
