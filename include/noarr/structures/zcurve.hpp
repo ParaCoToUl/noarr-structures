@@ -26,8 +26,13 @@ template<std::size_t L0, std::size_t L1>
 struct zc_merged_len<static_arg_length<L0>, static_arg_length<L1>> { using type = static_arg_length<L0 * L1>; };
 
 template<std::size_t... I, class F>
-constexpr auto zc_static_for(std::index_sequence<I...>, F f) noexcept {
-	return (1 * ... * f(std::integral_constant<std::size_t, I>()));
+constexpr void zc_static_for(std::index_sequence<I...>, F f) noexcept {
+	(..., f(std::integral_constant<std::size_t, I>()));
+}
+
+template<std::size_t... I, class F>
+constexpr auto zc_product_static_for(std::index_sequence<I...>, F f) noexcept {
+	return (... * f(std::integral_constant<std::size_t, I>()));
 }
 
 template<std::size_t Levels, class... SizeTs>
@@ -41,7 +46,7 @@ constexpr std::tuple<SizeTs...> zc_general(std::size_t z, SizeTs... sizes) noexc
 		zc_static_for(EachDim(), [&](auto ic) {
 			constexpr std::size_t i = ic;
 			constexpr std::size_t small_tile_size = (std::size_t) 1 << level;
-			std::size_t facet = zc_static_for(EachDim(), [&](auto jc) {
+			std::size_t facet = zc_product_static_for(EachDim(), [&](auto jc) {
 				constexpr std::size_t j = jc;
 				if constexpr(j == i) {
 					return 1;
@@ -55,9 +60,7 @@ constexpr std::tuple<SizeTs...> zc_general(std::size_t z, SizeTs... sizes) noexc
 				z -= half_volume;
 				std::get<i>(result) += small_tile_size;
 			}
-			return 0;
 		});
-		return 0;
 	});
 	return std::tuple<SizeTs...>(result); // force copy, so that `result` is not aliased due to copy elision
 }
