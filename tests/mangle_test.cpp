@@ -8,8 +8,8 @@
 template<char... Chars>
 std::string cp2a(noarr::char_sequence<Chars...>) { return {Chars...}; }
 
-static std::string int_name = "i" + std::to_string(sizeof(int) * 8);
-static std::string size_name = "u" + std::to_string(sizeof(std::size_t) * 8);
+static std::string int_name = "int" + std::to_string(sizeof(int) * 8) + "_t";
+static std::string size_name = "uint" + std::to_string(sizeof(std::size_t) * 8) + "_t";
 
 TEST_CASE("Mangle scalar", "[mangle]") {
 	using s = noarr::scalar<int>;

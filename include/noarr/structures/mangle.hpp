@@ -74,17 +74,27 @@ struct scalar_name {
 
 template<class T>
 struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>> {
-	using type = integer_sequence_concat<char_sequence<'i'>, mangle_value<int, 8 * sizeof(T)>>;
+	using type = integer_sequence_concat<char_sequence<'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, char_sequence<'_', 't'>>;
 };
 
 template<class T>
 struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value>> {
-	using type = integer_sequence_concat<char_sequence<'u'>, mangle_value<int, 8 * sizeof(T)>>;
+	using type = integer_sequence_concat<char_sequence<'u', 'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, char_sequence<'_', 't'>>;
 };
 
-template<class T>
-struct scalar_name<T, std::enable_if_t<std::is_floating_point<T>::value>> {
-	using type = integer_sequence_concat<char_sequence<'f'>, mangle_value<int, 8 * sizeof(T)>>;
+template<>
+struct scalar_name<float> {
+	using type = char_sequence<'f', 'l', 'o', 'a', 't'>;
+};
+
+template<>
+struct scalar_name<double> {
+	using type = char_sequence<'d', 'o', 'u', 'b', 'l', 'e'>;
+};
+
+template<>
+struct scalar_name<long double> {
+	using type = char_sequence<'l', 'o', 'n', 'g', ' ', 'd', 'o', 'u', 'b', 'l', 'e'>;
 };
 
 /**
