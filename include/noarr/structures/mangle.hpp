@@ -66,12 +66,6 @@ struct mangle_value_impl<T, V, std::enable_if_t<std::is_integral<T>::value>>
 template<class T, class = void>
 struct scalar_name;
 
-template<class T, class>
-struct scalar_name {
-	static_assert(always_false<T>, "scalar_name<T> has to be implemented");
-	using type = void;
-};
-
 template<class T>
 struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>> {
 	using type = integer_sequence_concat<char_sequence<'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, char_sequence<'_', 't'>>;
@@ -125,7 +119,58 @@ struct mangle_desc<Name, std::index_sequence<Indices...>, struct_params<Params..
 		char_sequence<'>'>>;
 };
 
+struct mangle_expr_helpers {
+	template<class... Ts>
+	static inline std::index_sequence_for<Ts...> get_contain_indices(const contain<Ts...> &) noexcept { std::terminate(); }
+
+	template<class String, class T, std::size_t... Indices>
+	static constexpr void append_items(String &out, const T &t, std::index_sequence<Indices...>) {
+		(..., (append(out, t.template get<Indices>()), out.push_back(',')));
+	}
+
+	template<class String, class U>
+	static constexpr void append_int(String &out, bool neg, U u) {
+		constexpr auto maxsz = sizeof(U) * 3 + 1; // at most 3 digits per byte + sign
+		char buff[maxsz], *ptr = buff + maxsz;
+		std::size_t sz = 0;
+		if(neg)
+			u = -u;
+		do {
+			*--ptr = '0' + u % 10;
+			sz++;
+		} while(u /= 10);
+		if(neg)
+			*--ptr = '-';
+		out.append(ptr, sz);
+	}
+
+	template<class String, class T, class Indices = decltype(get_contain_indices(std::declval<T>()))> // Indices also used for SFINAE
+	static constexpr void append(String &out, const T &t) {
+		using type_str = mangle_to_str<T>;
+		out.append(type_str::c_str, type_str::length);
+		out.push_back('{');
+		append_items(out, t, Indices{});
+		out.push_back('}');
+	}
+
+	template<class String, class T>
+	static constexpr std::enable_if_t<std::is_integral_v<T>> append(String &out, const T &t) {
+		using type_str = char_seq_to_str<typename scalar_name<T>::type>;
+		out.append(type_str::c_str, type_str::length);
+		out.push_back('{');
+		append_int(out, (t < 0), std::make_unsigned_t<T>(t));
+		out.push_back('}');
+	}
+};
+
 } // namespace helpers
+
+template<class String, class T>
+constexpr String mangle_expr(const T &t) {
+	String out;
+	helpers::mangle_expr_helpers::append(out, t);
+	return out;
+}
 
 } // namespace noarr
 
