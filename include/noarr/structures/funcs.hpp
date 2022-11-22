@@ -13,7 +13,7 @@ namespace noarr {
 
 template<std::size_t I>
 struct idx_t : std::integral_constant<std::size_t, I> {
-    auto operator()() = delete; // using `idx<42>()` by mistake should be rejected, not evaluate to dynamic size_t of 42
+	auto operator()() = delete; // using `idx<42>()` by mistake should be rejected, not evaluate to dynamic size_t of 42
 };
 
 template<std::size_t I>
