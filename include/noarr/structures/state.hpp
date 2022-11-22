@@ -95,6 +95,12 @@ struct state : contain<typename StateItems::value_type...> {
 		return base::template get<index_of<Tag>.value>();
 	}
 
+	template<class Tag>
+	constexpr auto &get_ref() noexcept {
+		static_assert(contains<Tag>, "No such item");
+		return base::template get<index_of<Tag>.value>();
+	}
+
 	template<class... NewStateItems>
 	constexpr state<NewStateItems...> restrict(helpers::state_items_pack<NewStateItems...> = {}) const noexcept {
 		return state<NewStateItems...>(get<typename NewStateItems::tag>()...);

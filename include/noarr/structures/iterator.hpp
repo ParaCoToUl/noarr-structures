@@ -3,7 +3,6 @@
 
 #include <tuple>
 
-#include "dimension_map.hpp"
 #include "utility.hpp"
 #include "funcs.hpp"
 #include "structs_common.hpp"
@@ -25,41 +24,29 @@ struct n_th<0U, Dim, Dims...> {
     static constexpr value_type value = Dim;
 };
 
+template<char ...Dims>
+using iterator_dimension_map = state<state_item<index_in<Dims>, std::size_t>...>;
+
 template<class Struct, char ...Dims>
 struct iterator;
 
 template<std::size_t I, char ...Dims>
 struct iterator_eq_helper {
 private:
-    using DimensionMap = dimension_map<index_pair<Dims, std::size_t>...>;
+    using DimensionMap = iterator_dimension_map<Dims...>;
 
 public:
     static constexpr int compare(const DimensionMap &first, const DimensionMap &second) noexcept {
-        constexpr char symbol = n_th<I, Dims...>::value;
+        using key = index_in<n_th<I, Dims...>::value>;
 
-        if (first.template get<symbol>() < second.template get<symbol>()) {
+        if (first.template get<key>() < second.template get<key>()) {
             return -1;
-        } else if (first.template get<symbol>() > second.template get<symbol>()) {
+        } else if (first.template get<key>() > second.template get<key>()) {
             return 1;
+        } else if constexpr (I == 0) {
+            return 0;
         } else {
             return iterator_eq_helper<I - 1, Dims...>::compare(first, second);
-        }
-    }
-};
-
-template<char Dim, char ...Dims>
-struct iterator_eq_helper<0U, Dim, Dims...> {
-private:
-    using DimensionMap = dimension_map<index_pair<Dim, std::size_t>, index_pair<Dims, std::size_t>...>;
-
-public:
-    static constexpr int compare(const DimensionMap &first, const DimensionMap &second) noexcept {
-        if (first.template get<Dim>() < second.template get<Dim>()) {
-            return -1;
-        } else if (first.template get<Dim>() > second.template get<Dim>()) {
-            return 1;
-        } else {
-            return 0;
         }
     }
 };
@@ -67,13 +54,14 @@ public:
 template<std::size_t I, char ...Dims>
 struct iterator_inc_helper {
 private:
-    using DimensionMap = dimension_map<index_pair<Dims, std::size_t>...>;
+    using DimensionMap = iterator_dimension_map<Dims...>;
     static constexpr char symbol = n_th<I - 1, Dims...>::value;
+    using key = index_in<symbol>;
 
 public:
     template<class Struct>
     static bool increment(DimensionMap &dims, const Struct &s) noexcept {
-        auto &&dim = dims.template get<symbol>();
+        auto &dim = dims.template get_ref<key>();
         ++dim;
 
         if (dim == (s | get_length<symbol>())) {
@@ -89,7 +77,7 @@ public:
 template<char ...Dims>
 struct iterator_inc_helper<0, Dims...> {
 private:
-    using DimensionMap = dimension_map<index_pair<Dims, std::size_t>...>;
+    using DimensionMap = iterator_dimension_map<Dims...>;
 
 public:
     template<class Struct>
@@ -101,7 +89,7 @@ public:
 template<class Struct, char ...Dims>
 struct iterator {
     Struct *structure;
-    dimension_map<index_pair<Dims, std::size_t>...> dims;
+    iterator_dimension_map<Dims...> dims;
 
     using value_type = decltype(*structure ^ fix<Dims...>(((void)Dims, 0U)...));
 
@@ -142,25 +130,25 @@ public:
 
 template<std::size_t I, class Struct, char ...Dims>
 struct iterator_get_helper {
-    static constexpr char symbol = n_th<I - 1, Dims...>::value;
+    using key = index_in<n_th<I - 1, Dims...>::value>;
 
     static constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-        return it.dims.template get<symbol>();
+        return it.dims.template get<key>();
     }
 
     static constexpr decltype(auto) get(const noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-        return it.dims.template get<symbol>();
+        return it.dims.template get<key>();
     }
 };
 
 template<class Struct, char ...Dims>
 struct iterator_get_helper<0U, Struct, Dims...> {
     static constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-        return *it.structure ^ fix<Dims...>(it.dims.template get<Dims>()...);
+        return *it.structure ^ fix<Dims...>(it.dims.template get<index_in<Dims>>()...);
     }
 
     static constexpr decltype(auto) get(const noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-        return *it.structure ^ fix<Dims...>(it.dims.template get<Dims>()...);
+        return *it.structure ^ fix<Dims...>(it.dims.template get<index_in<Dims>>()...);
     }
 };
 
