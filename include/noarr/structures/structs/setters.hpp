@@ -1,10 +1,11 @@
 #ifndef NOARR_STRUCTURES_SETTERS_HPP
 #define NOARR_STRUCTURES_SETTERS_HPP
 
-#include "structs_common.hpp"
-#include "contain.hpp"
-#include "state.hpp"
-#include "signature.hpp"
+#include "../base/contain.hpp"
+#include "../base/signature.hpp"
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
 
 namespace noarr {
 

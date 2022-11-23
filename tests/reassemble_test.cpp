@@ -1,7 +1,6 @@
 #include <catch2/catch.hpp>
 
-#include "noarr/structures_extended.hpp"
-#include "noarr/structures/shortcuts.hpp"
+#include <noarr/structures_extended.hpp>
 
 using namespace noarr;
 

@@ -1,10 +1,11 @@
 #ifndef NOARR_STRUCTURES_SHORTCUTS_HPP
 #define NOARR_STRUCTURES_SHORTCUTS_HPP
 
-#include "layouts.hpp"
-#include "blocks.hpp"
-#include "views.hpp"
-#include "setters.hpp"
+#include "../base/utility.hpp"
+#include "../structs/layouts.hpp"
+#include "../structs/blocks.hpp"
+#include "../structs/views.hpp"
+#include "../structs/setters.hpp"
 
 namespace noarr {
 

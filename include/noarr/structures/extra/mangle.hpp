@@ -1,9 +1,9 @@
 #ifndef NOARR_STRUCTURES_MANGLE_HPP
 #define NOARR_STRUCTURES_MANGLE_HPP
 
-#include "utility.hpp"
-#include "scalar.hpp"
-#include "structs_common.hpp"
+#include "../base/contain.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
 
 namespace noarr {
 

@@ -3,10 +3,11 @@
 
 #include <tuple>
 
-#include "utility.hpp"
-#include "funcs.hpp"
-#include "structs_common.hpp"
-#include "setters.hpp"
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
+#include "../extra/funcs.hpp"
+#include "../structs/setters.hpp"
 
 namespace noarr {
 

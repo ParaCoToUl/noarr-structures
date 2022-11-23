@@ -1,13 +1,11 @@
 #ifndef NOARR_STRUCTURES_FUNCS_HPP
 #define NOARR_STRUCTURES_FUNCS_HPP
 
-#include <type_traits>
-#include <utility>
-
-#include "state.hpp"
-#include "structs_common.hpp"
-#include "struct_traits.hpp"
-#include "scalar.hpp"
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
+#include "../extra/struct_traits.hpp"
+#include "../structs/scalar.hpp"
 
 namespace noarr {
 

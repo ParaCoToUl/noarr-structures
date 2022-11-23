@@ -3,9 +3,8 @@
 #include <array>
 #include <iostream>
 
-#include "noarr/structures_extended.hpp"
-#include "noarr/structures/traverser.hpp"
-#include "noarr/structures/shortcuts.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/extra/traverser.hpp>
 
 using namespace noarr;
 

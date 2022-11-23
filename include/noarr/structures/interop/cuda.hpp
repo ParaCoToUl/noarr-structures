@@ -1,7 +1,7 @@
 #ifndef NOARR_STRUCTURES_CUDA_HPP
 #define NOARR_STRUCTURES_CUDA_HPP
 
-#include "traverser.hpp"
+#include "../extra/traverser.hpp"
 
 #ifdef NOARR_DUMMY_CUDA
 #define __device__

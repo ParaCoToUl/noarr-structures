@@ -1,7 +1,8 @@
 #include <catch2/catch.hpp>
 
-#include "noarr/structures.hpp"
-#include "noarr/structures/mangle.hpp"
+#include <noarr/structures.hpp>
+#include <noarr/structures/extra/mangle.hpp>
+#include <noarr/structures/structs/setters.hpp>
 
 #include <string>
 #include <stdint.h>

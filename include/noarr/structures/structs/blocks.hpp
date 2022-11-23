@@ -1,11 +1,11 @@
 #ifndef NOARR_STRUCTURES_BLOCKS_HPP
 #define NOARR_STRUCTURES_BLOCKS_HPP
 
-#include "utility.hpp"
-#include "structs_common.hpp"
-#include "state.hpp"
-#include "struct_traits.hpp"
-#include "funcs.hpp"
+#include "../base/contain.hpp"
+#include "../base/signature.hpp"
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
 
 namespace noarr {
 

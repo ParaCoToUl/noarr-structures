@@ -3,12 +3,9 @@
 #include <array>
 #include <iostream>
 
-#include "noarr/structures/setters.hpp"
-#include "noarr/structures/layouts.hpp"
-#include "noarr/structures/views.hpp"
-#include "noarr/structures/blocks.hpp"
+#include <noarr/structures_extended.hpp>
 #define NOARR_DUMMY_CUDA
-#include "noarr/structures/cuda.hpp"
+#include <noarr/structures/interop/cuda.hpp>
 
 TEST_CASE("Cuda traverser simple 6D", "[cuda]") {
 	auto s = noarr::scalar<int>()

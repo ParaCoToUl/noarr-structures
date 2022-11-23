@@ -1,6 +1,7 @@
 #include <catch2/catch.hpp>
 
-#include "noarr/structures.hpp"
+#include <noarr/structures.hpp>
+#include <noarr/structures/structs/setters.hpp>
 
 using namespace noarr;
 

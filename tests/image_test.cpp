@@ -4,7 +4,8 @@
 #include <iostream>
 #include <tuple>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/extra/wrapper.hpp>
 
 TEST_CASE("Image", "[image]") {
 	noarr::array<'x', 1920, noarr::array<'y', 1080, noarr::array<'p', 4, noarr::scalar<float>>>> g;

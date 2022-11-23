@@ -1,7 +1,7 @@
 #include <catch2/catch.hpp>
 
-#include "noarr/structures.hpp"
-#include "noarr/structures/zcurve.hpp"
+#include <noarr/structures.hpp>
+#include <noarr/structures/structs/zcurve.hpp>
 
 TEST_CASE("Z curve", "[zcurve]") {
 	auto a = noarr::array<'y', 4, noarr::array<'x', 4, noarr::scalar<int>>>();

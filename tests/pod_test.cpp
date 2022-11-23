@@ -1,6 +1,6 @@
 #include <catch2/catch.hpp>
 
-#include "noarr/structures.hpp"
+#include <noarr/structures.hpp>
 #include "noarr_test_defs.hpp"
 
 using namespace noarr;

@@ -4,9 +4,11 @@
 #include <iostream>
 #include <cstring>
 
-#include "noarr/structures_extended.hpp"
-#include "noarr/structures/traverser.hpp"
-#include "noarr/structures/shortcuts.hpp"
+#include <noarr/structures.hpp>
+#include <noarr/structures/extra/shortcuts.hpp>
+#include <noarr/structures/extra/traverser.hpp>
+#include <noarr/structures/extra/wrapper.hpp>
+#include <noarr/structures/interop/bag.hpp>
 
 using namespace noarr;
 

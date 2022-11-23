@@ -4,7 +4,8 @@
 #include <iostream>
 #include <tuple>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/extra/wrapper.hpp>
 #include "noarr_test_defs.hpp"
 
 TEST_CASE("Vector resizing", "[resizing]")

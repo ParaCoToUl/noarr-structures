@@ -1,8 +1,12 @@
 #ifndef NOARR_STRUCTURES_TRAVERSER_HPP
 #define NOARR_STRUCTURES_TRAVERSER_HPP
 
-#include "funcs.hpp"
-#include "to_struct.hpp"
+#include "../base/contain.hpp"
+#include "../base/signature.hpp"
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
+#include "../extra/to_struct.hpp"
 
 namespace noarr {
 

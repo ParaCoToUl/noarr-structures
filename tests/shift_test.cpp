@@ -1,6 +1,9 @@
 #include <catch2/catch.hpp>
 
-#include "noarr/structures.hpp"
+#include <noarr/structures.hpp>
+#include <noarr/structures/extra/wrapper.hpp>
+#include <noarr/structures/structs/setters.hpp>
+#include <noarr/structures/structs/slice.hpp>
 
 TEST_CASE("Fixes and shifts", "[offsets]") {
 	noarr::vector<'x', noarr::scalar<float>> v;

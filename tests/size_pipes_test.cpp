@@ -3,7 +3,7 @@
 #include <iostream>
 #include <array>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
 #include "noarr_test_defs.hpp"
 
 using noarr::idx;

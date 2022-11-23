@@ -3,7 +3,8 @@
 #include <iostream>
 #include <tuple>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/interop/bag.hpp>
 
 
 enum MatrixDataLayout { Rows = 0, Columns = 1 };

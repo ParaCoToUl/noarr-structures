@@ -4,7 +4,8 @@
 #include <iostream>
 #include <tuple>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/interop/bag.hpp>
 
 
 enum class ImageDataLayout { ArrayOfArrays = 1, VectorOfVectors = 2 };

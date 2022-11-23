@@ -1,8 +1,11 @@
 #ifndef NOARR_STRUCTURES_SLICE_HPP
 #define NOARR_STRUCTURES_SLICE_HPP
 
-#include "structs_common.hpp"
-#include "state.hpp"
+#include "../base/contain.hpp"
+#include "../base/signature.hpp"
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
 
 namespace noarr {
 

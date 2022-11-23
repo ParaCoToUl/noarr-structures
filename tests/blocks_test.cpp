@@ -1,8 +1,8 @@
 #include <catch2/catch.hpp>
 
-#include "noarr/structures.hpp"
-#include "noarr/structures/blocks.hpp"
-#include "noarr/structures/shortcuts.hpp"
+#include <noarr/structures.hpp>
+#include <noarr/structures/structs/blocks.hpp>
+#include <noarr/structures/extra/shortcuts.hpp>
 
 TEST_CASE("Split", "[blocks]") {
 	auto m = noarr::scalar<float>()

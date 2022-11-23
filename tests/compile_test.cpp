@@ -6,7 +6,8 @@
 
 #include <catch2/catch.hpp>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/interop/bag.hpp>
 
 
 TEST_CASE("Main example compile test", "[Main example compile test]") {

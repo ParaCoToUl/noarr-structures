@@ -1,11 +1,13 @@
 #ifndef NOARR_STRUCTURES_WRAPPER_HPP
 #define NOARR_STRUCTURES_WRAPPER_HPP
 
-#include "scalar.hpp"
-#include "funcs.hpp"
-#include "setters.hpp"
-#include "slice.hpp"
-#include "to_struct.hpp"
+#include "../base/contain.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
+#include "../extra/funcs.hpp"
+#include "../extra/to_struct.hpp"
+#include "../structs/setters.hpp"
+#include "../structs/slice.hpp"
 
 namespace noarr {
 

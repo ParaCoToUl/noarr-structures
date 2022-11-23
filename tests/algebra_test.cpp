@@ -1,7 +1,7 @@
 #include <catch2/catch.hpp>
 #include <type_traits>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
 
 using namespace noarr;
 
