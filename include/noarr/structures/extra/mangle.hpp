@@ -121,7 +121,7 @@ struct mangle_desc<Name, std::index_sequence<Indices...>, struct_params<Params..
 
 struct mangle_expr_helpers {
 	template<class... Ts>
-	static inline std::index_sequence_for<Ts...> get_contain_indices(const contain<Ts...> &) noexcept { std::terminate(); }
+	static inline std::index_sequence_for<Ts...> get_contain_indices(const contain<Ts...> &) noexcept; // undefined, use in decltype
 
 	template<class String, class T, std::size_t... Indices>
 	static constexpr void append_items(String &out, const T &t, std::index_sequence<Indices...>) {
