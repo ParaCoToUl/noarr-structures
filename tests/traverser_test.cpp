@@ -472,3 +472,33 @@ TEST_CASE("Nested traverser simplified", "[traverser]") {
 	});
 	REQUIRE(ei == 50);
 }
+
+TEST_CASE("Traverser single state", "[traverser]") {
+	auto t = traverser(scalar<float>() ^ array<'x', 100>()).order(fix<'x'>(42));
+
+	auto s = t.state();
+	auto [s0] = t.states();
+
+	REQUIRE(get_index<'x'>(s) == 42);
+
+	REQUIRE(get_index<'x'>(s0) == 42);
+}
+
+TEST_CASE("Traverser single state multi struct", "[traverser]") {
+	auto t = traverser(scalar<float>() ^ array<'x', 100>() ^ array<'y', 200>(), scalar<float>() ^ array<'y', 200>() ^ array<'z', 300>()).order(fix<'x'>(42) ^ fix<'y'>(142) ^ fix<'z'>(242));
+
+	auto s = t.state();
+	auto [s0, s1] = t.states();
+
+	REQUIRE(get_index<'x'>(s) == 42);
+	REQUIRE(get_index<'y'>(s) == 142);
+	REQUIRE(get_index<'z'>(s) == 242);
+
+	REQUIRE(get_index<'x'>(s0) == 42);
+	REQUIRE(get_index<'y'>(s0) == 142);
+	REQUIRE(s0.template contains<index_in<'z'>> == false);
+
+	REQUIRE(s1.template contains<index_in<'x'>> == false);
+	REQUIRE(get_index<'y'>(s1) == 142);
+	REQUIRE(get_index<'z'>(s1) == 242);
+}

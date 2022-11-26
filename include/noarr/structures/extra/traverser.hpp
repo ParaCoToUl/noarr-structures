@@ -106,6 +106,11 @@ public:
 	static constexpr void single_iter(F f, State state) noexcept {
 		f(state.restrict(typename helpers::union_filter_accepted<typename Structs::signature, State>::template res<>::ult())...);
 	}
+
+	template<class State>
+	static constexpr auto restrict_states(State state) noexcept {
+		return std::make_tuple(state.restrict(typename helpers::union_filter_accepted<typename Structs::signature, State>::template res<>::ult())...);
+	}
 };
 
 template<class Struct, class Order>
@@ -124,7 +129,17 @@ struct traverser_t : contain<Struct, Order> {
 	template<class F>
 	constexpr void for_each(F f) {
 		auto top_struct = get_struct() ^ get_order();
-		for_each_impl<typename decltype(top_struct)::signature>::for_each(top_struct, f, state<>());
+		for_each_impl<typename decltype(top_struct)::signature>::for_each(top_struct, f, empty_state);
+	}
+
+	constexpr auto state() const noexcept {
+		auto top_struct = get_struct() ^ get_order();
+		static_assert(for_each_impl<typename decltype(top_struct)::signature>::single_state, "There may be multiple states to traverse - use for_each");
+		return state_at<Struct>(top_struct, empty_state);
+	}
+
+	constexpr auto states() const noexcept {
+		return Struct::restrict_states(state());
 	}
 
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
@@ -136,6 +151,7 @@ private:
 	struct for_each_impl : std::false_type {};
 	template<char Dim, class ArgLength, class RetSig>
 	struct for_each_impl<function_sig<Dim, ArgLength, RetSig>> {
+		static constexpr bool single_state = false;
 		template<class TopStruct, class F, class State>
 		static constexpr void for_each(TopStruct top_struct, F f, State state) noexcept {
 			std::size_t len = top_struct.template length<Dim>(state);
@@ -145,6 +161,7 @@ private:
 	};
 	template<char Dim, class... RetSigs>
 	struct for_each_impl<dep_function_sig<Dim, RetSigs...>> {
+		static constexpr bool single_state = false;
 		template<class TopStruct, class F, class State>
 		static constexpr void for_each(TopStruct top_struct, F f, State state) noexcept {
 			for_each(top_struct, f, state, std::index_sequence_for<RetSigs...>());
@@ -156,6 +173,7 @@ private:
 	};
 	template<class ValueType>
 	struct for_each_impl<scalar_sig<ValueType>> {
+		static constexpr bool single_state = true;
 		template<class TopStruct, class F, class State>
 		static constexpr void for_each(TopStruct top_struct, F f, State state) noexcept {
 			Struct::single_iter(f, state_at<Struct>(top_struct, state));

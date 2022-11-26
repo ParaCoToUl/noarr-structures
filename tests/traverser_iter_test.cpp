@@ -78,6 +78,9 @@ TEST_CASE("Traverser iter deref deref", "[traverser iter]") {
 		z++;
 	});
 	REQUIRE(z == 1);
+	auto only_state = t_x_y.state();
+	REQUIRE(only_state.template get<index_in<'x'>>() == x);
+	REQUIRE(only_state.template get<index_in<'y'>>() == y);
 }
 
 TEST_CASE("Traverser iter for", "[traverser iter]") {
@@ -115,6 +118,9 @@ TEST_CASE("Traverser iter for for", "[traverser iter]") {
 				z++;
 			});
 			REQUIRE(z == 1);
+			auto only_state = t_x_y.state();
+			REQUIRE(only_state.template get<index_in<'x'>>() == x);
+			REQUIRE(only_state.template get<index_in<'y'>>() == y);
 			y++;
 		}
 		REQUIRE(y == 30);
