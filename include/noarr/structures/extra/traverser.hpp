@@ -127,6 +127,10 @@ struct traverser_t : contain<Struct, Order> {
 		for_each_impl<typename decltype(top_struct)::signature>::for_each(top_struct, f, state<>());
 	}
 
+	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
+	constexpr auto begin() const noexcept; // defined in traverser_iter.hpp
+	constexpr auto end() const noexcept; // defined in traverser_iter.hpp
+
 private:
 	template<class T>
 	struct for_each_impl : std::false_type {};
