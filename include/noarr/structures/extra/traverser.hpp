@@ -70,6 +70,9 @@ struct union_filter_accepted<Signature, state<>> {
 	struct res { using ult = state_items_pack<>; };
 };
 
+template<class Struct, class State>
+using union_filter_accepted_t = typename union_filter_accepted<typename Struct::signature, State>::template res<>::ult;
+
 } // namespace helpers
 
 template<class... Structs>
@@ -104,12 +107,12 @@ public:
 
 	template<class F, class State>
 	static constexpr void single_iter(F f, State state) noexcept {
-		f(state.restrict(typename helpers::union_filter_accepted<typename Structs::signature, State>::template res<>::ult())...);
+		f(state.restrict(helpers::union_filter_accepted_t<Structs, State>())...);
 	}
 
 	template<class State>
 	static constexpr auto restrict_states(State state) noexcept {
-		return std::make_tuple(state.restrict(typename helpers::union_filter_accepted<typename Structs::signature, State>::template res<>::ult())...);
+		return std::make_tuple(state.restrict(helpers::union_filter_accepted_t<Structs, State>())...);
 	}
 };
 
