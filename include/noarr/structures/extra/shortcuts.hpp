@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_SHORTCUTS_HPP
 
 #include "../base/utility.hpp"
+#include "../structs/bcast.hpp"
 #include "../structs/layouts.hpp"
 #include "../structs/blocks.hpp"
 #include "../structs/views.hpp"
@@ -34,6 +35,11 @@ constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) {
 template<char Dim, char TmpDim = 127, class StartT, class StrideT>
 constexpr auto step(StartT start, StrideT stride) {
 	return into_blocks<Dim, Dim, TmpDim>(stride) ^ fix<TmpDim>(start);
+}
+
+template<char Dim, class SizeT>
+constexpr auto bcast(SizeT length) {
+	return bcast<Dim>() ^ set_length<Dim>(length);
 }
 
 // Working with state (especially in traverser lambdas)
