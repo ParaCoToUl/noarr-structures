@@ -1,8 +1,8 @@
 #ifndef NOARR_STRUCTURES_TBB_HPP
 #define NOARR_STRUCTURES_TBB_HPP
 
+#include <cstdlib>
 #include <tbb/tbb.h>
-#include <tbb/scalable_allocator.h>
 
 #include "../interop/traverser_iter.hpp"
 
@@ -34,45 +34,35 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FEq &f_eq,
 		});
 	} else {
 		// parallel writes may go to colliding offsets => out_ptr must be privatized
-		struct reducer {
-		private:
-			const FNeut &f_neut;
-			const FEq &f_eq;
-			const F &f;
-			const OutStruct &out_struct;
-			void *const local_out_ptr;
-			bool const root;
-		public:
-			// 1. initialize
-			reducer(const FNeut &f_neut, const FEq &f_eq, const F &f, const OutStruct &out_struct, void *out_ptr)
-				: f_neut(f_neut), f_eq(f_eq), f(f), out_struct(out_struct), local_out_ptr(out_ptr), root(true) {
-			}
-			// 2. split
-			reducer(const reducer &orig, tbb::split)
-				: f_neut(orig.f_neut), f_eq(orig.f_eq), f(orig.f), out_struct(orig.out_struct), local_out_ptr(/*tbb::*/scalable_malloc(orig.out_struct.size(empty_state))), root(false) {
-				traverser(out_struct).for_each([ptr=local_out_ptr, f_neut=f_neut](auto state) {
-					f_neut(state, ptr);
+		struct private_ptr {
+			void *raw;
+			constexpr private_ptr() noexcept : raw(nullptr) {}
+			private_ptr(const private_ptr &) = delete;
+			private_ptr(private_ptr &&) = delete;
+			private_ptr &operator=(const private_ptr &) = delete;
+			private_ptr &operator=(private_ptr &&) = delete;
+			~private_ptr() { std::free(raw); } // ok with null
+		};
+		tbb::combinable<private_ptr> out_ptrs;
+		tbb::parallel_for(t.range(), [&f_neut, &f_eq, &out_struct, &out_ptrs](const range_t &subrange) {
+			private_ptr &local = out_ptrs.local();
+			void *local_out_ptr = local.raw;
+			if(local_out_ptr == nullptr) {
+				local_out_ptr = std::malloc(out_struct.size(empty_state));
+				traverser(out_struct).for_each([local_out_ptr, f_neut](auto state) {
+					f_neut(state, local_out_ptr);
 				});
+				local.raw = local_out_ptr;
 			}
-			// 3. local reduction
-			void operator()(const range_t &subrange) {
-				subrange.for_each([f_eq=f_eq, local_out_ptr=local_out_ptr](auto... states) {
-					f_eq(states..., local_out_ptr);
-				});
-			}
-			// 4. join
-			void join(const reducer &other) {
-				traverser(out_struct).for_each([to=local_out_ptr, from=other.local_out_ptr, f=f](auto state) {
-					f(state, to, (const void *) from);
-				});
-			}
-			// 5. free joined
-			~reducer() {
-				if(!root)
-					/*tbb::*/scalable_free(local_out_ptr);
-			}
-		} r(f_neut, f_eq, f, out_struct, out_ptr);
-		tbb::parallel_reduce(t.range(), r);
+			subrange.for_each([f_eq, local_out_ptr](auto... states) {
+				f_eq(states..., local_out_ptr);
+			});
+		});
+		out_ptrs.combine_each([out_struct, out_ptr, &f](const private_ptr &local_out_ptr) {
+			traverser(out_struct).for_each([to=out_ptr, from=local_out_ptr.raw, f](auto state) {
+				f(state, to, (const void *) from);
+			});
+		});
 	}
 }
 
