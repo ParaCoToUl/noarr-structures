@@ -49,6 +49,11 @@ constexpr auto get_index(State state) {
 	return state.template get<index_in<Dim>>();
 }
 
+template<char... Dim, class State>
+constexpr auto get_indices(State state) {
+	return std::make_tuple(state.template get<index_in<Dim>>()...);
+}
+
 template<char Dim, class State, class F>
 constexpr auto update_index(State state, F f) {
 	static_assert(State::template contains<index_in<Dim>>, "Requested dimension does not exist. To add a new dimension instead of updating existing one, use .template with<index_in<'...'>>(...)");
