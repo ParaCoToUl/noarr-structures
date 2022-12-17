@@ -21,15 +21,15 @@ inline void tbb_for_each(const Traverser &t, const F &f) noexcept {
 	tbb::parallel_for(t.range(), [&f](const auto &subrange) { subrange.for_each(f); });
 }
 
-template<class Traverser, class FEq, class F, class OutStruct, class FNeut>
-inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FEq &f_eq, const F &f, const OutStruct &out_struct, void *out_ptr) noexcept {
+template<class Traverser, class FNeut, class FAcc, class FJoin, class OutStruct>
+inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_acc, const FJoin &f_join, const OutStruct &out_struct, void *out_ptr) noexcept {
 	constexpr char top_dim = helpers::traviter_top_dim<decltype(t.get_struct() ^ t.get_order())>;
 	using range_t = decltype(t.range());
 	if constexpr(OutStruct::signature::template all_accept<top_dim>) {
 		// parallel writes will go to different offsets => out_ptr may be shared
-		tbb::parallel_for(t.range(), [&f_eq, out_ptr](const range_t &subrange) {
-			subrange.for_each([f_eq, out_ptr](auto... states) {
-				f_eq(states..., out_ptr);
+		tbb::parallel_for(t.range(), [&f_acc, out_ptr](const range_t &subrange) {
+			subrange.for_each([f_acc, out_ptr](auto... states) {
+				f_acc(states..., out_ptr);
 			});
 		});
 	} else {
@@ -44,7 +44,7 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FEq &f_eq,
 			~private_ptr() { std::free(raw); } // ok with null
 		};
 		tbb::combinable<private_ptr> out_ptrs;
-		tbb::parallel_for(t.range(), [&f_neut, &f_eq, &out_struct, &out_ptrs](const range_t &subrange) {
+		tbb::parallel_for(t.range(), [&f_neut, &f_acc, &out_struct, &out_ptrs](const range_t &subrange) {
 			private_ptr &local = out_ptrs.local();
 			void *local_out_ptr = local.raw;
 			if(local_out_ptr == nullptr) {
@@ -54,13 +54,13 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FEq &f_eq,
 				});
 				local.raw = local_out_ptr;
 			}
-			subrange.for_each([f_eq, local_out_ptr](auto... states) {
-				f_eq(states..., local_out_ptr);
+			subrange.for_each([f_acc, local_out_ptr](auto... states) {
+				f_acc(states..., local_out_ptr);
 			});
 		});
-		out_ptrs.combine_each([out_struct, out_ptr, &f](const private_ptr &local_out_ptr) {
-			traverser(out_struct).for_each([to=out_ptr, from=local_out_ptr.raw, f](auto state) {
-				f(state, to, (const void *) from);
+		out_ptrs.combine_each([out_struct, out_ptr, &f_join](const private_ptr &local_out_ptr) {
+			traverser(out_struct).for_each([to=out_ptr, from=local_out_ptr.raw, f_join](auto state) {
+				f_join(state, to, (const void *) from);
 			});
 		});
 	}
