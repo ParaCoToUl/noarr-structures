@@ -25,9 +25,9 @@ struct scalar : contain<> {
 	using signature = scalar_sig<T>;
 
 	template<class State>
-	constexpr std::size_t size(State) const noexcept {
+	constexpr auto size(State) const noexcept {
 		static_assert(State::is_empty, "Unused items in state");
-		return sizeof(T);
+		return constexpr_arithmetic::make_const<sizeof(T)>();
 	}
 
 	template<class Sub, class State>

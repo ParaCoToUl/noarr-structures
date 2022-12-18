@@ -132,19 +132,19 @@ struct reorder_t : contain<T> {
 	static constexpr bool complete = reassemble_is_complete<signature>;
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().size(state);
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		static_assert(complete || signature::template any_accept<QDim>, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().template length<QDim>(state);
 	}
@@ -190,17 +190,17 @@ public:
 	using signature = function_sig<Dim, typename hoisted::arg_length, typename T::signature::template replace<dim_replacement, Dim>>;
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(state);
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
 	}
 
@@ -338,17 +338,17 @@ public:
 	}
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state<State>(state));
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state<State>(state));
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state<State>(state));
 	}
 

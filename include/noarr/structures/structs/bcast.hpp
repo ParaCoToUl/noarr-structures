@@ -25,18 +25,18 @@ struct bcast_t : contain<T> {
 	using signature = function_sig<Dim, unknown_arg_length, typename T::signature>;
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(state.template remove<index_in<Dim>, length_in<Dim>>());
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		return offset_of<Sub>(sub_structure(), state.template remove<index_in<Dim>, length_in<Dim>>());
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");

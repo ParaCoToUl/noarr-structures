@@ -33,13 +33,13 @@ struct tuple : contain<TS...> {
 	using signature = dep_function_sig<Dim, typename TS::signature...>;
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		return size_inner(is, state.template remove<index_in<Dim>>());
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
@@ -50,15 +50,15 @@ struct tuple : contain<TS...> {
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			// TODO check remaining state
-			return sizeof...(TS);
+			return constexpr_arithmetic::make_const<sizeof...(TS)>();
 		} else {
 			static_assert(State::template contains<index_in<Dim>>, "Tuple indices must be set");
-			constexpr std::size_t index = state.template get<index_in<Dim>>();
+			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 			return sub_structure<index>().template length<QDim>(state.template remove<index_in<Dim>>());
 		}
 	}
@@ -72,10 +72,10 @@ private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
 	template<std::size_t... IS, class State>
-	constexpr std::size_t size_inner(std::index_sequence<IS...>, State sub_state) const noexcept {
+	constexpr auto size_inner(std::index_sequence<IS...>, State sub_state) const noexcept {
 		using namespace constexpr_arithmetic;
 		(void) sub_state; // don't complain about unused parameter in case of empty fold
-		return (ce_0() + ... + sub_structure<IS>().size(sub_state));
+		return (make_const<0>() + ... + sub_structure<IS>().size(sub_state));
 	}
 };
 
@@ -102,20 +102,20 @@ struct array : contain<T> {
 	using signature = function_sig<Dim, static_arg_length<L>, typename T::signature>;
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
-		return L * sub_structure().size(state.template remove<index_in<Dim>>());
+		return make_const<L>() * sub_structure().size(state.template remove<index_in<Dim>>());
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		if constexpr(L != 1) {
 			// offset = index * elem_size + offset_within_elem
-			std::size_t index = state.template get<index_in<Dim>>();
+			auto index = state.template get<index_in<Dim>>();
 			auto sub_struct = sub_structure();
 			auto sub_state = state.template remove<index_in<Dim>>();
 			return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
@@ -128,12 +128,12 @@ struct array : contain<T> {
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			// TODO check remaining state
-			return L;
+			return constexpr_arithmetic::make_const<L>();
 		} else {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>>());
 		}
@@ -175,25 +175,25 @@ struct vector : contain<T> {
 	using signature = function_sig<Dim, unknown_arg_length, typename T::signature>;
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
-		std::size_t len = state.template get<length_in<Dim>>();
+		auto len = state.template get<length_in<Dim>>();
 		return len * sub_structure().size(state.template remove<index_in<Dim>, length_in<Dim>>());
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
-		std::size_t index = state.template get<index_in<Dim>>();
+		auto index = state.template get<index_in<Dim>>();
 		auto sub_struct = sub_structure();
 		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
 		return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");

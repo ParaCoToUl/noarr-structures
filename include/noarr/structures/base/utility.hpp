@@ -105,23 +105,23 @@ struct none {
 
 namespace constexpr_arithmetic {
 
-using ce_0 = std::integral_constant<std::size_t, 0>;
-using ce_1 = std::integral_constant<std::size_t, 1>;
+template<std::size_t N>
+using make_const = std::integral_constant<std::size_t, N>;
 
 template<std::size_t A, std::size_t B>
-constexpr std::integral_constant<std::size_t, A + B> operator+(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+constexpr make_const<A + B> operator+(make_const<A>, make_const<B>) noexcept { return {}; }
 
 template<std::size_t A, std::size_t B>
-constexpr std::integral_constant<std::size_t, A - B> operator-(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+constexpr make_const<A - B> operator-(make_const<A>, make_const<B>) noexcept { return {}; }
 
 template<std::size_t A, std::size_t B>
-constexpr std::integral_constant<std::size_t, A * B> operator*(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+constexpr make_const<A * B> operator*(make_const<A>, make_const<B>) noexcept { return {}; }
 
 template<std::size_t A, std::size_t B>
-constexpr std::integral_constant<std::size_t, A / B> operator/(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+constexpr make_const<A / B> operator/(make_const<A>, make_const<B>) noexcept { return {}; }
 
 template<std::size_t A, std::size_t B>
-constexpr std::integral_constant<std::size_t, A % B> operator%(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+constexpr make_const<A % B> operator%(make_const<A>, make_const<B>) noexcept { return {}; }
 
 } // namespace constexpr_arithmetic
 

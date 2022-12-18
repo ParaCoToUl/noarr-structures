@@ -49,17 +49,17 @@ public:
 	}
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
@@ -130,17 +130,17 @@ public:
 	}
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 

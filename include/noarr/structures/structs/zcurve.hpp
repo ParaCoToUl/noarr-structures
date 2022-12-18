@@ -188,18 +188,18 @@ public:
 	}
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state, is()));
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(State::template contains<index_in<Dim>>, "Index has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state, is()));
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		if constexpr(QDim == Dim) {

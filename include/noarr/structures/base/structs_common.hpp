@@ -29,10 +29,10 @@ template<char Dim>
 struct dim_param;
 
 template<class StructInner, class StructOuter, class State>
-constexpr std::size_t offset_of(StructOuter structure, State state) noexcept {
+constexpr auto offset_of(StructOuter structure, State state) noexcept {
 	if constexpr(std::is_same_v<StructInner, StructOuter>) {
 		// TODO check that state only contains relevant lengths
-		return 0;
+		return constexpr_arithmetic::make_const<0>();
 	} else {
 		return structure.template strict_offset_of<StructInner>(state);
 	}

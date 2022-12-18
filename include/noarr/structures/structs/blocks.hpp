@@ -72,12 +72,12 @@ public:
 	}
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
 		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
 		static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
@@ -85,7 +85,7 @@ public:
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimMinor) {
@@ -207,18 +207,18 @@ public:
 	}
 
 	template<class State>
-	constexpr std::size_t size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, class State>
-	constexpr std::size_t strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(State::template contains<index_in<Dim>>, "Index has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == Dim) {
