@@ -63,7 +63,10 @@ struct bcast_proto {
 };
 
 template<char... Dim>
-constexpr auto bcast() noexcept { return (neutral_proto() ^ ... ^ bcast_proto<Dim>()); }
+constexpr auto bcast() noexcept { return (... ^ bcast_proto<Dim>()); }
+
+template<>
+constexpr auto bcast<>() noexcept { return neutral_proto(); }
 
 } // namespace noarr
 

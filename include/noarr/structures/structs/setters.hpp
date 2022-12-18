@@ -88,7 +88,10 @@ struct fix_proto : contain<IdxT> {
  * @param ts: parameters for fixing the indices
  */
 template<char... Dim, class... IdxT>
-constexpr auto fix(IdxT... idx) noexcept { return (neutral_proto() ^ ... ^ fix_proto<Dim, good_index_t<IdxT>>(idx)); }
+constexpr auto fix(IdxT... idx) noexcept { return (... ^ fix_proto<Dim, good_index_t<IdxT>>(idx)); }
+
+template<>
+constexpr auto fix<>() noexcept { return neutral_proto(); }
 
 template<char Dim, class T, class LenT>
 struct set_length_t : contain<T, LenT> {
@@ -165,7 +168,10 @@ struct set_length_proto : contain<LenT> {
  * @param length: the desired length
  */
 template<char... Dim, class... LenT>
-constexpr auto set_length(LenT... len) noexcept { return (neutral_proto() ^ ... ^ set_length_proto<Dim, good_index_t<LenT>>(len)); }
+constexpr auto set_length(LenT... len) noexcept { return (... ^ set_length_proto<Dim, good_index_t<LenT>>(len)); }
+
+template<>
+constexpr auto set_length<>() noexcept { return neutral_proto(); }
 
 } // namespace noarr
 
