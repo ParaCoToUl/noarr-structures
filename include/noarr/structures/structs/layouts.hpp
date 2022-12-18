@@ -40,6 +40,7 @@ struct tuple : contain<TS...> {
 
 	template<class Sub, class State>
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in idx<> (e.g. replace 42 with idx<42>)");
@@ -72,8 +73,9 @@ private:
 
 	template<std::size_t... IS, class State>
 	constexpr std::size_t size_inner(std::index_sequence<IS...>, State sub_state) const noexcept {
+		using namespace constexpr_arithmetic;
 		(void) sub_state; // don't complain about unused parameter in case of empty fold
-		return (0 + ... + sub_structure<IS>().size(sub_state));
+		return (ce_0() + ... + sub_structure<IS>().size(sub_state));
 	}
 };
 
@@ -101,12 +103,14 @@ struct array : contain<T> {
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		return L * sub_structure().size(state.template remove<index_in<Dim>>());
 	}
 
 	template<class Sub, class State>
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		if constexpr(L != 1) {
@@ -172,6 +176,7 @@ struct vector : contain<T> {
 
 	template<class State>
 	constexpr std::size_t size(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
 		std::size_t len = state.template get<length_in<Dim>>();
 		return len * sub_structure().size(state.template remove<index_in<Dim>, length_in<Dim>>());
@@ -179,6 +184,7 @@ struct vector : contain<T> {
 
 	template<class Sub, class State>
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		std::size_t index = state.template get<index_in<Dim>>();
 		auto sub_struct = sub_structure();

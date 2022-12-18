@@ -40,6 +40,7 @@ public:
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		if constexpr(Dim != DimMajor && Dim != DimMinor) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index in this dimension is overriden by a substructure");
 			static_assert(!State::template contains<length_in<Dim>>, "Index in this dimension is overriden by a substructure");
@@ -85,6 +86,7 @@ public:
 
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimMinor) {
 			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
@@ -174,6 +176,7 @@ public:
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		if constexpr(DimMajor != Dim) {
 			static_assert(!State::template contains<index_in<DimMajor>>, "Index in this dimension is overriden by a substructure");
 			static_assert(!State::template contains<length_in<DimMajor>>, "Index in this dimension is overriden by a substructure");
@@ -216,6 +219,7 @@ public:
 
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == Dim) {
 			if constexpr(State::template contains<length_in<Dim>>) {

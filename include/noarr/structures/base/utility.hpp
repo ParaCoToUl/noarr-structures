@@ -103,6 +103,28 @@ struct none {
 	}
 };
 
+namespace constexpr_arithmetic {
+
+using ce_0 = std::integral_constant<std::size_t, 0>;
+using ce_1 = std::integral_constant<std::size_t, 1>;
+
+template<std::size_t A, std::size_t B>
+constexpr std::integral_constant<std::size_t, A + B> operator+(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+
+template<std::size_t A, std::size_t B>
+constexpr std::integral_constant<std::size_t, A - B> operator-(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+
+template<std::size_t A, std::size_t B>
+constexpr std::integral_constant<std::size_t, A * B> operator*(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+
+template<std::size_t A, std::size_t B>
+constexpr std::integral_constant<std::size_t, A / B> operator/(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+
+template<std::size_t A, std::size_t B>
+constexpr std::integral_constant<std::size_t, A % B> operator%(std::integral_constant<std::size_t, A>, std::integral_constant<std::size_t, B>) noexcept { return {}; }
+
+} // namespace constexpr_arithmetic
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_UTILITY_HPP

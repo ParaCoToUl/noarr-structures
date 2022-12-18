@@ -56,7 +56,7 @@ public:
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
-		// TODO constexpr arithmetic
+		using namespace constexpr_arithmetic;
 		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
 		if constexpr(State::template contains<index_in<Dim>>)
 			if constexpr(State::template contains<length_in<Dim>>)
@@ -82,6 +82,7 @@ public:
 
 	template<char QDim, class State>
 	constexpr std::size_t length(State state) const noexcept {
+		using namespace constexpr_arithmetic;
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			if constexpr(State::template contains<length_in<Dim>>) {
@@ -166,7 +167,7 @@ public:
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
-		// TODO constexpr arithmetic
+		using namespace constexpr_arithmetic;
 		if constexpr(State::template contains<index_in<Dim>>)
 			return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
 		else
