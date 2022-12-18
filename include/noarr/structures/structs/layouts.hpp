@@ -109,10 +109,18 @@ struct array : contain<T> {
 	constexpr std::size_t strict_offset_of(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
-		std::size_t index = state.template get<index_in<Dim>>();
-		auto sub_struct = sub_structure();
-		auto sub_state = state.template remove<index_in<Dim>>();
-		return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
+		if constexpr(L != 1) {
+			// offset = index * elem_size + offset_within_elem
+			std::size_t index = state.template get<index_in<Dim>>();
+			auto sub_struct = sub_structure();
+			auto sub_state = state.template remove<index_in<Dim>>();
+			return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
+		} else {
+			// Optimization: length is one, thus the only valid index is zero.
+			// Assume the index is valid (caller's responsibility).
+			// offset = 0 * elem_size + offset_within_elem = offset_within_elem
+			return offset_of<Sub>(sub_structure(), state.template remove<index_in<Dim>>());
+		}
 	}
 
 	template<char QDim, class State>
