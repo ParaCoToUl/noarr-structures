@@ -21,9 +21,6 @@ struct scalar : contain<> {
 		type_param<T>>;
 
 	constexpr scalar() noexcept = default;
-	static constexpr std::size_t size() noexcept { return sizeof(T); }
-	static constexpr std::size_t offset() noexcept { return 0; }
-	static constexpr std::size_t length() noexcept { return 0; }
 
 	using signature = scalar_sig<T>;
 
