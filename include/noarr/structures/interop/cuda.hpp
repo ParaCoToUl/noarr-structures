@@ -3,12 +3,6 @@
 
 #include "../extra/traverser.hpp"
 
-#ifdef NOARR_DUMMY_CUDA
-#define __device__
-typedef unsigned uint;
-static struct dim3 { uint x = 1, y = 1, z = 1; } threadIdx, blockIdx;
-#endif
-
 namespace noarr {
 
 namespace helpers {

@@ -1,10 +1,7 @@
 #include <catch2/catch.hpp>
 
-#include <array>
-#include <iostream>
-
 #include <noarr/structures_extended.hpp>
-#define NOARR_DUMMY_CUDA
+#include "noarr_test_cuda_dummy.hpp"
 #include <noarr/structures/interop/cuda.hpp>
 
 TEST_CASE("Cuda traverser simple 6D", "[cuda]") {
