@@ -40,7 +40,7 @@ constexpr auto offset(Idxs... idxs) noexcept { return offset<SubStruct>(empty_st
 
 template<class State>
 constexpr auto offset(State state) noexcept { return [state](auto structure) constexpr noexcept {
-	using type = scalar_t<decltype(structure), State>;
+	using type = unchecked_scalar_t<decltype(structure), State>;
 	return offset_of<scalar<type>>(structure, state);
 }; }
 
@@ -77,7 +77,7 @@ constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { ret
  */
 template<class State, class CvVoid>
 constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
-	using type = scalar_t<decltype(structure), State>;
+	using type = unchecked_scalar_t<decltype(structure), State>;
 	return *helpers::sub_ptr<type>(ptr, offset_of<scalar<type>>(structure, state));
 }; }
 
