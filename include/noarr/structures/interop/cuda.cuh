@@ -7,12 +7,13 @@ namespace noarr {
 
 namespace helpers {
 
-struct cuda_block_x  { static __device__ inline auto idx() { return blockIdx.x; } };
-struct cuda_block_y  { static __device__ inline auto idx() { return blockIdx.y; } };
-struct cuda_block_z  { static __device__ inline auto idx() { return blockIdx.z; } };
-struct cuda_thread_x { static __device__ inline auto idx() { return threadIdx.x; } };
-struct cuda_thread_y { static __device__ inline auto idx() { return threadIdx.y; } };
-struct cuda_thread_z { static __device__ inline auto idx() { return threadIdx.z; } };
+
+struct cuda_block_x  { static __device__ inline auto idx() noexcept { return blockIdx.x; } };
+struct cuda_block_y  { static __device__ inline auto idx() noexcept { return blockIdx.y; } };
+struct cuda_block_z  { static __device__ inline auto idx() noexcept { return blockIdx.z; } };
+struct cuda_thread_x { static __device__ inline auto idx() noexcept { return threadIdx.x; } };
+struct cuda_thread_y { static __device__ inline auto idx() noexcept { return threadIdx.y; } };
+struct cuda_thread_z { static __device__ inline auto idx() noexcept { return threadIdx.z; } };
 
 template<class... CudaDim>
 struct cuda_dims_pack;
