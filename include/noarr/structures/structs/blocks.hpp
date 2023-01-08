@@ -79,7 +79,7 @@ public:
 	template<class Sub, class State>
 	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
-		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
+		static_assert(State::template contains<index_in<DimMinor>>, "Index has not been set");
 		static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
