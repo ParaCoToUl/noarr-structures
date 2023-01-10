@@ -7,85 +7,129 @@
 #include <noarr/structures/interop/cuda_striped.hpp>
 
 TEST_CASE("Cuda striped - 32bit scalar array", "[cuda]") {
-	constexpr std::size_t period = 2*4*32;
-	constexpr std::size_t nstripes = 32;
-	constexpr std::size_t stripe_size = 8;
+	static_assert(sizeof(std::uint32_t) == 4);
 
-	static_assert(noarr::cuda_striped_default_period == period);
+	constexpr std::size_t throughput = 1;
+	constexpr std::size_t period = 4*32*throughput;
+	constexpr std::size_t nstripes = 32;
+	constexpr std::size_t stripe_size = 4;
 
 	auto s = noarr::scalar<std::uint32_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
 	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint32_t));
+	REQUIRE(s.max_conflict_size == throughput);
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 0*period + 0*stripe_size + 1*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 1*period + 0*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 1*period + 0*stripe_size + 1*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 2*period + 0*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 2*period + 0*stripe_size + 1*sizeof(std::uint32_t));
-
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 1*period + 1*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 1*period + 1*stripe_size + 1*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 2*period + 1*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 2*period + 1*stripe_size + 1*sizeof(std::uint32_t));
-
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 1*period + 2*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 1*period + 2*stripe_size + 1*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 2*period + 2*stripe_size + 0*sizeof(std::uint32_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 2*period + 2*stripe_size + 1*sizeof(std::uint32_t));
+	for(std::size_t j = 0; j < nstripes; j++) {
+		for(std::size_t i = 0; i < 100; i++) {
+			REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(i, j))) == i*period + j*stripe_size);
+		}
+	}
 }
 
 TEST_CASE("Cuda striped - 64bit scalar array", "[cuda]") {
-	constexpr std::size_t period = 2*4*32;
+	static_assert(sizeof(std::uint64_t) == 8);
+
+	constexpr std::size_t throughput = 2;
+	constexpr std::size_t period = 4*32*throughput;
 	constexpr std::size_t nstripes = 32;
 	constexpr std::size_t stripe_size = 8;
-
-	static_assert(noarr::cuda_striped_default_period == period);
 
 	auto s = noarr::scalar<std::uint64_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
 	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint64_t));
+	REQUIRE(s.max_conflict_size == throughput);
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 1*period + 0*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 2*period + 0*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 3*period + 0*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 4*period + 0*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 5*period + 0*stripe_size);
-
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 1*period + 1*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 2*period + 1*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 3*period + 1*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 4*period + 1*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 5*period + 1*stripe_size);
-
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 1*period + 2*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 2*period + 2*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 3*period + 2*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 4*period + 2*stripe_size);
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 5*period + 2*stripe_size);
+	for(std::size_t j = 0; j < nstripes; j++) {
+		for(std::size_t i = 0; i < 100; i++) {
+			REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(i, j))) == i*period + j*stripe_size);
+		}
+	}
 }
 
-TEST_CASE("Cuda striped - 24bit scalar array - 12 stripes", "[cuda]") {
+TEST_CASE("Cuda striped - 16bit scalar array", "[cuda]") {
+	static_assert(sizeof(std::uint16_t) == 2);
+
+	constexpr std::size_t throughput = 1;
+	constexpr std::size_t period = 4*32*throughput;
+	constexpr std::size_t nstripes = 32;
+	constexpr std::size_t stripe_size = 4;
+
+	auto s = noarr::scalar<std::uint16_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
+
+	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint16_t));
+	REQUIRE(s.max_conflict_size == throughput);
+
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 0*period + 0*stripe_size + 1*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 1*period + 0*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 1*period + 0*stripe_size + 1*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 2*period + 0*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 2*period + 0*stripe_size + 1*sizeof(std::uint16_t));
+
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 1*period + 1*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 1*period + 1*stripe_size + 1*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 2*period + 1*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 2*period + 1*stripe_size + 1*sizeof(std::uint16_t));
+
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 1*period + 2*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 1*period + 2*stripe_size + 1*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 2*period + 2*stripe_size + 0*sizeof(std::uint16_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 2*period + 2*stripe_size + 1*sizeof(std::uint16_t));
+}
+
+TEST_CASE("Cuda striped - 8bit scalar array", "[cuda]") {
+	static_assert(sizeof(std::uint8_t) == 1);
+
+	constexpr std::size_t throughput = 1;
+	constexpr std::size_t period = 4*32*throughput;
+	constexpr std::size_t nstripes = 32;
+	constexpr std::size_t stripe_size = 4;
+
+	auto s = noarr::scalar<std::uint8_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
+
+	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint8_t));
+	REQUIRE(s.max_conflict_size == throughput);
+
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size + 0*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 0*period + 0*stripe_size + 1*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 0*period + 0*stripe_size + 2*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 0*period + 0*stripe_size + 3*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 1*period + 0*stripe_size + 0*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 1*period + 0*stripe_size + 1*sizeof(std::uint8_t));
+
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 0*period + 1*stripe_size + 2*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 0*period + 1*stripe_size + 3*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 1*period + 1*stripe_size + 0*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 1*period + 1*stripe_size + 1*sizeof(std::uint8_t));
+
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 0*period + 2*stripe_size + 2*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 0*period + 2*stripe_size + 3*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 1*period + 2*stripe_size + 0*sizeof(std::uint8_t));
+	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 1*period + 2*stripe_size + 1*sizeof(std::uint8_t));
+}
+
+TEST_CASE("Cuda striped - 24bit scalar array - 6 stripes", "[cuda]") {
 	struct color { std::uint8_t r, g, b; };
 
 	static_assert(sizeof(color) == 3);
 
-	constexpr std::size_t period = 2*4*32;
-	constexpr std::size_t nstripes = 12;
+	constexpr std::size_t throughput = 1;
+	constexpr std::size_t period = 4*32*throughput;
+	constexpr std::size_t nstripes = 6;
 	constexpr std::size_t stripe_size = sizeof(color)*6 + 2; // 6 elems per stripe, 2 bytes padding (to get 4-byte alignment)
-
-	static_assert(noarr::cuda_striped_default_period == period);
 
 	auto s = noarr::scalar<color>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
 	REQUIRE((s | noarr::get_size()) == 167 * period); // 167 = ceil(1000 / 6), where 6 = number of elems per stripe and period
+	REQUIRE(s.max_conflict_size == throughput);
 
 	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 0, 0))) == 0*period + 0*stripe_size + 0*sizeof(color));
 	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 1, 0))) == 0*period + 0*stripe_size + 1*sizeof(color));
@@ -116,17 +160,19 @@ TEST_CASE("Cuda striped - 24bit scalar array - 12 stripes", "[cuda]") {
 	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(6, 11))) == 1*period + 11*stripe_size + 0*sizeof(color));
 }
 
-TEST_CASE("Cuda striped - 24bit non-scalar array - 12 stripes", "[cuda]") {
-	constexpr std::size_t period = 2*4*32;
-	constexpr std::size_t nstripes = 12;
-	constexpr std::size_t stripe_size = 3*6 + 2; // 6 elems per stripe, 2 bytes padding (to get 4-byte alignment)
+TEST_CASE("Cuda striped - 24bit non-scalar array - 6 stripes", "[cuda]") {
+	static_assert(sizeof(std::uint8_t) == 1);
 
-	static_assert(noarr::cuda_striped_default_period == period);
+	constexpr std::size_t throughput = 1;
+	constexpr std::size_t period = 4*32*throughput;
+	constexpr std::size_t nstripes = 6;
+	constexpr std::size_t stripe_size = 3*6 + 2; // 6 elems per stripe, 2 bytes padding (to get 4-byte alignment)
 
 	auto color_s = noarr::scalar<std::uint8_t>() ^ noarr::array<'c', 3>();
 	auto s = color_s ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes, decltype(color_s)>();
 
 	REQUIRE((s | noarr::get_size()) == 167 * period); // 167 = ceil(1000 / 6), where 6 = number of elems per stripe and period
+	REQUIRE(s.max_conflict_size == throughput);
 
 	for(int c = 0; c < 3; c++) {
 		REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::index_in<'c'>, noarr::cuda_stripe_index>( 0, c, 0))) == 0*period + 0*stripe_size + 0*3 + c);
@@ -163,8 +209,11 @@ TEST_CASE("Cuda striped - 24bit non-scalar array - 12 stripes", "[cuda]") {
 }
 
 TEST_CASE("Cuda striped constexpr arithmetic", "[cuda cearithm]") {
-	constexpr std::size_t period = 2*4*32;
-	constexpr std::size_t nstripes = 12;
+	static_assert(sizeof(std::uint8_t) == 1);
+
+	constexpr std::size_t throughput = 1;
+	constexpr std::size_t period = 4*32*throughput;
+	constexpr std::size_t nstripes = 6;
 	constexpr std::size_t stripe_size = 3*6 + 2; // 6 elems per stripe, 2 bytes padding (to get 4-byte alignment)
 
 	auto color_s = noarr::scalar<std::uint8_t>() ^ noarr::array<'c', 3>();
