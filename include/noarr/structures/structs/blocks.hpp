@@ -169,7 +169,7 @@ private:
 		using denom = arg_length_from_t<MinorLenT>;
 		using dm = divmod<typename Original::arg_length, denom>;
 		using body_type = function_sig<DimMajor, typename dm::quo, function_sig<DimMinor, denom, typename Original::ret_sig>>;
-		using border_type = function_sig<DimMinor, typename dm::rem, typename Original::ret_sig>;
+		using border_type = function_sig<DimMajor, static_arg_length<1>, function_sig<DimMinor, typename dm::rem, typename Original::ret_sig>>;
 		using type = dep_function_sig<DimIsBorder, body_type, border_type>;
 	};
 public:
@@ -186,22 +186,14 @@ public:
 			static_assert(!State::template contains<index_in<Dim>>, "Index in this dimension is overriden by a substructure");
 		}
 		auto clean_state = state.template remove<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-		if constexpr(State::template contains<index_in<DimIsBorder>> && State::template contains<index_in<DimMinor>>) {
+		if constexpr(State::template contains<index_in<DimIsBorder>> && State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
 			auto minor_index = state.template get<index_in<DimMinor>>();
 			if constexpr(is_body<State>()) {
-				if constexpr(State::template contains<index_in<DimMajor>>) {
-					auto major_index = state.template get<index_in<DimMajor>>();
-					return clean_state.template with<index_in<Dim>>(major_index*minor_length() + minor_index);
-				} else {
-					return clean_state;
-				}
+				auto major_index = state.template get<index_in<DimMajor>>();
+				return clean_state.template with<index_in<Dim>>(major_index*minor_length() + minor_index);
 			} else /*border*/ {
-				if constexpr(true) { // no other requirements, we do not need major
-					auto major_length = sub_structure().template length<Dim>(clean_state) / minor_length();
-					return clean_state.template with<index_in<Dim>>(major_length*minor_length() + minor_index);
-				} else {
-					return clean_state;
-				}
+				auto major_length = sub_structure().template length<Dim>(clean_state) / minor_length();
+				return clean_state.template with<index_in<Dim>>(major_length*minor_length() + minor_index);
 			}
 		} else {
 			return clean_state;
@@ -216,7 +208,7 @@ public:
 	template<class Sub, class State>
 	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(State::template contains<index_in<DimIsBorder>>, "Index has not been set");
-		static_assert(!is_body<State>() || State::template contains<index_in<DimMajor>>, "Index has not been set");
+		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
 		static_assert(State::template contains<index_in<DimMinor>>, "Index has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
@@ -238,8 +230,11 @@ public:
 			}
 		} else if constexpr(QDim == DimMajor) {
 			// TODO check remaining state
-			static_assert(is_body<State>(), "This dimension is not valid in the border");
-			return sub_structure().template length<Dim>(sub_state(state)) / minor_length();
+			if constexpr(is_body<State>()) {
+				return sub_structure().template length<Dim>(sub_state(state)) / minor_length();
+			} else /*border*/ {
+				return make_const<1>();
+			}
 		} else {
 			static_assert(QDim != Dim, "Index in this dimension is overriden by a substructure");
 			return sub_structure().template length<QDim>(sub_state(state));

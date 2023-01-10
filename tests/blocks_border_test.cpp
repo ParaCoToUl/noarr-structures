@@ -15,17 +15,18 @@ TEST_CASE("Blocks with border", "[blocks]") {
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'c'>);
-	REQUIRE(decltype(m)::signature::any_accept<'b'> & !decltype(m)::signature::all_accept<'b'>);
+	REQUIRE(decltype(m)::signature::all_accept<'b'>);
 	REQUIRE(decltype(m)::signature::all_accept<'a'>);
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'c'>()) == 2);
 	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) ==           1);
 	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) ==          16);
 	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) == 10'013 % 16);
 
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'c'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'a', 'y',      'c'>(10, 3333,      idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with border reused as minor", "[blocks]") {
@@ -36,17 +37,18 @@ TEST_CASE("Blocks with border reused as minor", "[blocks]") {
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'c'>);
-	REQUIRE(decltype(m)::signature::any_accept<'b'> & !decltype(m)::signature::all_accept<'b'>);
+	REQUIRE(decltype(m)::signature::all_accept<'b'>);
 	REQUIRE(decltype(m)::signature::all_accept<'x'>);
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'c'>()) == 2);
 	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) ==           1);
 	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) ==          16);
 	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) == 10'013 % 16);
 
 	REQUIRE((m | noarr::offset<'x', 'y', 'b', 'c'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'x', 'y',      'c'>(10, 3333,      idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'x', 'y', 'b', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with border reused as major", "[blocks]") {
@@ -57,17 +59,18 @@ TEST_CASE("Blocks with border reused as major", "[blocks]") {
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'c'>);
-	REQUIRE(decltype(m)::signature::any_accept<'x'> & !decltype(m)::signature::all_accept<'x'>);
+	REQUIRE(decltype(m)::signature::all_accept<'x'>);
 	REQUIRE(decltype(m)::signature::all_accept<'a'>);
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'c'>()) == 2);
 	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) ==           1);
 	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) ==          16);
 	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) == 10'013 % 16);
 
 	REQUIRE((m | noarr::offset<'a', 'y', 'x', 'c'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'a', 'y',      'c'>(10, 3333,      idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'x', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with border reused as is-border", "[blocks]") {
@@ -78,17 +81,18 @@ TEST_CASE("Blocks with border reused as is-border", "[blocks]") {
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'x'>);
-	REQUIRE(decltype(m)::signature::any_accept<'b'> & !decltype(m)::signature::all_accept<'b'>);
+	REQUIRE(decltype(m)::signature::all_accept<'b'>);
 	REQUIRE(decltype(m)::signature::all_accept<'a'>);
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'x'>()) == 2);
 	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<1>))) ==           1);
 	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<0>))) ==          16);
 	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<1>))) == 10'013 % 16);
 
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'a', 'y',      'x'>(10, 3333,      idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with border traverser", "[blocks traverser]") {
@@ -102,11 +106,10 @@ TEST_CASE("Blocks with border traverser", "[blocks traverser]") {
 	noarr::traverser(m).for_each([&](auto s){
 		REQUIRE(noarr::get_index<'y'>(s) == y);
 		REQUIRE(noarr::get_index<'c'>(s) == c);
+		REQUIRE(noarr::get_index<'b'>(s) == b);
+		REQUIRE(noarr::get_index<'a'>(s) == a);
 
 		if constexpr(decltype(noarr::get_index<'c'>(s))::value == 0) { // blocked body
-			REQUIRE(noarr::get_index<'b'>(s) == b);
-			REQUIRE(noarr::get_index<'a'>(s) == a);
-
 			if(++a == 4) {
 				a = 0;
 				if(++b == 2) {
@@ -115,8 +118,6 @@ TEST_CASE("Blocks with border traverser", "[blocks traverser]") {
 				}
 			}
 		} else if constexpr(decltype(noarr::get_index<'c'>(s))::value == 1) { // border
-			REQUIRE(noarr::get_index<'a'>(s) == a);
-
 			if(++a == 3) {
 				a = 0;
 				c = 0;
