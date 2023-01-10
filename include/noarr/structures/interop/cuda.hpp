@@ -146,6 +146,11 @@ struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<Di
 		return {(uint)full.template length<DimsT>(empty_state)...};
 	}
 
+	explicit constexpr operator bool() const noexcept {
+		auto full = get_struct() ^ get_order();
+		return (... && full.template length<DimsT>(empty_state)) && (... && full.template length<DimsB>(empty_state));
+	}
+
 	constexpr auto inner() const noexcept {
 		return traverser_t<Struct, decltype(get_order() ^ get_fixes())>(get_struct(), get_order() ^ get_fixes());
 	}
