@@ -32,11 +32,6 @@ constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) {
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
-template<char Dim, char TmpDim = 127, class StartT, class StrideT>
-constexpr auto step(StartT start, StrideT stride) {
-	return into_blocks<Dim, Dim, TmpDim>(stride) ^ fix<TmpDim>(start);
-}
-
 template<char Dim, class SizeT>
 constexpr auto bcast(SizeT length) {
 	return bcast<Dim>() ^ set_length<Dim>(length);

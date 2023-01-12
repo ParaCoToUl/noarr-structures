@@ -219,6 +219,102 @@ struct slice_proto : contain<StartT, LenT> {
 template<char Dim, class StartT, class LenT>
 constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, good_index_t<StartT>, good_index_t<LenT>>(start, len); }
 
+template<char Dim, class T, class StartT, class StrideT>
+struct step_t : contain<T, StartT, StrideT> {
+	using base = contain<T, StartT, StrideT>;
+	using base::base;
+
+	static constexpr char name[] = "step_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>,
+		type_param<StartT>,
+		type_param<StrideT>>;
+
+	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr StartT start() const noexcept { return base::template get<1>(); }
+	constexpr StrideT stride() const noexcept { return base::template get<2>(); }
+
+	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
+private:
+	template<class Original>
+	struct dim_replacement;
+	template<class ArgLength, class RetSig>
+	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> { using type = function_sig<Dim, arg_length_from_t<StrideT>, RetSig>; };
+	template<class... RetSigs>
+	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
+		using original = dep_function_sig<Dim, RetSigs...>;
+		static_assert(StartT::value || true, "Cannot slice a tuple dimension dynamically");
+		static_assert(StrideT::value || true, "Cannot slice a tuple dimension dynamically");
+		static constexpr std::size_t start = StartT::value;
+		static constexpr std::size_t stride = StrideT::value;
+		static constexpr std::size_t sub_length = sizeof...(RetSigs);
+
+		template<class Indices = std::make_index_sequence<(sub_length + stride - start - 1) / stride>>
+		struct pack_helper;
+		template<std::size_t... Indices>
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices*stride+start>...>; };
+
+		using type = typename pack_helper<>::type;
+	};
+public:
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+
+	template<class State>
+	constexpr auto sub_state(State state) const noexcept {
+		using namespace constexpr_arithmetic;
+		if constexpr(State::template contains<index_in<Dim>>)
+			return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride() + start());
+		else
+			return state;
+	}
+
+	template<class State>
+	constexpr auto size(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+		return sub_structure().size(sub_state(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_offset_of(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+		return offset_of<Sub>(sub_structure(), sub_state(state));
+	}
+
+	template<char QDim, class State>
+	constexpr auto length(State state) const noexcept {
+		using namespace constexpr_arithmetic;
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+		if constexpr(QDim == Dim) {
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+			auto sub_length = sub_structure().template length<Dim>(state);
+			return (sub_length + stride() - start() - make_const<1>()) / stride();
+		} else {
+			return sub_structure().template length<QDim>(sub_state(state));
+		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+		return state_at<Sub>(sub_structure(), sub_state(state));
+	}
+};
+
+template<char Dim, class StartT, class StrideT>
+struct step_proto : contain<StartT, StrideT> {
+	using base = contain<StartT, StrideT>;
+	using base::base;
+
+	static constexpr bool is_proto_struct = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return step_t<Dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>()); }
+};
+
+template<char Dim, class StartT, class StrideT>
+constexpr auto step(StartT start, StrideT stride) noexcept { return step_proto<Dim, good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_SLICE_HPP
