@@ -4,7 +4,7 @@
 
 #include <noarr/structures_extended.hpp>
 #include "noarr_test_cuda_dummy.hpp"
-#include <noarr/structures/interop/cuda_striped.hpp>
+#include <noarr/structures/interop/cuda_striped.cuh>
 
 TEST_CASE("Cuda striped - 32bit scalar array", "[cuda]") {
 	static_assert(sizeof(std::uint32_t) == 4);

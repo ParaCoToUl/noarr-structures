@@ -2,7 +2,7 @@
 
 #include <noarr/structures_extended.hpp>
 #include "noarr_test_cuda_dummy.hpp"
-#include <noarr/structures/interop/cuda.hpp>
+#include <noarr/structures/interop/cuda.cuh>
 
 TEST_CASE("Cuda traverser simple 6D", "[cuda]") {
 	auto s = noarr::scalar<int>()
