@@ -47,7 +47,7 @@ private:
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices+start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
@@ -130,7 +130,7 @@ struct slice_t : contain<T, StartT, LenT> {
 	using base = contain<T, StartT, LenT>;
 	using base::base;
 
-	static constexpr char name[] = "shift_t";
+	static constexpr char name[] = "slice_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<T>,
@@ -158,7 +158,7 @@ private:
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
 		template<std::size_t... Indices>
-		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices-start>...>; };
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices+start>...>; };
 
 		using type = typename pack_helper<>::type;
 	};
