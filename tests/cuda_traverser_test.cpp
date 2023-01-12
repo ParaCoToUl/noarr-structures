@@ -2,7 +2,7 @@
 
 #include <noarr/structures_extended.hpp>
 #include "noarr_test_cuda_dummy.hpp"
-#include <noarr/structures/interop/cuda.cuh>
+#include <noarr/structures/interop/cuda_traverser.cuh>
 
 TEST_CASE("Cuda traverser simple 6D", "[cuda]") {
 	auto s = noarr::scalar<int>()
@@ -23,7 +23,7 @@ TEST_CASE("Cuda traverser simple 6D", "[cuda]") {
 	REQUIRE(53 == t.block_dim().y);
 	REQUIRE(79 == t.grid_dim().z);
 	REQUIRE(97 == t.block_dim().z);
-	
+
 	blockIdx = {10, 30, 50};
 	threadIdx = {20, 40, 60};
 
@@ -56,7 +56,7 @@ TEST_CASE("Cuda traverser simple 2D", "[cuda]") {
 	REQUIRE(1 == t.block_dim().y);
 	REQUIRE(1 == t.grid_dim().z);
 	REQUIRE(1 == t.block_dim().z);
-	
+
 	blockIdx = {10};
 	threadIdx = {20};
 
@@ -85,7 +85,7 @@ TEST_CASE("Cuda traverser confusing 2D", "[cuda]") {
 	REQUIRE(1 == t.block_dim().y);
 	REQUIRE(1 == t.grid_dim().z);
 	REQUIRE(1 == t.block_dim().z);
-	
+
 	blockIdx = {10};
 	threadIdx = {20};
 
@@ -117,7 +117,7 @@ TEST_CASE("Cuda blocks", "[cuda]") {
 	REQUIRE(8 == t.block_dim().y);
 	REQUIRE(1 == t.grid_dim().z);
 	REQUIRE(1 == t.block_dim().z);
-	
+
 	blockIdx = {10, 20};
 	threadIdx = {3, 5};
 

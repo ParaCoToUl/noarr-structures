@@ -1,12 +1,11 @@
-#ifndef NOARR_STRUCTURES_CUDA_HPP
-#define NOARR_STRUCTURES_CUDA_HPP
+#ifndef NOARR_STRUCTURES_CUDA_TRAVERSER_HPP
+#define NOARR_STRUCTURES_CUDA_TRAVERSER_HPP
 
 #include "../extra/traverser.hpp"
 
 namespace noarr {
 
 namespace helpers {
-
 
 struct cuda_block_x  { static __device__ inline auto idx() noexcept { return blockIdx.x; } };
 struct cuda_block_y  { static __device__ inline auto idx() noexcept { return blockIdx.y; } };
@@ -162,4 +161,4 @@ constexpr cuda_traverser_t<U, neutral_proto> cuda_traverser(const Ts &... s) noe
 
 } // namespace noarr
 
-#endif // NOARR_STRUCTURES_CUDA_HPP
+#endif // NOARR_STRUCTURES_CUDA_TRAVERSER_HPP
