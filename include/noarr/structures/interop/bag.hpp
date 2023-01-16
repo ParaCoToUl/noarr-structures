@@ -92,31 +92,31 @@ private:
 	wrapper<Structure> structure_;
 
 public:
-	explicit bag_base(Structure s) : structure_(wrap(s)) {
+	explicit constexpr bag_base(Structure s) : structure_(wrap(s)) {
 		data_ = BagPolicy::construct(structure().get_size());
 	}
 
-	explicit bag_base(wrapper<Structure> s) : structure_(s) {
+	explicit constexpr bag_base(wrapper<Structure> s) : structure_(s) {
 		data_ = BagPolicy::construct(structure().get_size());
 	}
 
-	explicit bag_base(Structure s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(wrap(s))
+	explicit constexpr bag_base(Structure s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(wrap(s))
 	{ }
 
-	explicit bag_base(wrapper<Structure> s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(s)
+	explicit constexpr bag_base(wrapper<Structure> s, typename BagPolicy::type &&data) : data_(std::move(data)), structure_(s)
 	{ }
 
-	explicit bag_base(Structure s, typename BagPolicy::type &data) : data_(data), structure_(wrap(s))
+	explicit constexpr bag_base(Structure s, typename BagPolicy::type &data) : data_(data), structure_(wrap(s))
 	{ }
 
-	explicit bag_base(wrapper<Structure> s, typename BagPolicy::type &data) : data_(data), structure_(s)
+	explicit constexpr bag_base(wrapper<Structure> s, typename BagPolicy::type &data) : data_(data), structure_(s)
 	{ }
 
-	bag_base(Structure s, BagPolicy policy) : structure_(wrap(s)) {
+	constexpr bag_base(Structure s, BagPolicy policy) : structure_(wrap(s)) {
 		data_ = policy.construct(structure().get_size());
 	}
 
-	bag_base(wrapper<Structure> s, BagPolicy policy) : structure_(s) {
+	constexpr bag_base(wrapper<Structure> s, BagPolicy policy) : structure_(s) {
 		data_ = policy.construct(structure().get_size());
 	}
 
