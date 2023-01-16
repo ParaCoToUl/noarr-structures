@@ -142,6 +142,16 @@ public:
 	}
 
 	/**
+	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
+	 * 
+	 * @param ts: the dimension values
+	 */
+	template<class... Ts>
+	constexpr decltype(auto) operator[](Ts... ts) const noexcept {
+		return structure().template get_at(data(), ts...);
+	}
+
+	/**
 	 * @brief returns an offset of a value in `data` by fixing dimensions in the `structure`
 	 * 
 	 * @tparam Dims: the dimension names
@@ -226,6 +236,17 @@ public:
 		return structure().template get_at<Dims...>(data(), ts...);
 	}
 	using bag_base<Structure, BagPolicy>::at;
+
+	/**
+	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
+	 * 
+	 * @param ts: the dimension values
+	 */
+	template<class... Ts>
+	constexpr decltype(auto) operator[](Ts... ts) noexcept {
+		return structure().template get_at(data(), ts...);
+	}
+	using bag_base<Structure, BagPolicy>::operator[];
 };
 
 }
