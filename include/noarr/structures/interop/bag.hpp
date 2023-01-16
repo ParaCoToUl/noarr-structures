@@ -168,9 +168,9 @@ public:
 	 * 
 	 * @tparam Dim: the dimension name
 	 */
-	template<char Dim>
-	constexpr auto get_length() const noexcept {
-		return structure().template get_length<Dim>();
+	template<char Dim, class... Ts>
+	constexpr auto get_length(Ts... ts) const noexcept {
+		return structure().template get_length<Dim>(ts...);
 	}
 
 	/**
