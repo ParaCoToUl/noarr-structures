@@ -12,8 +12,8 @@ namespace noarr {
 
 // Common compositions
 
-template<char Dim>
-constexpr auto sized_vector(std::size_t length) {
+template<char Dim, class LenT>
+constexpr auto sized_vector(LenT length) {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
