@@ -22,6 +22,11 @@ constexpr auto into_blocks(MinorLengthT minor_length) {
 	return into_blocks<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
 }
 
+template<char Dim, char DimMajor, char DimMinor, char DimIsPresent, class MinorLengthT>
+constexpr auto into_blocks_dynamic(MinorLengthT minor_length) {
+	return into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>() ^ set_length<DimMinor>(minor_length);
+}
+
 template<char DimMajor, char DimMinor, char Dim, class MinorSizeT>
 constexpr auto merge_blocks(MinorSizeT minor_length) {
 	return set_length<DimMinor>(minor_length) ^ merge_blocks<DimMajor, DimMinor, Dim>();

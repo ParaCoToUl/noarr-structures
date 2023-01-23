@@ -7,11 +7,11 @@
 
 using noarr::idx;
 
-TEST_CASE("Blocks with border", "[blocks]") {
+TEST_CASE("Blocks with static border", "[blocks]") {
 	auto m = noarr::scalar<float>()
 		^ noarr::array<'x', 10'013>()
 		^ noarr::array<'y', 20'000>()
-		^ noarr::into_blocks<'x', 'c', 'b', 'a'>(16);
+		^ noarr::into_blocks_static<'x', 'c', 'b', 'a'>(16);
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'c'>);
@@ -29,11 +29,11 @@ TEST_CASE("Blocks with border", "[blocks]") {
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
-TEST_CASE("Blocks with border reused as minor", "[blocks]") {
+TEST_CASE("Blocks with static border reused as minor", "[blocks]") {
 	auto m = noarr::scalar<float>()
 		^ noarr::array<'x', 10'013>()
 		^ noarr::array<'y', 20'000>()
-		^ noarr::into_blocks<'x', 'c', 'b', 'x'>(16);
+		^ noarr::into_blocks_static<'x', 'c', 'b', 'x'>(16);
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'c'>);
@@ -51,11 +51,11 @@ TEST_CASE("Blocks with border reused as minor", "[blocks]") {
 	REQUIRE((m | noarr::offset<'x', 'y', 'b', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
-TEST_CASE("Blocks with border reused as major", "[blocks]") {
+TEST_CASE("Blocks with static border reused as major", "[blocks]") {
 	auto m = noarr::scalar<float>()
 		^ noarr::array<'x', 10'013>()
 		^ noarr::array<'y', 20'000>()
-		^ noarr::into_blocks<'x', 'c', 'x', 'a'>(16);
+		^ noarr::into_blocks_static<'x', 'c', 'x', 'a'>(16);
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'c'>);
@@ -73,11 +73,11 @@ TEST_CASE("Blocks with border reused as major", "[blocks]") {
 	REQUIRE((m | noarr::offset<'a', 'y', 'x', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
-TEST_CASE("Blocks with border reused as is-border", "[blocks]") {
+TEST_CASE("Blocks with static border reused as is-border", "[blocks]") {
 	auto m = noarr::scalar<float>()
 		^ noarr::array<'x', 10'013>()
 		^ noarr::array<'y', 20'000>()
-		^ noarr::into_blocks<'x', 'x', 'b', 'a'>(16);
+		^ noarr::into_blocks_static<'x', 'x', 'b', 'a'>(16);
 
 	REQUIRE(decltype(m)::signature::all_accept<'y'>);
 	REQUIRE(decltype(m)::signature::all_accept<'x'>);
@@ -95,11 +95,11 @@ TEST_CASE("Blocks with border reused as is-border", "[blocks]") {
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
-TEST_CASE("Blocks with border traverser", "[blocks traverser]") {
+TEST_CASE("Blocks with static border traverser", "[blocks traverser]") {
 	auto m = noarr::scalar<float>()
 		^ noarr::array<'x', 11>()
 		^ noarr::array<'y', 5>()
-		^ noarr::into_blocks<'x', 'c', 'b', 'a'>(4);
+		^ noarr::into_blocks_static<'x', 'c', 'b', 'a'>(4);
 
 	std::size_t i = 0, a = 0, b = 0, c = 0, y = 0;
 
