@@ -43,21 +43,20 @@ struct is_cube : sig_is_cube<typename T::signature> {};
 
 
 
-template<class T, class State, bool Checked>
+template<class T, class State>
 struct sig_get_scalar;
-template<char Dim, class ArgLength, class RetSig, class State, bool Checked>
-struct sig_get_scalar<function_sig<Dim, ArgLength, RetSig>, State, Checked> {
-	static_assert(State::template contains<index_in<Dim>> || !Checked, "Not all dimensions are fixed");
-	using type = typename sig_get_scalar<RetSig, state_remove_t<State, index_in<Dim>, length_in<Dim>>, Checked>::type;
+template<char Dim, class ArgLength, class RetSig, class State>
+struct sig_get_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
+	using type = typename sig_get_scalar<RetSig, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
-template<char Dim, class... RetSigs, class State, bool Checked>
-struct sig_get_scalar<dep_function_sig<Dim, RetSigs...>, State, Checked> {
-	static_assert(State::template contains<index_in<Dim>>, "Not all dimensions are fixed");
+template<char Dim, class... RetSigs, class State>
+struct sig_get_scalar<dep_function_sig<Dim, RetSigs...>, State> {
+	static_assert(State::template contains<index_in<Dim>>, "Not all tuple dimensions are fixed");
 	static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in idx<> (e.g. replace 42 with idx<42>)");
-	using type = typename sig_get_scalar<typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>, state_remove_t<State, index_in<Dim>, length_in<Dim>>, Checked>::type;
+	using type = typename sig_get_scalar<typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
-template<class ValueType, class State, bool Checked>
-struct sig_get_scalar<scalar_sig<ValueType>, State, Checked> {
+template<class ValueType, class State>
+struct sig_get_scalar<scalar_sig<ValueType>, State> {
 	using type = ValueType;
 };
 
@@ -67,10 +66,7 @@ struct sig_get_scalar<scalar_sig<ValueType>, State, Checked> {
  * @tparam T: the `scalar<...>`
  */
 template<class T, class State = state<>>
-using scalar_t = typename sig_get_scalar<typename T::signature, State, true>::type;
-
-template<class T, class State = state<>>
-using unchecked_scalar_t = typename sig_get_scalar<typename T::signature, State, false>::type;
+using scalar_t = typename sig_get_scalar<typename T::signature, State>::type;
 
 } // namespace noarr
 
