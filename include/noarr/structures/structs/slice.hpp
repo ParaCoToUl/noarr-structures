@@ -23,7 +23,6 @@ struct shift_t : contain<T, StartT> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr StartT start() const noexcept { return base::template get<1>(); }
 
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
@@ -86,7 +85,6 @@ public:
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			if constexpr(State::template contains<length_in<Dim>>) {
-				// TODO check remaining state
 				return state.template get<length_in<Dim>>();
 			} else {
 				return sub_structure().template length<Dim>(state.template remove<index_in<Dim>, length_in<Dim>>()) - start();
@@ -141,7 +139,6 @@ struct slice_t : contain<T, StartT, LenT> {
 	constexpr StartT start() const noexcept { return base::template get<1>(); }
 	constexpr LenT len() const noexcept { return base::template get<2>(); }
 
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
@@ -169,7 +166,7 @@ public:
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(State::template contains<index_in<Dim>>)
-			return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
+			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
 		else
 			return state;
 	}
@@ -191,7 +188,6 @@ public:
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
-			// TODO check remaining state
 			return len();
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
@@ -235,7 +231,6 @@ struct step_t : contain<T, StartT, StrideT> {
 	constexpr StartT start() const noexcept { return base::template get<1>(); }
 	constexpr StrideT stride() const noexcept { return base::template get<2>(); }
 
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
@@ -264,7 +259,7 @@ public:
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(State::template contains<index_in<Dim>>)
-			return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride() + start());
+			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride() + start());
 		else
 			return state;
 	}

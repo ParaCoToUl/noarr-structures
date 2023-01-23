@@ -28,8 +28,8 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 	if constexpr(OutStruct::signature::template all_accept<top_dim>) {
 		// parallel writes will go to different offsets => out_ptr may be shared
 		tbb::parallel_for(t.range(), [&f_acc, out_ptr](const range_t &subrange) {
-			subrange.for_each([f_acc, out_ptr](auto... states) {
-				f_acc(states..., out_ptr);
+			subrange.for_each([f_acc, out_ptr](auto state) {
+				f_acc(state, out_ptr);
 			});
 		});
 	} else {
@@ -54,8 +54,8 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 				});
 				local.raw = local_out_ptr;
 			}
-			subrange.for_each([f_acc, local_out_ptr](auto... states) {
-				f_acc(states..., local_out_ptr);
+			subrange.for_each([f_acc, local_out_ptr](auto state) {
+				f_acc(state, local_out_ptr);
 			});
 		});
 		out_ptrs.combine_each([out_struct, out_ptr, &f_join](const private_ptr &local_out_ptr) {

@@ -126,7 +126,7 @@ constexpr auto cuda_striped() noexcept { return cuda_striped_proto<NumStripes, E
 
 
 template<std::size_t NumStripes, std::size_t BankCount, std::size_t BankWidth, class T>
-using cuda_scalar_striped_t = cuda_striped_t<NumStripes, scalar<unchecked_scalar_t<T>>, BankCount, BankWidth, T>;
+using cuda_scalar_striped_t = cuda_striped_t<NumStripes, scalar<scalar_t<T>>, BankCount, BankWidth, T>;
 
 template<std::size_t NumStripes, std::size_t BankCount, std::size_t BankWidth>
 struct cuda_scalar_striped_proto {

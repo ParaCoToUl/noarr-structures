@@ -24,7 +24,6 @@ struct into_blocks_t : contain<T> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for both components of a dimension");
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>, "Dimension of this name already exists");
 	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>, "Dimension of this name already exists");
 private:
@@ -41,11 +40,7 @@ public:
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(Dim != DimMajor && Dim != DimMinor) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index in this dimension is overriden by a substructure");
-			static_assert(!State::template contains<length_in<Dim>>, "Index in this dimension is overriden by a substructure");
-		}
-		auto clean_state = state.template remove<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
+		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
 		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>;
 		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
 			auto major_length = state.template get<length_in<DimMajor>>();
@@ -78,9 +73,6 @@ public:
 
 	template<class Sub, class State>
 	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
-		static_assert(State::template contains<index_in<DimMinor>>, "Index has not been set");
-		static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -90,11 +82,9 @@ public:
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimMinor) {
 			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
-			// TODO check remaining state
 			return state.template get<length_in<DimMinor>>();
 		} else if constexpr(QDim == DimMajor) {
 			if constexpr(State::template contains<length_in<DimMajor>>) {
-				// TODO check remaining state
 				return state.template get<length_in<DimMajor>>();
 			} else if constexpr(State::template contains<length_in<DimMinor>>) {
 				auto minor_length = state.template get<length_in<DimMinor>>();
@@ -147,7 +137,6 @@ struct into_blocks_border_t : contain<T, MinorLenT> {
 	static_assert(DimIsBorder != DimMajor, "Cannot use the same name for multiple components of a dimension");
 	static_assert(DimIsBorder != DimMinor, "Cannot use the same name for multiple components of a dimension");
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for multiple components of a dimension");
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 	static_assert(DimIsBorder == Dim || !T::signature::template any_accept<DimIsBorder>, "Dimension of this name already exists");
 	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>, "Dimension of this name already exists");
 	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>, "Dimension of this name already exists");
@@ -181,11 +170,7 @@ public:
 		static_assert(!State::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
-		static_assert(!State::template contains<length_in<Dim>>, "Index in this dimension is overriden by a substructure");
-		if constexpr(Dim != DimIsBorder && Dim != DimMajor && Dim != DimMinor) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index in this dimension is overriden by a substructure");
-		}
-		auto clean_state = state.template remove<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
+		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>();
 		if constexpr(State::template contains<index_in<DimIsBorder>> && State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
 			auto minor_index = state.template get<index_in<DimMinor>>();
 			if constexpr(is_body<State>()) {
@@ -207,9 +192,6 @@ public:
 
 	template<class Sub, class State>
 	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(State::template contains<index_in<DimIsBorder>>, "Index has not been set");
-		static_assert(State::template contains<index_in<DimMajor>>, "Index has not been set");
-		static_assert(State::template contains<index_in<DimMinor>>, "Index has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -219,17 +201,14 @@ public:
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimIsBorder) {
 			static_assert(!State::template contains<length_in<DimIsBorder>>, "Cannot set length in this dimension");
-			// TODO check remaining state
 			return make_const<2>();
 		} else if constexpr(QDim == DimMinor) {
-			// TODO check remaining state
 			if constexpr(is_body<State>()) {
 				return minor_length();
 			} else /*border*/ {
 				return sub_structure().template length<Dim>(sub_state(state)) % minor_length();
 			}
 		} else if constexpr(QDim == DimMajor) {
-			// TODO check remaining state
 			if constexpr(is_body<State>()) {
 				return sub_structure().template length<Dim>(sub_state(state)) / minor_length();
 			} else /*border*/ {
@@ -287,8 +266,6 @@ struct merge_blocks_t : contain<T> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot merge a dimension with itself");
-	static_assert(T::signature::template all_accept<DimMajor>, "The structure does not have a dimension of this name");
-	static_assert(T::signature::template all_accept<DimMinor>, "The structure does not have a dimension of this name");
 	static_assert(Dim == DimMajor || Dim == DimMinor || !T::signature::template any_accept<Dim>, "Dimension of this name already exists");
 private:
 	template<class Original>
@@ -322,15 +299,7 @@ public:
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(DimMajor != Dim) {
-			static_assert(!State::template contains<index_in<DimMajor>>, "Index in this dimension is overriden by a substructure");
-			static_assert(!State::template contains<length_in<DimMajor>>, "Index in this dimension is overriden by a substructure");
-		}
-		if constexpr(DimMinor != Dim) {
-			static_assert(!State::template contains<index_in<DimMinor>>, "Index in this dimension is overriden by a substructure");
-			static_assert(!State::template contains<length_in<DimMinor>>, "Index in this dimension is overriden by a substructure");
-		}
-		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
 		auto minor_length = sub_structure().template length<DimMinor>(clean_state);
 		if constexpr(State::template contains<length_in<Dim>>) {
 			auto length = state.template get<length_in<Dim>>();
@@ -358,7 +327,6 @@ public:
 
 	template<class Sub, class State>
 	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(State::template contains<index_in<Dim>>, "Index has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -368,7 +336,6 @@ public:
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == Dim) {
 			if constexpr(State::template contains<length_in<Dim>>) {
-				// TODO check remaining state
 				return state.template get<length_in<Dim>>();
 			} else {
 				auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();

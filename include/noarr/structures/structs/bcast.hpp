@@ -40,7 +40,6 @@ struct bcast_t : contain<T> {
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
-			// TODO check remaining state
 			return state.template get<length_in<Dim>>();
 		} else {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>, length_in<Dim>>());

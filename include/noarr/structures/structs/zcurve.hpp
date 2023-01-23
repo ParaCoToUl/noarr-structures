@@ -134,7 +134,6 @@ struct merge_zcurve_t : contain<T> {
 	static_assert(sizeof...(Dims), "No dimensions to merge");
 	static_assert(sizeof...(Dims) <= 8*sizeof(std::size_t), "Too many dimensions to merge");
 	static_assert(helpers::zc_uniquity<Dims...>::value, "Cannot merge a dimension with itself");
-	static_assert((... && T::signature::template all_accept<Dims>), "The structure does not have a dimension of this name");
 	static_assert((... || (Dim == Dims)) || !T::signature::template any_accept<Dim>, "Dimension of this name already exists");
 private:
 	template<int Remaining, class ArgLenAcc>
@@ -171,11 +170,7 @@ public:
 	template<class State, std::size_t... DimsI>
 	constexpr auto sub_state(State state, std::index_sequence<DimsI...>) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
-		/* TODO if constexpr(Dims != Dim) {
-			static_assert(!State::template contains<index_in<Dims>>, "Index in this dimension is overriden by a substructure");
-			static_assert(!State::template contains<length_in<Dims>>, "Index in this dimension is overriden by a substructure");
-		}...*/
-		auto clean_state = state.template remove<index_in<Dim>>();
+		auto clean_state = state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
 		if constexpr(State::template contains<index_in<Dim>>) {
 			auto index = state.template get<index_in<Dim>>();
 			auto index_general = index >> SpecialLevel*sizeof...(Dims);
