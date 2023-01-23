@@ -58,7 +58,6 @@ struct sig_get_scalar<dep_function_sig<Dim, RetSigs...>, State, Checked> {
 };
 template<class ValueType, class State, bool Checked>
 struct sig_get_scalar<scalar_sig<ValueType>, State, Checked> {
-	static_assert(State::is_empty || !Checked, "Superfluous parameters passed in the state");
 	using type = ValueType;
 };
 

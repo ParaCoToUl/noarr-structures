@@ -23,7 +23,6 @@ struct fix_t : contain<T, IdxT> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr IdxT idx() const noexcept { return base::template get<1>(); }
 
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;
@@ -43,9 +42,7 @@ public:
 
 	template<class State>
 	constexpr auto sub_state(State state) const noexcept {
-		static_assert(!State::template contains<index_in<Dim>>, "This dimension is already fixed, it cannot be used from outside");
-		static_assert(!State::template contains<length_in<Dim>>, "This dimension is already fixed, it cannot be used from outside");
-		return state.template with<index_in<Dim>>(idx());
+		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(idx());
 	}
 
 	template<class State>
@@ -107,7 +104,6 @@ struct set_length_t : contain<T, LenT> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 	constexpr LenT len() const noexcept { return base::template get<1>(); }
 
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement;

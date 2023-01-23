@@ -31,7 +31,6 @@ struct dim_param;
 template<class StructInner, class StructOuter, class State>
 constexpr auto offset_of(StructOuter structure, State state) noexcept {
 	if constexpr(std::is_same_v<StructInner, StructOuter>) {
-		// TODO check that state only contains relevant lengths
 		return constexpr_arithmetic::make_const<0>();
 	} else {
 		return structure.template strict_offset_of<StructInner>(state);

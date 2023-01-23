@@ -45,7 +45,7 @@ struct tuple : contain<TS...> {
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in idx<> (e.g. replace 42 with idx<42>)");
 		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-		auto sub_state = state.template remove<index_in<Dim>>(); // TODO remove all indices for size_inner
+		auto sub_state = state.template remove<index_in<Dim>>();
 		return size_inner(std::make_index_sequence<index>(), sub_state) + offset_of<Sub>(sub_structure<index>(), sub_state);
 	}
 
@@ -54,7 +54,6 @@ struct tuple : contain<TS...> {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
-			// TODO check remaining state
 			return constexpr_arithmetic::make_const<sizeof...(TS)>();
 		} else {
 			static_assert(State::template contains<index_in<Dim>>, "Tuple indices must be set");
@@ -132,7 +131,6 @@ struct array : contain<T> {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
-			// TODO check remaining state
 			return constexpr_arithmetic::make_const<L>();
 		} else {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>>());
@@ -197,7 +195,6 @@ struct vector : contain<T> {
 		if constexpr(QDim == Dim) {
 			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
-			// TODO check remaining state
 			return state.template get<length_in<Dim>>();
 		} else {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>, length_in<Dim>>());

@@ -26,7 +26,6 @@ struct scalar : contain<> {
 
 	template<class State>
 	constexpr auto size(State) const noexcept {
-		static_assert(State::is_empty, "Unused items in state");
 		return constexpr_arithmetic::make_const<sizeof(T)>();
 	}
 

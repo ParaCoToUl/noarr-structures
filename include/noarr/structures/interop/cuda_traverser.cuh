@@ -39,7 +39,6 @@ struct cuda_fix_t : contain<T> {
 
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
-	static_assert(T::signature::template all_accept<Dim>, "The structure does not have a dimension of this name");
 private:
 	template<class Original>
 	struct dim_replacement {
@@ -52,9 +51,7 @@ public:
 
 	template<class State>
 	static __device__ inline auto sub_state(State state) noexcept {
-		static_assert(!State::template contains<index_in<Dim>>, "This dimension is already fixed, it cannot be used from outside");
-		static_assert(!State::template contains<length_in<Dim>>, "This dimension is already fixed, it cannot be used from outside");
-		return state.template with<index_in<Dim>>(CudaDim::idx());
+		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(CudaDim::idx());
 	}
 
 	template<class State>

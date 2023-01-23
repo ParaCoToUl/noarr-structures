@@ -322,7 +322,6 @@ private:
 	struct assertion<std::integer_sequence<char, ExternalDims...>, std::integer_sequence<char, InternalDims...>> {
 		template<char Dim>
 		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
-		static_assert((... && T::signature::template any_accept<InternalDims>), "The structure does not have a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
 		static_assert((... && is_free<ExternalDims>), "The structure already has a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
 		// Note: in case a dimension is renamed to itself, is_free returns true. This is necessary to make the above assertion pass.
 		// The `rename_uniquity<external>` check already ensures that if a dimension is renamed to itself, no other dimension is renamed to its name.
