@@ -53,14 +53,14 @@ template<char Dim, class State, class F>
 constexpr auto update_index(State state, F f) {
 	static_assert(State::template contains<index_in<Dim>>, "Requested dimension does not exist. To add a new dimension instead of updating existing one, use .template with<index_in<'...'>>(...)");
 	auto new_index = f(state.template get<index_in<Dim>>());
-	return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
+	return state.template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
 
 template<char... Dims, class State>
 constexpr auto neighbor(State state, std::enable_if_t<true || Dims, std::ptrdiff_t>... diffs) noexcept {
 	static_assert((... && State::template contains<index_in<Dims>>), "Requested dimension does not exist");
 	static_assert((... && std::is_same_v<state_get_t<State, index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
-	return state.template remove<index_in<Dims>...>().template with<index_in<Dims>...>(std::size_t(state.template get<index_in<Dims>>() + diffs)...);
+	return state.template with<index_in<Dims>...>(std::size_t(state.template get<index_in<Dims>>() + diffs)...);
 }
 
 // State to structure

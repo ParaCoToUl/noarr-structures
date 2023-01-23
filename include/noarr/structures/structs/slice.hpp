@@ -169,7 +169,7 @@ public:
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(State::template contains<index_in<Dim>>)
-			return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
+			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
 		else
 			return state;
 	}
@@ -264,7 +264,7 @@ public:
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(State::template contains<index_in<Dim>>)
-			return state.template remove<index_in<Dim>>().template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride() + start());
+			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride() + start());
 		else
 			return state;
 	}
