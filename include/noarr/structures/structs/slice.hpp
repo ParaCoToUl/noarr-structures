@@ -310,6 +310,24 @@ struct step_proto : contain<StartT, StrideT> {
 template<char Dim, class StartT, class StrideT>
 constexpr auto step(StartT start, StrideT stride) noexcept { return step_proto<Dim, good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
 
+template<class StartT, class StrideT>
+struct auto_step_proto : contain<StartT, StrideT> {
+	using base = contain<StartT, StrideT>;
+	using base::base;
+
+	static constexpr bool is_proto_struct = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		static_assert(!Struct::signature::dependent, "For auto_step, the top-level dimension must be dynamic (use step instead of auto_step to use another dimension)");
+		constexpr char dim = Struct::signature::dim;
+		return step_t<dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>());
+	}
+};
+
+template<class StartT, class StrideT>
+constexpr auto auto_step(StartT start, StrideT stride) noexcept { return auto_step_proto<good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_SLICE_HPP
