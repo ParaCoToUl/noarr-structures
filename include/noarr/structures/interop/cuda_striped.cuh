@@ -16,6 +16,14 @@ namespace helpers {
 template<std::size_t Value, std::size_t Mul>
 constexpr std::size_t pad_to_multiple = (Value + Mul - 1) / Mul * Mul;
 
+struct simple_cg_t : contain<std::size_t, std::size_t> {
+	using base = contain<std::size_t, std::size_t>;
+	using base::base;
+
+	constexpr std::size_t thread_rank() const noexcept { return base::template get<0>(); }
+	constexpr std::size_t num_threads() const noexcept { return base::template get<1>(); }
+};
+
 } // namespace helpers
 
 constexpr std::size_t cuda_shm_bank_count = 32;
@@ -94,6 +102,17 @@ public:
 	template<class Sub, class State>
 	constexpr void strict_state_at(State) const noexcept {
 		static_assert(always_false<cuda_striped_t>, "A cuda_striped_t cannot be used in this context");
+	}
+
+	static __device__ inline std::size_t current_stripe_index() noexcept {
+		return threadIdx.x % NumStripes;
+	}
+
+	static __device__ inline helpers::simple_cg_t current_stripe_cg() noexcept {
+		std::size_t stripe_index = threadIdx.x % NumStripes;
+		std::size_t num_threads_in_stripe = (blockDim.x + NumStripes - stripe_index - 1) / NumStripes;
+		std::size_t thread_rank_in_stripe = threadIdx.x / NumStripes;
+		return helpers::simple_cg_t{thread_rank_in_stripe, num_threads_in_stripe};
 	}
 
 private:
