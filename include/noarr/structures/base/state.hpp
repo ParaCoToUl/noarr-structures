@@ -120,11 +120,6 @@ struct state : contain<typename StateItems::value_type...> {
 	constexpr auto with(ValueTypes... values) const noexcept {
 		return restrict_add<Tags...>(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result(), values...);
 	}
-
-	template<class... NewStateItems>
-	constexpr state<StateItems..., NewStateItems...> merge(const state<NewStateItems...> &other) const noexcept {
-		return state<StateItems..., NewStateItems...>(get<typename StateItems::tag>()..., other.template get<typename NewStateItems::tag>()...);
-	}
 };
 
 template<class State, class Tag>
@@ -152,6 +147,11 @@ using good_index_t = decltype(helpers::supported_index_type(std::declval<T>()));
 template<class... Tag, class... ValueType>
 constexpr auto make_state(ValueType... value) {
 	return state<state_item<Tag, good_index_t<ValueType>>...>(value...);
+}
+
+template<class... StateItemsA, class... StateItemsB>
+constexpr state<StateItemsA..., StateItemsB...> operator&(state<StateItemsA...> state_a, state<StateItemsB...> state_b) noexcept {
+	return state<StateItemsA..., StateItemsB...>(state_a.template get<typename StateItemsA::tag>()..., state_b.template get<typename StateItemsB::tag>()...);
 }
 
 } // namespace noarr
