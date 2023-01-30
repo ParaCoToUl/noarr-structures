@@ -190,6 +190,12 @@ public:
 	constexpr auto get_size() const noexcept {
 		return structure().get_size();
 	}
+
+	/**
+	 * @brief wraps the data pointer in a new bag with the raw pointer policy. If the current bag owns the data,
+	 * it continues owning them, while the returned raw bag should be considered a non-owning reference.
+	 */
+	constexpr auto get_ref() const noexcept;
 };
 
 template<class Structure, class BagPolicy, class = void>
@@ -247,6 +253,13 @@ public:
 		return structure().template get_at(data(), ts...);
 	}
 	using bag_base<Structure, BagPolicy>::operator[];
+
+	/**
+	 * @brief wraps the data pointer in a new bag with the raw pointer policy. If the current bag owns the data,
+	 * it continues owning them, while the returned raw bag should be considered a non-owning reference.
+	 */
+	constexpr auto get_ref() noexcept;
+	using bag_base<Structure, BagPolicy>::get_ref;
 };
 
 }
@@ -366,6 +379,20 @@ template<class Structure>
 constexpr auto make_bag(noarr::wrapper<Structure> s, const char *data) noexcept {
 	return bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, data);
 }
+
+
+
+template<class Structure, class BagPolicy>
+constexpr auto helpers::bag_base<Structure, BagPolicy>::get_ref() const noexcept {
+	return make_bag(structure(), data());
+}
+
+template<class Structure, class BagPolicy>
+constexpr auto helpers::bag_impl<Structure, BagPolicy, std::enable_if_t<!std::is_const<std::remove_pointer_t<typename BagPolicy::type>>::value>>::get_ref() noexcept {
+	return make_bag(structure(), data());
+}
+
+
 
 template<class T, class P>
 struct to_struct<bag<T, P>> {
