@@ -43,7 +43,7 @@ struct tuple : contain<TS...> {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
-		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in idx<> (e.g. replace 42 with idx<42>)");
+		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
 		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 		auto sub_state = state.template remove<index_in<Dim>>();
 		return size_inner(std::make_index_sequence<index>(), sub_state) + offset_of<Sub>(sub_structure<index>(), sub_state);

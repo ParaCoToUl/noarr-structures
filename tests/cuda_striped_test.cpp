@@ -220,6 +220,6 @@ TEST_CASE("Cuda striped constexpr arithmetic", "[cuda cearithm]") {
 	auto s = color_s ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes, decltype(color_s)>();
 
 	REQUIRE(decltype(s | noarr::get_size())::value == 167 * period); // 167 = ceil(1000 / 6), where 6 = number of elems per stripe and period
-	REQUIRE(decltype(s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::index_in<'c'>, noarr::cuda_stripe_index>(noarr::idx<11>, noarr::idx<1>, noarr::idx<7>)))::value == 1*period + 7*stripe_size + 5*3 + 1);
-	REQUIRE(decltype(s | noarr::offset<decltype(color_s)>(noarr::empty_state.with<noarr::index_in<'x'>,    noarr::cuda_stripe_index>(noarr::idx<11>,                noarr::idx<7>)))::value == 1*period + 7*stripe_size + 5*3);
+	REQUIRE(decltype(s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::index_in<'c'>, noarr::cuda_stripe_index>(noarr::lit<11>, noarr::lit<1>, noarr::lit<7>)))::value == 1*period + 7*stripe_size + 5*3 + 1);
+	REQUIRE(decltype(s | noarr::offset<decltype(color_s)>(noarr::empty_state.with<noarr::index_in<'x'>,    noarr::cuda_stripe_index>(noarr::lit<11>,                noarr::lit<7>)))::value == 1*period + 7*stripe_size + 5*3);
 }

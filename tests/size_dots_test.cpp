@@ -7,7 +7,7 @@
 #include <noarr/structures/extra/wrapper.hpp>
 #include "noarr_test_defs.hpp"
 
-using noarr::idx;
+using noarr::lit;
 
 TEST_CASE("Sizes is_cube is_simple", "[sizes is_cube is_simple]") {
 	noarr::vector<'x', noarr::scalar<float>> v;
@@ -44,9 +44,9 @@ TEST_CASE("Sizes sizes", "[sizes sizes]") {
 	SECTION("check cizes") {
 		REQUIRE(w_v_sized.get_length<'x'>() == 20);
 		REQUIRE(w_v2.get_length<'y'>() == 20000);
-		REQUIRE(w_t.fix<'t'>(idx<0>).get_length<'x'>() == 10);
-		REQUIRE(w_t2.fix<'t'>(idx<0>).get_length<'y'>() == 20000);
-		REQUIRE(w_t2.fix<'t'>(idx<1>).get_length<'b'>() == 20);
+		REQUIRE(w_t.fix<'t'>(lit<0>).get_length<'x'>() == 10);
+		REQUIRE(w_t2.fix<'t'>(lit<0>).get_length<'y'>() == 20000);
+		REQUIRE(w_t2.fix<'t'>(lit<1>).get_length<'b'>() == 20);
 	}
 }
 

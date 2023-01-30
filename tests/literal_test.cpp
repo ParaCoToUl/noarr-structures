@@ -16,7 +16,7 @@ TEST_CASE("Literality test", "[low-lvl]") {
 	constexpr auto test_tuple = tuple<'t', scalar<int>, array<'x', 50, scalar<int>>, array<'y', 50, scalar<int>>>();
 	constexpr auto test_tuple_size = test_tuple | get_size();
 
-	constexpr auto test_sfixed_dim = vector<'x', scalar<int>>() ^ set_length<'x'>(0) ^ fix<'x'>(idx<10>);
+	constexpr auto test_sfixed_dim = vector<'x', scalar<int>>() ^ set_length<'x'>(0) ^ fix<'x'>(lit<10>);
 	constexpr auto test_sfixed_dim_size = test_sfixed_dim | get_size();
 
 	constexpr auto test_fixed_dim = vector<'x', scalar<int>>() ^ set_length<'x'>(0) ^ fix<'x'>(10);

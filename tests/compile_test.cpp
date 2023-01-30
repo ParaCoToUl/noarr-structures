@@ -101,6 +101,6 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	// we will create a bag
 	auto tuple_bag = noarr::make_bag(tuple);
 	// we index tuple like this
-	float& value = tuple_bag.at<'t', 'x'>(noarr::idx<0>, 1);
+	float& value = tuple_bag.at<'t', 'x'>(noarr::lit<0>, 1);
 	value = 0.f;
 }

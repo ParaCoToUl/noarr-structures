@@ -5,7 +5,7 @@
 #include <noarr/structures/extra/shortcuts.hpp>
 #include <noarr/structures/extra/traverser.hpp>
 
-using noarr::idx;
+using noarr::lit;
 
 TEST_CASE("Blocks with static border", "[blocks]") {
 	auto m = noarr::scalar<float>()
@@ -20,13 +20,13 @@ TEST_CASE("Blocks with static border", "[blocks]") {
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'c'>()) == 2);
-	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) == 10'013 / 16);
-	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) ==           1);
-	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) ==          16);
-	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) == 10'013 % 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<1>))) ==           1);
+	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<0>))) ==          16);
+	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<1>))) == 10'013 % 16);
 
-	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'c'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'c'>(10, 3333, 500, lit<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'c'>(10, 3333,   1, lit<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with static border reused as minor", "[blocks]") {
@@ -42,13 +42,13 @@ TEST_CASE("Blocks with static border reused as minor", "[blocks]") {
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'c'>()) == 2);
-	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) == 10'013 / 16);
-	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) ==           1);
-	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) ==          16);
-	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) == 10'013 % 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<1>))) ==           1);
+	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<0>))) ==          16);
+	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<1>))) == 10'013 % 16);
 
-	REQUIRE((m | noarr::offset<'x', 'y', 'b', 'c'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'x', 'y', 'b', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'x', 'y', 'b', 'c'>(10, 3333, 500, lit<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'x', 'y', 'b', 'c'>(10, 3333,   1, lit<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with static border reused as major", "[blocks]") {
@@ -64,13 +64,13 @@ TEST_CASE("Blocks with static border reused as major", "[blocks]") {
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'c'>()) == 2);
-	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) == 10'013 / 16);
-	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) ==           1);
-	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<0>))) ==          16);
-	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(idx<1>))) == 10'013 % 16);
+	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'x'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<1>))) ==           1);
+	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<0>))) ==          16);
+	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'c'>>(lit<1>))) == 10'013 % 16);
 
-	REQUIRE((m | noarr::offset<'a', 'y', 'x', 'c'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'a', 'y', 'x', 'c'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'x', 'c'>(10, 3333, 500, lit<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'x', 'c'>(10, 3333,   1, lit<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with static border reused as is-border", "[blocks]") {
@@ -86,13 +86,13 @@ TEST_CASE("Blocks with static border reused as is-border", "[blocks]") {
 
 	REQUIRE((m | noarr::get_length<'y'>()) == 20'000);
 	REQUIRE((m | noarr::get_length<'x'>()) == 2);
-	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<0>))) == 10'013 / 16);
-	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<1>))) ==           1);
-	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<0>))) ==          16);
-	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'x'>>(idx<1>))) == 10'013 % 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'x'>>(lit<0>))) == 10'013 / 16);
+	REQUIRE((m | noarr::get_length<'b'>(noarr::empty_state.with<noarr::index_in<'x'>>(lit<1>))) ==           1);
+	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'x'>>(lit<0>))) ==          16);
+	REQUIRE((m | noarr::get_length<'a'>(noarr::empty_state.with<noarr::index_in<'x'>>(lit<1>))) == 10'013 % 16);
 
-	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333, 500, idx<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
-	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333,   1, idx<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333, 500, lit<0>)) == (10 + 500*16 + 3333*10'013L) * sizeof(float));
+	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333,   1, lit<1>)) == (10 + 10'000 + 3333*10'013L) * sizeof(float));
 }
 
 TEST_CASE("Blocks with static border traverser", "[blocks traverser]") {
