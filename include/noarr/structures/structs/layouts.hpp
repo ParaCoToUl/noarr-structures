@@ -145,7 +145,7 @@ struct array : contain<T> {
 
 template<char Dim, std::size_t L>
 struct array<Dim, L> {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return array<Dim, L, Struct>(s); }
@@ -209,7 +209,7 @@ struct vector : contain<T> {
 
 template<char Dim>
 struct vector<Dim> {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return vector<Dim, Struct>(s); }

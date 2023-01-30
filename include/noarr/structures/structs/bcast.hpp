@@ -55,7 +55,7 @@ struct bcast_t : contain<T> {
 
 template<char Dim>
 struct bcast_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return bcast_t<Dim, Struct>(s); }

@@ -107,7 +107,7 @@ public:
 
 template<char Dim, char DimMajor, char DimMinor>
 struct into_blocks_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_t<Dim, DimMajor, DimMinor, Struct>(s); }
@@ -232,7 +232,7 @@ public:
 
 template<char Dim, char DimMajor, char DimMinor, char DimIsPresent>
 struct into_blocks_dynamic_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, Struct>(s); }
@@ -366,7 +366,7 @@ struct into_blocks_static_proto : contain<MinorLenT> {
 	using base = contain<MinorLenT>;
 	using base::base;
 
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, Struct, MinorLenT>(s, base::template get<0>()); }
@@ -480,7 +480,7 @@ public:
 
 template<char DimMajor, char DimMinor, char Dim>
 struct merge_blocks_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_blocks_t<DimMajor, DimMinor, Dim, Struct>(s); }

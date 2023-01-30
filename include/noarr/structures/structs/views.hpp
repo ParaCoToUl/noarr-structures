@@ -157,7 +157,7 @@ struct reorder_t : contain<T> {
 
 template<char... Dims>
 struct reorder_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reorder_t<Struct, Dims...>(s); }
@@ -212,7 +212,7 @@ public:
 
 template<char Dim>
 struct hoist_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return hoist_t<Dim, Struct>(s); }
@@ -359,7 +359,7 @@ public:
 
 template<char... DimPairs>
 struct rename_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return rename_t<Struct, DimPairs...>(s); }

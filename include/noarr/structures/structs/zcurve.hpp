@@ -213,7 +213,7 @@ public:
 
 template<int SpecialLevel, int GeneralLevel, char Dim, char... Dims>
 struct merge_zcurve_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_zcurve_t<SpecialLevel, GeneralLevel, Dim, Struct, Dims...>(s); }

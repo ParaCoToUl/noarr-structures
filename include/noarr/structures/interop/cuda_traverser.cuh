@@ -80,7 +80,7 @@ namespace helpers {
 
 template<char DimB, char DimT, class CudaDimB, class CudaDimT>
 struct cuda_fix_pair_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {

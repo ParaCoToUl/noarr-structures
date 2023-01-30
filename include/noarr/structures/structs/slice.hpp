@@ -105,7 +105,7 @@ struct shift_proto : contain<StartT> {
 	using base = contain<StartT>;
 	using base::base;
 
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return shift_t<Dim, Struct, StartT>(s, base::template get<0>()); }
@@ -206,7 +206,7 @@ struct slice_proto : contain<StartT, LenT> {
 	using base = contain<StartT, LenT>;
 	using base::base;
 
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return slice_t<Dim, Struct, StartT, LenT>(s, base::template get<0>(), base::template get<1>()); }
@@ -301,7 +301,7 @@ struct step_proto : contain<StartT, StrideT> {
 	using base = contain<StartT, StrideT>;
 	using base::base;
 
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return step_t<Dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>()); }
@@ -315,7 +315,7 @@ struct auto_step_proto : contain<StartT, StrideT> {
 	using base = contain<StartT, StrideT>;
 	using base::base;
 
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {

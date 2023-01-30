@@ -402,7 +402,7 @@ struct to_struct<bag<T, P>> {
 
 
 
-template<class Struct, class BagPolicy, class ProtoStruct, class = std::enable_if_t<ProtoStruct::is_proto_struct>>
+template<class Struct, class BagPolicy, class ProtoStruct, class = std::enable_if_t<ProtoStruct::proto_preserves_layout>>
 constexpr auto operator ^(bag<Struct, BagPolicy> &&s, ProtoStruct p) {
 	auto new_struct = s.structure().unwrap() ^ p;
 	return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.data()));

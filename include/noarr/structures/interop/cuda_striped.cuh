@@ -133,7 +133,7 @@ private:
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth>
 struct cuda_striped_proto {
 	static_assert(is_struct<ElemType>(), "The element type of cuda_striped must be a noarr structure. Omit the type to imply scalar<...>, or specify scalar<...> (or any other noarr structure) explicitly.");
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return cuda_striped_t<NumStripes, ElemType, BankCount, BankWidth, Struct>(s); }
@@ -149,7 +149,7 @@ using cuda_scalar_striped_t = cuda_striped_t<NumStripes, scalar<scalar_t<T>>, Ba
 
 template<std::size_t NumStripes, std::size_t BankCount, std::size_t BankWidth>
 struct cuda_scalar_striped_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return cuda_scalar_striped_t<NumStripes, BankCount, BankWidth, Struct>(s); }

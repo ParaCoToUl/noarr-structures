@@ -55,6 +55,11 @@ struct is_struct_impl<T, std::void_t<typename T::signature>> : std::true_type {
 	static_assert(is_signature<typename T::signature>());
 };
 
+template<class T, class = void>
+struct is_proto_struct_impl : std::false_type {};
+template<class T>
+struct is_proto_struct_impl<T, std::enable_if_t<std::is_same_v<decltype(T::proto_preserves_layout), const bool>>> : std::true_type {};
+
 } // namespace helpers
 
 /**
@@ -65,25 +70,28 @@ struct is_struct_impl<T, std::void_t<typename T::signature>> : std::true_type {
 template<class T>
 using is_struct = helpers::is_struct_impl<T>;
 
-template<class Struct, class ProtoStruct, class = std::enable_if_t<is_struct<Struct>::value && ProtoStruct::is_proto_struct>>
+template<class T>
+using is_proto_struct = helpers::is_proto_struct_impl<T>;
+
+template<class Struct, class ProtoStruct, class = std::enable_if_t<is_struct<Struct>::value && is_proto_struct<ProtoStruct>::value>>
 constexpr auto operator ^(Struct s, ProtoStruct p) {
 	return p.instantiate_and_construct(s);
 }
 
 struct neutral_proto {
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s; }
 };
 
-template<class InnerProtoStruct, class OuterProtoStruct, class = std::enable_if_t<InnerProtoStruct::is_proto_struct && OuterProtoStruct::is_proto_struct>>
+template<class InnerProtoStruct, class OuterProtoStruct, bool PreservesLayout = InnerProtoStruct::proto_preserves_layout && OuterProtoStruct::proto_preserves_layout>
 struct compose_proto : contain<InnerProtoStruct, OuterProtoStruct> {
 	using base = contain<InnerProtoStruct, OuterProtoStruct>;
 	using base::base;
 	constexpr compose_proto(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
 
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = PreservesLayout;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
