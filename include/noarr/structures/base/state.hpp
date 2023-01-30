@@ -147,6 +147,13 @@ constexpr std::integral_constant<std::size_t, Value> supported_index_type(std::i
 template<class T>
 using good_index_t = decltype(helpers::supported_index_type(std::declval<T>()));
 
+
+
+template<class... Tag, class... ValueType>
+constexpr auto make_state(ValueType... value) {
+	return state<state_item<Tag, good_index_t<ValueType>>...>(value...);
+}
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_STATE_HPP
