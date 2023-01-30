@@ -127,7 +127,6 @@ struct traverser_t : contain<Struct, Order> {
 
 	constexpr auto state() const noexcept {
 		auto top_struct = get_struct() ^ get_order();
-		static_assert(for_each_impl<typename decltype(top_struct)::signature>::single_state, "There may be multiple states to traverse - use for_each");
 		return state_at<Struct>(top_struct, empty_state);
 	}
 
@@ -140,7 +139,6 @@ private:
 	struct for_each_impl : std::false_type {};
 	template<char Dim, class ArgLength, class RetSig>
 	struct for_each_impl<function_sig<Dim, ArgLength, RetSig>> {
-		static constexpr bool single_state = false;
 		template<class TopStruct, class F, class State>
 		static constexpr void for_each(TopStruct top_struct, F f, State state) noexcept {
 			std::size_t len = top_struct.template length<Dim>(state);
@@ -150,7 +148,6 @@ private:
 	};
 	template<char Dim, class... RetSigs>
 	struct for_each_impl<dep_function_sig<Dim, RetSigs...>> {
-		static constexpr bool single_state = false;
 		template<class TopStruct, class F, class State>
 		static constexpr void for_each(TopStruct top_struct, F f, State state) noexcept {
 			for_each(top_struct, f, state, std::index_sequence_for<RetSigs...>());
@@ -162,7 +159,6 @@ private:
 	};
 	template<class ValueType>
 	struct for_each_impl<scalar_sig<ValueType>> {
-		static constexpr bool single_state = true;
 		template<class TopStruct, class F, class State>
 		static constexpr void for_each(TopStruct top_struct, F f, State state) noexcept {
 			f(state_at<Struct>(top_struct, state));
