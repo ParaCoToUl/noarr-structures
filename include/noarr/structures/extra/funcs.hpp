@@ -5,6 +5,7 @@
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
 #include "../extra/struct_traits.hpp"
+#include "../extra/to_struct.hpp"
 #include "../structs/scalar.hpp"
 
 namespace noarr {
@@ -99,9 +100,8 @@ constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept { return get_at(ptr, e
  * @return the result of the piping
  */
 template<class S, class F>
-constexpr auto operator|(S s, F f) noexcept ->
-std::enable_if_t<is_struct<std::enable_if_t<std::is_class<S>::value, S>>::value, decltype(std::declval<F>()(std::declval<S>()))> {
-	return f(s);
+constexpr auto operator|(const S &s, F f) noexcept -> decltype(std::declval<F>()(std::declval<typename to_struct<S>::type>())) {
+	return f(to_struct<S>::convert(s));
 }
 
 } // namespace noarr
