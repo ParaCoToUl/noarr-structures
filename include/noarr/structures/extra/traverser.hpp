@@ -139,6 +139,8 @@ struct traverser_t : contain<Struct, Order> {
 		return state_at<Struct>(top_struct, empty_state);
 	}
 
+	template<char Dim>
+	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto begin() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto end() const noexcept; // defined in traverser_iter.hpp

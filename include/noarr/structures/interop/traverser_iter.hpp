@@ -127,6 +127,14 @@ static constexpr char traviter_top_dim = traviter_sig_top_dim<typename Struct::s
 
 // declared in traverser.hpp
 template<class Struct, class Order>
+template<char Dim>
+constexpr auto traverser_t<Struct, Order>::range() const noexcept {
+	auto top_struct = get_struct() ^ get_order();
+	return traverser_range_t<Dim, Struct, Order>(*this, top_struct.template length<Dim>(empty_state));
+}
+
+// declared in traverser.hpp
+template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 	auto top_struct = get_struct() ^ get_order();
 	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct)>;
