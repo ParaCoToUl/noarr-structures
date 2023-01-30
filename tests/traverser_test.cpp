@@ -3,8 +3,8 @@
 #include <array>
 #include <iostream>
 
-#include <noarr/structures_extended.hpp>
 #include <noarr/structures/extra/traverser.hpp>
+#include <noarr/structures_extended.hpp>
 
 using namespace noarr;
 
@@ -418,6 +418,28 @@ TEST_CASE("Nested traverser simplified", "[traverser]") {
 			auto j = get_index<'j'>(idxs);
 			REQUIRE(j == ej);
 			auto o = sliced | offset(idxs);
+			REQUIRE(o == (50*ei + ei+ej) * sizeof(float));
+			ej++;
+		});
+		REQUIRE(ej == 50-ei);
+		ei++;
+	});
+	REQUIRE(ei == 50);
+}
+
+TEST_CASE("Nested traverser for_dims", "[traverser]") {
+	auto mat = scalar<float>() ^ array<'j', 50>() ^ array<'i', 50>();
+
+	unsigned ei = 0;
+
+	traverser(mat).for_dims<'i'>([&](auto trav) {
+		auto i = get_index<'i'>(trav.state());
+		REQUIRE(i == ei);
+		unsigned ej = 0;
+		trav.order(slice<'j'>(i, 50 - i)).for_each([&](auto idxs) {
+			auto j = get_index<'j'>(idxs);
+			REQUIRE(j-i == ej);
+			auto o = mat | offset(idxs);
 			REQUIRE(o == (50*ei + ei+ej) * sizeof(float));
 			ej++;
 		});
