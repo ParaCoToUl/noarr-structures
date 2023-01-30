@@ -319,14 +319,14 @@ struct auto_step_proto : contain<StartT, StrideT> {
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
-		static_assert(!Struct::signature::dependent, "For auto_step, the top-level dimension must be dynamic (use step instead of auto_step to use another dimension)");
+		static_assert(!Struct::signature::dependent, "Add a dimension name as the first parameter to step, or use a structure with a dynamic topmost dimension");
 		constexpr char dim = Struct::signature::dim;
 		return step_t<dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>());
 	}
 };
 
 template<class StartT, class StrideT>
-constexpr auto auto_step(StartT start, StrideT stride) noexcept { return auto_step_proto<good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
+constexpr auto step(StartT start, StrideT stride) noexcept { return auto_step_proto<good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
 
 } // namespace noarr
 

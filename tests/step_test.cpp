@@ -29,10 +29,10 @@ TEST_CASE("Step", "[step]") {
 
 TEST_CASE("Auto step", "[step]") {
 	auto m = noarr::scalar<float>() ^ noarr::array<'x', 10>();
-	auto m0 = m ^ noarr::auto_step(0, 4);
-	auto m1 = m ^ noarr::auto_step(1, 4);
-	auto m2 = m ^ noarr::auto_step(2, 4);
-	auto m3 = m ^ noarr::auto_step(3, 4);
+	auto m0 = m ^ noarr::step(0, 4);
+	auto m1 = m ^ noarr::step(1, 4);
+	auto m2 = m ^ noarr::step(2, 4);
+	auto m3 = m ^ noarr::step(3, 4);
 
 	REQUIRE((m0 | noarr::get_length<'x'>()) == 3);
 	REQUIRE((m1 | noarr::get_length<'x'>()) == 3);
