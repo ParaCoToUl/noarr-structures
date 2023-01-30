@@ -400,6 +400,14 @@ struct to_struct<bag<T, P>> {
 	static constexpr T convert(const bag<T, P> &b) noexcept { return b.structure().unwrap(); }
 };
 
+
+
+template<class Struct, class BagPolicy, class ProtoStruct, class = std::enable_if_t<ProtoStruct::is_proto_struct>>
+constexpr auto operator ^(bag<Struct, BagPolicy> &&s, ProtoStruct p) {
+	auto new_struct = s.structure().unwrap() ^ p;
+	return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.data()));
+}
+
 } // namespace noarr
 
 #endif // NOARR_BAG_HPP
