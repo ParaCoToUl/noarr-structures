@@ -6,37 +6,11 @@
 #include "../base/state.hpp"
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
+#include "../extra/sig_utils.hpp"
 
 namespace noarr {
 
 namespace helpers {
-
-template<char QDim, class State, class Signature>
-struct reassemble_find;
-
-template<char QDim, class State, class ArgLength, class RetSig>
-struct reassemble_find<QDim, State, function_sig<QDim, ArgLength, RetSig>> {
-	using type = function_sig<QDim, ArgLength, RetSig>;
-};
-template<char QDim, class State, class... RetSigs>
-struct reassemble_find<QDim, State, dep_function_sig<QDim, RetSigs...>> {
-	using type = dep_function_sig<QDim, RetSigs...>;
-};
-template<char QDim, class State, char Dim, class ArgLength, class RetSig>
-struct reassemble_find<QDim, State, function_sig<Dim, ArgLength, RetSig>> {
-	using type = typename reassemble_find<QDim, State, RetSig>::type;
-};
-template<char QDim, class State, char Dim, class... RetSigs>
-struct reassemble_find<QDim, State, dep_function_sig<Dim, RetSigs...>> {
-	static_assert(State::template contains<index_in<Dim>>, "Tuple indices must not be omitted or moved down");
-	static constexpr std::size_t idx = state_get_t<State, index_in<Dim>>::value;
-	using ret_sig = typename dep_function_sig<Dim, RetSigs...>::template ret_sig<idx>;
-	using type = typename reassemble_find<QDim, State, ret_sig>::type;
-};
-template<char QDim, class State, class ValueType>
-struct reassemble_find<QDim, State, scalar_sig<ValueType>> {
-	static_assert(value_always_false<QDim>, "The structure does not have a dimension of this name");
-};
 
 template<class T, class State>
 struct reassemble_scalar;
@@ -69,7 +43,7 @@ struct reassemble_build;
 template<class TopSig, class State, char Dim, char... Dims>
 struct reassemble_build<TopSig, State, Dim, Dims...> {
 	static_assert((... && (Dim != Dims)), "Duplicate dimension in reorder");
-	using found = typename reassemble_find<Dim, State, TopSig>::type;
+	using found = sig_find_dim<Dim, State, TopSig>;
 	template<class = found>
 	struct ty;
 	template<class ArgLength, class RetSig>
@@ -179,7 +153,7 @@ struct hoist_t : contain<T> {
 	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
 
 private:
-	using hoisted = typename helpers::reassemble_find<Dim, state<>, typename T::signature>::type; // reassemble_find also checks the dimension exists and is not within a tuple.
+	using hoisted = sig_find_dim<Dim, state<>, typename T::signature>; // sig_find_dim also checks the dimension exists and is not within a tuple.
 	static_assert(!hoisted::dependent, "Cannot hoist tuple dimension, use reorder");
 	template<class Original>
 	struct dim_replacement {
