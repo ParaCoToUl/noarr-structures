@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG        v2.13.1)
+  GIT_TAG        origin/devel)
 FetchContent_MakeAvailable(Catch2)
 
 # setup the test runner executable
@@ -20,9 +20,9 @@ file(GLOB_RECURSE tests_source_files CONFIGURE_DEPENDS
     "tests/*_test.hpp"
     "tests/*_test.cpp"
 )
-add_executable(test-runner tests/main_test.cpp ${tests_source_files})
+add_executable(test-runner ${tests_source_files})
 target_include_directories(test-runner PUBLIC include)
-target_link_libraries(test-runner PRIVATE Catch2::Catch2)
+target_link_libraries(test-runner PRIVATE Catch2::Catch2WithMain)
 
 # ask compiler to print maximum warnings
 if(MSVC)

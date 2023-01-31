@@ -1,4 +1,4 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <noarr/structures_extended.hpp>
 #include "noarr_test_cuda_dummy.hpp"
