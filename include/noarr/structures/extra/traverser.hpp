@@ -6,6 +6,7 @@
 #include "../base/state.hpp"
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
+#include "../extra/sig_utils.hpp"
 #include "../extra/to_struct.hpp"
 
 namespace noarr {
@@ -106,6 +107,9 @@ public:
 	}
 };
 
+template<char... Dim, class... IdxT>
+constexpr auto fix(IdxT...) noexcept; // defined in setters.hpp
+
 template<class Struct, class Order>
 struct traverser_t : contain<Struct, Order> {
 	using base = contain<Struct, Order>;
@@ -125,11 +129,18 @@ struct traverser_t : contain<Struct, Order> {
 		for_each_impl<typename decltype(top_struct)::signature>::for_each(top_struct, f, empty_state);
 	}
 
+	template<char... Dims, class F>
+	constexpr void for_dims(F f) {
+		for_dims_impl<Dims...>(get_struct() ^ get_order(), f, empty_state);
+	}
+
 	constexpr auto state() const noexcept {
 		auto top_struct = get_struct() ^ get_order();
 		return state_at<Struct>(top_struct, empty_state);
 	}
 
+	template<char Dim>
+	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto begin() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto end() const noexcept; // defined in traverser_iter.hpp
@@ -164,6 +175,27 @@ private:
 			f(state_at<Struct>(top_struct, state));
 		}
 	};
+
+	template<char Dim, char... Dims, class TopStruct, class F, class State, std::size_t... I>
+	static constexpr void for_dims_impl_dep(TopStruct top_struct, F f, State state, std::index_sequence<I...>) noexcept {
+		(..., for_dims_impl<Dims...>(top_struct, f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>())));
+	}
+	template<char Dim, char... Dims, class TopStruct, class F, class State>
+	constexpr void for_dims_impl(TopStruct top_struct, F f, State state) const noexcept {
+		using dim_sig = sig_find_dim<Dim, State, typename TopStruct::signature>;
+		if constexpr(dim_sig::dependent) {
+			constexpr std::size_t len = std::tuple_size_v<dim_sig::ret_sig_tuple>;
+			for_dims_impl_dep<Dim, Dims...>(top_struct, f, state, std::make_index_sequence<len>());
+		} else {
+			std::size_t len = top_struct.template length<Dim>(state);
+			for(std::size_t i = 0; i < len; i++)
+				for_dims_impl<Dims...>(top_struct, f, state.template with<index_in<Dim>>(i));
+		}
+	}
+	template<class TopStruct, class F, char... Dim, class... IdxT>
+	constexpr void for_dims_impl(TopStruct, F f, noarr::state<state_item<index_in<Dim>, IdxT>...> state) const noexcept {
+		f(order((... ^ fix<Dim>(state.template get<index_in<Dim>>()))));
+	}
 };
 
 template<class... Ts, class U = union_t<typename to_struct<Ts>::type...>>
