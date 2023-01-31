@@ -177,7 +177,7 @@ private:
 	};
 
 	template<char Dim, char... Dims, class TopStruct, class F, class State, std::size_t... I>
-	static constexpr void for_dims_impl_dep(TopStruct top_struct, F f, State state, std::index_sequence<I...>) noexcept {
+	constexpr void for_dims_impl_dep(TopStruct top_struct, F f, State state, std::index_sequence<I...>) const noexcept {
 		(..., for_dims_impl<Dims...>(top_struct, f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>())));
 	}
 	template<char Dim, char... Dims, class TopStruct, class F, class State>
