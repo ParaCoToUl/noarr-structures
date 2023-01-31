@@ -184,7 +184,7 @@ private:
 	constexpr void for_dims_impl(TopStruct top_struct, F f, State state) const noexcept {
 		using dim_sig = sig_find_dim<Dim, State, typename TopStruct::signature>;
 		if constexpr(dim_sig::dependent) {
-			constexpr std::size_t len = std::tuple_size_v<dim_sig::ret_sig_tuple>;
+			constexpr std::size_t len = std::tuple_size_v<typename dim_sig::ret_sig_tuple>;
 			for_dims_impl_dep<Dim, Dims...>(top_struct, f, state, std::make_index_sequence<len>());
 		} else {
 			std::size_t len = top_struct.template length<Dim>(state);
