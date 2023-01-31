@@ -15,15 +15,15 @@ template<template<class...> class container>
 struct bag_policy {
 	using type = container<char>;
 
-	static auto construct(std::size_t size) {
+	static constexpr auto construct(std::size_t size) {
 		return container<char>(size);
 	}
 
-	static char *get(container<char> &_container) noexcept {
+	static constexpr char *get(container<char> &_container) noexcept {
 		return _container.data();
 	}
 
-	static const char *get(const container<char> &_container) noexcept {
+	static constexpr const char *get(const container<char> &_container) noexcept {
 		return _container.data();
 	}
 };
@@ -44,11 +44,7 @@ struct bag_policy<std::unique_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static char *get(std::unique_ptr<char[]> &ptr) noexcept {
-		return ptr.get();
-	}
-
-	static const char *get(const std::unique_ptr<char[]> &ptr) noexcept {
+	static auto get(const std::unique_ptr<char[]> &ptr) noexcept {
 		return ptr.get();
 	}
 };
@@ -61,11 +57,8 @@ struct bag_policy<bag_raw_pointer_tag> {
 		return new char[size];
 	}
 
-	static constexpr char *get(char *ptr) noexcept {
-		return ptr;
-	}
-
-	static constexpr const char *get(const char *ptr) noexcept {
+	template<class Ptr>
+	static constexpr Ptr get(Ptr ptr) noexcept {
 		return ptr;
 	}
 };
@@ -128,7 +121,7 @@ public:
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr const char *data() const noexcept { return BagPolicy::get(data_); }
+	constexpr auto data() const noexcept { return BagPolicy::get(data_); }
 
 	/**
 	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
@@ -214,10 +207,6 @@ public:
 	using bag_base<Structure, BagPolicy>::bag_base;
 	using bag_base<Structure, BagPolicy>::structure;
 
-	/**
-	 * @brief returns the underlying data blob
-	 */
-	constexpr char *data() noexcept { return BagPolicy::get(bag_base<Structure, BagPolicy>::data_); }
 	using bag_base<Structure, BagPolicy>::data;
 
 	/**
@@ -231,34 +220,10 @@ public:
 			bag_base<Structure, BagPolicy>::data_[i] = 0;
 	}
 
-	/**
-	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
-	 * 
-	 * @tparam Dims: the dimension names
-	 * @param ts: the dimension values
-	 */
-	template<char... Dims, class... Ts>
-	constexpr decltype(auto) at(Ts... ts) noexcept {
-		return structure().template get_at<Dims...>(data(), ts...);
-	}
 	using bag_base<Structure, BagPolicy>::at;
 
-	/**
-	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
-	 * 
-	 * @param ts: the dimension values
-	 */
-	template<class... Ts>
-	constexpr decltype(auto) operator[](Ts... ts) noexcept {
-		return structure().template get_at(data(), ts...);
-	}
 	using bag_base<Structure, BagPolicy>::operator[];
 
-	/**
-	 * @brief wraps the data pointer in a new bag with the raw pointer policy. If the current bag owns the data,
-	 * it continues owning them, while the returned raw bag should be considered a non-owning reference.
-	 */
-	constexpr auto get_ref() noexcept;
 	using bag_base<Structure, BagPolicy>::get_ref;
 };
 
@@ -384,11 +349,6 @@ constexpr auto make_bag(noarr::wrapper<Structure> s, const char *data) noexcept 
 
 template<class Structure, class BagPolicy>
 constexpr auto helpers::bag_base<Structure, BagPolicy>::get_ref() const noexcept {
-	return make_bag(structure(), data());
-}
-
-template<class Structure, class BagPolicy>
-constexpr auto helpers::bag_impl<Structure, BagPolicy, std::enable_if_t<!std::is_const<std::remove_pointer_t<typename BagPolicy::type>>::value>>::get_ref() noexcept {
 	return make_bag(structure(), data());
 }
 
