@@ -1,6 +1,7 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <sstream>
+#include <memory>
 
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/serialize_data.hpp>
