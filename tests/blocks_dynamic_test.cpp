@@ -4,13 +4,6 @@
 #include <noarr/structures/structs/blocks.hpp>
 #include <noarr/structures/extra/shortcuts.hpp>
 
-// TODO move this to shortcuts
-namespace noarr {
-template<char... Dims, class... ValueTypes>
-constexpr auto indices(ValueTypes... values) noexcept {
-	return state<state_item<index_in<Dims>, ValueTypes>...>(values...);
-}
-}
 
 TEST_CASE("Split dynamic", "[blocks]") {
 	auto m = noarr::scalar<float>()
@@ -18,7 +11,7 @@ TEST_CASE("Split dynamic", "[blocks]") {
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks_dynamic<'x', 'b', 'a', '_'>(16);
 
-	REQUIRE((m | noarr::get_length<'_'>(noarr::indices<'a', 'y', 'b'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'_'>(noarr::idx<'a', 'y', 'b'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', '_'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -28,7 +21,7 @@ TEST_CASE("Split dynamic reused as flag", "[blocks]") {
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks_dynamic<'x', 'b', 'a', 'x'>(16);
 
-	REQUIRE((m | noarr::get_length<'x'>(noarr::indices<'a', 'y', 'b'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'x'>(noarr::idx<'a', 'y', 'b'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -38,7 +31,7 @@ TEST_CASE("Split dynamic reused as minor", "[blocks]") {
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks_dynamic<'x', 'X', 'x', '_'>(16);
 
-	REQUIRE((m | noarr::get_length<'_'>(noarr::indices<'x', 'y', 'X'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'_'>(noarr::idx<'x', 'y', 'X'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'x', 'y', 'X', '_'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -48,7 +41,7 @@ TEST_CASE("Split dynamic reused as major", "[blocks]") {
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks_dynamic<'x', 'x', 'X', '_'>(16);
 
-	REQUIRE((m | noarr::get_length<'_'>(noarr::indices<'X', 'y', 'x'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'_'>(noarr::idx<'X', 'y', 'x'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'X', 'y', 'x', '_'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -59,7 +52,7 @@ TEST_CASE("Split dynamic set length", "[blocks]") {
 		^ noarr::into_blocks_dynamic<'x', 'b', 'a', '_'>(16)
 		^ noarr::set_length<'b'>(10'000/16);
 
-	REQUIRE((m | noarr::get_length<'_'>(noarr::indices<'a', 'y', 'b'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'_'>(noarr::idx<'a', 'y', 'b'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', '_'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -70,7 +63,7 @@ TEST_CASE("Split dynamic set length reused as flag", "[blocks]") {
 		^ noarr::into_blocks_dynamic<'x', 'b', 'a', 'x'>(16)
 		^ noarr::set_length<'b'>(10'000/16);
 
-	REQUIRE((m | noarr::get_length<'x'>(noarr::indices<'a', 'y', 'b'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'x'>(noarr::idx<'a', 'y', 'b'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'a', 'y', 'b', 'x'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -81,7 +74,7 @@ TEST_CASE("Split dynamic set length reused as minor", "[blocks]") {
 		^ noarr::into_blocks_dynamic<'x', 'X', 'x', '_'>(16)
 		^ noarr::set_length<'X'>(10'000/16);
 
-	REQUIRE((m | noarr::get_length<'_'>(noarr::indices<'x', 'y', 'X'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'_'>(noarr::idx<'x', 'y', 'X'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'x', 'y', 'X', '_'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -92,7 +85,7 @@ TEST_CASE("Split dynamic set length reused as major", "[blocks]") {
 		^ noarr::into_blocks_dynamic<'x', 'x', 'X', '_'>(16)
 		^ noarr::set_length<'x'>(10'000/16);
 
-	REQUIRE((m | noarr::get_length<'_'>(noarr::indices<'X', 'y', 'x'>(10, 3333, 500))) == 1);
+	REQUIRE((m | noarr::get_length<'_'>(noarr::idx<'X', 'y', 'x'>(10, 3333, 500))) == 1);
 	REQUIRE((m | noarr::offset<'X', 'y', 'x', '_'>(10, 3333, 500, 0)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -119,7 +112,7 @@ TEST_CASE("Split dynamic remainder", "[blocks]") {
 			// index within block
 			std::size_t a = x % 4;
 
-			auto state = noarr::indices<'a', 'b'>(a, b);
+			auto state = noarr::idx<'a', 'b'>(a, b);
 
 			if(x < xlen) {
 				// should be valid elem
