@@ -4,9 +4,10 @@
  * 
  */
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/interop/bag.hpp>
 
 
 TEST_CASE("Main example compile test", "[Main example compile test]") {
@@ -31,7 +32,7 @@ TEST_CASE("Main example compile test", "[Main example compile test]") {
 	noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>> matrix_structure;
 
 	// defining size of the matrix
-	auto sized_matrix_structure = matrix_structure | noarr::set_length<'x'>(WIDTH) | noarr::set_length<'y'>(HEIGHT);
+	auto sized_matrix_structure = matrix_structure ^ noarr::set_length<'x'>(WIDTH) ^ noarr::set_length<'y'>(HEIGHT);
 
 	// data allocation
 	auto matrix = noarr::make_bag(sized_matrix_structure);
@@ -49,20 +50,12 @@ void matrix_demo(int size) {
 	// note template keyword, it is there because the whole function is layout templated
 	auto n1 = noarr::make_bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
 	// pipe version (both are valid syntax and produce the same result)
-	auto n2 = noarr::make_bag(Structure() | noarr::set_length<'x'>(size) | noarr::set_length<'y'>(size));
+	auto n2 = noarr::make_bag(Structure() ^ noarr::set_length<'x'>(size) ^ noarr::set_length<'y'>(size));
 }
 
 TEST_CASE("Example compile test", "[Example compile test]") {
 	noarr::vector<'i', noarr::scalar<float>> my_structure;
-	auto my_structure_of_ten = my_structure | noarr::set_length<'i'>(10);
-	// artificially complicated example
-	auto piped = my_structure_of_ten | noarr::set_length<'i'>(5) | noarr::set_length<'i'>(10);
-	// now version with wrapper
-	auto doted = noarr::wrap(my_structure_of_ten).set_length<'i'>(5).set_length<'i'>(10);
-
-	// to remove warnings
-	piped.size();
-	doted.get_size();
+	auto my_structure_of_ten = my_structure ^ noarr::set_length<'i'>(10);
 
 	// we will create a bag
 	auto bag = noarr::make_bag(my_structure_of_ten);
@@ -107,10 +100,7 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::array<'x', 20, noarr::scalar<int>>> tuple;
 	// we will create a bag
 	auto tuple_bag = noarr::make_bag(tuple);
-	// we have to use noarr::literals namespace to be able to index tuples
-	// we can put this at the beginning of the file
-	using namespace noarr::literals;
 	// we index tuple like this
-	float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
+	float& value = tuple_bag.at<'t', 'x'>(noarr::lit<0>, 1);
 	value = 0.f;
 }

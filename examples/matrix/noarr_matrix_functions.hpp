@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include "noarr/structures_extended.hpp"
+#include "noarr/structures/interop/bag.hpp"
 
 // read IMPORTANT from matrix.cpp first
 

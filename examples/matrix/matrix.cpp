@@ -13,15 +13,16 @@
 // matrix implementation in noarr will be referred to as "noarr matrix"
 // whole example assumes int matrices
 
-// definion of z-curve data stricture
-#include "z_curve.hpp"
-// definitions of basic matrix functions: matrix multiplication, scalar multiplication, copy and matrix transpose
+#include "noarr/structures_extended.hpp"
+#include "noarr/structures/interop/bag.hpp"
 #include "noarr_matrix_functions.hpp"
 
 // definitions of noarr layouts
 using matrix_rows = noarr::vector<'m', noarr::vector<'n', noarr::scalar<int>>>;
 using matrix_columns = noarr::vector<'n', noarr::vector<'m', noarr::scalar<int>>>;
+#if 0 // TODO z-curve
 using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::sized_vector<'a', noarr::scalar<int>>>;
+#endif
 
 /**
  * @brief Implements matrix using raw c++ ("classic matrix").
@@ -265,11 +266,13 @@ int main(int argc, char *argv[])
 
 	// if the first argument matches some of the supported layouts, run the example, otherwise print help
 	if (!strcmp(argv[1], "rows"))
-		matrix_demo(size, matrix_rows() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
+		matrix_demo(size, matrix_rows() ^ noarr::set_length<'n'>(size) ^ noarr::set_length<'m'>(size));
 	else if (!strcmp(argv[1], "columns"))
-		matrix_demo(size, matrix_columns() | noarr::set_length<'n'>(size) | noarr::set_length<'m'>(size));
+		matrix_demo(size, matrix_columns() ^ noarr::set_length<'n'>(size) ^ noarr::set_length<'m'>(size));
+#if 0 // TODO z-curve
 	else if (!strcmp(argv[1], "z_curve"))
 		matrix_demo(size, matrix_zcurve(noarr::sized_vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'n'>(size), noarr::helpers::z_curve_bottom<'m'>(size)));
+#endif
 	else
 		print_help_and_exit();
 

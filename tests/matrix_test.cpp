@@ -1,9 +1,10 @@
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <iostream>
 #include <tuple>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/interop/bag.hpp>
 
 
 enum MatrixDataLayout { Rows = 0, Columns = 1 };
@@ -262,63 +263,6 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 			m3.at(i, j) = sum;
 		}
 	}
-}
-
-template<MatrixDataLayout layout>
-void matrix_multiply_demo_template(std::size_t size)
-{
-
-	matrix m1 = get_clasic_matrix(size, size);
-	matrix m2 = get_clasic_matrix(size, size);
-	matrix m3 = get_clasic_matrix(size, size);
-
-	auto n1 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n2 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto n3 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-
-	clasic_matrix_to_noarr(m1, n1);
-	clasic_matrix_to_noarr(m2, n2);
-
-	clasic_matrix_multiply(m1, m2, m3);
-
-	matrix_transpose(n2);
-	matrix_transpose(n1);
-
-	matrix_multiply(n2, n1, n3);
-
-	matrix_transpose(n3);
-
-	auto n4 = noarr::make_bag(n3.structure().unwrap() | noarr::reassemble<'x', 'y'>());
-	matrix_copy(n3, n4);
-
-	matrix m4 = noarr_matrix_to_clasic(n4);
-
-	REQUIRE(are_equal_classic_matrices(m3, m4));
-
-	auto n5 = noarr::make_bag(n3.structure());
-
-	matrix_add(n3, n4, n5);
-	matrix_scalar_multiplication(n3, 2);
-
-	REQUIRE(are_equal_matrices(n3, n5));
-}
-
-void matrix_multiply_demo(MatrixDataLayout layout, std::size_t size)
-{
-	if (layout == MatrixDataLayout::Rows)
-		matrix_multiply_demo_template<MatrixDataLayout::Rows>(size);
-	else if (layout == MatrixDataLayout::Columns)
-		matrix_multiply_demo_template<MatrixDataLayout::Columns>(size);
-}
-
-TEST_CASE("Small matrix demo", "[Small matrix demo]")
-{
-	matrix_multiply_demo(MatrixDataLayout::Rows, 10);
-}
-
-TEST_CASE("Small matrix demo 2", "[Small matrix demo 2]")
-{
-	matrix_multiply_demo(MatrixDataLayout::Rows, 20);
 }
 
 TEST_CASE("Small matrix multimplication Rows", "[Small matrix multimplication Rows]")

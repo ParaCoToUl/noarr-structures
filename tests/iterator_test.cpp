@@ -4,12 +4,13 @@
  * 
  */
 
-#include <catch2/catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <array>
 #include <iostream>
 
-#include "noarr/structures_extended.hpp"
+#include <noarr/structures.hpp>
+#include <noarr/structures/extra/iterator.hpp>
 
 TEST_CASE("Iterator trivial", "[iterator]") {
 	auto array = noarr::array<'x', 20, noarr::scalar<int>>();

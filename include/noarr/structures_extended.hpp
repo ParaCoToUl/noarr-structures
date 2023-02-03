@@ -1,12 +1,12 @@
 /**
- * @file structures.hpp
- * @brief this file aggregates low-level and high-level includes for the entire "structures" module
+ * @file structures_extended.hpp
+ * @brief This file includes structures.hpp, and adds some non-essential functions and structures that can be used to transform an existing structure or the way it is accessed.
  */
 
-#include "structures/structs.hpp"
-#include "structures/contain_serialize.hpp"
-#include "structures/iterator.hpp"
-#include "structures/funcs.hpp"
-#include "structures/wrapper.hpp"
-#include "structures/bag.hpp"
-#include "structures/io.hpp"
+#include "structures.hpp"
+
+#include "structures/extra/shortcuts.hpp"
+#include "structures/structs/blocks.hpp"
+#include "structures/structs/setters.hpp"
+#include "structures/structs/slice.hpp"
+#include "structures/structs/views.hpp"

@@ -32,30 +32,50 @@ To represent a list of floats, you create the following *structure* object:
 
 ```cpp
 noarr::vector<'i', noarr::scalar<float>> my_structure;
+// ~or~
+auto my_structure = noarr::scalar<float>() ^ noarr::vector<'i'>();
 ```
+
+The above notations are equivalent, but for some structures (described below), only the latter is available. The `^` operator (originally xor in C++) stands for exponential type.
+It takes the structure on the left-hand-side and wraps it in the structure prototype on the right-hand-side.
 
 The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values. But currently, the structure has no size, we need to make room for 10 items:
 
 ```cpp
 auto my_structure_of_ten = my_structure 
-	| noarr::set_length<'i'>(10);
+	^ noarr::set_length<'i'>(10);
 ```
 
-A *structure* object is immutable. The `|` operator (the pipe) is used to create modified variants of *structures*. You can chain such operations to arrive at the structure that represents your data.
+Here we use wrap the structure in `set_length`. Like `vector`, `set_length` is also a structure. This new structure is returned by the operator while the original structure is left unchanged.
 
-> **Note:** The pipe operator is the preferred way to query or modify structures, as it automatically locates the proper sub-structure with the given dimension label (in compile time).
+## Structure functions
 
-The reason we specify the size later is that it allows us to decouple the *structure* structure from the resizing action. The resizing action specifies a dimension label `i` and it does not care, where that dimension is inside the *structure*.
+After the length is set, it can be queried using function `get_length`. Unlike `set_length`, `get_length` is not a structure prototype and the result is obviously not a structure.
+We use `|` (pipe) for function application to distinguish it from `^`:
+
+```cpp
+std::size_t ten = my_structure_of_ten | noarr::get_length<'i'>();
+```
+
+There are other functions. `get_size` returns the size in bytes (it does not take any dimension as a parameter, since it considers all dimensions).
+
+```cpp
+std::size_t forty = my_structure_of_ten | noarr::get_size();
+std::size_t eight = my_structure_of_ten | noarr::offset<'i'>(2);
+
+void *data = ...;
+float &last_elem = my_structure_of_ten | noarr::get_at<'i'>(data, 9);
+```
 
 ## Wrapper
 
-It is possible to use `.` (dot) instead of `|` (pipe), but you have to use `noarr::wrapper` first.
+It is possible to use `.` (dot) instead of `^` (exponential) and `|` (pipe), but you have to use `noarr::wrapper` first.
 
 ```cpp
 // artificially complicated example
 auto piped = my_structure_of_ten 
-	| noarr::set_length<'i'>(5) 
-	| noarr::set_length<'i'>(10);
+	^ noarr::set_length<'i'>(5) 
+	^ noarr::set_length<'i'>(10);
 
 // now version with wrapper
 auto doted = noarr::wrap(my_structure_of_ten)
@@ -115,8 +135,8 @@ void matrix_demo(int size) {
 	// pipe version (both are valid syntax and produce 
 		//the same result)
 	auto n2 = noarr::make_bag(Structure() 
-		| noarr::set_length<'x'>(size) 
-		| noarr::set_length<'y'>(size));
+		^ noarr::set_length<'x'>(size) 
+		^ noarr::set_length<'y'>(size));
 }
 ```
 
@@ -188,21 +208,26 @@ float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 
 ## Full list of the provided structures
 
-- `scalar`: the bottom structure describing a single value of a single type
-- `array`: a structure describing a static number of copies of its substructure's layout and introducing a dynamic dimension
-- `vector`: a structure describing a dynamic number of copies of its substructure's layout and introducing a dynamic dimension (its size is specified ad-hoc via `set_length` - see below)
-- `tuple`: a structure describing a number of various substructures' layouts and introducing a static dimension
+- `scalar`: the simplest possible structure referring to a single value of a certain type
+- `tuple`: introduces a static dimension with many substructures (similar to `std::tuple`)
+- `array`: introduces a dynamic dimension of a static length with a single substructure (similar to `std::array`)
+- `vector`: introduces a dynamic dimension of a dynamic length (has to be specified ad-hoc) with a single substructure (similar to `std::vector, .resize`)
+- `fix`: fixes an index in a structure
+- `set_length`: changes the length (number of indices) of arrays and vectors
+- `reorder`: reorders the dimensions according to the specified list of dimension names. Dimensions may be omitted.
+- `hoist`: selects one dimension by its name and moves it to the top level
+- `rename`: assigns different names to zero or more dimensions. Swapping names is allowed.
+- `shift`: makes the specified dimension start at the specified index, making the prefix of each row/column inaccessible
+- `slice`: makes the specified dimension start at some index and end at another index, making a prefix and a suffix inaccessible
+- `into_blocks`: splits one dimension into two dimensions, one of which becomes the index of a block, and the other the index within a block
+- `merge_blocks`: the inverse of `into_blocks` - takes two existing dimensions and merges them into one dimension, making one of the original dimensions the index of a block and the other the index within a block
+- `merge_zcurve`: like `merge_blocks`, but does not compose the dimensions using blocks but a z-order curve instead. This structure also supports any number of dimensions, not just two
 
 ## Full list of the provided functions
 
-- `compose`: function composition (honoring the left-associative `|` notation)
-- `set_length`: changes the length (number of indices) of arrays and vectors
 - `get_length`: gets the length (number of indices) of a structure
-- `reassemble`: takes two structures in the structure hierarchy, one contained in the other, and swaps them, returning the resulting structure
 - `get_size`: returns the size of the data represented by the structure in bytes
-- `fix`: fixes an index in a structure
-- `get_offset`: retrieves offset of a substructure
-- `offset`: retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
+- `offset`: retrieves offset of a substructure (if no substructure is specified it defaults to the innermost one: the scalar value), allows for ad-hoc fixing of dimensions
 - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
- 
+
 You can read about supported functions in detail in [Noarr structures](../include/noarr/structures/README.md "Noarr structures").
