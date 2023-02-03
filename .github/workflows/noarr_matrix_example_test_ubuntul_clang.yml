@@ -10,7 +10,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Debug
-  CXX: clang++-12
+  CXX: clang++-14
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
 
     - name: Install clang
       shell: bash
-      run: sudo apt update && sudo apt install clang-12
+      run: sudo apt update && sudo apt install clang-14
 
     - name: Create Build Environment
       shell: bash
