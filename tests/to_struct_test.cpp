@@ -41,7 +41,7 @@ TEST_CASE("Bag traverser", "[to_struct]") {
 }
 
 template<typename T1, typename T2>
-static bool eq(const T1 &t1, const T2 &t2) { return false; }
+static bool eq(const T1 &, const T2 &) { return false; }
 template<typename T>
 static bool eq(const T &t1, const T &t2) { return !std::memcmp(&t1, &t2, sizeof(T)); }
 

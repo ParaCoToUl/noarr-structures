@@ -56,7 +56,7 @@ constexpr std::tuple<SizeTs...> zc_general(std::size_t z, SizeTs... sizes) noexc
 					return 1;
 				} else {
 					constexpr std::size_t tile_size = (j::v > i::v ? 2 : 1) * small_tile_size::v;
-					return (std::get<j::v>(size) & -tile_size) == std::get<j::v>(result) ? (std::get<j::v>(size)-1 & tile_size-1) + 1 : tile_size;
+					return (std::get<j::v>(size) & -tile_size) == std::get<j::v>(result) ? ((std::get<j::v>(size) - 1) & (tile_size - 1)) + 1 : tile_size;
 				}
 			});
 			std::size_t half_volume = facet << level::v;
@@ -83,8 +83,8 @@ struct zc_special_helper<Period, RepBits, std::enable_if_t<Period >= sizeof RepB
 
 template<int NDim, int... I>
 constexpr std::size_t zc_special_inner(std::size_t tmp, std::integer_sequence<int, I...>) noexcept {
-	(..., (tmp &= zc_special_helper<(NDim << I), ((std::size_t) 1 << (1 << I))-1>::rep_bits, tmp |= tmp >> (NDim-1 << I)));
-	return tmp & ((std::size_t) 1 << (1 << sizeof...(I)))-1;
+	(..., (tmp &= zc_special_helper<(NDim << I), ((std::size_t) 1 << (1 << I)) - 1>::rep_bits, tmp |= tmp >> ((NDim - 1) << I)));
+	return tmp & ((std::size_t) 1 << ((1 << sizeof...(I)) - 1));
 }
 
 template<int NDim, int Dim>
@@ -174,7 +174,7 @@ public:
 		if constexpr(State::template contains<index_in<Dim>>) {
 			auto index = state.template get<index_in<Dim>>();
 			auto index_general = index >> SpecialLevel*sizeof...(Dims);
-			auto index_special = index & (1 << SpecialLevel*sizeof...(Dims))-1;
+			auto index_special = index & ((1 << SpecialLevel*sizeof...(Dims)) - 1);
 			auto indices = helpers::zc_general<GeneralLevel-SpecialLevel>(index_general, (sub_structure().template length<Dims>(clean_state) >> SpecialLevel)...);
 			return clean_state.template with<index_in<Dims>...>(((std::get<DimsI>(indices) << SpecialLevel) + helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
 		} else {
