@@ -84,7 +84,7 @@ struct zc_special_helper<Period, RepBits, std::enable_if_t<Period >= sizeof RepB
 template<int NDim, int... I>
 constexpr std::size_t zc_special_inner(std::size_t tmp, std::integer_sequence<int, I...>) noexcept {
 	(..., (tmp &= zc_special_helper<(NDim << I), ((std::size_t) 1 << (1 << I)) - 1>::rep_bits, tmp |= tmp >> ((NDim - 1) << I)));
-	return tmp & ((std::size_t) 1 << ((1 << sizeof...(I)) - 1));
+	return tmp & (((std::size_t) 1 << (1 << sizeof...(I))) - 1);
 }
 
 template<int NDim, int Dim>
