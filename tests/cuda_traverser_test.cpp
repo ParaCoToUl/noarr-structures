@@ -15,7 +15,7 @@ TEST_CASE("Cuda traverser simple 6D", "[cuda]") {
 		^ noarr::array<'g', 3>()
 	;
 
-	auto t = noarr::cuda_traverser(s).threads<'a', 'b', 'c', 'd', 'e', 'f'>();
+	auto t = noarr::cuda_threads<'a', 'b', 'c', 'd', 'e', 'f'>(noarr::traverser(s));
 
 	REQUIRE(11 == t.grid_dim().x);
 	REQUIRE(29 == t.block_dim().x);
@@ -48,7 +48,7 @@ TEST_CASE("Cuda traverser simple 2D", "[cuda]") {
 		^ noarr::array<'g', 3>()
 	;
 
-	auto t = noarr::cuda_traverser(s).threads<'a', 'b'>();
+	auto t = noarr::cuda_threads<'a', 'b'>(noarr::traverser(s));
 
 	REQUIRE(11 == t.grid_dim().x);
 	REQUIRE(29 == t.block_dim().x);
@@ -77,7 +77,7 @@ TEST_CASE("Cuda traverser confusing 2D", "[cuda]") {
 		^ noarr::array<'g', 3>()
 	;
 
-	auto t = noarr::cuda_traverser(s).order(noarr::rename<'a', 'c'>()).threads<'c', 'b'>();
+	auto t = noarr::cuda_threads<'c', 'b'>(noarr::traverser(s).order(noarr::rename<'a', 'c'>()));
 
 	REQUIRE(11 == t.grid_dim().x);
 	REQUIRE(29 == t.block_dim().x);
@@ -106,10 +106,9 @@ TEST_CASE("Cuda blocks", "[cuda]") {
 		^ noarr::array<'c', 3>()
 	;
 
-	auto t = noarr::cuda_traverser(s).order(
+	auto t = noarr::cuda_threads<'X', 'x', 'Y', 'y'>(traverser(s).order(
 		noarr::into_blocks<'x', 'X', 'x'>() ^ noarr::set_length<'x'>(4) ^
-		noarr::into_blocks<'y', 'Y', 'y'>() ^ noarr::set_length<'y'>(8)
-	).threads<'X', 'x', 'Y', 'y'>();
+		noarr::into_blocks<'y', 'Y', 'y'>() ^ noarr::set_length<'y'>(8)));
 
 	REQUIRE(800/4 == t.grid_dim().x);
 	REQUIRE(4 == t.block_dim().x);
