@@ -92,42 +92,15 @@ struct cuda_fix_pair_proto {
 
 } // namespace helpers
 
-template<class Struct, class Order, class DimsB = void, class DimsT = void, class CudaDimsB = void, class CudaDimsT = void>
+template<class Struct, class Order, class DimsB, class DimsT, class CudaDimsB, class CudaDimsT>
 struct cuda_traverser_t;
 
-template<class Struct, class Order>
-struct cuda_traverser_t<Struct, Order, void, void, void, void> : contain<Struct, Order> {
-	using base = contain<Struct, Order>;
-	using base::base;
-
-	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
-	constexpr auto get_order() const noexcept { return base::template get<1>(); }
-
-	template<class NewOrder>
-	constexpr auto order(NewOrder new_order) const noexcept {
-		return cuda_traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
-	}
-
-	template<char DimBX, char DimTX>
-	constexpr auto threads() const noexcept {
-		return cuda_traverser_t<Struct, Order, char_sequence<DimBX>, char_sequence<DimTX>, helpers::cuda_bx, helpers::cuda_tx>(get_struct(), get_order());
-	}
-
-	template<char DimBX, char DimTX, char DimBY, char DimTY>
-	constexpr auto threads() const noexcept {
-		return cuda_traverser_t<Struct, Order, char_sequence<DimBX, DimBY>, char_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(get_struct(), get_order());
-	}
-
-	template<char DimBX, char DimTX, char DimBY, char DimTY, char DimBZ, char DimTZ>
-	constexpr auto threads() const noexcept {
-		return cuda_traverser_t<Struct, Order, char_sequence<DimBX, DimBY, DimBZ>, char_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz, helpers::cuda_txyz>(get_struct(), get_order());
-	}
-};
-
-template<class Struct, class Order, char... DimsB, char... DimsT, class... CudaDimsB, class... CudaDimsT>
+template<char... DimsB, char... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
 struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : contain<Struct, Order> {
 	using base = contain<Struct, Order>;
 	using base::base;
+
+	constexpr cuda_traverser_t(const traverser_t<Struct, Order> &t) noexcept : base(t) {}
 
 	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
 	constexpr auto get_order() const noexcept { return base::template get<1>(); }
@@ -153,8 +126,27 @@ struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<Di
 	}
 };
 
-template<class... Ts, class U = union_t<typename to_struct<Ts>::type...>>
-constexpr cuda_traverser_t<U, neutral_proto> cuda_traverser(const Ts &... s) noexcept { return cuda_traverser_t<U, neutral_proto>(U(to_struct<Ts>::convert(s)...), neutral_proto()); }
+template<class NewDimsB, class NewDimsT, class NewCudaDimsB, class NewCudaDimsT, class Traverser>
+constexpr auto cuda_traverser(const Traverser &t) noexcept {
+	using Struct = decltype(t.get_struct());
+	using Order = decltype(t.get_order());
+	return cuda_traverser_t<Struct, Order, NewDimsB, NewDimsT, NewCudaDimsB, NewCudaDimsT>(t);
+}
+
+template<char DimBX, char DimTX, class Traverser>
+constexpr auto cuda_threads(const Traverser &t) noexcept {
+	return cuda_traverser<char_sequence<DimBX>, char_sequence<DimTX>, helpers::cuda_bx, helpers::cuda_tx>(t);
+}
+
+template<char DimBX, char DimTX, char DimBY, char DimTY, class Traverser>
+constexpr auto cuda_threads(const Traverser &t) noexcept {
+	return cuda_traverser<char_sequence<DimBX, DimBY>, char_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(t);
+}
+
+template<char DimBX, char DimTX, char DimBY, char DimTY, char DimBZ, char DimTZ, class Traverser>
+constexpr auto cuda_threads(const Traverser &t) noexcept {
+	return cuda_traverser<char_sequence<DimBX, DimBY, DimBZ>, char_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz, helpers::cuda_txyz>(t);
+}
 
 } // namespace noarr
 

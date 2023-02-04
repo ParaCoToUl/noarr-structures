@@ -194,7 +194,7 @@ private:
 	}
 	template<class TopStruct, class F, char... Dim, class... IdxT>
 	constexpr void for_dims_impl(TopStruct, F f, noarr::state<state_item<index_in<Dim>, IdxT>...> state) const noexcept {
-		f(order((... ^ fix<Dim>(state.template get<index_in<Dim>>()))));
+		f(order((noarr::neutral_proto() ^ ... ^ fix<Dim>(state.template get<index_in<Dim>>()))));
 	}
 };
 
