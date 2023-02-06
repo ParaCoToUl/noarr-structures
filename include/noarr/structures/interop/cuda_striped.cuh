@@ -108,6 +108,10 @@ public:
 		return threadIdx.x % NumStripes;
 	}
 
+	static __device__ inline std::size_t num_stripes() noexcept {
+		return NumStripes;
+	}
+
 	static __device__ inline helpers::simple_cg_t current_stripe_cg() noexcept {
 		std::size_t stripe_index = threadIdx.x % NumStripes;
 		std::size_t num_threads_in_stripe = (blockDim.x + NumStripes - stripe_index - 1) / NumStripes;
