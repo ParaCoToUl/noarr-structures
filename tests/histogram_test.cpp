@@ -84,27 +84,3 @@ TEST_CASE("Histogram prototype 64 x 43", "[Histogram prototype]")
 {
 	histogram_template_test<ImageDataLayout::ArrayOfArrays, 64, 43>();
 }
-
-template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
-void histogram_template_test_clear()
-{
-	auto image = GetBag(noarr::wrap(GetImageStructureGetter<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height)); // image size
-	auto histogram = GetBag(noarr::array<'x', pixel_range, noarr::scalar<int>>()); // lets say that every image has 256 pixel_range
-
-	image.clear();
-	histogram.clear();
-
-	int x_size = image.template get_length<'x'>();
-	int y_size = image.template get_length<'y'>();
-
-	for (int i = 0; i < x_size; i++)
-	{
-		for (int j = 0; j < y_size; j++)
-		{
-			int pixel_value = image.template at<'x', 'y'>(i, j);
-
-			int& histogram_value = histogram.template at<'x'>(pixel_value);
-			histogram_value = histogram_value + 1;
-		}
-	}
-}
