@@ -56,8 +56,7 @@ void histogram_template_test()
 		{
 			int pixel_value = image.template at<'x','y'>(i, j);
 
-			if (pixel_value != 0)
-				FAIL();
+			REQUIRE(pixel_value == 0);
 
 			int& histogram_value = histogram.template at<'x'>(pixel_value);
 			histogram_value = histogram_value + 1;
