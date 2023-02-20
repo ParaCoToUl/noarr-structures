@@ -130,7 +130,6 @@ The only formal requirement is that a noarr function is implemented as a callabl
 - **`reassemble`:** takes two structures in the structure hierarchy, one contained in the other, and swaps them, returning the resulting structure
 - **`get_size`:** returns the size of the data represented by the structure in bytes
 - **`fix`:** fixes an index in a structure
-- **`get_offset`:** retrieves offset of a substructure
 - **`offset`:** retrieves offset of a value in a structure with no dimensions (or in a structure with all dimensions being fixed), allows for ad-hoc fixing of dimensions
 - **`get_at`:** returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 

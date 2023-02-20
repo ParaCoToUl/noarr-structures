@@ -146,17 +146,6 @@ public:
 	}
 
 	/**
-	 * @brief returns an offset of a substructure with a certain index in a structure given by its dimension name
-	 * 
-	 * @tparam Dim: the dimension name
-	 * @param t: the index of the substructure
-	 */
-	template<char Dim, class T>
-	constexpr auto get_offset(T t) const noexcept {
-		return structure().template get_offset<Dim>(t);
-	}
-
-	/**
 	 * @brief gets the length (number of indices) of a dimension in the `structure`
 	 * 
 	 * @tparam Dim: the dimension name
