@@ -428,8 +428,8 @@ public:
 		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
 		auto minor_length = sub_structure().template length<DimMinor>(clean_state);
 		if constexpr(State::template contains<length_in<Dim>>) {
-			auto length = state.template get<length_in<Dim>>();
-			auto major_length = length / minor_length;
+			auto dim_length = state.template get<length_in<Dim>>();
+			auto major_length = dim_length / minor_length;
 			if constexpr(State::template contains<index_in<Dim>>) {
 				auto index = state.template get<index_in<Dim>>();
 				return clean_state.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(index / minor_length, index % minor_length, major_length);

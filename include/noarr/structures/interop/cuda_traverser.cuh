@@ -96,28 +96,29 @@ template<class Struct, class Order, class DimsB, class DimsT, class CudaDimsB, c
 struct cuda_traverser_t;
 
 template<char... DimsB, char... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
-struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : contain<Struct, Order> {
-	using base = contain<Struct, Order>;
+struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : traverser_t<Struct, Order> {
+	using base = traverser_t<Struct, Order>;
 	using base::base;
 
-	constexpr cuda_traverser_t(traverser_t<Struct, Order> t) noexcept : base(t) {}
+	explicit constexpr cuda_traverser_t(traverser_t<Struct, Order> t) noexcept : base(t) {}
 
-	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
-	constexpr auto get_order() const noexcept { return base::template get<1>(); }
+	using base::get_struct;
+	using base::get_order;
+
 	using get_fixes = decltype((... ^ helpers::cuda_fix_pair_proto<DimsB, DimsT, CudaDimsB, CudaDimsT>()));
 
 	constexpr dim3 grid_dim() const noexcept {
-		auto full = get_struct() ^ get_order();
+		auto full = base::top_struct();
 		return {(uint)full.template length<DimsB>(empty_state)...};
 	}
 
 	constexpr dim3 block_dim() const noexcept {
-		auto full = get_struct() ^ get_order();
+		auto full = base::top_struct();
 		return {(uint)full.template length<DimsT>(empty_state)...};
 	}
 
 	explicit constexpr operator bool() const noexcept {
-		auto full = get_struct() ^ get_order();
+		auto full = base::top_struct();
 		return (... && full.template length<DimsT>(empty_state)) && (... && full.template length<DimsB>(empty_state));
 	}
 
@@ -126,25 +127,23 @@ struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<Di
 	}
 };
 
-template<class NewDimsB, class NewDimsT, class NewCudaDimsB, class NewCudaDimsT, class Traverser>
-constexpr auto cuda_traverser(Traverser t) noexcept {
-	using Struct = decltype(t.get_struct());
-	using Order = decltype(t.get_order());
+template<class NewDimsB, class NewDimsT, class NewCudaDimsB, class NewCudaDimsT, class Struct, class Order>
+constexpr auto cuda_traverser(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser_t<Struct, Order, NewDimsB, NewDimsT, NewCudaDimsB, NewCudaDimsT>(t);
 }
 
-template<char DimBX, char DimTX, class Traverser>
-constexpr auto cuda_threads(Traverser t) noexcept {
+template<char DimBX, char DimTX, class Struct, class Order>
+constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser<char_sequence<DimBX>, char_sequence<DimTX>, helpers::cuda_bx, helpers::cuda_tx>(t);
 }
 
-template<char DimBX, char DimTX, char DimBY, char DimTY, class Traverser>
-constexpr auto cuda_threads(Traverser t) noexcept {
+template<char DimBX, char DimTX, char DimBY, char DimTY, class Struct, class Order>
+constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser<char_sequence<DimBX, DimBY>, char_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(t);
 }
 
-template<char DimBX, char DimTX, char DimBY, char DimTY, char DimBZ, char DimTZ, class Traverser>
-constexpr auto cuda_threads(Traverser t) noexcept {
+template<char DimBX, char DimTX, char DimBY, char DimTY, char DimBZ, char DimTZ, class Struct, class Order>
+constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser<char_sequence<DimBX, DimBY, DimBZ>, char_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz, helpers::cuda_txyz>(t);
 }
 

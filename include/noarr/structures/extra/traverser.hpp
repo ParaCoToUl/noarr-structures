@@ -107,6 +107,11 @@ public:
 	}
 };
 
+template<class ...Ts, class U = union_t<typename to_struct<Ts>::type...>>
+constexpr U make_union(const Ts &...s) noexcept {
+	return U(to_struct<Ts>::convert(s)...);
+}
+
 template<char... Dim, class... IdxT>
 constexpr auto fix(IdxT...) noexcept; // defined in setters.hpp
 
@@ -114,7 +119,7 @@ template<class Struct, class Order>
 struct traverser_t : contain<Struct, Order> {
 	using base = contain<Struct, Order>;
 	using base::base;
-	
+
 	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
 	constexpr auto get_order() const noexcept { return base::template get<1>(); }
 
@@ -124,19 +129,21 @@ struct traverser_t : contain<Struct, Order> {
 	}
 
 	template<class F>
-	constexpr void for_each(F f) {
-		auto top_struct = get_struct() ^ get_order();
-		for_each_impl<typename decltype(top_struct)::signature>::for_each(top_struct, f, empty_state);
+	constexpr void for_each(F f) const {
+		for_each_impl<typename decltype(top_struct())::signature>::for_each(top_struct(), f, empty_state);
 	}
 
 	template<char... Dims, class F>
-	constexpr void for_dims(F f) {
-		for_dims_impl<Dims...>(get_struct() ^ get_order(), f, empty_state);
+	constexpr void for_dims(F f) const {
+		for_dims_impl<Dims...>(top_struct(), f, empty_state);
 	}
 
 	constexpr auto state() const noexcept {
-		auto top_struct = get_struct() ^ get_order();
-		return state_at<Struct>(top_struct, empty_state);
+		return state_at<Struct>(top_struct(), empty_state);
+	}
+
+	constexpr auto top_struct() const noexcept {
+		return get_struct() ^ get_order();
 	}
 
 	template<char Dim>
@@ -198,8 +205,13 @@ private:
 	}
 };
 
-template<class... Ts, class U = union_t<typename to_struct<Ts>::type...>>
-constexpr traverser_t<U, neutral_proto> traverser(const Ts &... s) noexcept { return traverser_t<U, neutral_proto>(U(to_struct<Ts>::convert(s)...), neutral_proto()); }
+template<class... Ts>
+constexpr auto traverser(const Ts &... s) noexcept 
+	-> traverser_t<union_t<typename to_struct<Ts>::type...>, neutral_proto>
+{ return traverser(make_union(to_struct<Ts>::convert(s)...)); }
+
+template<class... Ts>
+constexpr auto traverser(union_t<Ts...> u) noexcept { return traverser_t<union_t<Ts...>, neutral_proto>(u, neutral_proto()); }
 
 } // namespace noarr
 

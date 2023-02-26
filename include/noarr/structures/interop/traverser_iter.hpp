@@ -129,24 +129,21 @@ static constexpr char traviter_top_dim = traviter_sig_top_dim<typename Struct::s
 template<class Struct, class Order>
 template<char Dim>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
-	auto top_struct = get_struct() ^ get_order();
-	return traverser_range_t<Dim, Struct, Order>(*this, top_struct.template length<Dim>(empty_state));
+	return traverser_range_t<Dim, Struct, Order>(*this, top_struct().template length<Dim>(empty_state));
 }
 
 // declared in traverser.hpp
 template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
-	auto top_struct = get_struct() ^ get_order();
-	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct)>;
-	return traverser_range_t<dim, Struct, Order>(*this, top_struct.template length<dim>(empty_state));
+	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct())>;
+	return traverser_range_t<dim, Struct, Order>(*this, top_struct().template length<dim>(empty_state));
 }
 
 // declared in traverser.hpp
 template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::begin() const noexcept {
 	// same as range().begin()
-	using top_struct_t = decltype(get_struct() ^ get_order());
-	constexpr char dim = helpers::traviter_top_dim<top_struct_t>;
+	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct())>;
 	return traverser_iterator_t<dim, Struct, Order>(*this, (std::size_t) 0);
 }
 
@@ -154,9 +151,8 @@ constexpr auto traverser_t<Struct, Order>::begin() const noexcept {
 template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::end() const noexcept {
 	// same as range().end()
-	auto top_struct = get_struct() ^ get_order();
-	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct)>;
-	return traverser_iterator_t<dim, Struct, Order>(*this, top_struct.template length<dim>(empty_state));
+	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct())>;
+	return traverser_iterator_t<dim, Struct, Order>(*this, top_struct().template length<dim>(empty_state));
 }
 
 } // namespace noarr
