@@ -71,6 +71,11 @@ struct sub_ptr_allowed<T, char> { static constexpr bool value = true; };
 template<class T>
 struct sub_ptr_allowed<T, unsigned char> { static constexpr bool value = true; };
 
+template<>
+struct sub_ptr_allowed<char, char> { static constexpr bool value = true; };
+template<>
+struct sub_ptr_allowed<unsigned char, unsigned char> { static constexpr bool value = true; };
+
 template<class T, class F>
 constexpr bool sub_ptr_allowed_v = sub_ptr_allowed<T, F>::value;
 
@@ -94,10 +99,10 @@ constexpr auto sub_ptr(const volatile F *ptr, std::size_t off) noexcept
  *
  * @param ptr: the pointer to blob structure
  */
-template<class State, class CvVoid>
-constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
+template<class State, class CvPtr>
+constexpr auto get_at(CvPtr ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
 	using type = scalar_t<decltype(structure), State>;
-	return *helpers::sub_ptr<type>(ptr, offset_of<scalar<type>>(structure, state));
+	return *helpers::sub_ptr<type, std::remove_cv_t<std::remove_pointer_t<CvPtr>>>(ptr, offset_of<scalar<type>>(structure, state));
 }; }
 
 /**
@@ -105,8 +110,8 @@ constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](a
  * @tparam Dims: the dimension names of the fixed dimensions
  * @param ptr: the pointer to blob structure
  */
-template<char... Dims, class... Idxs, class CvVoid>
-constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept { return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...)); }
+template<char... Dims, class... Idxs, class CvPtr>
+constexpr auto get_at(CvPtr ptr, Idxs... idxs) noexcept { return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...)); }
 
 /**
  * @brief performs a simple application of `F` to `S`
