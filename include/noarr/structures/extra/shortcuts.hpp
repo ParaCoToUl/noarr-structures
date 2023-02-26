@@ -17,6 +17,46 @@ constexpr auto sized_vector(LenT length) {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
+template<char Dim, class Struct, class State>
+constexpr auto length_like(Struct structure, State state) {
+	return set_length<Dim>(structure | get_length<Dim>(state));
+}
+
+template<char Dim, class Struct>
+constexpr auto length_like(Struct structure) {
+	return length_like<Dim>(structure, empty_state);
+}
+
+template<char ...Dims, class Struct, class State>
+constexpr auto lengths_like(Struct structure, State state) {
+	return (... ^ length_like<Dims>(structure, state));
+}
+
+template<char ...Dims, class Struct>
+constexpr auto lengths_like(Struct structure) {
+	return lengths_like<Dims...>(structure, empty_state);
+}
+
+template<char Dim, class Struct, class State>
+constexpr auto vector_like(Struct structure, State state) {
+	return (vector<Dim>() ^ length_like<Dim>(structure, state));
+}
+
+template<char Dim, class Struct>
+constexpr auto vector_like(Struct structure) {
+	return vector_like<Dim>(structure, empty_state);
+}
+
+template<char ...Dims, class Struct, class State>
+constexpr auto vectors_like(Struct structure, State state) {
+	return (... ^ (vector_like<Dims>(structure, state)));
+}
+
+template<char ...Dims, class Struct>
+constexpr auto vectors_like(Struct structure) {
+	return vectors_like<Dims...>(structure, empty_state);
+}
+
 template<char Dim, char DimMajor, char DimMinor, class MinorLengthT>
 constexpr auto into_blocks(MinorLengthT minor_length) {
 	return into_blocks<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
