@@ -89,19 +89,17 @@ public:
 	explicit constexpr bag_base(wrapper<Structure> s, typename BagPolicy::type &&data) : structure_(s), data_(std::move(data))
 	{ }
 
-	explicit constexpr bag_base(Structure s, typename BagPolicy::type &data) : structure_(wrap(s)), data_(data)
+	explicit constexpr bag_base(Structure s, const typename BagPolicy::type &data) : structure_(wrap(s)), data_(data)
 	{ }
 
-	explicit constexpr bag_base(wrapper<Structure> s, typename BagPolicy::type &data) : structure_(s), data_(data)
+	explicit constexpr bag_base(wrapper<Structure> s, const typename BagPolicy::type &data) : structure_(s), data_(data)
 	{ }
 
-	constexpr bag_base(Structure s, BagPolicy policy) : structure_(wrap(s)) {
-		data_ = policy.construct(structure().get_size());
-	}
+	explicit constexpr bag_base(Structure s, BagPolicy policy) : structure_(wrap(s)),  data_(policy.construct(structure().get_size()))
+	{ }
 
-	constexpr bag_base(wrapper<Structure> s, BagPolicy policy) : structure_(s) {
-		data_ = policy.construct(structure().get_size());
-	}
+	explicit constexpr bag_base(wrapper<Structure> s, BagPolicy policy) : structure_(s), data_(policy.construct(structure().get_size()))
+	{ }
 
 	/**
 	 * @brief return the wrapped structure which describes the `data` blob
@@ -115,7 +113,7 @@ public:
 
 	/**
 	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
-	 * 
+	 *
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
@@ -126,7 +124,7 @@ public:
 
 	/**
 	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
-	 * 
+	 *
 	 * @param ts: the dimension values
 	 */
 	template<class... Ts>
@@ -136,7 +134,7 @@ public:
 
 	/**
 	 * @brief returns an offset of a value in `data` by fixing dimensions in the `structure`
-	 * 
+	 *
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
@@ -147,7 +145,7 @@ public:
 
 	/**
 	 * @brief gets the length (number of indices) of a dimension in the `structure`
-	 * 
+	 *
 	 * @tparam Dim: the dimension name
 	 */
 	template<char Dim, class... Ts>
@@ -157,7 +155,7 @@ public:
 
 	/**
 	 * @brief gets the size of the data described by the `structure`
-	 * 
+	 *
 	 */
 	constexpr auto get_size() const noexcept {
 		return structure().get_size();
@@ -190,7 +188,7 @@ public:
 
 	/**
 	 * @brief sets the `data` to zeros
-	 * 
+	 *
 	 */
 	void clear() {
 		auto size_ = structure().get_size();
@@ -210,7 +208,7 @@ public:
 
 /**
  * @brief A bag is an abstraction of a structure combined with data of a corresponding size.
- * 
+ *
  * @tparam Structure: the structure that describes the data stored in the bag
  * @tparam BagPolicy: indicates what underlying structure contains the data blob (typically `std::unique_ptr`)
  */
@@ -231,7 +229,7 @@ using const_raw_bag = bag<Structure, helpers::bag_policy<helpers::bag_const_raw_
 
 /**
  * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
- * 
+ *
  * @param s: the structure
  */
 template<class Structure>
@@ -241,7 +239,7 @@ constexpr auto make_unique_bag(Structure s) noexcept {
 
 /**
  * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
- * 
+ *
  * @param s: the structure (wrapped)
  */
 template<class Structure>
@@ -251,7 +249,7 @@ constexpr auto make_unique_bag(noarr::wrapper<Structure> s) noexcept {
 
 /**
  * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::vector
- * 
+ *
  * @param s: the structure
  */
 template<class Structure>
@@ -261,7 +259,7 @@ constexpr auto make_vector_bag(Structure s) noexcept {
 
 /**
  * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::vector
- * 
+ *
  * @param s: the structure (wrapped)
  */
 template<class Structure>
@@ -271,7 +269,7 @@ constexpr auto make_vector_bag(noarr::wrapper<Structure> s) noexcept {
 
 /**
  * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
- * 
+ *
  * @param s: the structure
  */
 template<class Structure>
@@ -281,7 +279,7 @@ constexpr auto make_bag(Structure s) noexcept {
 
 /**
  * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
- * 
+ *
  * @param s: the structure (wrapped)
  */
 template<class Structure>
@@ -291,7 +289,7 @@ constexpr auto make_bag(noarr::wrapper<Structure> s) noexcept {
 
 /**
  * @brief creates a bag with the given structure and an underlying r/w observing data blob
- * 
+ *
  * @param s: the structure
  * @param data: the data blob
  */
@@ -300,9 +298,14 @@ constexpr auto make_bag(Structure s, char *data) noexcept {
 	return raw_bag<Structure>(s, data);
 }
 
+template<class Structure>
+constexpr auto make_bag(Structure s, scalar_t<std::enable_if_t<is_cube<Structure>::value, Structure>> *data) noexcept {
+	return raw_bag<Structure>(s, (char *)data);
+}
+
 /**
  * @brief creates a bag with the given structure and an underlying r/w observing data blob
- * 
+ *
  * @param s: the structure (wrapped)
  * @param data: the data blob
  */
@@ -311,9 +314,14 @@ constexpr auto make_bag(noarr::wrapper<Structure> s, char *data) noexcept {
 	return raw_bag<Structure>(s, data);
 }
 
+template<class Structure>
+constexpr auto make_bag(noarr::wrapper<Structure> s, scalar_t<std::enable_if_t<is_cube<Structure>::value, Structure>> *data) noexcept {
+	return raw_bag<Structure>(s, (char *)data);
+}
+
 /**
  * @brief creates a bag with the given structure and an underlying r/o observing data blob
- * 
+ *
  * @param s: the structure
  * @param data: the data blob
  */
@@ -324,7 +332,7 @@ constexpr auto make_bag(Structure s, const char *data) noexcept {
 
 /**
  * @brief creates a bag with the given structure and an underlying r/o observing data blob
- * 
+ *
  * @param s: the structure (wrapped)
  * @param data: the data blob
  */
