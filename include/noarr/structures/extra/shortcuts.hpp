@@ -77,9 +77,9 @@ constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) {
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
-template<char Dim, class SizeT>
-constexpr auto bcast(SizeT length) {
-	return bcast<Dim>() ^ set_length<Dim>(length);
+template<char ...Dims, class ...Sizes>
+constexpr auto bcast(Sizes ...lengths) {
+	return (... ^ (bcast<Dims>() ^ set_length<Dims>(lengths)));
 }
 
 // Working with state (especially in traverser lambdas)
@@ -105,6 +105,11 @@ constexpr auto update_index(State state, F f) {
 	auto new_index = f(state.template get<index_in<Dim>>());
 	return state.template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
+
+template<class State>
+constexpr auto getter(State state) noexcept { return [state](auto ptr) constexpr noexcept {
+	return get_at<State, decltype(ptr)>(ptr, state);
+}; }
 
 template<char... Dims, class State>
 constexpr auto neighbor(State state, std::enable_if_t<true || Dims, std::ptrdiff_t>... diffs) noexcept {
