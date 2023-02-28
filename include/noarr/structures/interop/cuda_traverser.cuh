@@ -122,8 +122,19 @@ struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<Di
 		return (... && full.template length<DimsT>(empty_state)) && (... && full.template length<DimsB>(empty_state));
 	}
 
-	constexpr auto inner() const noexcept {
+	constexpr auto inner() const noexcept
+		-> traverser_t<Struct, decltype(get_order() ^ get_fixes())> {
 		return traverser_t<Struct, decltype(get_order() ^ get_fixes())>(get_struct(), get_order() ^ get_fixes());
+	}
+
+
+	template<class ...Values>
+	constexpr auto simple_run(void kernel(decltype(std::declval<cuda_traverser_t>().inner()), Values...), uint shm_size, Values ...values) const noexcept {
+#ifdef __CUDACC__
+		kernel<<<grid_dim(), block_dim(), shm_size>>>(inner(), values...);
+#else
+		static_assert(always_false<cuda_traverser_t>, "This method is only available to CUDA context.");
+#endif
 	}
 };
 
