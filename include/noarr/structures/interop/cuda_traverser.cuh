@@ -128,14 +128,12 @@ struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<Di
 	}
 
 
+#ifdef __CUDACC__
 	template<class ...Values>
 	constexpr auto simple_run(void kernel(decltype(std::declval<cuda_traverser_t>().inner()), Values...), uint shm_size, Values ...values) const noexcept {
-#ifdef __CUDACC__
 		kernel<<<grid_dim(), block_dim(), shm_size>>>(inner(), values...);
-#else
-		static_assert(always_false<cuda_traverser_t>, "This method is only available to CUDA context.");
-#endif
 	}
+#endif
 };
 
 template<class NewDimsB, class NewDimsT, class NewCudaDimsB, class NewCudaDimsT, class Struct, class Order>
