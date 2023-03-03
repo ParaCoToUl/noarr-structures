@@ -122,7 +122,7 @@ constexpr auto neighbor(State state, std::enable_if_t<true || Dims, std::ptrdiff
 template<char ...Dims, class Struct, class Offset, class ...StateItems>
 constexpr auto symmetric_slice(Struct structure, state<StateItems...> state, Offset offset) noexcept {
 	using namespace constexpr_arithmetic;
-	return (... ^ slice<Dims>(offset, (structure | get_length<Dims>(state)) - make_const<2>() * offset - make_const<1>()));
+	return (... ^ slice<Dims>(offset, (structure | get_length<Dims>(state)) - make_const<2>() * offset));
 }
 
 template<char ...Dims, class Struct, class Offset>
