@@ -7,6 +7,7 @@
 #include "../structs/blocks.hpp"
 #include "../structs/views.hpp"
 #include "../structs/setters.hpp"
+#include "../structs/slice.hpp"
 
 namespace noarr {
 
@@ -118,15 +119,51 @@ constexpr auto neighbor(State state, std::enable_if_t<true || Dims, std::ptrdiff
 	return state.template with<index_in<Dims>...>(std::size_t(state.template get<index_in<Dims>>() + diffs)...);
 }
 
+template<char ...Dims, class Struct, class Offset, class ...StateItems>
+constexpr auto symmetric_slice(Struct structure, state<StateItems...> state, Offset offset) noexcept {
+	using namespace constexpr_arithmetic;
+	return (... ^ slice<Dims>(offset, (structure | get_length<Dims>(state)) - make_const<2>() * offset - make_const<1>()));
+}
+
+template<char ...Dims, class Struct, class Offset>
+constexpr auto symmetric_slice(Struct structure, Offset offset) noexcept {
+	return symmetric_slice<Dims...>(structure, empty_state, offset);
+}
+
+template<char ...Dims, class Struct, class ...Offsets, class ...StateItems, class = std::enable_if_t<sizeof...(Dims) == sizeof...(Offsets)>>
+constexpr auto symmetric_slices(Struct structure, state<StateItems...> state, Offsets ...offsets) noexcept {
+	return (... ^ symmetric_slice<Dims>(structure, state, offsets));
+}
+
+template<char ...Dims, class Struct, class ...Offsets, class = std::enable_if_t<sizeof...(Dims) == sizeof...(Offsets)>>
+constexpr auto symmetric_slices(Struct structure, Offsets ...offsets) noexcept {
+	return symmetric_slices<Dims...>(structure, empty_state, offsets...);
+}
+
 // State to structure
 
-template<char... Dim, class... IdxT>
-constexpr auto fix(state<state_item<index_in<Dim>, IdxT>...> state) noexcept {
-	return fix<Dim...>(get_index<Dim>(state)...);
+namespace helpers {
+
+template<char Dim, class IdxT, class State>
+constexpr auto state_construct_fix(state_item<index_in<Dim>, IdxT>, State state) {
+	return fix<Dim>(state);
 }
+
+template<class StateItem, class State>
+constexpr auto fix(StateItem, State) {
+	return neutral_proto();
+}
+
+} // namespace helpers
+
 template<class... StateItem>
-constexpr void fix(state<StateItem...>) {
-	static_assert(always_false<state<StateItem...>>, "Unrecognized items in state. The fix(state) shortcut can be only used to fix indices (index_in<...>)");
+constexpr auto fix(state<StateItem...> state) noexcept {
+	return (neutral_proto() ^ ... ^ helpers::state_construct_fix(StateItem(), state));
+}
+
+template<char Dim, char ...Dims, class... StateItem>
+constexpr auto fix(state<StateItem...> state) noexcept {
+	return fix<Dim, Dims...>(get_index<Dim>(state), get_index<Dims>(state)...);
 }
 
 } // namespace noarr
