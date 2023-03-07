@@ -149,12 +149,12 @@ template<MatrixDataLayout layout>
 void matrix_simple_multiply_template_test(std::size_t size)
 {
 	// using different kinds of bags
-	auto m1_structure = noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size);
-	std::vector<char> blob(m1_structure.get_size());
+	auto m1_structure = MatrixStructureGetter<layout>::GetMatrixStructure() ^  noarr::set_length<'x'>(size) ^ noarr::set_length<'y'>(size);
+	std::vector<char> blob(m1_structure | noarr::get_size());
 
-	auto m1 = noarr::make_bag(m1_structure, static_cast<const char *>(blob.data()));
-	auto m2 = noarr::make_vector_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	auto m3 = noarr::make_bag(noarr::wrap(MatrixStructureGetter<layout>::GetMatrixStructure()).template set_length<'x'>(size).template set_length<'y'>(size));
+	auto m1 = noarr::make_bag(m1_structure, const_cast<const char *>(blob.data()));
+	auto m2 = noarr::make_vector_bag(m1_structure);
+	auto m3 = noarr::make_bag(m1_structure);
 
 	matrix_multiply(m1, m2, m3);
 }

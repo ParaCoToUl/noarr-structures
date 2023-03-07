@@ -70,7 +70,7 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 
 template<class Traverser, class FNeut, class FAcc, class FJoin, class OutBag>
 inline void tbb_reduce_bag(const Traverser &t, const FNeut &f_neut, const FAcc &f_acc, const FJoin &f_join, const OutBag &out_bag) noexcept {
-	auto out_struct = out_bag.structure().unwrap();
+	auto out_struct = out_bag.structure();
 	return tbb_reduce(t,
 		[out_struct, &f_neut](auto out_state, void *out_left) {
 			auto bag = make_bag(out_struct, (char *)out_left);

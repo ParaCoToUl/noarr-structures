@@ -46,11 +46,7 @@ TEST_CASE("Main example compile test", "[Main example compile test]") {
 // function which does some logic templated by different structures
 template<typename Structure>
 void matrix_demo(int size) {
-	// dot version
-	// note template keyword, it is there because the whole function is layout templated
-	auto n1 = noarr::make_bag(noarr::wrap(Structure()).template set_length<'x'>(size).template set_length<'y'>(size));
-	// pipe version (both are valid syntax and produce the same result)
-	auto n2 = noarr::make_bag(Structure() ^ noarr::set_length<'x'>(size) ^ noarr::set_length<'y'>(size));
+	noarr::make_bag(Structure() ^ noarr::set_length<'x'>(size) ^ noarr::set_length<'y'>(size));
 }
 
 TEST_CASE("Example compile test", "[Example compile test]") {
@@ -61,7 +57,7 @@ TEST_CASE("Example compile test", "[Example compile test]") {
 	auto bag = noarr::make_bag(my_structure_of_ten);
 
 	// get the reference (we will get 5-th element)
-	float& value_ref = bag.structure().get_at<'i'>(bag.data(), 5);
+	float& value_ref = bag.structure() | noarr::get_at<'i'>(bag.data(), 5);
 
 	// now use the reference to access the value
 	value_ref = 42;

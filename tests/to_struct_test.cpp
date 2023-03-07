@@ -7,7 +7,6 @@
 #include <noarr/structures.hpp>
 #include <noarr/structures/extra/shortcuts.hpp>
 #include <noarr/structures/extra/traverser.hpp>
-#include <noarr/structures/extra/wrapper.hpp>
 #include <noarr/structures/interop/bag.hpp>
 
 using namespace noarr;
@@ -19,8 +18,8 @@ TEST_CASE("Wrapper traverser", "[to_struct]") {
 	auto a = at();
 	auto b = bt();
 
-	auto aw = a | wrap();
-	auto bw = b | wrap();
+	auto aw = make_bag(a, (char *)nullptr);
+	auto bw = make_bag(b, (char *)nullptr);
 
 	REQUIRE(std::is_empty_v<decltype(traverser(a, b))>);
 	REQUIRE(std::is_same_v<decltype(traverser(a, b)), decltype(traverser(aw, bw))>);
@@ -33,8 +32,8 @@ TEST_CASE("Bag traverser", "[to_struct]") {
 	auto a = at();
 	auto b = bt();
 
-	auto aw = make_bag(a);
-	auto bw = make_bag(b);
+	auto aw = make_bag(a, (char *)nullptr);
+	auto bw = make_bag(b, (char *)nullptr);
 
 	REQUIRE(std::is_empty_v<decltype(traverser(a, b))>);
 	REQUIRE(std::is_same_v<decltype(traverser(a, b)), decltype(traverser(aw, bw))>);
@@ -52,8 +51,8 @@ TEST_CASE("Vector wrapper traverser", "[to_struct]") {
 	auto a = at() ^ noarr::set_length<'x', 'y'>(2, 3);
 	auto b = bt() ^ noarr::set_length<'y', 'z'>(3, 4);
 
-	auto aw = a | wrap();
-	auto bw = b | wrap();
+	auto aw = noarr::make_bag(a, (char *)nullptr);
+	auto bw = noarr::make_bag(b, (char *)nullptr);
 
 	REQUIRE(eq(traverser(a, b), traverser(aw, bw)));
 }
@@ -65,8 +64,8 @@ TEST_CASE("Vector bag traverser", "[to_struct]") {
 	auto a = at() ^ noarr::set_length<'x', 'y'>(2, 3);
 	auto b = bt() ^ noarr::set_length<'y', 'z'>(3, 4);
 
-	auto aw = make_bag(a);
-	auto bw = make_bag(b);
+	auto aw = noarr::make_bag(a, (char *)nullptr);
+	auto bw = noarr::make_bag(b, (char *)nullptr);
 
 	REQUIRE(eq(traverser(a, b), traverser(aw, bw)));
 }

@@ -34,15 +34,19 @@ struct GetImageStructureGetter<ImageDataLayout::VectorOfVectors>
 template<ImageDataLayout layout, std::size_t width, std::size_t height, std::size_t pixel_range = 256>
 void histogram_template_test()
 {
-	auto image = noarr::make_bag(noarr::wrap(GetImageStructureGetter<layout>::GetImageStructure()).template set_length<'x'>(width).template set_length<'y'>(height));
+	auto image = noarr::make_bag(GetImageStructureGetter<layout>::GetImageStructure() ^  noarr::set_length<'x'>(width) ^ noarr::set_length<'y'>(height));
 
 	CHECK(image.get_size() == width * height * sizeof(int));
 
 	auto histogram = noarr::make_bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
 	CHECK(histogram.get_size() == pixel_range * sizeof(int));
 
-	image.clear();
-	histogram.clear();
+	for (std::size_t i = 0; i < width; i++)
+		for (std::size_t j = 0; j < height; j++)
+			image.template at<'x','y'>(i, j) = 0;
+
+	for (std::size_t i = 0; i < pixel_range; i++)
+		histogram.template at<'x'>(i) = 0;
 
 	std::size_t x_size = image.template get_length<'x'>();
 	REQUIRE(x_size == width);

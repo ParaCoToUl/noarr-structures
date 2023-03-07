@@ -1,38 +1,35 @@
 #ifndef NOARR_STRUCTURES_SERIALIZE_DATA_HPP
 #define NOARR_STRUCTURES_SERIALIZE_DATA_HPP
 
-#include <istream>
-#include <ostream>
-
 #include "../extra/traverser.hpp"
 #include "../interop/bag.hpp"
 
 namespace noarr {
 
-template<class Struct>
-constexpr std::istream &deserialize_data(std::istream &in, Struct s, void *data) noexcept {
+template<class Istream, class Struct>
+constexpr decltype(auto) deserialize_data(Istream &&in, Struct s, void *data) noexcept {
 	traverser(s).for_each([&in, s, data](auto state) noexcept {
 		in >> (s | get_at(data, state));
 	});
-	return in;
+	return std::forward<Istream>(in);
 }
 
-template<class Bag>
-constexpr std::istream &deserialize_data(std::istream &in, Bag &&bag) noexcept {
-	return deserialize_data(in, bag.structure().unwrap(), bag.data());
+template<class Istream, class Bag>
+constexpr decltype(auto) deserialize_data(Istream &&in, Bag &&bag) noexcept {
+	return deserialize_data(std::forward<Istream>(in), bag.structure(), bag.data());
 }
 
-template<class Struct>
-constexpr std::ostream &serialize_data(std::ostream &out, Struct s, const void *data) noexcept {
+template<class Ostream, class Struct>
+constexpr decltype(auto) serialize_data(Ostream &&out, Struct s, const void *data) noexcept {
 	traverser(s).for_each([&out, s, data](auto state) noexcept {
 		out << (s | get_at(data, state)) << '\n';
 	});
-	return out;
+	return std::forward<Ostream>(out);
 }
 
-template<class Bag>
-constexpr std::ostream &serialize_data(std::ostream &out, const Bag &bag) noexcept {
-	return serialize_data(out, bag.structure().unwrap(), bag.data());
+template<class Ostream, class Bag>
+constexpr decltype(auto) serialize_data(Ostream &&out, const Bag &bag) noexcept {
+	return serialize_data(std::forward<Ostream>(out), bag.structure(), bag.data());
 }
 
 } // namespace noarr
