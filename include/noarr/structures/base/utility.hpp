@@ -52,6 +52,60 @@ struct integer_sequence_contains_impl<T, V, std::integer_sequence<T, v, VS...>, 
 template<class T, T V>
 struct integer_sequence_contains_impl<T, V, std::integer_sequence<T>> : std::false_type {};
 
+template<class In, class Set, class = void>
+struct integer_sequence_restrict_impl;
+
+template<class T, T v, T ...vs, class Set>
+struct integer_sequence_restrict_impl<std::integer_sequence<T, v, vs...>, Set, std::enable_if_t<integer_sequence_contains_impl<T, v, Set>::value>> {
+	using type = typename integer_sequence_concat_impl<std::integer_sequence<T, v>, typename integer_sequence_restrict_impl<std::integer_sequence<T, vs...>, Set>::type>::type;
+};
+
+template<class T, T v, T ...vs, class Set>
+struct integer_sequence_restrict_impl<std::integer_sequence<T, v, vs...>, Set, std::enable_if_t<!integer_sequence_contains_impl<T, v, Set>::value>> {
+	using type = typename integer_sequence_restrict_impl<std::integer_sequence<T, vs...>, Set>::type;
+};
+
+template<class T, class Set>
+struct integer_sequence_restrict_impl<std::integer_sequence<T>, Set> {
+	using type = std::integer_sequence<T>;
+};
+
+template<class T, T v, class ...Branches>
+struct integer_tree {
+	using value_type = T;
+	static constexpr value_type root_value = v;
+};
+
+template<class T, T v, class Tree>
+struct integer_tree_contains_impl : std::false_type {};
+
+template<class T, T v, T V, class ...Branches>
+struct integer_tree_contains_impl<T, v, integer_tree<T, V, Branches...>> {
+	using value_type = bool;
+	static constexpr bool value = ( ... || integer_tree_contains_impl<T, v, Branches>::value);
+};
+
+template<class T, T v, class ...Branches>
+struct integer_tree_contains_impl<T, v, integer_tree<T, v, Branches...>> : std::true_type {};
+
+template<class Tree, class Set, class = void>
+struct integer_tree_restrict_impl;
+
+template<class T, T v, class Branch, class Set>
+struct integer_tree_restrict_impl<integer_tree<T, v, Branch>, Set, std::enable_if_t<!integer_sequence_contains_impl<T, v, Set>::value>>{
+	using type = typename integer_tree_restrict_impl<Branch, Set>::type;
+};
+
+template<class T, T v, class ...Branches, class Set>
+struct integer_tree_restrict_impl<integer_tree<T, v, Branches...>, Set, std::enable_if_t<integer_sequence_contains_impl<T, v, Set>::value>>{
+	using type = integer_tree<T, v, typename integer_tree_restrict_impl<Branches, Set>::type...>;
+};
+
+template<class T, class Set>
+struct integer_tree_restrict_impl<std::integer_sequence<T>, Set>{
+	using type = std::integer_sequence<T>;
+};
+
 } // namespace helpers
 
 /**
@@ -69,6 +123,20 @@ using integer_sequence_concat = typename helpers::integer_sequence_concat_impl<P
  */
 template<class... Packs>
 using integer_sequence_concat_sep = typename helpers::integer_sequence_concat_sep_impl<Packs...>::type;
+
+template<class In, class Set>
+using integer_sequence_restrict = typename helpers::integer_sequence_restrict_impl<In, Set>::type;
+
+template<class T, T v, class Pack>
+constexpr bool integer_sequence_contains = helpers::integer_sequence_contains_impl<T, v, Pack>::value;
+
+using helpers::integer_tree;
+
+template<class In, class Set>
+using integer_tree_restrict = typename helpers::integer_tree_restrict_impl<In, Set>::type;
+
+template<class T, T v, class Tree>
+constexpr bool integer_tree_contains = helpers::integer_tree_contains_impl<T, v, Tree>::value;
 
 /**
  * @brief an alias for std::integer_sequence<char, ...>

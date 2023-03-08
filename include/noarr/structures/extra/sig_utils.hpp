@@ -36,10 +36,31 @@ struct sig_find_dim_impl<QDim, State, scalar_sig<ValueType>> {
 	static_assert(value_always_false<QDim>, "The structure does not have a dimension of this name");
 };
 
+template<class Signature>
+struct sig_dim_tree_impl;
+
+template<char Dim, class ArgLength, class RetSig>
+struct sig_dim_tree_impl<function_sig<Dim, ArgLength, RetSig>> {
+	using type = integer_tree<char, Dim, typename sig_dim_tree_impl<RetSig>::type>;
+};
+
+template<char Dim, class... RetSigs>
+struct sig_dim_tree_impl<dep_function_sig<Dim, RetSigs...>> {
+	using type = integer_tree<char, Dim, typename sig_dim_tree_impl<RetSigs>::type...>;
+};
+
+template<class ValueType>
+struct sig_dim_tree_impl<scalar_sig<ValueType>> {
+	using type = char_sequence<>;
+};
+
 } // namespace helpers
 
 template<char QDim, class State, class Signature>
 using sig_find_dim = typename helpers::sig_find_dim_impl<QDim, State, Signature>::type;
+
+template<class Signature>
+using sig_dim_tree = typename helpers::sig_dim_tree_impl<Signature>::type;
 
 } // namespace noarr
 
