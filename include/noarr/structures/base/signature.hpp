@@ -31,6 +31,8 @@ template<>
 struct arg_length_from<std::size_t> { using type = dynamic_arg_length; };
 template<std::size_t L>
 struct arg_length_from<std::integral_constant<std::size_t, L>> { using type = static_arg_length<L>; };
+template<std::size_t L>
+struct arg_length_from<noarr::lit_t<L>> { using type = static_arg_length<L>; };
 
 } // namespace helpers
 

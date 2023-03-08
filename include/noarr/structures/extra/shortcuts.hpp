@@ -150,7 +150,7 @@ constexpr auto state_construct_fix(state_item<index_in<Dim>, IdxT>, State state)
 }
 
 template<class StateItem, class State>
-constexpr auto fix(StateItem, State) {
+constexpr auto state_construct_fix(StateItem, State) {
 	return neutral_proto();
 }
 

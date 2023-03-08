@@ -10,14 +10,6 @@
 
 namespace noarr {
 
-template<std::size_t I>
-struct lit_t : std::integral_constant<std::size_t, I> {
-	auto operator()() = delete; // using `lit<42>()` by mistake should be rejected, not evaluate to dynamic size_t of 42
-};
-
-template<std::size_t I>
-constexpr lit_t<I> lit;
-
 template<char Dim, class State>
 constexpr auto get_length(State state) noexcept { return [state](auto structure) constexpr noexcept {
 	return structure.template length<Dim>(state);

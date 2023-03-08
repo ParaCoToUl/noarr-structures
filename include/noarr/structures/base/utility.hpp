@@ -146,6 +146,14 @@ constexpr bool integer_tree_contains = helpers::integer_tree_contains_impl<T, v,
 template<char... VS>
 using char_sequence = std::integer_sequence<char, VS...>;
 
+template<std::size_t I>
+struct lit_t : std::integral_constant<std::size_t, I> {
+	auto operator()() = delete; // using `lit<42>()` by mistake should be rejected, not evaluate to dynamic size_t of 42
+};
+
+template<std::size_t I>
+constexpr lit_t<I> lit;
+
 template<class>
 static constexpr bool always_false = false;
 template<auto>
