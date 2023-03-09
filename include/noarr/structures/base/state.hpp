@@ -102,23 +102,23 @@ struct state : contain<typename StateItems::value_type...> {
 	}
 
 	template<class... KeptStateItems>
-	constexpr state<KeptStateItems...> restrict(helpers::state_items_pack<KeptStateItems...> = {}) const noexcept {
+	constexpr state<KeptStateItems...> items_restrict(helpers::state_items_pack<KeptStateItems...> = {}) const noexcept {
 		return state<KeptStateItems...>(get<typename KeptStateItems::tag>()...);
 	}
 
 	template<class... NewTags, class... NewValueTypes, class... KeptStateItems>
-	constexpr state<KeptStateItems..., state_item<NewTags, NewValueTypes>...> restrict_add(helpers::state_items_pack<KeptStateItems...>, NewValueTypes... new_values) const noexcept {
+	constexpr state<KeptStateItems..., state_item<NewTags, NewValueTypes>...> items_restrict_add(helpers::state_items_pack<KeptStateItems...>, NewValueTypes... new_values) const noexcept {
 		return state<KeptStateItems..., state_item<NewTags, NewValueTypes>...>(get<typename KeptStateItems::tag>()..., new_values...);
 	}
 
 	template<class... Tags>
 	constexpr auto remove() const noexcept {
-		return restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result());
+		return items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result());
 	}
 
 	template<class... Tags, class... ValueTypes>
 	constexpr auto with(ValueTypes... values) const noexcept {
-		return restrict_add<Tags...>(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result(), values...);
+		return items_restrict_add<Tags...>(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result(), values...);
 	}
 };
 

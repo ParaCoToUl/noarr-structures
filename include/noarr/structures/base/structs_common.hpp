@@ -60,6 +60,18 @@ struct is_proto_struct_impl : std::false_type {};
 template<class T>
 struct is_proto_struct_impl<T, std::enable_if_t<std::is_same_v<decltype(T::proto_preserves_layout), const bool>>> : std::true_type {};
 
+template<class F, bool PreservesLayout>
+struct make_proto_impl {
+	static constexpr bool proto_preserves_layout = PreservesLayout;
+
+	F f_;
+
+	explicit constexpr make_proto_impl(F f) noexcept : f_(f) {}
+
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return f_(s); }
+};
 } // namespace helpers
 
 /**
@@ -72,6 +84,12 @@ using is_struct = helpers::is_struct_impl<T>;
 
 template<class T>
 using is_proto_struct = helpers::is_proto_struct_impl<T>;
+
+
+template<bool PreservesLayout = false, class F>
+constexpr auto make_proto(F f) noexcept {
+	return helpers::make_proto_impl<F, PreservesLayout>(f);
+}
 
 template<class Struct, class ProtoStruct, class = std::enable_if_t<is_struct<Struct>::value && is_proto_struct<ProtoStruct>::value>>
 constexpr auto operator ^(Struct s, ProtoStruct p) {

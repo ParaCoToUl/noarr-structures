@@ -129,31 +129,33 @@ struct traverser_t : contain<Struct, Order> {
 	}
 
 	template<char Dim, char... Dims, class F>
-	constexpr void for_each(F f) const noexcept(noexcept(f)) {
+	constexpr void for_each(F f) const noexcept {
 		for_sections<Dim, Dims...>([f](auto inner) { return f(inner.state()); });
 	}
 
 	template<class F>
-	constexpr void for_each(F f) const noexcept(noexcept(f)) {
+	constexpr void for_each(F f) const noexcept {
 		for_sections([f](auto inner) { return f(inner.state()); });
 	}
 
+	// TODO add tests
 	template<char Dim, char... Dims, class F>
-	constexpr void for_sections(F f) const noexcept(noexcept(f)) {
+	constexpr void for_sections(F f) const noexcept {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
 		static_assert((integer_tree_contains<char, Dim, dim_tree> && ... && integer_tree_contains<char, Dims, dim_tree>), "Requested dimensions are not present");
 		for_each_impl(integer_tree_restrict<dim_tree, char_sequence<Dim, Dims...>>(), f, empty_state);
 	}
 
+	// TODO add tests
 	template<class F>
-	constexpr void for_sections(F f) const noexcept(noexcept(f)) {
+	constexpr void for_sections(F f) const noexcept {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
 		for_each_impl(dim_tree(), f, empty_state);
 	}
 
 
 	template<char... Dims, class F>
-	constexpr void for_dims(F f) const noexcept(noexcept(f)) {
+	constexpr void for_dims(F f) const noexcept {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
 		static_assert((... && integer_tree_contains<char, Dims, dim_tree>), "Requested dimensions are not present");
 		for_each_impl(integer_tree_from_sequence<char_sequence<Dims...>>(), f, empty_state);
@@ -175,7 +177,7 @@ struct traverser_t : contain<Struct, Order> {
 
 private:
 	template<char Dim, class ...Branches, class F, class State, std::size_t... I>
-	constexpr void for_each_impl_dep(F f, State state, std::index_sequence<I...>) const noexcept(noexcept(f)) {
+	constexpr void for_each_impl_dep(F f, State state, std::index_sequence<I...>) const noexcept {
 		if constexpr (sizeof...(Branches) == 1) {
 			(..., for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>())));
 		} else {
@@ -183,7 +185,7 @@ private:
 		}
 	}
 	template<char Dim, class ...Branches, class F, class State>
-	constexpr void for_each_impl(integer_tree<char, Dim, Branches...>, F f, State state) const noexcept(noexcept(f)) {
+	constexpr void for_each_impl(integer_tree<char, Dim, Branches...>, F f, State state) const noexcept {
 		using dim_sig = sig_find_dim<Dim, State, typename decltype(top_struct())::signature>;
 		if constexpr(dim_sig::dependent) {
 			constexpr std::size_t len = std::tuple_size_v<typename dim_sig::ret_sig_tuple>;
@@ -195,11 +197,11 @@ private:
 		}
 	}
 	template<class F, char... Dims, class... IdxT>
-	constexpr void for_each_impl(char_sequence<>, F f, noarr::state<state_item<index_in<Dims>, IdxT>...> state) const noexcept(noexcept(f)) {
+	constexpr void for_each_impl(char_sequence<>, F f, noarr::state<state_item<index_in<Dims>, IdxT>...> state) const noexcept {
 		f(order((... ^ fix<Dims>(state.template get<index_in<Dims>>()))));
 	}
 	template<class F>
-	constexpr void for_each_impl(char_sequence<>, F f, noarr::state<>) const noexcept(noexcept(f)) {
+	constexpr void for_each_impl(char_sequence<>, F f, noarr::state<>) const noexcept {
 		f(*this);
 	}
 };
