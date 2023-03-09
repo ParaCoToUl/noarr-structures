@@ -106,6 +106,20 @@ struct integer_tree_restrict_impl<std::integer_sequence<T>, Set>{
 	using type = std::integer_sequence<T>;
 };
 
+template<class Sequence>
+struct integer_tree_from_sequence_impl;
+
+template<class T, T v, T ...vs>
+struct integer_tree_from_sequence_impl<std::integer_sequence<T, v, vs...>> {
+	using type = integer_tree<T, v, typename integer_tree_from_sequence_impl<std::integer_sequence<T, vs...>>::type>;
+};
+
+template<class T>
+struct integer_tree_from_sequence_impl<std::integer_sequence<T>> {
+	using type = std::integer_sequence<T>;
+};
+
+
 } // namespace helpers
 
 /**
@@ -137,6 +151,9 @@ using integer_tree_restrict = typename helpers::integer_tree_restrict_impl<In, S
 
 template<class T, T v, class Tree>
 constexpr bool integer_tree_contains = helpers::integer_tree_contains_impl<T, v, Tree>::value;
+
+template<class Seq>
+using integer_tree_from_sequence = typename helpers::integer_tree_from_sequence_impl<Seq>::type;
 
 /**
  * @brief an alias for std::integer_sequence<char, ...>
