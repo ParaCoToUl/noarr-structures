@@ -92,6 +92,11 @@ struct scalar_name<long double> {
 };
 
 template<std::size_t L>
+struct scalar_name<std::integral_constant<std::size_t, L>> {
+	using type = integer_sequence_concat<char_sequence<'s', 't', 'd', ':', ':', 'i', 'n', 't', 'e', 'g', 'r', 'a', 'l', '_', 'c', 'o', 'n', 's', 't', 'a', 'n', 't', '<'>, typename scalar_name<std::size_t>::type, char_sequence<','>, mangle_value<int, L>, char_sequence<'>'>>;
+};
+
+template<std::size_t L>
 struct scalar_name<lit_t<L>> {
 	using type = integer_sequence_concat<char_sequence<'l', 'i', 't', '_', 't', '<'>, mangle_value<int, L>, char_sequence<'>'>>;
 };
@@ -168,10 +173,10 @@ struct mangle_expr_helpers {
 	}
 
 	template<class String, std::size_t L>
-	static constexpr void append(String &out, const lit_t<L> t) {
-		out.append("lit_t<", 6);
+	static constexpr void append(String &out, const std::integral_constant<std::size_t, L> t) {
+		out.append("lit<", 4);
 		append_int(out, (t < 0), L);
-		out.append(">}", 2);
+		out.append(">", 1);
 	}
 };
 
