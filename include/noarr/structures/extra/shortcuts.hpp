@@ -18,6 +18,19 @@ constexpr auto sized_vector(LenT length) {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
+template<char Dim, std::size_t L, class SubStruct = void>
+struct array_impl {
+	using type = decltype(std::declval<SubStruct>() ^ sized_vector<Dim>(lit<L>));
+};
+
+template<char Dim, std::size_t L>
+struct array_impl<Dim, L, void> {
+	using type = decltype(sized_vector<Dim>(lit<L>));
+};
+
+template<char Dim, std::size_t L, class SubStruct = void>
+using array = typename array_impl<Dim, L, SubStruct>::type;
+
 template<char Dim, class Struct, class State>
 constexpr auto length_like(Struct structure, State state) {
 	return set_length<Dim>(structure | get_length<Dim>(state));

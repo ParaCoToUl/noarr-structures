@@ -91,6 +91,11 @@ struct scalar_name<long double> {
 	using type = char_sequence<'l', 'o', 'n', 'g', ' ', 'd', 'o', 'u', 'b', 'l', 'e'>;
 };
 
+template<std::size_t L>
+struct scalar_name<lit_t<L>> {
+	using type = integer_sequence_concat<char_sequence<'l', 'i', 't', '_', 't', '<'>, mangle_value<int, L>, char_sequence<'>'>>;
+};
+
 /**
  * @brief returns a textual representation of a template parameter description using `char_sequence`
  * 
@@ -160,6 +165,13 @@ struct mangle_expr_helpers {
 		out.push_back('{');
 		append_int(out, (t < 0), std::make_unsigned_t<T>(t));
 		out.push_back('}');
+	}
+
+	template<class String, std::size_t L>
+	static constexpr void append(String &out, const lit_t<L> t) {
+		out.append("lit_t<", 6);
+		append_int(out, (t < 0), L);
+		out.append(">}", 2);
 	}
 };
 

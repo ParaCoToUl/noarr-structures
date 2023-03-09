@@ -27,7 +27,7 @@ struct tuple : contain<TS...> {
 		structure_param<TS>...>;
 
 	constexpr tuple() noexcept = default;
-	constexpr tuple(TS... ss) noexcept : base(ss...) {}
+	explicit constexpr tuple(TS... ss) noexcept : base(ss...) {}
 
 	static_assert(!(TS::signature::template any_accept<Dim> || ...), "Dimension name already used");
 	using signature = dep_function_sig<Dim, typename TS::signature...>;
@@ -78,77 +78,9 @@ private:
 	}
 };
 
-/**
- * @brief a structure representing an array with a dynamicly specifiable index (all indices point to the same substructure, with a different offset)
- * 
- * @tparam Dim: the dimmension name added by the array
- * @tparam T: the type of the substructure the array contains
- */
-template<char Dim, std::size_t L, class T = void>
-struct array : contain<T> {
-	static constexpr char name[] = "array";
-	using params = struct_params<
-		dim_param<Dim>,
-		value_param<std::size_t, L>,
-		structure_param<T>>;
-
-	constexpr array() noexcept = default;
-	explicit constexpr array(T sub_structure) noexcept : contain<T>(sub_structure) {}
-
-	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
-
-	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
-	using signature = function_sig<Dim, static_arg_length<L>, typename T::signature>;
-
-	template<class State>
-	constexpr auto size(State state) const noexcept {
-		using namespace constexpr_arithmetic;
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
-		return make_const<L>() * sub_structure().size(state.template remove<index_in<Dim>>());
-	}
-
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
-		using namespace constexpr_arithmetic;
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
-		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
-		if constexpr(L != 1) {
-			// offset = index * elem_size + offset_within_elem
-			auto index = state.template get<index_in<Dim>>();
-			auto sub_struct = sub_structure();
-			auto sub_state = state.template remove<index_in<Dim>>();
-			return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
-		} else {
-			// Optimization: length is one, thus the only valid index is zero.
-			// Assume the index is valid (caller's responsibility).
-			// offset = 0 * elem_size + offset_within_elem = offset_within_elem
-			return offset_of<Sub>(sub_structure(), state.template remove<index_in<Dim>>());
-		}
-	}
-
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set array length");
-		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
-			return constexpr_arithmetic::make_const<L>();
-		} else {
-			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>>());
-		}
-	}
-
-	template<class Sub, class State>
-	constexpr void strict_state_at(State) const noexcept {
-		static_assert(value_always_false<Dim>, "An array cannot be used in this context");
-	}
-};
-
-template<char Dim, std::size_t L>
-struct array<Dim, L> {
-	static constexpr bool proto_preserves_layout = false;
-
-	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return array<Dim, L, Struct>(s); }
+template<char Dim, class ...Struct>
+constexpr auto make_tuple(Struct ...s) noexcept {
+	return tuple<Dim, Struct...>(s...);
 };
 
 /**
@@ -184,10 +116,18 @@ struct vector : contain<T> {
 	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
-		auto index = state.template get<index_in<Dim>>();
-		auto sub_struct = sub_structure();
-		auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
+		if constexpr(!std::is_same_v<decltype(state.template get<length_in<Dim>>()), std::integral_constant<std::size_t, 1>>) {
+			// offset = index * elem_size + offset_within_elem
+			auto index = state.template get<index_in<Dim>>();
+			auto sub_struct = sub_structure();
+			auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+			return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
+		} else {
+			// Optimization: length is one, thus the only valid index is zero.
+			// Assume the index is valid (caller's responsibility).
+			// offset = 0 * elem_size + offset_within_elem = offset_within_elem
+			return offset_of<Sub>(sub_structure(), state.template remove<index_in<Dim>, length_in<Dim>>());
+		}
 	}
 
 	template<char QDim, class State>

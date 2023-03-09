@@ -1,6 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include <noarr/structures.hpp>
+#include <noarr/structures_extended.hpp>
 #include <noarr/structures/structs/zcurve.hpp>
 
 TEST_CASE("Z curve", "[zcurve]") {

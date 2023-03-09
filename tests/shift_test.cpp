@@ -1,7 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include <noarr/structures.hpp>
-#include <noarr/structures/structs/setters.hpp>
+#include <noarr/structures_extended.hpp>
 #include <noarr/structures/structs/slice.hpp>
 
 TEST_CASE("Fixes and shifts", "[offsets]") {

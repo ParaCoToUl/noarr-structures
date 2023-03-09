@@ -9,7 +9,7 @@
 #include <array>
 #include <iostream>
 
-#include <noarr/structures.hpp>
+#include <noarr/structures_extended.hpp>
 #include <noarr/structures/extra/iterator.hpp>
 
 TEST_CASE("Iterator trivial", "[iterator]") {
