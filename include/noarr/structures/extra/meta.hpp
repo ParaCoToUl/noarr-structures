@@ -39,11 +39,14 @@ struct state_make_fix {
 template<char Dim, class ValueType>
 struct state_make_fix<state_item<index_in<Dim>, ValueType>> {
 	template<class Bcasts>
-	static constexpr auto construct(Bcasts, ValueType) noexcept {
-		if constexpr (Bcasts::signature::template any_accept<Dim>)
-			return neutral_proto();
-		else
-			return bcast<Dim>();
+	static constexpr auto construct(Bcasts, ValueType value) noexcept {
+		using namespace constexpr_arithmetic;
+
+		if constexpr (Bcasts::signature::template any_accept<Dim>) {
+			return (void)value, neutral_proto();
+		} else {
+			return bcast<Dim>(value + make_const<1>());
+		}
 	}
 };
 

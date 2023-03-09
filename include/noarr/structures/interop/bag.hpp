@@ -213,11 +213,6 @@ constexpr auto make_bag(Structure s, char *data) noexcept {
 	return raw_bag<Structure>(s, data);
 }
 
-template<class Structure>
-constexpr auto make_bag(Structure s, scalar_t<std::enable_if_t<is_cube<Structure>::value, Structure>> *data) noexcept {
-	return raw_bag<Structure>(s, (char *)data);
-}
-
 /**
  * @brief creates a bag with the given structure and an underlying r/o observing data blob
  *
@@ -228,6 +223,18 @@ template<class Structure>
 constexpr auto make_bag(Structure s, const char *data) noexcept {
 	return const_raw_bag<Structure>(s, data);
 }
+
+
+template<class Structure>
+constexpr auto make_bag(Structure s, scalar_t<std::enable_if_t<is_cube<Structure>::value, Structure>> *data) noexcept {
+	return raw_bag<Structure>(s, (char *)data);
+}
+
+template<class Structure>
+constexpr auto make_bag(Structure s, const scalar_t<std::enable_if_t<is_cube<Structure>::value, Structure>> *data) noexcept {
+	return const_raw_bag<Structure>(s, (const char *)data);
+}
+
 
 
 template<class Structure, class BagPolicy>
