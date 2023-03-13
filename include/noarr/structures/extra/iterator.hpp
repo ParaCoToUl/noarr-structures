@@ -104,12 +104,20 @@ public:
 	template<class ...Idxs>
 	constexpr iterator(Struct *structure, Idxs ...idxs) noexcept : structure(structure), dims(idxs...) {}
 
-	constexpr iterator &operator*() noexcept {
-		return *this;
+	constexpr auto &operator*() noexcept {
+		return dims;
 	}
 
-	constexpr const iterator &operator*() const noexcept {
-		return *this;
+	constexpr auto operator*() const noexcept {
+		return dims;
+	}
+
+	constexpr auto operator->() noexcept {
+		return &dims;
+	}
+
+	constexpr auto operator->() const noexcept {
+		return &dims;
 	}
 
 	iterator &operator++() noexcept {
@@ -126,30 +134,6 @@ public:
 
 	constexpr bool operator!=(const iterator &other) const noexcept {
 		return structure != other.structure || iterator_eq_helper<NDims - 1, Dims...>::compare(dims, other.dims) != 0;
-	}
-};
-
-template<std::size_t I, class Struct, char ...Dims>
-struct iterator_get_helper {
-	using key = index_in<n_th<I - 1, Dims...>::value>;
-
-	static constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-		return it.dims.template get<key>();
-	}
-
-	static constexpr decltype(auto) get(const noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-		return it.dims.template get<key>();
-	}
-};
-
-template<class Struct, char ...Dims>
-struct iterator_get_helper<0U, Struct, Dims...> {
-	static constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-		return *it.structure ^ fix<Dims...>(it.dims.template get<index_in<Dims>>()...);
-	}
-
-	static constexpr decltype(auto) get(const noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-		return *it.structure ^ fix<Dims...>(it.dims.template get<index_in<Dims>>()...);
 	}
 };
 
@@ -181,25 +165,5 @@ struct iterate {
 };
 
 } // namespace noarr
-
-namespace std {
-	template<class Struct, char ...Dims>
-	struct tuple_size<noarr::helpers::iterator<Struct, Dims...>> : integral_constant<std::size_t, sizeof...(Dims) + 1U> {};
-
-	template<class Struct, std::size_t I, char ...Dims>
-	struct tuple_element<I, noarr::helpers::iterator<Struct, Dims...>> {
-		using type = std::size_t;
-	};
-
-	template<class Struct, char ...Dims>
-	struct tuple_element<0U, noarr::helpers::iterator<Struct, Dims...>> {
-		using type = typename noarr::helpers::iterator<Struct, Dims...>::value_type;
-	};
-
-	template<std::size_t I, class Struct, char ...Dims>
-	constexpr decltype(auto) get(noarr::helpers::iterator<Struct, Dims...> &it) noexcept {
-		return noarr::helpers::iterator_get_helper<I, Struct, Dims...>::get(it);
-	}
-}
 
 #endif // NOARR_ITERATOR_HPP
