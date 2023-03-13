@@ -93,8 +93,8 @@ constexpr auto into_blocks_dynamic(MinorLengthT minor_length) noexcept {
 	return into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>() ^ set_length<DimMinor>(minor_length);
 }
 
-template<char DimMajor, char DimMinor, char Dim, class MinorSizeT>
-constexpr auto merge_blocks(MinorSizeT minor_length) noexcept {
+template<char DimMajor, char DimMinor, char Dim, class MinorLenT>
+constexpr auto merge_blocks(MinorLenT minor_length) noexcept {
 	return set_length<DimMinor>(minor_length) ^ merge_blocks<DimMajor, DimMinor, Dim>();
 }
 
@@ -103,8 +103,8 @@ constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) noexcep
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
-template<char ...Dims, class ...Sizes>
-constexpr auto bcast(Sizes ...lengths) noexcept {
+template<char ...Dims, class ...LenTs>
+constexpr auto bcast(LenTs ...lengths) noexcept {
 	return (... ^ (bcast<Dims>() ^ set_length<Dims>(lengths)));
 }
 

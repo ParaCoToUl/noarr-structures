@@ -5,7 +5,7 @@
 
 TEST_CASE("Z curve", "[zcurve]") {
 	auto a = noarr::array<'y', 4, noarr::array<'x', 4, noarr::scalar<int>>>();
-	auto z = a ^ noarr::merge_zcurve<'y', 'x', 'z'>::maxsize_alignment<4, 2>();
+	auto z = a ^ noarr::merge_zcurve<'y', 'x', 'z'>::maxlen_alignment<4, 2>();
 
 	REQUIRE((z | noarr::offset<'z'>( 0)) == (a | noarr::offset<'x', 'y'>(0, 0)));
 	REQUIRE((z | noarr::offset<'z'>( 1)) == (a | noarr::offset<'x', 'y'>(1, 0)));
@@ -30,7 +30,7 @@ TEST_CASE("Z curve", "[zcurve]") {
 
 TEST_CASE("Z curve misaligned", "[zcurve]") {
 	auto a = noarr::array<'y', 6, noarr::array<'x', 6, noarr::scalar<int>>>();
-	auto z = a ^ noarr::merge_zcurve<'y', 'x', 'z'>::maxsize_alignment<8, 2>();
+	auto z = a ^ noarr::merge_zcurve<'y', 'x', 'z'>::maxlen_alignment<8, 2>();
 
 	REQUIRE((z | noarr::offset<'z'>( 0)) == (a | noarr::offset<'x', 'y'>(0, 0)));
 	REQUIRE((z | noarr::offset<'z'>( 1)) == (a | noarr::offset<'x', 'y'>(1, 0)));
