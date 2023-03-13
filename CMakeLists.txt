@@ -28,7 +28,7 @@ target_link_libraries(test-runner PRIVATE Catch2::Catch2WithMain)
 if(MSVC)
   target_compile_options(test-runner PRIVATE /W4)
 else()
-  target_compile_options(test-runner PRIVATE -Wall -Wextra -pedantic)
+  target_compile_options(test-runner PRIVATE -Wall -Wextra -Wno-parentheses -pedantic)
 endif()
 
 # setup CTest integration
