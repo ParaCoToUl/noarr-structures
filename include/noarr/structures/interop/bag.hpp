@@ -52,7 +52,7 @@ struct bag_policy<std::unique_ptr> {
 
 template<>
 struct bag_policy<bag_raw_pointer_tag> {
-	using type = char *;
+	using type = void *;
 
 	template<class Ptr>
 	static constexpr Ptr get(Ptr ptr) noexcept {
@@ -62,9 +62,9 @@ struct bag_policy<bag_raw_pointer_tag> {
 
 template<>
 struct bag_policy<bag_const_raw_pointer_tag> {
-	using type = const char *;
+	using type = const void *;
 
-	static constexpr const char *get(const char *ptr) noexcept {
+	static constexpr const void *get(const void *ptr) noexcept {
 		return ptr;
 	}
 };
@@ -209,7 +209,7 @@ constexpr auto make_bag(Structure s) noexcept {
  * @param data: the data blob
  */
 template<class Structure>
-constexpr auto make_bag(Structure s, char *data) noexcept {
+constexpr auto make_bag(Structure s, void *data) noexcept {
 	return raw_bag<Structure>(s, data);
 }
 
@@ -220,19 +220,8 @@ constexpr auto make_bag(Structure s, char *data) noexcept {
  * @param data: the data blob
  */
 template<class Structure>
-constexpr auto make_bag(Structure s, const char *data) noexcept {
+constexpr auto make_bag(Structure s, const void *data) noexcept {
 	return const_raw_bag<Structure>(s, data);
-}
-
-
-template<class Structure>
-constexpr auto make_bag(Structure s, scalar_t<std::enable_if_t<is_cube<Structure>::value, Structure>> *data) noexcept {
-	return raw_bag<Structure>(s, (char *)data);
-}
-
-template<class Structure>
-constexpr auto make_bag(Structure s, const scalar_t<std::enable_if_t<is_cube<Structure>::value, Structure>> *data) noexcept {
-	return const_raw_bag<Structure>(s, (const char *)data);
 }
 
 
