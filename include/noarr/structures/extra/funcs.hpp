@@ -17,7 +17,7 @@ constexpr auto get_length(State state) noexcept { return [state](auto structure)
 
 /**
  * @brief returns the number of indices in the structure specified by the dimension name
- *
+ * 
  * @tparam Dim: the dimension name of the desired structure
  */
 template<char Dim>
@@ -52,49 +52,26 @@ constexpr auto get_size() noexcept { return get_size(empty_state); }
 
 namespace helpers {
 
-template<class T, class F>
-struct sub_ptr_allowed { static constexpr bool value = false; };
 template<class T>
-struct sub_ptr_allowed<T, T> { static constexpr bool value = true; };
+constexpr auto sub_ptr(void *ptr, std::size_t off) noexcept { return (T*) ((char*) ptr + off); }
 template<class T>
-struct sub_ptr_allowed<T, void> { static constexpr bool value = true; };
+constexpr auto sub_ptr(const void *ptr, std::size_t off) noexcept { return (const T*) ((const char*) ptr + off); }
 template<class T>
-struct sub_ptr_allowed<T, char> { static constexpr bool value = true; };
+constexpr auto sub_ptr(volatile void *ptr, std::size_t off) noexcept { return (volatile T*) ((volatile char*) ptr + off); }
 template<class T>
-struct sub_ptr_allowed<T, unsigned char> { static constexpr bool value = true; };
-
-template<>
-struct sub_ptr_allowed<char, char> { static constexpr bool value = true; };
-template<>
-struct sub_ptr_allowed<unsigned char, unsigned char> { static constexpr bool value = true; };
-
-template<class T, class F>
-constexpr bool sub_ptr_allowed_v = sub_ptr_allowed<T, F>::value;
-
-template<class T, class F>
-constexpr auto sub_ptr(F *ptr, std::size_t off) noexcept
-	-> std::enable_if_t<sub_ptr_allowed_v<T, F>, T*> { return (T*) ((char*) ptr + off); }
-template<class T, class F>
-constexpr auto sub_ptr(const F *ptr, std::size_t off) noexcept
-	-> std::enable_if_t<sub_ptr_allowed_v<T, F>, const T*> { return (const T*) ((const char*) ptr + off); }
-template<class T, class F>
-constexpr auto sub_ptr(volatile F *ptr, std::size_t off) noexcept
-	-> std::enable_if_t<sub_ptr_allowed_v<T, F>, volatile T*> { return (volatile T*) ((volatile char*) ptr + off); }
-template<class T, class F>
-constexpr auto sub_ptr(const volatile F *ptr, std::size_t off) noexcept
-	-> std::enable_if_t<sub_ptr_allowed_v<T, F>, const volatile T*> { return (const volatile T*) ((const volatile char*) ptr + off); }
+constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { return (const volatile T*) ((const volatile char*) ptr + off); }
 
 } // namespace helpers
 
 /**
  * @brief returns the item in the blob specified by `ptr` offset of which is specified by a structure
- *
+ * 
  * @param ptr: the pointer to blob structure
  */
-template<class State, class CvPtr>
-constexpr auto get_at(CvPtr ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
+template<class State, class CvVoid>
+constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
 	using type = scalar_t<decltype(structure), State>;
-	return *helpers::sub_ptr<type, std::remove_cv_t<std::remove_pointer_t<CvPtr>>>(ptr, offset_of<scalar<type>>(structure, state));
+	return *helpers::sub_ptr<type>(ptr, offset_of<scalar<type>>(structure, state));
 }; }
 
 /**
@@ -102,12 +79,12 @@ constexpr auto get_at(CvPtr ptr, State state) noexcept { return [ptr, state](aut
  * @tparam Dims: the dimension names of the fixed dimensions
  * @param ptr: the pointer to blob structure
  */
-template<char... Dims, class... Idxs, class CvPtr>
-constexpr auto get_at(CvPtr ptr, Idxs... idxs) noexcept { return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...)); }
+template<char... Dims, class... Idxs, class CvVoid>
+constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept { return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...)); }
 
 /**
  * @brief performs a simple application of `F` to `S`
- *
+ * 
  * @tparam S: the structure type
  * @tparam F: the function type
  * @param s: the structure
