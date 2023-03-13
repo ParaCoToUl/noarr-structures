@@ -27,6 +27,7 @@ struct tuple : contain<TS...> {
 		structure_param<TS>...>;
 
 	constexpr tuple() noexcept = default;
+	template<class = void> // resolve ambiguity with the default ctor by lowering the priority
 	explicit constexpr tuple(TS... ss) noexcept : base(ss...) {}
 
 	static_assert(!(TS::signature::template any_accept<Dim> || ...), "Dimension name already used");
