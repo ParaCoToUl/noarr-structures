@@ -3,7 +3,6 @@
 #include <type_traits>
 
 #include <noarr/structures_extended.hpp>
-#include <noarr/structures/extra/meta.hpp>
 
 TEST_CASE("Likes", "[shortcut]") {
 	auto scalar = noarr::scalar<float>();
@@ -47,25 +46,25 @@ TEST_CASE("Likes with state", "[shortcut]") {
 	auto sb_ = scalar ^ noarr::vector<'x'>() ^ noarr::vector<'y'>();
 
 	auto state = noarr::make_state<noarr::length_in<'x'>, noarr::length_in<'y'>>(100, 200);
-	auto consumer = noarr::state_consumer(state);
+	auto vector = noarr::scalar<void>() ^ noarr::vectors<'x', 'y'>();
 
-	// reconstruct sa from scalar using consumer:
-	REQUIRE(std::is_same_v<decltype(sa), decltype(scalar ^ noarr::vector_like<'x'>(consumer, state))>);
+	// reconstruct sa from scalar:
+	REQUIRE(std::is_same_v<decltype(sa), decltype(scalar ^ noarr::vector_like<'x'>(vector, state))>);
 
 	// reconstruct sa from scalar using sb_:
 	REQUIRE(std::is_same_v<decltype(sa), decltype(scalar ^ noarr::vector_like<'x'>(sb_, state))>);
 
-	// reconstruct sa from sa_ using consumer:
-	REQUIRE(std::is_same_v<decltype(sa), decltype(sa_ ^ noarr::length_like<'x'>(consumer, state))>);
+	// reconstruct sa from sa_:
+	REQUIRE(std::is_same_v<decltype(sa), decltype(sa_ ^ noarr::length_like<'x'>(vector, state))>);
 
 	// reconstruct sa from sa_ using dimensions from sb_:
 	REQUIRE(std::is_same_v<decltype(sa), decltype(sa_ ^ noarr::length_like<'x'>(sb_, state))>);
 
-	// reconstruct sb from scalar using consumer:
-	REQUIRE(std::is_same_v<decltype(sb), decltype(scalar ^ noarr::vectors_like<'x', 'y'>(consumer, state))>);
+	// reconstruct sb from scalar:
+	REQUIRE(std::is_same_v<decltype(sb), decltype(scalar ^ noarr::vectors_like<'x', 'y'>(vector, state))>);
 
-	// reconstruct sb from sb_ using consumer:
-	auto re_sb = sb_ ^ noarr::lengths_like<'x', 'y'>(consumer, state);
+	// reconstruct sb from sb_:
+	auto re_sb = sb_ ^ noarr::lengths_like<'x', 'y'>(vector, state);
 	REQUIRE(std::is_same_v<decltype(sb)::signature, decltype(re_sb)::signature>);
 	REQUIRE((sb | noarr::get_size()) == (re_sb | noarr::get_size()));
 	REQUIRE((sb | noarr::offset<'x', 'y'>(0, 1)) == (re_sb | noarr::offset<'x', 'y'>(0, 1)));

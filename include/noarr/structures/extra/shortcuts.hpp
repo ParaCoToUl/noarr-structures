@@ -132,7 +132,6 @@ constexpr auto update_index(State state, F f) noexcept {
 	return state.template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
 
-// TODO add tests
 template<char... Dims, class State>
 constexpr auto neighbor(State state, std::enable_if_t<true || Dims, std::ptrdiff_t>... diffs) noexcept {
 	static_assert((... && State::template contains<index_in<Dims>>), "Requested dimension does not exist");
@@ -142,27 +141,26 @@ constexpr auto neighbor(State state, std::enable_if_t<true || Dims, std::ptrdiff
 
 // TODO add tests
 template<char ...Dims, class Struct, class Offset, class ...StateItems>
-constexpr auto symmetric_slice(Struct structure, state<StateItems...> state, Offset offset) noexcept {
-	using namespace constexpr_arithmetic;
-	return (... ^ slice<Dims>(offset, (structure | get_length<Dims>(state)) - make_const<2>() * offset));
+constexpr auto symmetric_span(Struct structure, state<StateItems...> state, Offset offset) noexcept {
+	return (... ^ span<Dims>(offset, (structure | get_length<Dims>(state)) - offset));
 }
 
 // TODO add tests
 template<char ...Dims, class Struct, class Offset>
-constexpr auto symmetric_slice(Struct structure, Offset offset) noexcept {
-	return symmetric_slice<Dims...>(structure, empty_state, offset);
+constexpr auto symmetric_span(Struct structure, Offset offset) noexcept {
+	return symmetric_span<Dims...>(structure, empty_state, offset);
 }
 
 // TODO add tests
 template<char ...Dims, class Struct, class ...Offsets, class ...StateItems, class = std::enable_if_t<sizeof...(Dims) == sizeof...(Offsets)>>
-constexpr auto symmetric_slices(Struct structure, state<StateItems...> state, Offsets ...offsets) noexcept {
-	return (... ^ symmetric_slice<Dims>(structure, state, offsets));
+constexpr auto symmetric_spans(Struct structure, state<StateItems...> state, Offsets ...offsets) noexcept {
+	return (... ^ symmetric_span<Dims>(structure, state, offsets));
 }
 
 // TODO add tests
 template<char ...Dims, class Struct, class ...Offsets, class = std::enable_if_t<sizeof...(Dims) == sizeof...(Offsets)>>
-constexpr auto symmetric_slices(Struct structure, Offsets ...offsets) noexcept {
-	return symmetric_slices<Dims...>(structure, empty_state, offsets...);
+constexpr auto symmetric_spans(Struct structure, Offsets ...offsets) noexcept {
+	return symmetric_spans<Dims...>(structure, empty_state, offsets...);
 }
 
 // State to structure

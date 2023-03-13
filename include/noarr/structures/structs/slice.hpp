@@ -215,6 +215,100 @@ struct slice_proto : contain<StartT, LenT> {
 template<char Dim, class StartT, class LenT>
 constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, good_index_t<StartT>, good_index_t<LenT>>(start, len); }
 
+// TODO add tests
+template<char Dim, class T, class StartT, class EndT>
+struct span_t : contain<T, StartT, EndT> {
+	using base = contain<T, StartT, EndT>;
+	using base::base;
+
+	static constexpr char name[] = "span_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>,
+		type_param<StartT>,
+		type_param<EndT>>;
+
+	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr StartT start() const noexcept { return base::template get<1>(); }
+	constexpr EndT end() const noexcept { return base::template get<2>(); }
+
+private:
+	template<class Original>
+	struct dim_replacement;
+	template<class ArgLength, class RetSig>
+	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> { using type = function_sig<Dim, arg_length_from_t<EndT>, RetSig>; };
+	template<class... RetSigs>
+	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
+		using original = dep_function_sig<Dim, RetSigs...>;
+		static_assert(StartT::value || true, "Cannot span a tuple dimension dynamically");
+		static_assert(EndT::value || true, "Cannot span a tuple dimension dynamically");
+		static constexpr std::size_t start = StartT::value;
+		static constexpr std::size_t end = EndT::value;
+
+		template<class Indices = std::make_index_sequence<end - start>>
+		struct pack_helper;
+		template<std::size_t... Indices>
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices+start>...>; };
+
+		using type = typename pack_helper<>::type;
+	};
+public:
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+
+	template<class State>
+	constexpr auto sub_state(State state) const noexcept {
+		using namespace constexpr_arithmetic;
+		if constexpr(State::template contains<index_in<Dim>>)
+			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
+		else
+			return state;
+	}
+
+	template<class State>
+	constexpr auto size(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+		return sub_structure().size(sub_state(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_offset_of(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+		return offset_of<Sub>(sub_structure(), sub_state(state));
+	}
+
+	template<char QDim, class State>
+	constexpr auto length(State state) const noexcept {
+		using namespace constexpr_arithmetic;
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+		if constexpr(QDim == Dim) {
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+			return end() - start();
+		} else {
+			return sub_structure().template length<QDim>(sub_state(state));
+		}
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+		return state_at<Sub>(sub_structure(), sub_state(state));
+	}
+};
+
+template<char Dim, class StartT, class EndT>
+struct span_proto : contain<StartT, EndT> {
+	using base = contain<StartT, EndT>;
+	using base::base;
+
+	static constexpr bool proto_preserves_layout = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return span_t<Dim, Struct, StartT, EndT>(s, base::template get<0>(), base::template get<1>()); }
+};
+
+template<char Dim, class StartT, class EndT>
+constexpr auto span(StartT start, EndT end) noexcept { return span_proto<Dim, good_index_t<StartT>, good_index_t<EndT>>(start, end); }
+
 template<char Dim, class T, class StartT, class StrideT>
 struct step_t : contain<T, StartT, StrideT> {
 	using base = contain<T, StartT, StrideT>;
