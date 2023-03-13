@@ -105,7 +105,7 @@ struct zc_dims_pop<std::integer_sequence<char, Acc...>, Last> {
 
 template<std::size_t N>
 struct zc_log2 {
-	static_assert(N && !(N & 1), "Z curve size bound and alignment must be powers of two");
+	static_assert(N && !(N & 1), "Z curve length bound and alignment must be powers of two");
 	static constexpr int value = zc_log2<(N>>1)>::value + 1;
 };
 template<>
@@ -223,20 +223,20 @@ template<char... AllDims>
 struct merge_zcurve {
 private:
 	using dims_pop = helpers::zc_dims_pop<std::integer_sequence<char>, AllDims...>;
-	struct error { static_assert(always_false<merge_zcurve<AllDims...>>, "Do not instantiate this type directly, use merge_zcurve<'original dims', 'new dim'>::maxsize_alignment<size, alignment>()"); };
+	struct error { static_assert(always_false<merge_zcurve<AllDims...>>, "Do not instantiate this type directly, use merge_zcurve<'original dims', 'new dim'>::maxlen_alignment<len, alignment>()"); };
 
 public:
 	template<class = error>
 	merge_zcurve(error = {});
 
-	template<std::size_t Size, std::size_t Alignment>
-	static constexpr auto maxsize_alignment() noexcept {
-		return maxsize_alignment<helpers::zc_log2<Alignment>::value, helpers::zc_log2<Size>::value, dims_pop::dim>(typename dims_pop::dims());
+	template<std::size_t MaxLen, std::size_t Alignment>
+	static constexpr auto maxlen_alignment() noexcept {
+		return maxlen_alignment<helpers::zc_log2<Alignment>::value, helpers::zc_log2<MaxLen>::value, dims_pop::dim>(typename dims_pop::dims());
 	}
 
 private:
 	template<int SpecialLevel, int GeneralLevel, char Dim, char... Dims>
-	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...> maxsize_alignment(std::integer_sequence<char, Dims...>) noexcept {
+	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...> maxlen_alignment(std::integer_sequence<char, Dims...>) noexcept {
 		return {};
 	}
 };
