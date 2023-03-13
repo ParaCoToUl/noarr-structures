@@ -67,22 +67,6 @@ void *data = ...;
 float &last_elem = my_structure_of_ten | noarr::get_at<'i'>(data, 9);
 ```
 
-## Wrapper
-
-It is possible to use `.` (dot) instead of `^` (exponential) and `|` (pipe), but you have to use `noarr::wrapper` first.
-
-```cpp
-// artificially complicated example
-auto piped = my_structure_of_ten 
-	^ noarr::set_length<'i'>(5) 
-	^ noarr::set_length<'i'>(10);
-
-// now version with wrapper
-auto doted = noarr::wrap(my_structure_of_ten)
-	.set_length<'i'>(5)
-	.set_length<'i'>(10);
-```
-
 ## Allocating and accessing *data* and *bag*
 
 Now that we have a structure defined, we can create a bag to store the data. Bag allocates *data* buffer automatically:

@@ -38,9 +38,9 @@ TEST_CASE("Pipes sizes", "[sizes sizes]") {
 	SECTION("check sizes") {
 		REQUIRE((v_sized | noarr::get_length<'x'>()) == 20);
 		REQUIRE((v2 | noarr::get_length<'y'>()) == 20000);
-		REQUIRE(((t ^ noarr::fix<'t'>(lit<0>)) | noarr::get_length<'x'>()) == 10);
-		REQUIRE(((t2 ^ noarr::fix<'t'>(lit<0>)) | noarr::get_length<'y'>()) == 20000);
-		REQUIRE(((t2 ^ noarr::fix<'t'>(lit<1>)) | noarr::get_length<'b'>()) == 20);
+		REQUIRE((t ^ noarr::fix<'t'>(lit<0>) | noarr::get_length<'x'>()) == 10);
+		REQUIRE((t2 ^ noarr::fix<'t'>(lit<0>) | noarr::get_length<'y'>()) == 20000);
+		REQUIRE((t2 ^ noarr::fix<'t'>(lit<1>) | noarr::get_length<'b'>()) == 20);
 	}
 }
 
