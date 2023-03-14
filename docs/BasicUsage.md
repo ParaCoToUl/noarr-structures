@@ -1,7 +1,5 @@
 # Basic Usage
 
-## Creating a structure
-
 First, we have to `#include` the `noarr` library:
 
 ```cpp
@@ -19,7 +17,12 @@ auto my_structure = noarr::scalar<float>() ^ noarr::vector<'i'>();
 The above notations are equivalent, but for some structures (described below), only the latter is available. The `^` operator (originally xor in C++) stands for exponential type.
 It takes the structure on the left-hand-side and wraps it in the structure prototype on the right-hand-side.
 
-The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values. But currently, the structure has no size, we need to make room for 10 items:
+The only dimension of this *structure* has the label `i` and it has to be specified in order to access individual scalar values.
+
+
+## Lengths
+
+Currently, the structure has no size, we need to make room for 10 items:
 
 ```cpp
 auto my_structure_of_ten = my_structure 
@@ -28,14 +31,15 @@ auto my_structure_of_ten = my_structure
 
 Here we use wrap the structure in `set_length`. Like `vector`, `set_length` is also a structure. This new structure is returned by the operator while the original structure is left unchanged.
 
-## Structure functions
-
 After the length is set, it can be queried using function `get_length`. Unlike `set_length`, `get_length` is not a structure prototype and the result is obviously not a structure.
 We use `|` (pipe) for function application to distinguish it from `^`:
 
 ```cpp
 std::size_t ten = my_structure_of_ten | noarr::get_length<'i'>();
 ```
+
+
+## Functions
 
 There are other functions. `get_size` returns the size in bytes (it does not take any dimension as a parameter, since it considers all dimensions).
 
@@ -47,7 +51,8 @@ void *data = ...;
 float &last_elem = my_structure_of_ten | noarr::get_at<'i'>(data, 9);
 ```
 
-## Allocating and accessing *data* and *bag*
+
+## Bag
 
 Now that we have a structure defined, we can create a bag to store the data. Bag allocates *data* buffer automatically:
 
@@ -71,6 +76,7 @@ As discussed earlier, there is a good reason to separate *structure* and *data*.
 ```cpp
 bag.at<'i'>(5) = 42;
 ```
+
 
 ## Changing data layout (*structure*)
 
@@ -111,6 +117,7 @@ void main() {
 	...
 }
 ```
+
 
 ## Our supported layouts (*structures*)
 
@@ -161,6 +168,7 @@ using namespace noarr::literals;
 // note that we fix multiple dimensions at one
 float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
+
 
 ## Full list of the provided functions
 
