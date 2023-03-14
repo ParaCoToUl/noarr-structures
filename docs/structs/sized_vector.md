@@ -1,6 +1,6 @@
 # sized_vector
 
-Repeat the structure layout, forming an array/vector of elements matching the original structure,
+Repeat the [sub-structure](../Glossary.md#sub-structure) layout, forming a vector of elements matching the sub-structure,
 and use a new [dimension](../Glossary.md#dimension) (of the specified length) to select between the elements.
 
 ```hpp
