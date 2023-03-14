@@ -69,7 +69,9 @@ Also, unlike Function, there is no need for an `ArgLength` parameter: the [lengt
 
 ## Working with signatures
 
-As mentioned above, the intended usage is C++ template specialization:
+Before using a signature directly, consider using one of the [structure traits](other/StructureTraits.md) utilities, which may be easier, shorter, and more readable.
+
+That being said, direct usage of signatures is also possible and supported. As mentioned above, the intended usage is C++ template specialization:
 
 ```cpp
 // The primary template may be left undefined, since all legal signatures are handled by the three specializations.
