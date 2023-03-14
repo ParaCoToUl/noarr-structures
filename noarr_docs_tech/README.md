@@ -4,32 +4,6 @@
 
 A  *structure* is a simple object that describes data layouts and their abstractions
 
-### Structure requirements
-
-For a structure `T`:
-
-- the expression `std::is_trivial<T>::value && std::is_standard_layout<T>::value` shall evaluate to `true` (= it shall be a *[PODType](https://en.cppreference.com/w/cpp/named_req/PODType)*), furthermore, it shall not define any fields in its body
-  - all desired fields shall be defined by inheriting the tuple-like `contain` (see below)
-- it shall inherit from `contain`
-- the structure shall define `description`, a type that is an instance of `struct_description`, and describes the structure and its type parameters
-  - the first entry shall be a `char_sequence` instance containing the structure's name
-  - the second entry shall be a `dims_impl` instance containing the dimension (if any - *e.g. `scalar<T>` does not introduce a dimension*) the structure introduces
-  - the third entry shall be a `dims_impl` instance containing the dimensions (if any) the structure consumes from its sub-structures
-  - the other entries shall each be a either `structure_param` or `type_param`, `type_param` for (scalar) type parameters and `structure_param` for types that represent structures
-  - this `description` should be implemented in such a way that `print_struct(std::ostream&, structure)` outputs an equivalent of the structure type with all type parameters written in C++ (this is not a technical requirement, but not satisfying it can hinder any data serialization validation based on `print_struct`)
-- `T::length()` is a function that returns a `std::size_t` value which specifies the range of indices the structure supports via `T::offset`
-  - it shall be `constexpr`
-  - it shall be either `static` or `const`
-  - if the structure has no dimension it shall be `static` and return `0`
-- `T::offset()`, `T::offset<std::size_t>()`, or `T::offset(std::size_t)` is a function that returns a `std::size_t` value which specifies the offset of a (sub-structure) instance with the given index
-  - it shall be `constexpr`
-  - it shall be either `static` or `const`
-  - it shall take an argument (either template or formal) iff the structure has a dimension
-  - the implementation of `T::offset` should satisfy requirements for it implied by requirements for `T::get_t`
-  - if a positive integer `n` is a valid argument, then the argument `n - 1` shall be valid as well
-  - the number of all valid arguments for `T::offset` shall be equal to `T::length()`
-    - *as a result, if `l = T::length()` is positive then `l - k` will be a valid argument for `T::offset`; where `k` is an integer s.t. `0 < k < l + 1`*
-
 ### Subtypes of structures
 
 - **Cube:** a cube is a structure hierarchy that has all its dimensions dynamic. This has a consequence of having a single scalar type (all values described by the structure share the same type).

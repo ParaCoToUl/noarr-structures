@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 17" width="540" height="204">
+	<rect x="3" y="5" width="5" height="5" stroke-width="2" stroke="#e69f00" fill="none" />
+	<path d="M 13,5 l -1,2 h -1 l 2,-4 l 2,4 h -1 z" />
+	<rect x="18" y="5" width="5" height="5" stroke-width="2" stroke="#009e73" fill="none" />
+	<path d="M 26,6 h 4 v 1 h -4 z M 26,8 h 4 v 1 h -4 z" />
+	<rect x="35" y="5" width="5" height="5" stroke-width="2" stroke="#e69f00" fill="none" />
+	<rect x="33" y="3" width="9" height="9" stroke-width="2" stroke="#009e73" fill="none" />
+	<text x="2" y="15" font-size="1" textLength="7">proto-structure</text>
+	<text x="17" y="15" font-size="1" textLength="7">proto-structure</text>
+	<text x="34" y="15" font-size="1" textLength="7">proto-structure</text>
+</svg>

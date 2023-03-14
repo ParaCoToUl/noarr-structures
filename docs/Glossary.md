@@ -48,11 +48,13 @@ It can be queried using [`offset`](BasicUsage.md#offset).
 ### proto-structure
 
 A proto-structure is similar to a [structure](#structure) template. It cannot be used on its own until it is instantiated, i.e. until another structure is passed to it as an argument.
+See [Defining Structures](DefiningStructures.md) for more information about how proto-structures are created and used.
 
 ### signature
 
 The signature of a [structure](#structure) describes the interface of the structure: the [dimension](#dimension) names, their order, their [kind](DimensionKinds.md), and the element type.
 Signatures are purely compile-time objects (represented by C++ types without values) and can be obtained from the `::signature` member typedef of structure types.
+See [Signature](Signature.md) for more information.
 
 ### size
 
@@ -72,7 +74,7 @@ See [Dimension Kinds](DimensionKinds.md).
 ### structure
 
 An object that describes the mapping between [indices](#index) and memory. It can be [queried for](BasicUsage.md#functions) offsets of elements, size in memory, and valid index ranges.
-The structure itself does not hold the elements (see [bag](BasicUsage.md#bag) for that).
+The structure itself does not hold the elements (see [bag](BasicUsage.md#bag) for that). See [Defining Structures](DefiningStructures.md) for more information about how structures are created.
 
 ### sub-structure
 
