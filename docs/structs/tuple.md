@@ -20,6 +20,7 @@ In order to use any of the [sub-structures](../Glossary.md#sub-structure) (`Ts`)
 it is necessary to [set the index](../BasicUsage.md) in `Dim`, as otherwise, some operations would be ambiguous.
 As the name suggests, the `Dim` introduced with the `tuple` is a [tuple-like dimension](../DimensionKinds.md): it cannot be indexed using plain integers.
 The value used for the index must be static. See the first section of [Dimension Kinds](../DimensionKinds.md).
+(When a [traverser](../Traverser.md) is used, it detects this and uses the proper indexing.)
 
 The size of a tuple is equal to the sum of the sizes of the [sub-structures](../Glossary.md#sub-structure). The tuple does not add any padding.
 

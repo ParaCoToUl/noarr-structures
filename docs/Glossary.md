@@ -64,6 +64,7 @@ The size can be queried using [`get_size`](BasicUsage.md#get_size).
 ### state
 
 A collection of [indices](#index) and potentially other parameters needed to query a property of a [structure](#structure).
+Also passed by a [`traverser`](Traverser.md) to the lambda (function object) in [`for_each`](Traverser.md#for_eachlambda).
 See [State documentation](State.md).
 
 ### static value
@@ -81,3 +82,7 @@ The structure itself does not hold the elements (see [bag](BasicUsage.md#bag) fo
 [Structures](#structure) are often defined in terms of other structures. A sub-structure U of a structure T is any structure used in the definition of T.
 Memory that is laid out according to T will usually contain parts that are laid out according to U.
 There could possibly be more copies of U, or the layout of T could possibly consist exactly of the layout of V.
+
+### traverser
+
+A tool for [structure](#structure) iteration. See [Traverser documentation](Traverser.md).

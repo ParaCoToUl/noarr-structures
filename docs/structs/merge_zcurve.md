@@ -37,7 +37,7 @@ Set the `Alignment` parameter to the largest power of two such that all the leng
 If you cannot promise any bound, set this to one (since all integers are divisible by one).
 If you know that the length will always be a power of two (just don't know which one), set this to the same value as `MaxLen`.
 
-This structure is intended to guide traversals of the usual multidimensional structures (e.g. row-major or column-major).
+This structure is intended to guide [traversals](../Traverser.md) of the usual multidimensional structures (e.g. row-major or column-major).
 This means it is suitable for the implementation of cache-oblivious algorithms such as those for matrix transposition or multiplication.
 It cannot be used to store multidimensional into memory using z-order curve (as is sometimes done e.g. with textures or volumetric data).
 For that, an opposite of `merge_zcurve` would be necessary: ~~`into_zcurve`~~, which as of now is not implemented.
