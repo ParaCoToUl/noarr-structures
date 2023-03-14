@@ -38,12 +38,6 @@ For a structure `T`:
 
   It is a special case of a cube.
 
-### Contain
-
-`contain` facilitates the creation of new structures. It is a tuple-like struct that defines a struct's fields via inheritance, but in contrast with `std::tuple`, it is a trivially constructible standard layout.
-
-It is used in the library to define all structures (and the majority of all noarr functions). This is to provide a structured way of serializing a structure's data.
-
 ### Provided structures
 
 The library provides the following set of structures that describe the most essential layouts:
