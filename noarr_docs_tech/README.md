@@ -37,12 +37,3 @@ For a structure `T`:
 - **Point:** a point is a structure hierarchy with no dimensions. It has only a single scalar type and it describes one scalar value of this type.
 
   It is a special case of a cube.
-
-### Provided structures
-
-The library provides the following set of structures that describe the most essential layouts:
-
-- **`scalar`:** contains a single scalar type and describes one value of this type. It serves as the leaf substructure in structure hierarchies and as the bottom case for many algorithms and mechanisms defined by the library. Its size is equal to the size of the contained type and it is always known during compile time.
-- **`array`:** a structure containing a single substructure and providing a dynamic dimension. The layout described by an array consists of a static number of copies of the layout described by the contained substructure lined up right after one another. Its size is equal to the size of the contained substructure multiplied by the number of its copies and it is always known during compile time if the size of the substructure is as well.
-- **`vector`:** a structure containing a single substructure and providing a dynamic dimension. It is very similar to array (see above) with the distinction that the number of the substructure's layout copies is dynamic, and because of it being dynamic, the size of the vector is dynamic as well and it is generally not known during compile time.
-- **`tuple`:** a structure containing multiple substructures and providing a static dimension. It describes a layout consisting of the layouts of the substructures lined up one after another. Its size is equal to the sum of the sizes of the substructures and it is known during compile time if all sizes of the substructures are as well.
