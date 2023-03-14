@@ -4,6 +4,7 @@ A collection of parameters that can be used for structure queries and in other p
 A state item consists of a *tag* and a *value*. Currently, the recognized tags are:
 - `noarr::index_in<Dim>` (e.g. `noarr::index_in<'x'>`) gives the [index](Glossary.md#index) for the named [dimension](Glossary.md#dimension)
 - `noarr::length_in<Dim>` specifies the [length](Glossary.md#length) of the structure in the named dimension (note: the length must not have been previously specified)
+- `noarr::cuda_stripe_index` is specific to [`noarr::cuda_striped`](structs/cuda_striped.md) - see there for more information
 
 The value of a state item can be static (known at compile time and taking no space) or dynamic (only known at runtime) --
 for more information, see [Dimension Kinds](DimensionKinds.md).
@@ -28,6 +29,16 @@ The primary use of state is as a parameter to [functions](BasicUsage.md#function
 State is also used internally when handling these queries.
 The top-level structure receives a state from the caller, obtains (and deletes) the items it needs,
 and passes the updated state to its [sub-structure(s)](Glossary.md#sub-structure).
+
+The state items expected by a structure are described by the structure's [signature](Signature.md).
+The operations carried out on the state during query roughly correspond to those carried out on the signature during structure construction,
+as detailed in [the relevant section in Signature documentation](Signature.md#relation-to-state)).
+
+### Traverser
+
+State is the parameter passed by [Traverser](Traverser.md) to the user lambda in [`.for_each(lambda)`](Traverser.md#for_eachlambda).
+The other method, [`.for_dims<...>(lambda)`](Traverser.md#for_dimslambda) does not pass a state,
+but [`.state()`](Traverser.md#state-obtaining-a-plain-state-in-for_dims) can be used on the parameter to get one.
 
 ### Creating a state
 
@@ -110,3 +121,24 @@ my_state.template get_ref<noarr::index_in<'x'>>() = 42;
 ```
 
 It is not possible to add items in-place or modify static item values.
+
+### Fixing a state in a structure
+
+A state consisting of just indices can be used as argument to [`noarr::fix`](structs/fix.md).
+As a result, the dimensions in the structure for which indices are specified in the state are fixed.
+
+For example:
+
+```cpp
+auto structure = noarr::scalar<float>() ^ noarr::array<'x', 10>() ^ noarr::array<'y', 20>() ^ noarr::array<'z', 30>();
+
+auto xy = noarr::idx<'x', 'y'>(3, 4);
+
+auto fixed = structure ^ noarr::fix(xy);
+
+auto item_3_4_5 = fixed | noarr::offset(noarr::idx<'z'>(5));
+auto item_3_4_6 = fixed | noarr::offset<'z'>(6);
+```
+
+Normally the state would be created somewhere else (e.g. given to you in [traverser](Traverser.md) lambda).
+Otherwise, you could just use `... ^ noarr::fix<'x', 'y'>(3, 4)`.
