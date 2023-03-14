@@ -105,6 +105,28 @@ bag[state] = 42;
 
 <!-- TODO elaborate -->
 
+### Bag types
+
+There are various types of `bag`s:
+
+- vector bag
+
+  - created by `make_vector_bag(structure)`
+  - the underlying data blob is implemented via a `std::vector`
+  - the bag destroys the data blob in its destructor
+
+- unique bag (the default type)
+
+  - created by `make_unique_bag(structure)` or `make_bag(structure)`
+  - the underlying data blob is implemented via a `std::unique_ptr`
+  - the bag destroys the data blob in its destructor
+
+- observer bag
+
+  - created by `make_bag(structure, char_carray)`
+  - the underlying data blob is implemented via `char *`
+  - destruction of bag does not affect the data blob
+
 
 ## Changing data layout (*structure*)
 
