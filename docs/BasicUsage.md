@@ -77,6 +77,17 @@ As discussed earlier, there is a good reason to separate *structure* and *data*.
 bag.at<'i'>(5) = 42;
 ```
 
+### Indexing a bag
+
+A bag can be indexed using a state. The above can be rewritten as:
+
+```cpp
+auto state = noarr::idx<'i'>(5);
+bag[state] = 42;
+```
+
+<!-- TODO elaborate -->
+
 
 ## Changing data layout (*structure*)
 
