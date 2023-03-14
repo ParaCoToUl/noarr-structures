@@ -41,12 +41,29 @@ std::size_t ten = my_structure_of_ten | noarr::get_length<'i'>();
 
 ## Functions
 
-There are other functions. `get_size` returns the size in bytes (it does not take any dimension as a parameter, since it considers all dimensions).
+There are other functions.
+
+### get_size
+
+`get_size` returns the size in bytes (it does not take any dimension as a parameter, since it considers all dimensions):
 
 ```cpp
 std::size_t forty = my_structure_of_ten | noarr::get_size();
-std::size_t eight = my_structure_of_ten | noarr::offset<'i'>(2);
+```
 
+### offset
+
+`offset` retrieves offset of a scalar value, allowing for ad-hoc fixing of dimensions:
+
+```cpp
+std::size_t eight = my_structure_of_ten | noarr::offset<'i'>(2);
+```
+
+### get_at
+
+`get_at` returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allowing for ad-hoc fixing of dimensions:
+
+```cpp
 void *data = ...;
 float &last_elem = my_structure_of_ten | noarr::get_at<'i'>(data, 9);
 ```
@@ -179,13 +196,3 @@ using namespace noarr::literals;
 // note that we fix multiple dimensions at one
 float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
 ```
-
-
-## Full list of the provided functions
-
-- `get_length`: gets the length (number of indices) of a structure
-- `get_size`: returns the size of the data represented by the structure in bytes
-- `offset`: retrieves offset of a substructure (if no substructure is specified it defaults to the innermost one: the scalar value), allows for ad-hoc fixing of dimensions
-- `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
-
-You can read about supported functions in detail in [Noarr structures](../include/noarr/structures/README.md "Noarr structures").
