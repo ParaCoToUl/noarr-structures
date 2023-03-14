@@ -96,7 +96,7 @@ bag.at<'i'>(5) = 42;
 
 ### Indexing a bag
 
-A bag can be indexed using a state. The above can be rewritten as:
+A bag can be indexed using a [state](State.md). The above can be rewritten as:
 
 ```cpp
 auto state = noarr::idx<'i'>(5);

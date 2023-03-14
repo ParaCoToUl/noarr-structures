@@ -62,6 +62,7 @@ The size can be queried using [`get_size`](BasicUsage.md#get_size).
 ### state
 
 A collection of [indices](#index) and potentially other parameters needed to query a property of a [structure](#structure).
+See [State documentation](State.md).
 
 ### static value
 
