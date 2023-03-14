@@ -352,6 +352,8 @@ for(auto trav : noarr::traverser(cube)) for(auto trav : trav) for(auto trav : tr
 }
 ```
 
+Alternatively, it is possible to use [noarr iterator](other/Iterator.md), but note that it incurs some overhead that cannot be optimized away by the compiler.
+
 ### Use with OpenMP
 
 For loops can be used with [OpenMP](https://www.openmp.org/).
