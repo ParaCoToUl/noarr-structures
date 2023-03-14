@@ -131,6 +131,23 @@ All the member functions should fail to compile (either by `static_assert` or su
 In the members `strict_offset_of` and `strict_state_at`, the word "strict" refers to the fact that the `Sub` template argument is expected to be strictly a **sub**structure, i.e. never the structure itself.
 Note that these two members should not be called directly, but only via `noarr::offset_of` and `noarr::state_at` respectively, which take care of the non-strict case.
 
+If [mangling](other/Mangling.md) support is desired, the structure must additionally:
+
+- be an instance of some template `T`
+- inherit from an instance of [`noarr::contain`](dev/Contain.md)
+- not define any data members
+- define the following public members:
+  - `static constexpr char name[]` that
+    - either is the qualified identifier of the template `T` (including the leading `::`)
+    - or (if `T` is declared in `namespace noarr`) is an unqualified identifier
+  - `params` member type that
+    - is a type alias to the `noarr::struct_params` instance with the following arguments (corresponding to the actual arguments of the current `T` instance):
+      - structure arguments are described using `noarr::structure_param`
+      - other type arguments are described using `noarr::type_param`
+      - dimension name arguments are described using `noarr::dim_param`
+      - non-type arguments are described using `noarr::value_param`
+  - all constructors inherited from the base class
+
 ### Example manual structure definition
 
 You can start with the following template template. It is a structure with one direct sub-structure `T`, one additional dimension `Dim`, and two examples of plain template parameters `U` and `V`.
