@@ -30,6 +30,14 @@ constexpr proto noarr::into_blocks_dynamic(auto minor_length);
 
 template<char Dim, char DimIsBorder, char DimMajor, char DimMinor>
 constexpr proto noarr::into_blocks_static(auto minor_length);
+
+template<char Dim, char DimMajor, char DimMinor>
+constexpr proto noarr::strip_mine();
+// = noarr::into_blocks<Dim, DimMajor, DimMinor>() ^ noarr::hoist<DimMajor>()
+
+template<char Dim, char DimMajor, char DimMinor>
+constexpr proto noarr::strip_mine(auto minor_length);
+// = noarr::into_blocks<Dim, DimMajor, DimMinor>(minor_length) ^ noarr::hoist<DimMajor>()
 ```
 
 (`proto` is an unspecified [proto-structure](../Glossary.md#proto-structure))
@@ -84,3 +92,37 @@ It is also true in some elements of the last block, namely those that still "fit
 However, if there are any elements that would be past the original length, their `DimIsPresent` will be empty (i.e. length `0` and no valid index).
 
 In case the original length is, in fact, a multiple of block size, all blocks will be complete and `DimIsPresent` will always be non-empty (unit).
+
+### Comparison
+
+`into_blocks` is the easiest to work with and also potentially the most efficient. If you can pad your structure to fit the block size you want to use, we recommend to do so.
+
+Both `into_blocks_static` and `into_blocks_dynamic` impose some restrictions on how the dimensions can be used:
+
+- `DimIsBorder` in `into_blocks_static` is a [tuple-like dimension](../DimensionKinds.md): it cannot be indexed using plain integers.
+  `lit<0>` and `lit<1>` must be used instead. [Traverser](../Traverser.md) is able to detect this and use the proper indexing, but it won't allow some operations.
+  Also, the `DimMajor` and `DimMinor` dimensions cannot be directly used (e.g. queried for length) before `DimIsBorder` is fixed.
+- `DimIsPresent` in `into_blocks_dynamic`, on the other hand, cannot be queried for length until both `DimMajor` and `DimMinor` are fixed.
+  Again, this does not pose a problem for traverser, except for example when one attempts to iterate `DimIsPresent` first.
+
+Both also incur some overhead:
+
+- When a traverser encounters a tuple-like dimension, as in `into_blocks_static`, it is forced to specialize the lambda for all possible indices.
+  In this case, there will be two specializations, one for the body, one for the border. Note that the number of specializations doubles with each layer of `into_blocks_static`.
+  Even if the dimension is used manually, without a traverser, such specialization is usually the only option to access both the body and the border in an algorithm.
+- When using `into_blocks_dynamic` on a CPU, it should never be done in the innermost loop. In other words, there should always be at least one dimension below `DimIsPresent`.
+  (`DimMajor` and `DimMinor` cannot be used for this because they are dependencies for `DimIsPresent`.)
+  If you don't ensure this, there will be a conditional statement in each iteration of the inner loop, leading to missed optimizations, especially vectorization.
+  On GPU, `into_blocks_dynamic` is the recommend option: `DimMajor` and `DimMinor` can be [bound to cpu threads](../Traverser.md#cuda-integration) and `DimIsPresent` checked inside the kernel.
+
+Note that the order of dimensions in the two structures is different: this reflects the fact that the dependencies go in opposite ways
+(`DimMajor` and `DimMinor` depend on `DimIsBorder`, while `DimIsPresent` depends on `DimMajor` and `DimMinor`).
+
+### strip_mine and general notes
+
+Unlike the other three, `strip_mine` does not have a structure on its own: the function is just a shortcut that composes
+a simple `noarr::into_blocks()` or `noarr::into_blocks(length)` with [`noarr::hoist()`](hoist.md) to additionally change the traversing order.
+
+Unless `strip_mine` or `hoist` or some other kind of transformation is used, `into_blocks` and similar are **extremely unlikely to improve performance on their own**,
+since they do not change the access patterns, faciliate vectorization, or explicitly allow bulk processing.
+They are just tools to organize and relabel the data so that other tools (e.g. `hoist` or [cuda integration](../Traverser.md#cuda-integration)) can be instructed what to do.
