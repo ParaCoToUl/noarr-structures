@@ -18,14 +18,14 @@ Note that we have *not* created any "container" yet. `my_structure` is just a de
 (Think *the structure of the data*, not *a data structure*.)
 
 The `^` operator (originally xor in C++) takes the left-hand side and wraps it in the right-hand side.
-The right-hand side is not exactly a [structures](Glossary.md#structure). It is missing an important part.
+The right-hand side is not exactly a [structure](Glossary.md#structure). It is missing an important part.
 Such objects are called [proto-structures](Glossary.md#proto-structure) in noarr, and being used in `^` is their primary purpose.
+[Defining Structures](DefiningStructures.md) describes the `^` operator and its meaning in full detail.
 
 Why two syntaxes? While the former is more familiar to a C++ programmer (and is closer to how the structure is represented),
-it quickly becomes unusable when one starts to nest structures and manipulate the layouts. We will show an example of this later.
-For now, we will stick with the latter syntax.
+it quickly becomes unusable when one starts to nest structures and manipulate the layouts. For now, we will stick with the latter syntax.
 
-And finally, what does `scalar` do? In both syntaxes, the `vector` structure needs another [structure](Glossary.md#structure) to specify the element type.
+And what does `scalar` do? In both syntaxes, the `vector` structure needs another [structure](Glossary.md#structure) to specify the element type.
 We could use another vector for the element to create a 2D layout (*), but here we want the elements to be just simple float values.
 And [`scalar<T>`](structs/scalar.md) is exactly that: a structure that describes a layout consisting of just one `T` value.
 
