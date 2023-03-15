@@ -8,6 +8,9 @@ to select between the original structures (now elements of the whole).
 
 template<char Dim, typename... Ts>
 struct noarr::tuple;
+
+template<char Dim>
+constexpr noarr::tuple<Dim, /*...*/> make_tuple(auto... ts);
 ```
 
 
@@ -27,33 +30,47 @@ The size of a tuple is equal to the sum of the sizes of the [sub-structures](../
 
 ## Usage examples
 
-Here are some of the valid tuple declarations:
+While it is possible to combine tuples with other structures arbitrarily, there are two main usages: array of structures (AoS) and structure of arrays (SoA).
+
+Consider for example a weighted graph (network) represented as a list of edges. Each edge has two endpoints (`int` IDs) and a weight/cost/capacity/... (`float`).
+The simpler case is AoS:
 
 ```cpp
-noarr::tuple<'t', noarr::scalar<int>, 
-	noarr::scalar<float>> t;
-noarr::tuple<'t', noarr::array<'x', 10, 
-	noarr::scalar<float>>, noarr::vector<'x', 
-	noarr::scalar<int>>> t2;
-noarr::tuple<'t', noarr::array<'y', 20000, 
-	noarr::vector<'x', noarr::scalar<float>>>,
-	noarr::vector<'x', noarr::array<'y', 20, 
-	noarr::scalar<int>>>> t3;
+auto edges_aos = noarr::make_tuple<'t'>(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ noarr::array<'i', 1024>();
 ```
 
-We will work with `tuple`s like this:
+It will be useful to extract the `array`:
 
 ```cpp
-// tuple declaration
-noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, 
-	noarr::array<'x', 20, noarr::scalar<int>>> tuple;
-// we will create a bag
-auto tuple_bag = noarr::make_bag(tuple);
-// we have to use noarr::literals namespace 
-	// to be able to index tuples
-// we can put this at the beginning of the file
-using namespace noarr::literals;
-// we index tuple like this
-// note that we fix multiple dimensions at one
-float& value = tuple_bag.at<'t', 'x'>(0_idx, 1);
+auto a = noarr::array<'i', 1024>(); // or sized_vector if it should not be hardcoded
+auto edges_aos = noarr::make_tuple<'t'>(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ a;
+```
+
+Unfortunately, there is currently no way to similarly extract the tuple. Still the extraction of `a` helps.
+Now it will be easier to move the array down, inside the tuple:
+
+```cpp
+auto edges_soa = noarr::make_tuple<'t'>(noarr::scalar<int>() ^ a, noarr::scalar<int>() ^ a, noarr::scalar<float>() ^ a);
+```
+
+The main advantage Noarr tuples bring here is the layout agnosticity. The following algorithm works with both `edges_aos` and `edges_soa`:
+
+```cpp
+auto edges = noarr::make_bag(edges_soa, data_ptr); // or edges_aos
+
+// a static index is necessary to index a tuple -- noarr::lit is a shortcut to create one
+using noarr::lit;
+
+for(std::size_t i = 0; i < num_edges; i++) {
+	// the order of indices is not significant (but do not do this)
+	int x = edges.at<'t', 'i'>(lit<0>, i);
+	int y = edges.at<'i', 't'>(i, lit<1>);
+	float force = edges.at<'t', 'i'>(lit<2>, i);
+
+	// a dimension can be fixed regardless of the layout
+	// (only in AoS the result will be contiguous, but that does not matter much)
+	auto edge = edges ^ noarr::fix<'i'>(i);
+	int also_x = edge.at<'t'>(lit<0>); // i already fixed, t remained
+	// ...
+}
 ```
