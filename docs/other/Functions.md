@@ -1,6 +1,7 @@
 # Other Functions
 
-In addition to [get_length], [get_size], [offset], and [get_at], the library provides the following functions.
+In addition to [`get_length`](../BasicUsage.md#lengths), [`get_size`](../BasicUsage.md#get_size), [`offset`](../BasicUsage.md#offset), and [`get_at`](../BasicUsage.md#get_at),
+the library provides the following functions.
 
 
 ## offset_of
