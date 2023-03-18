@@ -161,6 +161,21 @@ public:
 	 * it continues owning them, while the returned raw bag should be considered a non-owning reference.
 	 */
 	constexpr auto get_ref() const noexcept;
+
+	template<class ProtoStruct, class = std::enable_if_t<ProtoStruct::proto_preserves_layout>>
+	friend constexpr auto operator ^(bag &&s, ProtoStruct p) {
+		auto new_struct = s.structure() ^ p;
+		return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.data_));
+	}
+
+
+	template<class ProtoStruct, class = std::enable_if_t<
+		ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>>>
+	friend constexpr auto operator ^(const bag &s, ProtoStruct p) {
+		auto new_struct = s.structure() ^ p;
+		return bag<decltype(new_struct), BagPolicy>(new_struct, s.data_);
+	}
+
 };
 
 template<class Structure>
@@ -238,21 +253,6 @@ struct to_struct<bag<T, P>> {
 	using type = T;
 	static constexpr T convert(const bag<T, P> &b) noexcept { return b.structure(); }
 };
-
-
-
-template<class Struct, class BagPolicy, class ProtoStruct, class = std::enable_if_t<ProtoStruct::proto_preserves_layout>>
-constexpr auto operator ^(bag<Struct, BagPolicy> &&s, ProtoStruct p) {
-	auto new_struct = s.structure() ^ p;
-	return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.data()));
-}
-
-template<class Struct, class BagPolicy, class ProtoStruct,class = std::enable_if_t<
-	ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>>>
-constexpr auto operator ^(const bag<Struct, BagPolicy> &s, ProtoStruct p) {
-	auto new_struct = s.structure() ^ p;
-	return bag<decltype(new_struct), BagPolicy>(new_struct, s.data());
-}
 
 } // namespace noarr
 
