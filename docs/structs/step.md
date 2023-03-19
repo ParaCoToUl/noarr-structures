@@ -33,3 +33,32 @@ The dimension name, `Dim` is optional for this function, it defaults to the oute
 Both parameters are unsigned integers. `start` must be (strictly) less than `step` (thus `step` must always be nonzero).
 
 See the first section of [Dimension Kinds](../DimensionKinds.md) for the allowed types of `start` and `step` (and `StartT` and `StepT` respectively).
+
+
+## Usage examples
+
+Creating `N` structures using `noarr::step<Dim>(i, N)` (each with a different `i` from 0 inclusive to `N` exclusive) effectively splits the original structure
+into `N` parts that are disjunct (share no elements) and together cover all the elements of the original structure.
+Additionally, if the original length in `Dim` is large enough in comparison to `N`, the resulting parts will have roughly the same number of elements.
+
+This can be used to split work among threads or processing units. [`noarr::cuda_step`](cuda_step.md) is an application of `noarr::step` for CUDA kernels.
+
+In the following example, we split `all` into 4 disjoint parts covering the original structure:
+
+```cpp
+auto all = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42);
+
+auto part0 = all ^ noarr::step(0, 4); // 0,  4,  8, ..., 36, 40
+auto part1 = all ^ noarr::step(1, 4); // 1,  5,  9, ..., 37, 41
+auto part2 = all ^ noarr::step(2, 4); // 2,  6, 10, ..., 38
+auto part3 = all ^ noarr::step(3, 4); // 3,  7, 11, ..., 39
+
+assert((part0 | noarr::get_length<'i'>()) == 11);
+assert((part1 | noarr::get_length<'i'>()) == 11);
+assert((part2 | noarr::get_length<'i'>()) == 10);
+assert((part3 | noarr::get_length<'i'>()) == 10);
+
+assert((part3 | noarr::offset<'i'>(7)) == (all | noarr::offset<'i'>(3 + 4*7)));
+```
+
+`noarr::step` is equivalent to `noarr::step<'i'>`, since it is the only dimension.

@@ -34,3 +34,52 @@ The delta is an unsigned integer: it is not possible to shift by a negative numb
 Shifting with number large enough and indexing with indices large enough to cause wraparound is undefined by noarr and can in some cases result in undefined behavior.
 
 See the first section of [Dimension Kinds](../DimensionKinds.md) for the allowed types of `deltas` (and `DeltaT`).
+
+
+## Usage examples
+
+`noarr::shift` is similar to [`noarr::slice`](slice.md). For example, the following two are equivalent:
+
+```cpp
+auto structure = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42);
+
+auto shifted = structure ^ noarr::shift<'i'>(10);
+auto sliced = structure ^ noarr::slice<'i'>(10, 32); // 32 is the remaining length, 42 - 10
+```
+
+In contrast to `slice`, `shift` can also have its length set externally:
+
+```cpp
+auto structure = noarr::scalar<float>() ^ noarr::vector<'i'>();
+
+auto shifted = structure ^ noarr::shift<'i'>(10);
+
+auto updated = shifted ^ noarr::set_length<'i'>(32); // this sets the length after shifting
+
+// the length of the vector includes the shift, and thus so does the size
+auto size = updated | noarr::get_size();
+assert(size == 42 * sizeof(float));
+```
+
+It is possible to shift multiple dimensions at once:
+
+```cpp
+auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(12) ^ noarr::sized_vector<'i'>(8);
+
+auto submatrix = matrix ^ noarr::shift<'j', 'i'>(3, 2);
+```
+
+Both `shift` and `slice` can also be used in [`traverser::order()`](../Traverser.md#orderproto-structure-customizing-the-traversal) to limit the traversal:
+
+```cpp
+noarr::traverser(matrix).order(noarr::shift<'j', 'i'>(3, 2)).for_each([&](auto state) {
+	// the indices here are already shifted
+	auto [i, j] = noarr::get_indices<'i', 'j'>(state);
+	assert(j >= 3 && i >= 2 && j < 12 && i < 8);
+
+	// use it directly with the original structure (or bag)
+	std::size_t off = matrix | noarr::offset(state);
+});
+```
+
+![Matrix where i is row index, j is column index, first 3 columns and 2 rows are ignored, remaining submatrix is traversed row-by-row](../img/shift-trav.svg)

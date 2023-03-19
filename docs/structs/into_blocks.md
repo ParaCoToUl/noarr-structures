@@ -30,14 +30,6 @@ constexpr proto noarr::into_blocks_dynamic(auto minor_length);
 
 template<char Dim, char DimIsBorder, char DimMajor, char DimMinor>
 constexpr proto noarr::into_blocks_static(auto minor_length);
-
-template<char Dim, char DimMajor, char DimMinor>
-constexpr proto noarr::strip_mine();
-// = noarr::into_blocks<Dim, DimMajor, DimMinor>() ^ noarr::hoist<DimMajor>()
-
-template<char Dim, char DimMajor, char DimMinor>
-constexpr proto noarr::strip_mine(auto minor_length);
-// = noarr::into_blocks<Dim, DimMajor, DimMinor>(minor_length) ^ noarr::hoist<DimMajor>()
 ```
 
 (`proto` is an unspecified [proto-structure](../Glossary.md#proto-structure))
@@ -118,11 +110,135 @@ Both also incur some overhead:
 Note that the order of dimensions in the two structures is different: this reflects the fact that the dependencies go in opposite ways
 (`DimMajor` and `DimMinor` depend on `DimIsBorder`, while `DimIsPresent` depends on `DimMajor` and `DimMinor`).
 
-### strip_mine and general notes
+### general notes
 
-Unlike the other three, `strip_mine` does not have a structure on its own: the function is just a shortcut that composes
-a simple `noarr::into_blocks()` or `noarr::into_blocks(length)` with [`noarr::hoist()`](hoist.md) to additionally change the traversing order.
-
-Unless `strip_mine` or `hoist` or some other kind of transformation is used, `into_blocks` and similar are **extremely unlikely to improve performance on their own**,
+Unless `hoist` or some other kind of transformation is used, `into_blocks` and similar are **extremely unlikely to improve performance on their own**,
 since they do not change the access patterns, faciliate vectorization, or explicitly allow bulk processing.
 They are just tools to organize and relabel the data so that other tools (e.g. `hoist` or [cuda integration](../Traverser.md#cuda-integration)) can be instructed what to do.
+
+
+## Usage examples
+
+Most importantly, these structures can be used to change the order of traversal (strip mining, tiling).
+The best order always depends on the algorithm and the structure. These examples only show the syntax, not the use cases.
+The examples use the following definition:
+
+```cpp
+auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(12) ^ noarr::sized_vector<'i'>(8);
+```
+
+### Default traversal
+
+The traversal in any of the following will be the same:
+
+```cpp
+// the default order
+noarr::traverser(matrix).for_each([&](auto state) {
+	std::size_t off = matrix | noarr::offset(state); // or use bag
+	// ...
+});
+
+// any combination of blocks
+noarr::traverser(matrix).order(noarr::into_blocks<'i', 'I', 'i'>(4)).for_each(/*...*/);
+noarr::traverser(matrix).order(noarr::into_blocks<'j', 'J', 'j'>(4)).for_each(/*...*/);
+noarr::traverser(matrix).order(noarr::into_blocks<'i', 'I', 'i'>(4) ^ noarr::into_blocks<'j', 'J', 'j'>(4)).for_each(/*...*/);
+noarr::traverser(matrix).order(noarr::into_blocks<'j', 'J', 'j'>(4) ^ noarr::into_blocks<'i', 'I', 'i'>(4)).for_each(/*...*/);
+```
+
+![Matrix traversed row-by-row, where i is row index, j is column index](../img/blocks-trav-default.svg)
+
+### Tiling in one dimension
+
+We can split the inner dimension into blocks and then hoist the block index so that it is traversed first:
+
+```cpp
+auto tile_j = noarr::into_blocks<'j', 'J', 'j'>(4) ^ noarr::hoist<'J'>();
+
+noarr::traverser(matrix).order(tile_j).for_each([&](auto state) {
+	std::size_t off = matrix | noarr::offset(state); // or use bag
+	// ...
+});
+```
+
+![Matrix is now split into vertical blocks of size 4, each traversed row-by-row, where i is row index, j is global column index](../img/blocks-trav-tile1.svg)
+
+What happened here is that:
+- the original structure had dimensions `'i'`, `'j'`
+- `into_blocks` split `'j'` into blocks, yielding a structure with `'i'`, `'J'`, `'j'`
+- `hoist` changed the order to `'J'`, `'i'`, `'j'`
+
+### Tiling in both dimensions
+
+It is possible to split both dimensions to achieve true tiling:
+
+```cpp
+auto tile_j = noarr::into_blocks<'j', 'J', 'j'>(4) ^ noarr::hoist<'J'>();
+auto tile_i = noarr::into_blocks<'i', 'I', 'i'>(4) ^ noarr::hoist<'I'>();
+
+noarr::traverser(matrix).order(tile_j ^ tile_i).for_each([&](auto state) {
+	std::size_t off = matrix | noarr::offset(state); // or use bag
+	// ...
+});
+```
+
+![Matrix is now split into square tiles of size 4 by 4, each traversed row-by-row, where i is global row index, j is global column index](../img/blocks-trav-tile2.svg)
+
+What happened here is that:
+- the original structure had dimensions `'i'`, `'j'`
+- `into_blocks` split `'j'` into blocks, yielding a structure with `'i'`, `'J'`, `'j'`
+- `hoist` changed the order to `'J'`, `'i'`, `'j'`
+- `into_blocks` split `'i'` into blocks, yielding a structure with `'J'`, `'I'`, `'i'`, `'j'`
+- `hoist` changed the order to `'I'`, `'J'`, `'i'`, `'j'`
+
+Note that the position of `into_blocks` with respect to the others is insignificant (all that is needed is that a dimension is created before it is hoisted).
+However, the order of `hoist` is significant. For example, if we first hoisted `'I'`, then `'J'`, the result would have `'J'` as the top-most dimension.
+
+### Parallelization
+
+Apart from improving access patterns, `into_blocks` can also be used for parallelization on both CPU and GPU.
+See [traverser CUDA integration](../Traverser.md#cuda-integration) for the GPU case (where it is used to set block dimensions).
+
+To split the computation between multiple CPUs/threads, you will usually use [`noarr::slice`](slice.md).
+
+This example will be about vectorization. Consider a the following example, where we naively sum the elements of an array:
+
+```cpp
+auto input = noarr::make_bag(noarr::scalar<float>() ^ noarr::sized_vector<'i'>(num_elems), input_data);
+
+float sum = 0;
+
+noarr::traverser(input).for_each([&](auto si) {
+	sum += input[si];
+});
+```
+
+The compiler will generally not vectorize this code, since each partial sum depends on the previous (and reordering the elements would change the meaning).
+If we want to make full use of the vector unit, we need multiple partial sums (a vector of them),
+read input in blocks of the same size, and always add a whole block to the vector of sums:
+
+```cpp
+// assuming avx512: 16 elems * 32 bits per elem = 512 bits (it is generally ok to overshoot)
+constexpr std::size_t block_size = 16;
+
+auto input = noarr::make_bag(noarr::scalar<float>() ^ noarr::sized_vector<'i'>(num_elems), input_data);
+
+auto sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', block_size>());
+
+noarr::traverser(sums).for_each([&](auto si) {
+	sums[si] = 0;
+});
+
+// note: we cannot put this into `order()`, since we need
+// the state (`sii` below) to really have both 'I' and 'i'
+auto input_blocks = input ^ noarr::into_blocks_static<'i', '!', 'I', 'i'>(block_size);
+
+noarr::traverser(input_blocks).for_each([&](auto sii) {
+	sums[sii] += input_blocks[sii];
+});
+
+float sum = 0;
+
+noarr::traverser(sums).for_each([&](auto si) {
+	sum += sums[si];
+});
+```

@@ -33,3 +33,22 @@ The `bcast` function can accept a list of dimensions: it will compose multiple `
 Neither `bcast_t` itself nor the first overload of `bcast` set the length of the new dimension - it must be [set externally](../BasicUsage.md#lengths).
 The second overload of `bcast` provides a shortcut for this by setting the length in the structure immediately using [`noarr::set_length`](set_length.md).
 See the first section of [Dimension Kinds](../DimensionKinds.md) for the allowed types of `lengths`.
+
+
+## Usage examples
+
+This structure can be used to have a [traverser](../Traverser.md) visit each element repeatedly:
+
+```cpp
+auto structure = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42);
+
+noarr::traverser(structure ^ noarr::bcast<'r'>(5)).for_each([&](auto state) {
+	int round = noarr::get_index<'r'>(state);
+
+	// fine, structure will ignore 'r' (same with e.g. bag[] or get_at)
+	std::size_t off = structure | noarr::offset(state);
+});
+```
+
+Broadcast can also be used to make a structure appear as having more dimensions without really changing the dimensionality of the data.
+Specifically, if the length is set to one (`noarr::bcast<'...'>(1)`), it will still appear as having the same elements.
