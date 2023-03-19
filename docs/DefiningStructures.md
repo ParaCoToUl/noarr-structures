@@ -224,7 +224,9 @@ When defining a proto-structure manually, you will probably want to define a str
 
 A proto-structure must have at least the following two members:
 
-- `static constexpr bool is_proto_struct` data member that evaluates to `true`
+- `static constexpr bool proto_preserves_layout` data member
+  - evaluates to `true` iff the structure it provides uses exactly the same layout as the original
+    (i.e. it delegates calls to `strict_offset_of` and `size`, only updating state, but returning the same value)
 - `instantiate_and_construct` const-qualified member function template that
   - can be called as `.instantiate_and_construct(Struct)`, where `Struct` is a structure
   - returns a structure that contains `Struct` as a [sub-structure](Glossary.md#sub-structure) (not necessarily a direct one)
@@ -241,7 +243,7 @@ struct bar {
 	// we also need to know the values of the fields, again except for the sub-structure
 	U u;
 
-	static constexpr bool is_proto_struct = true;
+	static constexpr bool proto_preserves_layout = true or false;
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
