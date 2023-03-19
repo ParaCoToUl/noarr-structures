@@ -71,7 +71,7 @@ noarr::traverser(matrix).order(noarr::slice<'i'>(2, 5)).for_each([&](auto state)
 });
 ```
 
-![Matrix where i is row index, j is column index, only rows 2 inclusive to 7 exclusive are traversed (row-by-row)](../img/slice-trav-cols.svg)
+![Matrix where i is row index, j is column index, only rows 2 inclusive to 7 exclusive are traversed (row-by-row)](../img/slice-trav-rows.svg)
 
 ### In data modeling
 
