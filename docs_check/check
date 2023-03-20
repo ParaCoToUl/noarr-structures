@@ -1,0 +1,53 @@
+#!/bin/sh -e
+
+my_dir="docs_check"
+
+echo
+
+cd "`dirname "$0"`/.."
+echo "Repo root: $PWD"
+
+output=`mktemp`
+snipdir=`mktemp -d`
+echo "Created snippets directory: $snipdir"
+trap "echo 'Deleting: $snipdir, $output'; rm -r '$snipdir' '$output'" EXIT
+
+include="include"
+include_dummy="$my_dir/include"
+aout="$snipdir/a.out"
+
+echo
+
+if ! python3 -B "$my_dir/inner-check.py" "$snipdir" "$include" docs/*.md docs/*/*.md > "$output" 2>&1
+then
+	cat "$output"
+	echo
+	false
+fi
+
+if git --no-pager diff --no-index "$output" "$my_dir/expected-warnings"
+then
+	echo Markdown links and formatting OK
+else
+	test -z "$CI" # fail iff in CI
+fi
+
+echo
+echo "Will compile: $snipdir/"
+
+echo 'GCC, C++17...'
+g++ --std=c++17 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
+g++ --std=c++17 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
+
+echo 'Exec, C++17...'
+"$aout"
+
+echo 'GCC, C++20...'
+g++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
+g++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
+
+echo 'GCC, C++23...'
+g++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
+g++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
+
+echo 'OK'
