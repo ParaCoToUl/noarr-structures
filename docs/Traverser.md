@@ -454,18 +454,18 @@ Their names are `noarr::tbb_reduce` and `noarr::tbb_reduce_bag` and behave both 
 In the following example, we use the latter to sum the rows and columns of a matrix:
 
 ```cpp
-auto matrix = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>(), matrix_data);
-auto col_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 400>()); // a row vector
-auto row_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>()); // a column vector
+auto matrix = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 300>() ^ noarr::array<'i', 400>(), matrix_data);
+auto row_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 400>()); // a column vector
+auto col_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 300>()); // a row vector
 
 // row sums - serial version for comparison:
 
-noarr::traverser(col_sums).for_each([&](auto state) {
-	col_sums[state] = 0;
+noarr::traverser(row_sums).for_each([&](auto state) {
+	row_sums[state] = 0;
 });
 
 noarr::traverser(matrix).for_each([&](auto state) {
-	col_sums[state] += matrix[state];
+	row_sums[state] += matrix[state];
 });
 
 // row sums - parallel version:
@@ -476,7 +476,7 @@ noarr::tbb_reduce_bag(
 
 	// fill the output with neutral elements (zeros) with respect to the operation (+)
 	[](auto state, auto &out) {
-		out[state] = 0; // out is a bag: col_sums or its copy
+		out[state] = 0; // out is a bag: row_sums or its copy
 	},
 
 	// accumulate elements into (partial) result
@@ -490,23 +490,24 @@ noarr::tbb_reduce_bag(
 	},
 
 	// output bag
-	col_sums
+	row_sums
 );
 
 // column sums - parallel version:
 
-noarr::tbb_reduce_bag(/* ... all args the same ... */, row_sums);
+noarr::tbb_reduce_bag(/* ... all args the same ... */, col_sums);
 ```
 
 These functions automatically detect the parallelization strategy.
-The input structure is always split according to its outermost dimension, in this case `'j'` (in both .
-Then, depending on the output structure, the library decides whether it is necessary to create multiple thread-local copies of the output structure.
-In the above example, the reduction into `col_sums` can be done on one copy without a conflict, since two threads never use the same `'j'`,
-and therefore they never access the same element of `col_sums`.
-On the other hand, `row_sums` will be copied (one copy per thread), because the structure only has the `'i'` dimension (it ignores the index in `'j'`).
-Although two threads never use the same `'j'`, they can (and often will) use the same `'i'` at the same time, therefore accessing the same element.
+The input structure is always split according to its outermost dimension, in this case `'i'` (in both reductions).
 
-<!-- TODO image for tbb reduce -->
+![When parallelizing, accesses to `row_sums` go to different elements, while accesses to `col_sums` go to overlapping sets of elements](img/trav-tbb-reduce.svg)
+
+Then, depending on the output structure, the library decides whether it is necessary to create multiple thread-local copies of the output structure.
+In the above example, the reduction into `row_sums` can be done on one copy without a conflict, since two threads never use the same `'i'`,
+and therefore they never access the same element of `row_sums`.
+On the other hand, `col_sums` will be copied (one copy per thread), because the structure only has the `'j'` dimension (it ignores the index in `'i'`).
+Although two threads never use the same `'i'`, they can (and often will) use the same `'j'` at the same time, therefore accessing the same element.
 
 The two structures need not be related and the output structure may be accessed using a different set of dimensions.
 In the following example, the input structure only has an `'i'` dimension, while the output structure only has `'v'`:
