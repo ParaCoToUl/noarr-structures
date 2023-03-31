@@ -65,9 +65,11 @@ auto s4 = noarr::idx<'x', 'y'>(lit<3>, 4);
 auto s5 = noarr::make_state<noarr::index_in<'x'>, noarr::index_in<'y'>, noarr::length_in<'x'>, noarr::cuda_stripe_index>(lit<3>, 4, lit<10>, threadIdx.x + (1<<i));
 ```
 
+Multiple states can also be merged using the `&` operator.
+
 ### Retrieving state items
 
-State items can be retrieved using its methods or (somewhat more conveniently) using some shortcut functions:
+State items can be retrieved using the state's methods or (somewhat more conveniently) using some shortcut functions:
 
 ```cpp
 auto my_state = s5; // or s1 or s2 or s3 or s4, from the previous snippet

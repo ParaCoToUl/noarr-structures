@@ -1,6 +1,6 @@
 # Developer documentation for Noarr Structures
 
-This directory contains sections that are interesting mostly or exclusively to Noarr developers.
+This directory contains sections that are interesting mostly or exclusively to noarr developers.
 
 Most of the library's functionality is in the structure classes and shortcuts for these.
 The library allows clients to [define their own structures](../DefiningStructures.md#defining-structures-manually),

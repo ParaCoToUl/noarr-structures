@@ -20,15 +20,16 @@ global_decls = '''
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <cstdint>
 #include <cstring>
 '''
 
 substitutions = {
 	('docs/BasicUsage.md', 1): {'auto': ''},
-	('docs/BasicUsage.md', 15): {'n(rows|cols)': '42'},
-	('docs/BasicUsage.md', 16): {_EPILOG: _tmp_mulsc + 'void UNIQ() { mul_by_scalar(sr, nullptr, 4.2); mul_by_scalar(sc, nullptr, 4.2); }\n'},
-	('docs/BasicUsage.md', 17): {_EPILOG: _tmp_mulsc + 'void UNIQ() { mul_by_scalar(br, 4.2); mul_by_scalar(bc, 4.2); }\n'},
+	('docs/BasicUsage.md', 16): {'n(rows|cols)': '42'},
+	('docs/BasicUsage.md', 17): {_EPILOG: _tmp_mulsc + 'void UNIQ() { mul_by_scalar(sr, nullptr, 4.2); mul_by_scalar(sc, nullptr, 4.2); }\n'},
 	('docs/BasicUsage.md', 18): {_EPILOG: _tmp_mulsc + 'void UNIQ() { mul_by_scalar(br, 4.2); mul_by_scalar(bc, 4.2); }\n'},
+	('docs/BasicUsage.md', 19): {_EPILOG: _tmp_mulsc + 'void UNIQ() { mul_by_scalar(br, 4.2); mul_by_scalar(bc, 4.2); }\n'},
 	('docs/DefiningStructures.md', 5): {'image': 'UNIQ'},
 	('docs/DefiningStructures.md', 6): {'using signature = \.\.\.;': '', '\.\.\.': '0'},
 	('docs/DimensionKinds.md', 0): {_PROLOG: 'using noarr::lit;', '.*incorrect.*': ''},

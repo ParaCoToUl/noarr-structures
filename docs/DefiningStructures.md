@@ -1,6 +1,6 @@
 # Defining Structures
 
-A noarr structure is an object that describes the mapping between [indices](Glossary.md#index) and memory.
+A noarr structure is an object that describes the mapping from [indices](Glossary.md#index) to memory.
 Noarr provides simple building blocks that can be composed together to define custom structures.
 
 The most trivial building block is Scalar. Scalar itself happens to be a noarr structure.
@@ -104,16 +104,16 @@ A structure class must have at least the following public members:
   - should describe the dimensions accepted in the `s` argument of the remaining members
 - `size` const-qualified member function template that
   - can be called as `.size(s)` where `s` is an instance of [`state`](State.md)
-  - returns a `std::size_t` or a `std::integral_constant<std::size_t, *>`
+  - returns a `std::size_t` or a `std::integral_constant<std::size_t, N>`
   - should return the size of the structure in bytes
 - `strict_offset_of` const-qualified member function template that
   - can be called as `.strict_offset_of<Sub>(s)` where `Sub` is a structure type and `s` is an instance of [`state`](State.md)
-  - returns a `std::size_t` or a `std::integral_constant<std::size_t, *>`
+  - returns a `std::size_t` or a `std::integral_constant<std::size_t, N>`
   - should return the offset of a [sub-structure](Glossary.md#sub-structure) of type `Sub`
   - is recommended to call `offset_of<Sub>` on one of its sub-structures
 - `length` const-qualified member function template that
   - can be called as `.length<QDim>(s)` where `QDim` is a dimension name (`char`) and `s` is an instance of [`state`](State.md)
-  - returns a `std::size_t` or a `std::integral_constant<std::size_t, *>`
+  - returns a `std::size_t` or a `std::integral_constant<std::size_t, N>`
   - should return the [length](Glossary.md#length) in dimension `QDim`
 - `strict_state_at` const-qualified member function template that
   - can be called as `.strict_state_at<Sub>(s)` where `Sub` is a structure type and `s` is an instance of [`state`](State.md)
@@ -147,6 +147,8 @@ If [mangling](other/Mangling.md) support is desired, the structure must addition
       - dimension name arguments are described using `noarr::dim_param`
       - non-type arguments are described using `noarr::value_param`
   - all constructors inherited from the base class
+
+Using `contain` is recommended anyway, to avoid having the compiler inserting non-empty unused space in place of empty fields (which is otherwise required by C++).
 
 ### Example manual structure definition
 

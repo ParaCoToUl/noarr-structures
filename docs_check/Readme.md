@@ -28,8 +28,9 @@ Otherwise, the list of warning does not cause the script to stop nor return fail
 Each Markdown file is converted to up to two C++ files.
 One file for block-level declarations and statements.
 One file for namespace-level declarations (used for templates).
+The files are compiled separately, neither is included in the other.
 
-The former file looks roughly like this:
+The block-level file (used for non-templates) looks roughly like this:
 
 ```cpp
 ...()
@@ -44,7 +45,7 @@ The former file looks roughly like this:
 }
 ```
 
-The latter file looks roughly like this:
+The namespace-level file (used for templates) looks roughly like this:
 
 ```cpp
 namespace ... {

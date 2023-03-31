@@ -18,7 +18,7 @@ tickpatt = Pattern('`.*?`')
 linkpatt = Pattern(r'\[(.*?)\]\((.*?)\)')
 cudapatt = Pattern('(.*)<<<(.*)>>>(.*)')
 
-anchor_ign_patt = Pattern('[().:<>`]')
+anchor_ign_patt = Pattern('[(),.:<>`]')
 
 def clean_anchor(text):
 	return anchor_ign_patt.sub('', text).replace(' ', '-').lower()

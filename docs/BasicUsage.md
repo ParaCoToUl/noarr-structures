@@ -6,7 +6,7 @@ First, we have to `#include` the `noarr` library:
 #include <noarr/structures_extended.hpp>
 ```
 
-We start by modeling the layout. For example, either of the following two equivalent definitions describes a list of floats (indexed by some `'i'`):
+We start by modeling the layout. For example, each of the following two equivalent definitions describes a list of floats (indexed by some `'i'`):
 
 ```cpp
 noarr::vector<'i', noarr::scalar<float>> my_structure;
@@ -25,11 +25,19 @@ Such objects are called [proto-structures](Glossary.md#proto-structure) in noarr
 Why two syntaxes? While the former is more familiar to a C++ programmer (and is closer to how the structure is represented),
 it quickly becomes unusable when one starts to nest structures and manipulate the layouts. For now, we will stick with the latter syntax.
 
-And what does `scalar` do? In both syntaxes, the `vector` structure needs another [structure](Glossary.md#structure) to specify the element type.
-We could use another vector for the element to create a 2D layout (*), but here we want the elements to be just simple float values.
-And [`scalar<T>`](structs/scalar.md) is exactly that: a structure that describes a layout consisting of just one `T` value.
+In both syntaxes, we use `noarr::scalar<float>` instead of `float` directly.
+This is because, as said above, we are *not* constructing a vector, but rather a description of one.
+For this description, we do not need a `float` value, just the description of a layout consisting of one `float` value.
+And [`scalar<T>`](structs/scalar.md) is exactly that.
 
-(*): and even so, we would need an element type for the inner vector; it cannot be vecturtles all the way down.
+We could use any other structure for the vector element. In the following example, we use `my_structure`:
+
+```cpp
+auto my_matrix = my_structure ^ noarr::vector<'j'>();
+```
+
+This creates a vector of vectors of scalar `float` values, in other words, a matrix of `float`s.
+These definitions can of course be inlined:
 
 ```cpp
 auto my_matrix = noarr::scalar<float>() ^ noarr::vector<'i'>() ^ noarr::vector<'j'>();
@@ -46,7 +54,7 @@ auto my_matrix_3x3 = my_matrix ^ noarr::set_length<'i', 'j'>(3, 3);
 ```
 
 Like `vector`, [`set_length`](structs/set_length.md) is a [proto-structure](Glossary.md#proto-structure).
-It does not add any dimensions or elements, it just communicates to the underlying `vector` what it should use for its length.
+However, it does not add any dimensions or elements, it just communicates to the underlying `vector` what it should use for its length.
 Note that the original structure is not modified in-place. Instead, a new structure is returned.
 
 You can also use [`sized_vector`](structs/sized_vector.md) or [`array`](structs/array.md), which are shortcuts for a plain `vector` combined with a `set_length`.
@@ -60,7 +68,7 @@ std::size_t three = my_matrix_3x3 | noarr::get_length<'i'>(); // same with 'j'
 ```
 
 Notice the difference in the operator used (`|` and not `^`). That is because `get_length` is *not* a [proto-structure](Glossary.md#proto-structure).
-It is a noarr function and `|` calls the function on the structure. You can read more about noarr functions in the next section.
+It is a *noarr function* and `|` calls the function on the structure. You can read more about noarr functions in the next section.
 
 
 ## Functions
@@ -72,7 +80,7 @@ The most important functions defined by the library are listed below.
 
 `get_size` returns the [size](Glossary.md#size) of the structure in bytes. Do not confuse this with length (described above).
 A structure has one length per [dimension](Glossary.md#dimension); it is the number of valid indices.
-On the other hand, a structure only has one size. It takes into accounts all parts of the structure, including the scalar type(s):
+On the other hand, a structure has only one size. It takes into account all parts of the structure, including the scalar type(s):
 
 ```cpp
 std::size_t forty = my_structure_of_ten | noarr::get_size(); // 10 * sizeof(float)
@@ -81,7 +89,8 @@ std::size_t thirty_six = my_matrix_3x3 | noarr::get_size(); // 3 * 3 * sizeof(fl
 
 ### offset
 
-`offset` retrieves offset of a scalar value. The result is in bytes again. You need to pass an [index](Glossary.md#index) in each [dimension](Glossary.md#dimension):
+`offset` retrieves the offset of a scalar value. The result is in bytes again.
+You need to pass an [index](Glossary.md#index) in each [dimension](Glossary.md#dimension):
 
 ```cpp
 std::size_t eight = my_structure_of_ten | noarr::offset<'i'>(2); // 2 * sizeof(float)
@@ -135,6 +144,7 @@ A bag is an object that remembers both. It is usually created using one of these
 auto unique_bag = noarr::make_bag(my_structure_of_ten);
 auto ref_bag = noarr::make_bag(my_structure_of_ten, data_ptr);
 ```
+
 The first variant allocates the memory (according to [`get_size`](#get_size)) and deallocates the memory in the bag's destructor.
 The second variant uses a caller-supplied pointer. The caller must ensure there is enough space, and must deallocate the data after the bag is destroyed (the bag does neither).
 
@@ -158,7 +168,7 @@ This holds in simple cases where it is defined in the same function, but not for
 
 ```cpp
 template<typename Bag>
-void foo(Bag bag) {
+void foo(Bag &bag) {
 	float &last_elem = bag.template at<'i'>(9);
 	// ...
 }
@@ -167,7 +177,7 @@ void foo(Bag bag) {
 ### Copying or Moving a Bag
 
 When defined as in the example above, `unique_bag` behaves like a `std::unique_ptr`. It cannot be copied, and moving it clears the original (makes it null).
-On the other hand, `ref_ptr` behaves like a reference or raw pointer.
+On the other hand, `ref_bag` behaves like a reference or raw pointer.
 There is no difference between copying and moving (both the original and the new bag are valid and point to the same data, neither being the owner).
 
 It is possible to get a reference bag pointing to a unique bag:
@@ -198,7 +208,7 @@ auto matrix_columns = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(nrows) ^
 auto matrix_rows = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(ncols) ^ noarr::sized_vector<'i'>(nrows);
 ```
 
-Algorithms that can work with one should be able to work with the other. However, Noarr needs to know the structure at compile time (for performance).
+Algorithms that can work with one should be able to work with the other. However, noarr needs to know the structure at compile time (for performance).
 So the right approach is to template all functions and then select between compiled versions. Here we make use of the fact that [dimensions](Glossary.md#dimension) are named:
 
 ```cpp

@@ -53,7 +53,7 @@ Now it will be easier to move the array down, inside the tuple:
 auto edges_soa = noarr::make_tuple<'t'>(noarr::scalar<int>() ^ a, noarr::scalar<int>() ^ a, noarr::scalar<float>() ^ a);
 ```
 
-The main advantage Noarr tuples bring here is the layout agnosticity. The following algorithm works with both `edges_aos` and `edges_soa`:
+The main advantage noarr tuples bring here is the layout agnosticity. The following algorithm works with both `edges_aos` and `edges_soa`:
 
 ```cpp
 auto edges = noarr::make_bag(edges_soa, data_ptr); // or edges_aos

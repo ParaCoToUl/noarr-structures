@@ -10,7 +10,7 @@ In general, noarr supports two ways to represent indices/lengths/offsets/sizes:
   They occupy the necessary amount of bytes (usually 8) and cannot be derived from the type.
   Note that numeric literals are also considered dynamic unless marked otherwise (this is a property of C++ and cannot be overriden by noarr).
 - **static** values are already known at compile time (but may be used at runtime).
-  They are represented using the `std::integral_constant<std::size_t, *>` family of types.
+  They are represented using the `std::integral_constant<std::size_t, N>` family of types.
   They usually take no space at all, since all the necessary information is stored in its type.
   Noarr provides a shortcut to create such values: `noarr::lit<N>`, e.g. `noarr::lit<42>`, without parentheses.
 
@@ -29,8 +29,8 @@ std::size_t a1 = decltype(answer)::value; // correct, but unnecessarily complex
 constexpr std::size_t a2 = decltype(answer)::value; // correct, can be used for template parameter
 auto answer2 = lit<a2>; // correct, conversion back to integral_constant
 
-constexpr std::size_t a3 = answer; // incorrect!
-constexpr std::size_t a4 = answer.value; // incorrect!
+constexpr std::size_t a3 = answer; // incorrect! (conversion from non-constexpr value)
+constexpr std::size_t a4 = answer.value; // incorrect! (member of non-constexpr value, albeit static)
 ```
 
 
@@ -55,7 +55,7 @@ auto soffset6 = structure | noarr::offset<'x'>(lit<6>); // returns 6*sizeof(floa
 Note that in some cases (not this one), the length may depend on other parameters, some of which may not yet be known.
 See [`noarr::into_blocks`](structs/into_blocks.md) for an example.
 
-In the [signature](Signature.md), vector-like dimensions are represented as `noarr::function_sig<Dim, noarr::dynamic_arg_length, *>`.
+In the [signature](Signature.md), vector-like dimensions are represented as `noarr::function_sig<Dim, noarr::dynamic_arg_length, T>`.
 [Traverser](Traverser.md) iterates vector-like dimensions using for-loops.
 A single instance of the lambda body is created and it runs multiple times.
 
@@ -87,7 +87,7 @@ auto structure = noarr::scalar<float>() ^ noarr::array<'x', 42>();
 // in this case, array will behave exactly the same as sized_vector(lit)
 ```
 
-In the [signature](Signature.md), array-like dimensions are represented as `noarr::function_sig<Dim, noarr::static_arg_length<*>, *>`.
+In the [signature](Signature.md), array-like dimensions are represented as `noarr::function_sig<Dim, noarr::static_arg_length<N>, T>`.
 [Traverser](Traverser.md) iterates array-like in the same way as vector-like dimensions -- using for loops.
 
 
@@ -99,7 +99,7 @@ Only static values can be used for indexing and the result type may depend on th
 The simplest way to create a structure with such a dimension is [`noarr::tuple`](structs/tuple.md):
 
 ```cpp
-auto structure = noarr::tuple<'x', noarr::scalar<long>, noarr::scalar<short>>();
+auto structure = noarr::make_tuple<'x'>(noarr::scalar<long>(), noarr::scalar<short>());
 
 auto size = structure | noarr::get_size(); // returns sizeof(long)+sizeof(short) as a *static* value
 auto length = structure | noarr::get_length<'x'>(); // returns 2 as a static value
@@ -110,7 +110,7 @@ auto soffset2 = structure | noarr::offset<'x'>(lit<2>); // fails at compile time
 auto doffset1 = structure | noarr::offset<'x'>(1); // fails at compile time (tuple index must be static)
 ```
 
-In the [signature](Signature.md), tuple-like dimensions are represented as `noarr::dep_function_sig<Dim, **>`.
+In the [signature](Signature.md), tuple-like dimensions are represented as `noarr::dep_function_sig<Dim, T...>`.
 [Traverser](Traverser.md) iterates tuple-like dimensions using template specialization.
 The lambda body is specialized for each possible index.
 
@@ -148,5 +148,5 @@ auto size = structure | noarr::get_size(state42); // returns 42*sizeof(float) as
 
 Note that `noarr::sized_vector<Dim>(len)` used in the first two kinds is actually just a shortcut for `noarr::vector<Dim>() ^ noarr::set_length<Dim>(len)`.
 
-In the [signature](Signature.md), tuple-like dimensions are represented as `noarr::function_sig<Dim, noarr::unknown_arg_length, *>`.
+In the [signature](Signature.md), unknown length dimensions are represented as `noarr::function_sig<Dim, noarr::unknown_arg_length, T>`.
 [Traverser](Traverser.md) cannot be used until the length is set.

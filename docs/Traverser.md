@@ -1,6 +1,9 @@
 # Traverser
 
 Traverser is a tool for multi-dimensional [structure](Glossary.md#structure) iteration.
+It can process individual elements ([`for_each(lambda)`](#for_eachlambda)) or whole sections ([`for_dims<...>(lambda)`](#for_dimslambda)) of a structure.
+It can also work with over [multiple structures](#traversing-multiple-structures-at-once) at once.
+Traverser is also the library's main tool for data parallelism.
 
 
 ## `for_each(lambda)`

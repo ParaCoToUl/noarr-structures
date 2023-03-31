@@ -3,7 +3,7 @@
 ### `^` (operator)
 
 The `^` operator can be used to compose [structures](#structure) and [proto-structures](#proto-structure) into larger (proto-)structures.
-It was chosen for its visual similarity with a common symbol for exponentiation.
+It was chosen for its visual similarity with a common symbol for exponentiation (which in turn was chosen for its meaning in type theory, where `T ^ n` means `n`-element array of `T`).
 
 ### `|` (operator)
 
@@ -69,7 +69,8 @@ See [State documentation](State.md).
 
 ### static value
 
-A value ([index](#index), [length](#length), [state](#state) item, [structure](#structure) property, ...) that is known at compile time. Represented using `std::integral_constant<std::size_t, *>`.
+A value ([index](#index), [length](#length), [state](#state) item, [structure](#structure) property, ...) that is known at compile time.
+Can be written as `noarr::lit<N>` (which is a shortcut for `std::integral_constant<std::size_t, N>()`).
 See [Dimension Kinds](DimensionKinds.md).
 
 ### structure
@@ -79,9 +80,9 @@ The structure itself does not hold the elements (see [bag](BasicUsage.md#bag) fo
 
 ### sub-structure
 
-[Structures](#structure) are often defined in terms of other structures. A sub-structure U of a structure T is any structure used in the definition of T.
-Memory that is laid out according to T will usually contain parts that are laid out according to U.
-There could possibly be more copies of U, or the layout of T could possibly consist exactly of the layout of V.
+[Structures](#structure) are often defined in terms of other structures. A sub-structure *U* of a structure *T* is any structure used in the definition of *T*.
+Memory that is laid out according to *T* will usually contain parts that are laid out according to *U*.
+There could possibly be more copies of *U*, or the layout of *T* could possibly consist exactly of the layout of *U*.
 
 ### traverser
 
