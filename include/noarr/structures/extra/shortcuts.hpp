@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_SHORTCUTS_HPP
 
 #include "../base/utility.hpp"
+#include "../extra/funcs.hpp"
 #include "../structs/bcast.hpp"
 #include "../structs/layouts.hpp"
 #include "../structs/blocks.hpp"
