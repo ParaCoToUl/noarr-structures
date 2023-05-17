@@ -191,9 +191,9 @@ private:
 			constexpr std::size_t len = std::tuple_size_v<typename dim_sig::ret_sig_tuple>;
 			for_each_impl_dep<Dim, Branches...>(f, state, std::make_index_sequence<len>());
 		} else {
-			std::size_t len = top_struct().template length<Dim>(state);
-			for(std::size_t i = 0; i < len; i++)
-				for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(i));
+			std::ptrdiff_t len = top_struct().template length<Dim>(state);
+			for(std::ptrdiff_t i = 0; i < len; i++)
+				for_each_impl(Branches()..., f, state.template with<index_in<Dim>>((std::size_t) i));
 		}
 	}
 	template<class F, char... Dims, class... IdxT>
