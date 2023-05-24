@@ -328,6 +328,93 @@ struct auto_step_proto : contain<StartT, StrideT> {
 template<class StartT, class StrideT>
 constexpr auto step(StartT start, StrideT stride) noexcept { return auto_step_proto<good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
 
+template<char Dim, class T>
+struct reverse_t : contain<T> {
+	using base = contain<T>;
+	using base::base;
+
+	static constexpr char name[] = "reverse_t";
+	using params = struct_params<
+		dim_param<Dim>,
+		structure_param<T>>;
+
+	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+
+private:
+	template<class Original>
+	struct dim_replacement {
+		using type = Original;
+	};
+	template<class... RetSigs>
+	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
+		using original = dep_function_sig<Dim, RetSigs...>;
+		static constexpr std::size_t len = sizeof...(RetSigs);
+
+		template<class Indices = std::make_index_sequence<len>>
+		struct pack_helper;
+		template<std::size_t... Indices>
+		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<len-1-Indices>...>; };
+
+		using type = typename pack_helper<>::type;
+	};
+public:
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+
+	template<class State>
+	constexpr auto sub_state(State state) const noexcept {
+		using namespace constexpr_arithmetic;
+		if constexpr(State::template contains<index_in<Dim>>) {
+			auto tmp_state = state.template remove<index_in<Dim>>();
+			return tmp_state.template with<index_in<Dim>>(sub_structure().template length<Dim>(tmp_state) - make_const<1>() - state.template get<index_in<Dim>>());
+		} else {
+			return state;
+		}
+	}
+
+	template<class State>
+	constexpr auto size(State state) const noexcept {
+		return sub_structure().size(sub_state(state));
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_offset_of(State state) const noexcept {
+		return offset_of<Sub>(sub_structure(), sub_state(state));
+	}
+
+	template<char QDim, class State>
+	constexpr auto length(State state) const noexcept {
+		using namespace constexpr_arithmetic;
+		if constexpr(QDim == Dim) {
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+		}
+		return sub_structure().template length<QDim>(state);
+	}
+
+	template<class Sub, class State>
+	constexpr auto strict_state_at(State state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
+	}
+};
+
+template<char Dim>
+struct reverse_proto {
+	static constexpr bool proto_preserves_layout = true;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reverse_t<Dim, Struct>(s); }
+};
+
+/**
+ * @brief reverses an index (or indices) given by dimension name(s) in a structure
+ *
+ * @tparam Dim: the dimension names
+ */
+template<char... Dim>
+constexpr auto reverse() noexcept { return (... ^ reverse_proto<Dim>()); }
+
+template<>
+constexpr auto reverse<>() noexcept { return neutral_proto(); }
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_SLICE_HPP
