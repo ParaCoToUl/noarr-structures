@@ -102,7 +102,7 @@ private:
 public:
 
 	template<char QDim, class State>
-	constexpr std::size_t length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept {
 		return base::template get<first_match<QDim>>().template length<QDim>(state);
 	}
 };
