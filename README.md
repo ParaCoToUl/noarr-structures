@@ -113,15 +113,24 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 Make sure you are in the root folder. In the terminal (Linux bash, Windows Cygwin, or Gitbash), run the following commands:
 
 ```sh
-# creates the build directory
+# unless you are already in the `tests` directory:
+#  enter the `tests` directory
+cd tests
+
+# create the `build` directory
 cmake -E make_directory build
 
-# enters the build directory
+# enter the `build` directory
 cd build
 
-# configures the build environment
+# configure the build environment
 cmake ..
 
-# builds the project according to the configuration
+# build the `test-runner` executable according to the configuration
 cmake --build .
+
+# NOTE: `cmake --build . -j<NUMBER_OF_THREADS>` might be significantly faster
+
+# run the test executable
+./test-runner
 ```

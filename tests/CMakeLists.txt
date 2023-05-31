@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 Include(FetchContent)
 
 # set the project name
-project(Noarr VERSION 0.17.0)
+project(NoarrTests VERSION 0.17.0)
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -17,11 +17,10 @@ FetchContent_MakeAvailable(Catch2)
 
 # setup the test runner executable
 file(GLOB_RECURSE tests_source_files CONFIGURE_DEPENDS
-    "tests/*_test.hpp"
-    "tests/*_test.cpp"
+    "*_test.cpp"
 )
 add_executable(test-runner ${tests_source_files})
-target_include_directories(test-runner PUBLIC include)
+target_include_directories(test-runner PUBLIC ../include)
 target_link_libraries(test-runner PRIVATE Catch2::Catch2WithMain)
 
 # ask compiler to print maximum warnings

@@ -312,7 +312,7 @@ _deps
 # CTest & testing
 /ParseAndAddCatchTests.cmake
 /DartConfiguration.tcl
-/build
+**/build
 
 # CMake stuff on Windows
 /Debug
