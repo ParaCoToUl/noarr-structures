@@ -97,6 +97,9 @@ template<class ValueType>
 struct scalar_sig {
 	scalar_sig() = delete;
 
+	template<template<class Original> class Replacement, char... QDims>
+	using replace = scalar_sig;
+
 	template<char QDim>
 	static constexpr bool all_accept = false;
 	template<char QDim>
