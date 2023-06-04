@@ -19,61 +19,63 @@ struct state_item {
 };
 
 namespace helpers {
-	template<class... StateItems>
-	struct state_items_pack {
-		template<class HeadStateItem>
-		using prepend = state_items_pack<HeadStateItem, StateItems...>;
-	};
 
-	template<class Tag, class... StateItems>
-	struct state_index_of;
+template<class... StateItems>
+struct state_items_pack {
+	template<class HeadStateItem>
+	using prepend = state_items_pack<HeadStateItem, StateItems...>;
+};
 
-	template<class Tag, class ValueType, class... TailStateItems>
-	struct state_index_of<Tag, state_item<Tag, ValueType>, TailStateItems...> {
-		static constexpr auto result = some<std::size_t>{0};
-	};
+template<class Tag, class... StateItems>
+struct state_index_of;
 
-	template<class Tag, class HeadStateItem, class... TailStateItems>
-	struct state_index_of<Tag, HeadStateItem, TailStateItems...> {
-		static constexpr auto result = state_index_of<Tag, TailStateItems...>::result.and_then([](auto v){return v+1;});
-	};
+template<class Tag, class ValueType, class... TailStateItems>
+struct state_index_of<Tag, state_item<Tag, ValueType>, TailStateItems...> {
+	static constexpr auto result = some<std::size_t>{0};
+};
 
-	template<class Tag>
-	struct state_index_of<Tag> {
-		static constexpr auto result = none{};
-	};
+template<class Tag, class HeadStateItem, class... TailStateItems>
+struct state_index_of<Tag, HeadStateItem, TailStateItems...> {
+	static constexpr auto result = state_index_of<Tag, TailStateItems...>::result.and_then([](auto v){return v+1;});
+};
 
-	template<class Tag, class... StateItems>
-	struct state_remove_item;
+template<class Tag>
+struct state_index_of<Tag> {
+	static constexpr auto result = none{};
+};
 
-	template<class Tag, class ValueType, class... TailStateItems>
-	struct state_remove_item<Tag, state_item<Tag, ValueType>, TailStateItems...> {
-		using result = typename state_remove_item<Tag, TailStateItems...>::result;
-	};
+template<class Tag, class... StateItems>
+struct state_remove_item;
 
-	template<class Tag, class HeadStateItem, class... TailStateItems>
-	struct state_remove_item<Tag, HeadStateItem, TailStateItems...> {
-		using result = typename state_remove_item<Tag, TailStateItems...>::result::template prepend<HeadStateItem>;
-	};
+template<class Tag, class ValueType, class... TailStateItems>
+struct state_remove_item<Tag, state_item<Tag, ValueType>, TailStateItems...> {
+	using result = typename state_remove_item<Tag, TailStateItems...>::result;
+};
 
-	template<class Tag>
-	struct state_remove_item<Tag> {
-		using result = state_items_pack<>;
-	};
+template<class Tag, class HeadStateItem, class... TailStateItems>
+struct state_remove_item<Tag, HeadStateItem, TailStateItems...> {
+	using result = typename state_remove_item<Tag, TailStateItems...>::result::template prepend<HeadStateItem>;
+};
 
-	template<class StateItemsPack, class... Tags>
-	struct state_remove_items;
+template<class Tag>
+struct state_remove_item<Tag> {
+	using result = state_items_pack<>;
+};
 
-	template<class StateItemsPack>
-	struct state_remove_items<StateItemsPack> {
-		using result = StateItemsPack;
-	};
+template<class StateItemsPack, class... Tags>
+struct state_remove_items;
 
-	template<class... StateItems, class Tag, class... Tags>
-	struct state_remove_items<state_items_pack<StateItems...>, Tag, Tags...> {
-		using recursion_result = typename state_remove_item<Tag, StateItems...>::result;
-		using result = typename state_remove_items<recursion_result, Tags...>::result;
-	};
+template<class StateItemsPack>
+struct state_remove_items<StateItemsPack> {
+	using result = StateItemsPack;
+};
+
+template<class... StateItems, class Tag, class... Tags>
+struct state_remove_items<state_items_pack<StateItems...>, Tag, Tags...> {
+	using recursion_result = typename state_remove_item<Tag, StateItems...>::result;
+	using result = typename state_remove_items<recursion_result, Tags...>::result;
+};
+
 } // namespace helpers
 
 template<class... StateItems>
