@@ -130,7 +130,7 @@ struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<Di
 
 #ifdef __CUDACC__
 	template<class ...Values>
-	constexpr auto simple_run(void kernel(decltype(std::declval<cuda_traverser_t>().inner()), Values...), uint shm_size, Values ...values) const noexcept {
+	constexpr auto simple_run(void kernel(traverser_t<Struct, decltype(std::declval<base>().get_order() ^ get_fixes())>, Values...), uint shm_size, Values ...values) const noexcept {
 		kernel<<<grid_dim(), block_dim(), shm_size>>>(inner(), values...);
 	}
 #endif
