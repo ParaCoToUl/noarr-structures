@@ -10,11 +10,6 @@ the library provides the following functions.
 There is no similar generalization of [`get_at`](../BasicUsage.md#get_at), because it could not return a reference (there may be no C++ type corresponding to non-scalar structures).
 
 
-## iterate
-
-`noarr::iterate<Dims...>()`, which constructs an [iterator](Iterator.md) is also a function.
-
-
 ## Custom
 
 It is relatively easy to define a custom function.

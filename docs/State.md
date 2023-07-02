@@ -97,7 +97,7 @@ if constexpr(has_xlen) { /*...*/ } /*...*/
 
 ### Updating a state
 
-Unless you have to, you should create a new state:
+State is immutable, you have to create a new state:
 
 ```cpp
 // increment index in 'x' and return a new state (other indices are copied unchanged)
@@ -112,17 +112,6 @@ auto state_south_east = noarr::neighbor<'x', 'y'>(my_state, +1, +1);
 // create a new item (or replace existing one without seeing it)
 auto my_state_3d = my_state.template with<noarr::index_in<'z'>>(0);
 ```
-
-To update state in-place, get a mutable reference to one of its items:
-
-```cpp
-auto &x = my_state.template get_ref<noarr::index_in<'x'>>();
-x *= 2;
-
-my_state.template get_ref<noarr::index_in<'x'>>() = 42;
-```
-
-It is not possible to add items in-place or modify static item values.
 
 ### Fixing a state in a structure
 
