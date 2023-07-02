@@ -19,175 +19,63 @@ namespace helpers {
 template<class, class... TS>
 struct contain_impl;
 
-/**
- * @brief structure that facilitates `.get` method of the `contain` structure
- * 
- * @tparam T: the `contain` structure
- * @tparam I: the index of the desired field
- */
-template<class T, std::size_t I>
-struct contain_get {
-	static constexpr decltype(auto) get(const T &t) noexcept {
-		return t.template _get_next<I>();
-	}
-
-	static constexpr decltype(auto) get(T &t) noexcept {
-		return t.template _get_next<I>();
-	}
-};
-
-template<class T>
-struct contain_get<T, 0> {
-	static constexpr decltype(auto) get(const T &t) noexcept {
-		return t._get();
-	}
-
-	static constexpr decltype(auto) get(T &t) noexcept {
-		return t._get();
-	}
-};
-
 // an implementation for the pair (T, TS...) where neither is empty
 template<class T, class... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
-	template<class, std::size_t>
-	friend struct contain_get;
-
-	T t_;
+	contain_impl<void, T> t_;
 	contain_impl<void, TS...> ts_;
 
-	constexpr contain_impl() noexcept = default;
 	explicit constexpr contain_impl(T t, TS... ts) noexcept : t_(t), ts_(ts...) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) get() noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-private:
-	template<std::size_t I>
-	constexpr decltype(auto) _get_next() const noexcept {
-		return ts_.template get<I - 1>();
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) _get_next() noexcept {
-		return ts_.template get<I - 1>();
-	}
-
-	constexpr const auto &_get() const noexcept {
-		return t_;
-	}
-
-	constexpr auto &_get() noexcept {
-		return t_;
+		if constexpr(I == 0)
+			return t_.template get<0>();
+		else
+			return ts_.template get<I - 1>();
 	}
 };
 
 // an implementation for the pair (T, TS...) where TS... is empty
 template<class T, class... TS>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
-	template<class, std::size_t>
-	friend struct contain_get;
+	contain_impl<void, T> t_;
 
-	T t_;
-
-	constexpr contain_impl() noexcept = default;
-	explicit constexpr contain_impl(T t) noexcept : t_(t) {}
 	explicit constexpr contain_impl(T t, TS...) noexcept : t_(t) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) get() noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-private:
-	template<std::size_t I>
-	constexpr decltype(auto) _get_next() const noexcept {
-		return contain_impl<void, TS...>::template get<I - 1>();
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) _get_next() noexcept {
-		return contain_impl<void, TS...>::template get<I - 1>();
-	}
-
-	constexpr const auto &_get() const noexcept {
-		return t_;
-	}
-
-	constexpr auto &_get() noexcept {
-		return t_;
+		if constexpr(I == 0)
+			return t_.template get<0>();
+		else
+			return contain_impl<void, TS...>::template get<I - 1>();
 	}
 };
 
 // an implementation for the pair (T, TS...) where T is empty
 template<class T, class... TS>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
-	template<class, std::size_t>
-	friend struct contain_get;
-
-	constexpr contain_impl() noexcept = default;
-	explicit constexpr contain_impl(TS... ts) noexcept : contain_impl<void, TS...>(ts...) {}
+	constexpr contain_impl() = default;
 	explicit constexpr contain_impl(T, TS... ts) noexcept : contain_impl<void, TS...>(ts...) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) get() noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-private:
-	template<std::size_t I>
-	constexpr decltype(auto) _get_next() const noexcept {
-		return contain_impl<void, TS...>::template get<I - 1>();
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) _get_next() noexcept {
-		return contain_impl<void, TS...>::template get<I - 1>();
-	}
-
-	static constexpr auto _get() noexcept {
-		return T();
+		if constexpr(I == 0)
+			return T();
+		else
+			return contain_impl<void, TS...>::template get<I - 1>();
 	}
 };
 
 // an implementation for an empty T
 template<class T>
 struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
-	template<class, std::size_t>
-	friend struct contain_get;
-
 	constexpr contain_impl() noexcept = default;
 	explicit constexpr contain_impl(T) noexcept {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) get() noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-private:
-	static constexpr auto _get() noexcept {
+		static_assert(I == 0, "index out of bounds");
 		return T();
 	}
 };
@@ -195,9 +83,6 @@ private:
 // an implementation for an nonempty T
 template<class T>
 struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
-	template<class, std::size_t>
-	friend struct contain_get;
-
 	T t_;
 
 	constexpr contain_impl() noexcept = delete;
@@ -205,20 +90,7 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-	template<std::size_t I>
-	constexpr decltype(auto) get() noexcept {
-		return contain_get<contain_impl, I>::get(*this);
-	}
-
-private:
-	constexpr const auto &_get() const noexcept {
-		return t_;
-	}
-
-	constexpr auto &_get() noexcept {
+		static_assert(I == 0, "index out of bounds");
 		return t_;
 	}
 };
