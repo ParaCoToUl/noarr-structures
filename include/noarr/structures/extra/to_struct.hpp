@@ -8,7 +8,7 @@ namespace noarr {
 template<class T>
 struct to_struct;
 
-template<class T> requires is_struct<T>::value
+template<class T> requires (is_struct_v<T>)
 struct to_struct<T> {
 	using type = T;
 	static constexpr T convert(T t) noexcept { return t; }

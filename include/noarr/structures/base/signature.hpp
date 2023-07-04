@@ -115,6 +115,9 @@ struct is_signature<dep_function_sig<Dim, RetSigs...>> : std::true_type {};
 template<class ValueType>
 struct is_signature<scalar_sig<ValueType>> : std::true_type {};
 
+template<class T>
+static constexpr bool is_signature_v = is_signature<T>::value;
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_SIGNATURE_HPP

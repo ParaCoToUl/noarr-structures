@@ -54,7 +54,7 @@ struct mangle_integral<T, V, char_sequence<Acc...>> {
 	using type = char_sequence<(char)(V % 10) + '0', Acc...>;
 };
 
-template<class T, T V> requires std::is_integral<T>::value
+template<class T, T V> requires (std::is_integral_v<T>)
 struct mangle_value_impl<T, V>
 	: mangle_integral<T, V> {};
 
@@ -66,12 +66,12 @@ struct mangle_value_impl<T, V>
 template<class T>
 struct scalar_name;
 
-template<class T> requires (std::is_integral<T>::value && std::is_signed<T>::value)
+template<class T> requires (std::is_integral_v<T> && std::is_signed_v<T>)
 struct scalar_name<T> {
 	using type = integer_sequence_concat<char_sequence<'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, char_sequence<'_', 't'>>;
 };
 
-template<class T> requires (std::is_integral<T>::value && std::is_unsigned<T>::value)
+template<class T> requires (std::is_integral_v<T> && std::is_unsigned_v<T>)
 struct scalar_name<T> {
 	using type = integer_sequence_concat<char_sequence<'u', 'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, char_sequence<'_', 't'>>;
 };

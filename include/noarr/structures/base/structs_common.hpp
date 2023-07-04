@@ -50,7 +50,7 @@ namespace helpers {
 
 template<class T>
 struct is_struct_impl : std::false_type {};
-template<class T> requires is_signature<typename T::signature>::value
+template<class T> requires is_signature_v<typename T::signature>
 struct is_struct_impl<T> : std::true_type {
 	static_assert(is_signature<typename T::signature>());
 };
@@ -83,15 +83,25 @@ template<class T>
 using is_struct = helpers::is_struct_impl<T>;
 
 template<class T>
+static constexpr auto is_struct_v = is_struct<T>::value;
+
+/**
+ * @brief returns whether the type `T` meets the criteria for proto-structures
+ * 
+ * @tparam T: the input type
+ */
+template<class T>
 using is_proto_struct = helpers::is_proto_struct_impl<T>;
 
+template<class T>
+static constexpr auto is_proto_struct_v = is_proto_struct<T>::value;
 
 template<bool PreservesLayout = false, class F>
 constexpr auto make_proto(F f) noexcept {
 	return helpers::make_proto_impl<F, PreservesLayout>(f);
 }
 
-template<class Struct, class ProtoStruct> requires (is_struct<Struct>::value && is_proto_struct<ProtoStruct>::value)
+template<class Struct, class ProtoStruct> requires (is_struct_v<Struct> && is_proto_struct_v<ProtoStruct>)
 constexpr auto operator ^(Struct s, ProtoStruct p) {
 	return p.instantiate_and_construct(s);
 }

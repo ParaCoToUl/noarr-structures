@@ -355,9 +355,9 @@ private:
 	template<class State>
 	static constexpr bool is_body() noexcept {
 		static_assert(State::template contains<index_in<DimIsBorder>>, "Index has not been set");
-		using is_border = state_get_t<State, index_in<DimIsBorder>>;
-		static_assert(is_border::value == 0 || is_border::value == 1, "The is-border index must be set statically (use lit<0> or lit<1>)");
-		return is_border::value == 0;
+		constexpr auto is_border = state_get_t<State, index_in<DimIsBorder>>::value;
+		static_assert(is_border == 0 || is_border == 1, "The is-border index must be set statically (use lit<0> or lit<1>)");
+		return is_border == 0;
 	}
 };
 
