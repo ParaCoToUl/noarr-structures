@@ -48,17 +48,17 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 
 namespace helpers {
 
-template<class T, class = void>
-struct is_struct_impl : std::false_type {};
 template<class T>
-struct is_struct_impl<T, std::void_t<typename T::signature>> : std::true_type {
+struct is_struct_impl : std::false_type {};
+template<class T> requires is_signature<typename T::signature>::value
+struct is_struct_impl<T> : std::true_type {
 	static_assert(is_signature<typename T::signature>());
 };
 
-template<class T, class = void>
-struct is_proto_struct_impl : std::false_type {};
 template<class T>
-struct is_proto_struct_impl<T, std::enable_if_t<std::is_same_v<decltype(T::proto_preserves_layout), const bool>>> : std::true_type {};
+struct is_proto_struct_impl : std::false_type {};
+template<class T> requires std::is_same_v<decltype(T::proto_preserves_layout), const bool>
+struct is_proto_struct_impl<T> : std::true_type {};
 
 template<class F, bool PreservesLayout>
 struct make_proto_impl {
@@ -91,7 +91,7 @@ constexpr auto make_proto(F f) noexcept {
 	return helpers::make_proto_impl<F, PreservesLayout>(f);
 }
 
-template<class Struct, class ProtoStruct, class = std::enable_if_t<is_struct<Struct>::value && is_proto_struct<ProtoStruct>::value>>
+template<class Struct, class ProtoStruct> requires (is_struct<Struct>::value && is_proto_struct<ProtoStruct>::value)
 constexpr auto operator ^(Struct s, ProtoStruct p) {
 	return p.instantiate_and_construct(s);
 }

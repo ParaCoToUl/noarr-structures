@@ -69,14 +69,14 @@ constexpr std::tuple<SizeTs...> zc_general(std::size_t z, SizeTs... sizes) noexc
 	return std::tuple<SizeTs...>(result); // force copy, so that `result` is not aliased due to copy elision
 }
 
-template<int Period, std::size_t RepBits = 0, class = void>
+template<int Period, std::size_t RepBits = 0>
 struct zc_special_helper {
 	using rec = zc_special_helper<2 * Period, (RepBits | RepBits << Period)>;
 	static constexpr std::size_t rep_bits = rec::rep_bits;
 	static constexpr int num_iter = rec::num_iter + 1;
 };
-template<int Period, std::size_t RepBits>
-struct zc_special_helper<Period, RepBits, std::enable_if_t<Period >= sizeof RepBits * 8>> {
+template<int Period, std::size_t RepBits> requires (Period >= sizeof RepBits * 8)
+struct zc_special_helper<Period, RepBits> {
 	static constexpr std::size_t rep_bits = RepBits;
 	static constexpr int num_iter = 0;
 };

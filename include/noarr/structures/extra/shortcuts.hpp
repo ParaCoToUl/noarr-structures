@@ -153,13 +153,13 @@ constexpr auto symmetric_span(Struct structure, Offset offset) noexcept {
 }
 
 // TODO add tests
-template<char ...Dims, class Struct, class ...Offsets, class ...StateItems, class = std::enable_if_t<sizeof...(Dims) == sizeof...(Offsets)>>
+template<char ...Dims, class Struct, class ...Offsets, class ...StateItems> requires (sizeof...(Dims) == sizeof...(Offsets))
 constexpr auto symmetric_spans(Struct structure, state<StateItems...> state, Offsets ...offsets) noexcept {
 	return (... ^ symmetric_span<Dims>(structure, state, offsets));
 }
 
 // TODO add tests
-template<char ...Dims, class Struct, class ...Offsets, class = std::enable_if_t<sizeof...(Dims) == sizeof...(Offsets)>>
+template<char ...Dims, class Struct, class ...Offsets> requires (sizeof...(Dims) == sizeof...(Offsets))
 constexpr auto symmetric_spans(Struct structure, Offsets ...offsets) noexcept {
 	return symmetric_spans<Dims...>(structure, empty_state, offsets...);
 }

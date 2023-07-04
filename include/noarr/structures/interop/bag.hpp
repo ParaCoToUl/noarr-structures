@@ -162,15 +162,14 @@ public:
 	 */
 	constexpr auto get_ref() const noexcept;
 
-	template<class ProtoStruct, class = std::enable_if_t<ProtoStruct::proto_preserves_layout>>
+	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout)
 	friend constexpr auto operator ^(bag &&s, ProtoStruct p) {
 		auto new_struct = s.structure() ^ p;
 		return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.data_));
 	}
 
 
-	template<class ProtoStruct, class = std::enable_if_t<
-		ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>>>
+	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
 	friend constexpr auto operator ^(const bag &s, ProtoStruct p) {
 		auto new_struct = s.structure() ^ p;
 		return bag<decltype(new_struct), BagPolicy>(new_struct, s.data_);

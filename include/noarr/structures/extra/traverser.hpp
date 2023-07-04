@@ -52,16 +52,16 @@ struct union_filter_accepted;
 template<class Signature, class HeadStateItem, class... TailStateItems>
 struct union_filter_accepted<Signature, state<HeadStateItem, TailStateItems...>> {
 	using tail = typename union_filter_accepted<Signature, state<TailStateItems...>>::template res<>::ult;
-	template<class = HeadStateItem, class = void>
+	template<class = HeadStateItem>
 	struct res {
 		using ult = tail;
 	};
-	template<char Dim, class ValueType>
-	struct res<state_item<index_in<Dim>, ValueType>, std::enable_if_t<Signature::template any_accept<Dim>>> {
+	template<char Dim, class ValueType> requires (Signature::template any_accept<Dim>)
+	struct res<state_item<index_in<Dim>, ValueType>> {
 		using ult = typename tail::template prepend<HeadStateItem>;
 	};
-	template<char Dim, class ValueType>
-	struct res<state_item<length_in<Dim>, ValueType>, std::enable_if_t<Signature::template any_accept<Dim>>> {
+	template<char Dim, class ValueType> requires (Signature::template any_accept<Dim>)
+	struct res<state_item<length_in<Dim>, ValueType>> {
 		using ult = typename tail::template prepend<HeadStateItem>;
 	};
 };

@@ -13,17 +13,16 @@ namespace helpers {
 /**
  * @brief see `contain`. This is a helper structure implementing its functionality
  * 
- * @tparam class: placeholder type
  * @tparam ...TS: contained fields
  */
-template<class, class... TS>
+template<class... TS>
 struct contain_impl;
 
 // an implementation for the pair (T, TS...) where neither is empty
-template<class T, class... TS>
-struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> {
-	contain_impl<void, T> t_;
-	contain_impl<void, TS...> ts_;
+template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain_impl<TS...>> && (sizeof...(TS) > 0))
+struct contain_impl<T, TS...> {
+	contain_impl<T> t_;
+	contain_impl<TS...> ts_;
 
 	explicit constexpr contain_impl(T t, TS... ts) noexcept : t_(t), ts_(ts...) {}
 
@@ -37,9 +36,9 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && !std::is_empty<
 };
 
 // an implementation for the pair (T, TS...) where TS... is empty
-template<class T, class... TS>
-struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<contain_impl<void, TS...>>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
-	contain_impl<void, T> t_;
+template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain_impl<TS...>> && (sizeof...(TS) > 0))
+struct contain_impl<T, TS...> : private contain_impl<TS...> {
+	contain_impl<T> t_;
 
 	explicit constexpr contain_impl(T t, TS...) noexcept : t_(t) {}
 
@@ -48,28 +47,28 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value && std::is_empty<c
 		if constexpr(I == 0)
 			return t_.template get<0>();
 		else
-			return contain_impl<void, TS...>::template get<I - 1>();
+			return contain_impl<TS...>::template get<I - 1>();
 	}
 };
 
 // an implementation for the pair (T, TS...) where T is empty
-template<class T, class... TS>
-struct contain_impl<std::enable_if_t<std::is_empty<T>::value && (sizeof...(TS) > 0)>, T, TS...> : private contain_impl<void, TS...> {
+template<class T, class... TS> requires (std::is_empty_v<T> && (sizeof...(TS) > 0))
+struct contain_impl<T, TS...> : private contain_impl<TS...> {
 	constexpr contain_impl() = default;
-	explicit constexpr contain_impl(T, TS... ts) noexcept : contain_impl<void, TS...>(ts...) {}
+	explicit constexpr contain_impl(T, TS... ts) noexcept : contain_impl<TS...>(ts...) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
 		if constexpr(I == 0)
 			return T();
 		else
-			return contain_impl<void, TS...>::template get<I - 1>();
+			return contain_impl<TS...>::template get<I - 1>();
 	}
 };
 
 // an implementation for an empty T
-template<class T>
-struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
+template<class T> requires (std::is_empty_v<T>)
+struct contain_impl<T> {
 	constexpr contain_impl() noexcept = default;
 	explicit constexpr contain_impl(T) noexcept {}
 
@@ -81,8 +80,8 @@ struct contain_impl<std::enable_if_t<std::is_empty<T>::value>, T> {
 };
 
 // an implementation for an nonempty T
-template<class T>
-struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
+template<class T> requires (!std::is_empty_v<T>)
+struct contain_impl<T> {
 	T t_;
 
 	constexpr contain_impl() noexcept = delete;
@@ -97,7 +96,7 @@ struct contain_impl<std::enable_if_t<!std::is_empty<T>::value>, T> {
 
 // contains nothing
 template<>
-struct contain_impl<void> {};
+struct contain_impl<> {};
 
 } // namespace helpers
 
@@ -107,18 +106,18 @@ struct contain_impl<void> {};
  * @tparam TS the contained fields
  */
 template<class... TS>
-struct contain : private helpers::contain_impl<void, TS...> {
+struct contain : private helpers::contain_impl<TS...> {
 protected:
-	using helpers::contain_impl<void, TS...>::contain_impl;
+	using helpers::contain_impl<TS...>::contain_impl;
 
 public:
-	using helpers::contain_impl<void, TS...>::get;
+	using helpers::contain_impl<TS...>::get;
 };
 
 template<>
-struct contain<> : private helpers::contain_impl<void> {
+struct contain<> : private helpers::contain_impl<> {
 protected:
-	using helpers::contain_impl<void>::contain_impl;
+	using helpers::contain_impl<>::contain_impl;
 };
 
 } // namespace noarr

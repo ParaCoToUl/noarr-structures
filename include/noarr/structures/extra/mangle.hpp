@@ -36,26 +36,26 @@ using mangle_to_str = char_seq_to_str<mangle<T>>;
 
 namespace helpers {
 
-template<class T, T V, class = void>
+template<class T, T V>
 struct mangle_value_impl;
 
 template<class T, T V>
 using mangle_value = typename mangle_value_impl<T, V>::type;
 
-template<class T, T V, class Acc = std::integer_sequence<char>, class = void>
+template<class T, T V, class Acc = std::integer_sequence<char>>
 struct mangle_integral;
 
-template<class T, char... Acc, T V>
-struct mangle_integral<T, V, char_sequence<Acc...>, std::enable_if_t<(V >= 10)>>
+template<class T, char... Acc, T V> requires (V >= 10)
+struct mangle_integral<T, V, char_sequence<Acc...>>
 	: mangle_integral<T, V / 10, char_sequence<(char)(V % 10) + '0', Acc...>> {};
 
-template<class T, char... Acc, T V>
-struct mangle_integral<T, V, char_sequence<Acc...>, std::enable_if_t<(V < 10 && V >= 0)>> {
+template<class T, char... Acc, T V> requires (V < 10 && V >= 0)
+struct mangle_integral<T, V, char_sequence<Acc...>> {
 	using type = char_sequence<(char)(V % 10) + '0', Acc...>;
 };
 
-template<class T, T V>
-struct mangle_value_impl<T, V, std::enable_if_t<std::is_integral<T>::value>>
+template<class T, T V> requires std::is_integral<T>::value
+struct mangle_value_impl<T, V>
 	: mangle_integral<T, V> {};
 
 /**
@@ -63,16 +63,16 @@ struct mangle_value_impl<T, V, std::enable_if_t<std::is_integral<T>::value>>
  * 
  * @tparam T: the scalar type
  */
-template<class T, class = void>
+template<class T>
 struct scalar_name;
 
-template<class T>
-struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_signed<T>::value>> {
+template<class T> requires (std::is_integral<T>::value && std::is_signed<T>::value)
+struct scalar_name<T> {
 	using type = integer_sequence_concat<char_sequence<'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, char_sequence<'_', 't'>>;
 };
 
-template<class T>
-struct scalar_name<T, std::enable_if_t<std::is_integral<T>::value && std::is_unsigned<T>::value>> {
+template<class T> requires (std::is_integral<T>::value && std::is_unsigned<T>::value)
+struct scalar_name<T> {
 	using type = integer_sequence_concat<char_sequence<'u', 'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, char_sequence<'_', 't'>>;
 };
 
@@ -163,8 +163,8 @@ struct mangle_expr_helpers {
 		out.push_back('}');
 	}
 
-	template<class String, class T>
-	static constexpr std::enable_if_t<std::is_integral_v<T>> append(String &out, const T &t) {
+	template<class String, class T> requires (std::is_integral_v<T>)
+	static constexpr void append(String &out, const T &t) {
 		using type_str = char_seq_to_str<typename scalar_name<T>::type>;
 		out.append(type_str::c_str, type_str::length);
 		out.push_back('{');
