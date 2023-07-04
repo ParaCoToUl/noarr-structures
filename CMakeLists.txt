@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(Noarr
-    VERSION 0.17.0
+    VERSION 0.20.0
     LANGUAGES CXX
-    DESCRIPTION "Noarr is a header-only library that facilitates creation of many data structures and provides a layout-agnostic way of accessing the values stored in them."
+    DESCRIPTION "Noarr is a header-only library that facilitates the creation of many data structures and provides a layout-agnostic way of accessing the values stored in them."
 )
 
 add_library(Noarr INTERFACE)
