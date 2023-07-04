@@ -93,7 +93,7 @@ Noarr Structures is a header-only library, so only its include path needs to be 
 target_include_directories(<my-app> PUBLIC <cloned-repo-path>/include)
 ```
 
-The library requires C++ 17.
+The library requires C++ 20.
 
 ## Examples
 

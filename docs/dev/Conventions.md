@@ -62,4 +62,4 @@ Dynamic allocation and RAII is not used unless necessary ([`noarr::bag`](../Basi
 to work with existing interfaces and conventions.
 Types and functions that do so should be concentrated in the [`interop` source directory](../../include/noarr/structures/interop/).
 
-The codebase should conform to the intersection of C++17, C++20, and C++23.
+The codebase should conform to the intersection of C++20 and C++23.
