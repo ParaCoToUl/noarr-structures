@@ -19,7 +19,7 @@ template<class... TS>
 struct contain_impl;
 
 // an implementation for the pair (T, TS...) where neither is empty
-template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain_impl<TS...>> && (sizeof...(TS) > 0))
+template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> {
 	contain_impl<T> t_;
 	contain_impl<TS...> ts_;
@@ -36,7 +36,7 @@ struct contain_impl<T, TS...> {
 };
 
 // an implementation for the pair (T, TS...) where TS... is empty
-template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain_impl<TS...>> && (sizeof...(TS) > 0))
+template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
 	contain_impl<T> t_;
 
@@ -52,9 +52,9 @@ struct contain_impl<T, TS...> : private contain_impl<TS...> {
 };
 
 // an implementation for the pair (T, TS...) where T is empty
-template<class T, class... TS> requires (std::is_empty_v<T> && (sizeof...(TS) > 0))
+template<class T, class... TS> requires (std::is_empty_v<T>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
-	constexpr contain_impl() = default;
+	constexpr contain_impl() noexcept = default;
 	explicit constexpr contain_impl(T, TS... ts) noexcept : contain_impl<TS...>(ts...) {}
 
 	template<std::size_t I>
