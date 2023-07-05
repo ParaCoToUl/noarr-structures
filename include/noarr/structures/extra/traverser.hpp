@@ -89,9 +89,8 @@ struct union_t : contain<Structs...> {
 
 private:
 	template<char Dim, std::size_t I>
-	constexpr auto find_first_match() {
-		using sub_t = decltype(sub_structure<I>());
-		using sub_sig = typename sub_t::signature;
+	constexpr auto find_first_match() const noexcept {
+		using sub_sig = typename decltype(sub_structure<I>())::signature;
 		if constexpr(sub_sig::template any_accept<Dim>)
 			return std::integral_constant<std::size_t, I>();
 		else
