@@ -133,10 +133,32 @@ constexpr std::size_t supported_index_type(std::size_t);
 template<std::size_t Value>
 constexpr std::integral_constant<std::size_t, Value> supported_index_type(std::integral_constant<std::size_t, Value>);
 
+constexpr std::size_t supported_diff_type(std::size_t);
+constexpr std::ptrdiff_t supported_diff_type(std::ptrdiff_t);
+
+template<std::size_t Value>
+constexpr std::integral_constant<std::size_t, Value> supported_diff_type(std::integral_constant<std::size_t, Value>);
+template<std::size_t Value>
+constexpr std::integral_constant<std::ptrdiff_t, Value> supported_diff_type(std::integral_constant<std::ptrdiff_t, Value>);
+
+constexpr std::size_t supported_diff_index_type(std::size_t);
+constexpr std::size_t supported_diff_index_type(std::ptrdiff_t);
+
+template<std::size_t Value>
+constexpr std::integral_constant<std::size_t, Value> supported_diff_index_type(std::integral_constant<std::size_t, Value>);
+template<std::size_t Value>
+constexpr std::integral_constant<std::size_t, Value> supported_diff_index_type(std::integral_constant<std::ptrdiff_t, Value>);
+
 } // namespace helpers
 
 template<class T>
 using good_index_t = decltype(helpers::supported_index_type(std::declval<T>()));
+
+template<class T>
+using good_diff_t = decltype(helpers::supported_diff_type(std::declval<T>()));
+
+template<class T>
+using good_diff_index_t = decltype(helpers::supported_diff_index_type(std::declval<T>()));
 
 
 

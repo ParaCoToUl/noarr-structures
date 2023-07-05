@@ -133,11 +133,12 @@ constexpr auto update_index(State state, F f) noexcept {
 	return state.template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
 
-template<char... Dims, class State>
-constexpr auto neighbor(State state, std::enable_if_t<true || Dims, std::ptrdiff_t>... diffs) noexcept {
+template<char... Dims, class ...Diffs, class State> requires (sizeof...(Dims) == sizeof...(Diffs))
+constexpr auto neighbor(State state, Diffs... diffs) noexcept {
+	using namespace noarr::constexpr_arithmetic;
 	static_assert((... && State::template contains<index_in<Dims>>), "Requested dimension does not exist");
 	static_assert((... && std::is_same_v<state_get_t<State, index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
-	return state.template with<index_in<Dims>...>(std::size_t(state.template get<index_in<Dims>>() + diffs)...);
+	return state.template with<index_in<Dims>...>(good_diff_index_t<decltype(state.template get<index_in<Dims>>() + diffs)>(state.template get<index_in<Dims>>() + diffs)...);
 }
 
 // TODO add tests
