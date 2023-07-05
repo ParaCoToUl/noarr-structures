@@ -46,11 +46,22 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 	}
 }
 
+template<class... Structs>
+struct struct_pack : contain<Structs...> {
+	using base = contain<Structs...>;
+
+	template<std::size_t Index>
+	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
+	static constexpr char name[] = "struct_pack";
+
+	explicit constexpr struct_pack(Structs... structs) noexcept : base(structs...) {}
+};
+
 namespace helpers {
 
 template<class T>
 struct is_struct_impl : std::false_type {};
-template<class T> requires is_signature_v<typename T::signature>
+template<class T> requires (is_signature_v<typename T::signature>)
 struct is_struct_impl<T> : std::true_type {
 	static_assert(is_signature<typename T::signature>());
 };
@@ -72,6 +83,12 @@ struct make_proto_impl {
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return f_(s); }
 };
+
+template<class... Structs, class ProtoStruct, std::size_t... Indices>
+constexpr auto pass_struct_pack(struct_pack<Structs...> s, ProtoStruct p, std::index_sequence<Indices...>) noexcept {
+	return p.instantiate_and_construct(s.template sub_structure<Indices>()...);
+}
+
 } // namespace helpers
 
 /**
@@ -104,6 +121,11 @@ constexpr auto make_proto(F f) noexcept {
 template<class Struct, class ProtoStruct> requires (is_struct_v<Struct> && is_proto_struct_v<ProtoStruct>)
 constexpr auto operator ^(Struct s, ProtoStruct p) {
 	return p.instantiate_and_construct(s);
+}
+
+template<class... Structs, class ProtoStruct> requires (is_proto_struct_v<ProtoStruct> && ... && is_struct_v<Structs>)
+constexpr auto operator ^(struct_pack<Structs...> s, ProtoStruct p) {
+	return helpers::pass_struct_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
 
 struct neutral_proto {
