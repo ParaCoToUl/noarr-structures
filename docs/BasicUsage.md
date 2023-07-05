@@ -9,7 +9,7 @@ First, we have to `#include` the `noarr` library:
 We start by modeling the layout. For example, each of the following two equivalent definitions describes a list of floats (indexed by some `'i'`):
 
 ```cpp
-noarr::vector<'i', noarr::scalar<float>> my_structure;
+noarr::vector_t<'i', noarr::scalar<float>> my_structure;
 // ~ or ~
 auto my_structure = noarr::scalar<float>() ^ noarr::vector<'i'>();
 ```

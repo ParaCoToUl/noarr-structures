@@ -46,16 +46,26 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 	}
 }
 
-template<class... Structs>
-struct struct_pack : contain<Structs...> {
-	using base = contain<Structs...>;
+template<class... Args>
+struct pack : contain<Args...> {
+	using contain<Args...>::contain;
 
-	template<std::size_t Index>
-	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
-	static constexpr char name[] = "struct_pack";
-
-	explicit constexpr struct_pack(Structs... structs) noexcept : base(structs...) {}
+	explicit constexpr pack(Args... args) noexcept : contain<Args...>(args...) {}
 };
+
+// this is for the consistency of packs of packs
+template<class... Args>
+pack(pack<Args...>) -> pack<pack<Args...>>;
+
+template<class ProtoStruct>
+struct to_each : ProtoStruct {
+	using ProtoStruct::ProtoStruct;
+
+	to_each(ProtoStruct p) noexcept : ProtoStruct(p) {}
+};
+
+template<class ProtoStruct>
+to_each(ProtoStruct) -> to_each<ProtoStruct>;
 
 namespace helpers {
 
@@ -84,9 +94,19 @@ struct make_proto_impl {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return f_(s); }
 };
 
-template<class... Structs, class ProtoStruct, std::size_t... Indices>
-constexpr auto pass_struct_pack(struct_pack<Structs...> s, ProtoStruct p, std::index_sequence<Indices...>) noexcept {
-	return p.instantiate_and_construct(s.template sub_structure<Indices>()...);
+template<class... Structs, class ProtoStruct, std::size_t... Indices> requires (is_proto_struct_impl<ProtoStruct>::value)
+constexpr auto pass_pack(pack<Structs...> s, ProtoStruct p, std::index_sequence<Indices...>) noexcept {
+	return p.instantiate_and_construct(s.template get<Indices>()...);
+}
+
+template<class Arg, class... Args, std::size_t... Indices>
+constexpr auto pass_pack(Arg s, pack<Args...> p, std::index_sequence<Indices...>) noexcept {
+	return pack(s ^ p.template get<Indices>()...);
+}
+
+template<class... Structs, class Arg, std::size_t... Indices>
+constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, std::index_sequence<Indices...>) noexcept {
+	return pack(s.template get<Indices>() ^ p...);
 }
 
 } // namespace helpers
@@ -119,13 +139,23 @@ constexpr auto make_proto(F f) noexcept {
 }
 
 template<class Struct, class ProtoStruct> requires (is_struct_v<Struct> && is_proto_struct_v<ProtoStruct>)
-constexpr auto operator ^(Struct s, ProtoStruct p) {
+constexpr auto operator ^(Struct s, ProtoStruct p) noexcept {
 	return p.instantiate_and_construct(s);
 }
 
 template<class... Structs, class ProtoStruct> requires (is_proto_struct_v<ProtoStruct> && ... && is_struct_v<Structs>)
-constexpr auto operator ^(struct_pack<Structs...> s, ProtoStruct p) {
-	return helpers::pass_struct_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
+constexpr auto operator ^(pack<Structs...> s, ProtoStruct p) noexcept {
+	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
+}
+
+template<class Arg, class... Args>
+constexpr auto operator ^(Arg s, pack<Args...> p) noexcept {
+	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Args)>());
+}
+
+template<class... Structs, class Arg> requires (... && is_struct_v<Structs>)
+constexpr auto operator ^(pack<Structs...> s, to_each<Arg> p) noexcept {
+	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
 
 struct neutral_proto {
@@ -135,23 +165,37 @@ struct neutral_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s; }
 };
 
-template<class InnerProtoStruct, class OuterProtoStruct, bool PreservesLayout = InnerProtoStruct::proto_preserves_layout && OuterProtoStruct::proto_preserves_layout>
-struct compose_proto : contain<InnerProtoStruct, OuterProtoStruct> {
-	using base = contain<InnerProtoStruct, OuterProtoStruct>;
-	using base::base;
-	constexpr compose_proto(InnerProtoStruct i, OuterProtoStruct o) noexcept : base(i, o) {}
+template<class InnerProtoStructPack, class OuterProtoStruct>
+struct compose_proto;
 
-	static constexpr bool proto_preserves_layout = PreservesLayout;
+template<class... InnerProtoStructs, class OuterProtoStruct>
+struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : contain<pack<InnerProtoStructs...>, OuterProtoStruct> {
+	using base = contain<pack<InnerProtoStructs...>, OuterProtoStruct>;
+	using base::base;
+
+	explicit constexpr compose_proto(pack<InnerProtoStructs...> i, OuterProtoStruct o) noexcept : base(i, o) {}
+
+	static constexpr bool proto_preserves_layout = (OuterProtoStruct::proto_preserves_layout && ... && InnerProtoStructs::proto_preserves_layout);
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
-		return base::template get<1>().instantiate_and_construct(base::template get<0>().instantiate_and_construct(s));
+		return s ^ base::template get<0>() ^ base::template get<1>();
+	}
+
+	template<class... Structs> requires (sizeof...(Structs) != 1)
+	constexpr auto instantiate_and_construct(Structs... s) const noexcept {
+		return pack(s...) ^ base::template get<0>() ^ base::template get<1>();
 	}
 };
 
-template<class InnerProtoStruct, class OuterProtoStruct>
-constexpr compose_proto<InnerProtoStruct, OuterProtoStruct> operator ^(InnerProtoStruct i, OuterProtoStruct o) {
-	return compose_proto(i, o);
+template<class InnerProtoStruct, class OuterProtoStruct> requires (is_proto_struct_v<InnerProtoStruct> && is_proto_struct_v<OuterProtoStruct>)
+constexpr compose_proto<pack<InnerProtoStruct>, OuterProtoStruct> operator ^(InnerProtoStruct i, OuterProtoStruct o) noexcept {
+	return compose_proto<pack<InnerProtoStruct>, OuterProtoStruct>(pack(i), o);
+}
+
+template<class... InnerProtoStructs, class OuterProtoStruct> requires (is_proto_struct_v<OuterProtoStruct> && ... && is_proto_struct_v<InnerProtoStructs>)
+constexpr compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> operator ^(pack<InnerProtoStructs...> i, OuterProtoStruct o) noexcept {
+	return compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct>(i, o);
 }
 
 } // namespace noarr

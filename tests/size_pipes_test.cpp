@@ -9,10 +9,10 @@
 using noarr::lit;
 
 TEST_CASE("Pipes sizes is_cube is_simple", "[sizes is_cube is_simple]") {
-	noarr::vector<'x', noarr::scalar<float>> v;
-	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'y', noarr::scalar<int>>> t;
-	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'x', noarr::array<'y', 20, noarr::scalar<int>>>> t2;
+	auto v = noarr::vector_t<'x', noarr::scalar<float>>();
+	auto v2 = noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>();
+	auto t = noarr::tuple_t<'t', noarr::array_t<'x', 10, noarr::scalar<float>>, noarr::vector_t<'y', noarr::scalar<int>>>();
+	auto t2 = noarr::tuple_t<'t', noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>, noarr::vector_t<'x', noarr::array_t<'y', 20, noarr::scalar<int>>>>();
 
 	SECTION("check is_cube") {
 		REQUIRE(!noarr::is_cube<decltype(v)>::value);
@@ -28,10 +28,10 @@ TEST_CASE("Pipes sizes is_cube is_simple", "[sizes is_cube is_simple]") {
 }
 
 TEST_CASE("Pipes sizes", "[sizes sizes]") {
-	noarr::vector<'x', noarr::scalar<float>> v;
-	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'y', noarr::scalar<int>>> t;
-	noarr::tuple<'t', noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>>, noarr::vector<'a', noarr::array<'b', 20, noarr::scalar<int>>>> t2;
+	auto v = noarr::vector_t<'x', noarr::scalar<float>>();
+	auto v2 = noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>();
+	auto t = noarr::tuple_t<'t', noarr::array_t<'x', 10, noarr::scalar<float>>, noarr::vector_t<'y', noarr::scalar<int>>>();
+	auto t2 = noarr::tuple_t<'t', noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>, noarr::vector_t<'a', noarr::array_t<'b', 20, noarr::scalar<int>>>>();
 	
 	auto v_sized = v ^ noarr::set_length<'x'>(20);
 
@@ -45,7 +45,7 @@ TEST_CASE("Pipes sizes", "[sizes sizes]") {
 }
 
 TEST_CASE("Pipes resize", "[transform]") {
-	noarr::vector<'x', noarr::scalar<float>> v;
+	noarr::vector_t<'x', noarr::scalar<float>> v;
 	auto vs = v ^ noarr::set_length<'x'>(10);
 
 	SECTION("check is_cube") {
@@ -62,7 +62,7 @@ TEST_CASE("Pipes resize", "[transform]") {
 }
 
 TEST_CASE("Pipes resize 2", "[Resizing]") {
-	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>> v2;
 	auto vs2 = v2 ^ noarr::set_length<'x'>(20);
 
 	SECTION("check is_cube") {
@@ -90,7 +90,7 @@ TEST_CASE("Pipes resize 2", "[Resizing]") {
 }
 
 TEST_CASE("Pipes resize 3", "[Resizing]") {
-	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>> v2;
 	auto vs3 = v2 ^ noarr::set_length<'x'>(lit<10>);
 
 	SECTION("check is_cube") {
@@ -109,8 +109,8 @@ TEST_CASE("Pipes resize 3", "[Resizing]") {
 
 TEST_CASE("Pipes resize 4", "[Resizing]") {
 	volatile std::size_t l = 20;
-	noarr::array<'y', 20000, noarr::vector<'x', noarr::scalar<float>>> v2;
-	noarr::tuple<'t', noarr::array<'x', 10, noarr::scalar<float>>, noarr::vector<'x', noarr::scalar<int>>> t;
+	auto v2 = noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>();
+	auto t = noarr::tuple_t<'t', noarr::array_t<'x', 10, noarr::scalar<float>>, noarr::vector_t<'x', noarr::scalar<int>>>();
 	auto vs4 = v2 ^ noarr::set_length<'x'>(l);
 
 	SECTION("check is_cube") {

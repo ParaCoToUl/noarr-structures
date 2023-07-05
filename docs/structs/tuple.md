@@ -36,21 +36,21 @@ Consider for example a weighted graph (network) represented as a list of edges. 
 The simpler case is AoS:
 
 ```cpp
-auto edges_aos = noarr::make_tuple<'t'>(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ noarr::array<'i', 1024>();
+auto edges_aos = noarr::pack(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ noarr::tuple<'t'>() ^ noarr::array<'i', 1024>();
 ```
 
 It will be useful to extract the `array`:
 
 ```cpp
 auto a = noarr::array<'i', 1024>(); // or sized_vector if it should not be hardcoded
-auto edges_aos = noarr::make_tuple<'t'>(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ a;
+auto edges_aos = noarr::pack(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ noarr::tuple<'t'>() ^ a;
 ```
 
 Unfortunately, there is currently no way to similarly extract the tuple. Still the extraction of `a` helps.
 Now it will be easier to move the array down, inside the tuple:
 
 ```cpp
-auto edges_soa = noarr::make_tuple<'t'>(noarr::scalar<int>() ^ a, noarr::scalar<int>() ^ a, noarr::scalar<float>() ^ a);
+auto edges_soa = noarr::pack(noarr::scalar<int>() ^ a, noarr::scalar<int>() ^ a, noarr::scalar<float>() ^ a) ^ noarr::tuple<'t'>();
 ```
 
 The main advantage noarr tuples bring here is the layout agnosticity. The following algorithm works with both `edges_aos` and `edges_soa`:

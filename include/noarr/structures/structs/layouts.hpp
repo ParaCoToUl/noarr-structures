@@ -16,19 +16,18 @@ namespace noarr {
  * @tparam T,TS... substructure types
  */
 template<char Dim, class... TS>
-struct tuple : contain<TS...> {
+struct tuple_t : contain<TS...> {
 	using base = contain<TS...>;
 
 	template<std::size_t Index>
 	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
-	static constexpr char name[] = "tuple";
+	static constexpr char name[] = "tuple_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<TS>...>;
 
-	constexpr tuple() noexcept = default;
-	template<class = void> // resolve ambiguity with the default ctor by lowering the priority
-	explicit constexpr tuple(TS... ss) noexcept : base(ss...) {}
+	constexpr tuple_t() noexcept = default;
+	explicit constexpr tuple_t(TS... ss) noexcept requires (sizeof...(TS) > 0) : base(ss...) {}
 
 	static_assert(!(TS::signature::template any_accept<Dim> || ...), "Dimension name already used");
 	using signature = dep_function_sig<Dim, typename TS::signature...>;
@@ -79,9 +78,17 @@ private:
 	}
 };
 
-template<char Dim, class ...Struct>
-constexpr auto make_tuple(Struct ...s) noexcept {
-	return tuple<Dim, Struct...>(s...);
+template<char Dim>
+struct tuple_proto {
+	static constexpr bool proto_preserves_layout = false;
+
+	template<class... Structs>
+	constexpr auto instantiate_and_construct(Structs... s) const noexcept { return tuple_t<Dim, Structs...>(s...); }
+};
+
+template<char Dim>
+constexpr auto tuple() noexcept {
+	return tuple_proto<Dim>();
 };
 
 /**
@@ -90,15 +97,15 @@ constexpr auto make_tuple(Struct ...s) noexcept {
  * @tparam Dim: the dimmension name added by the vector
  * @tparam T: type of the substructure the vector contains
  */
-template<char Dim, class T = void>
-struct vector : contain<T> {
-	static constexpr char name[] = "vector";
+template<char Dim, class T>
+struct vector_t : contain<T> {
+	static constexpr char name[] = "vector_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<T>>;
 
-	constexpr vector() noexcept = default;
-	explicit constexpr vector(T sub_structure) noexcept : contain<T>(sub_structure) {}
+	constexpr vector_t() noexcept = default;
+	explicit constexpr vector_t(T sub_structure) noexcept : contain<T>(sub_structure) {}
 
 	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
 
@@ -149,12 +156,17 @@ struct vector : contain<T> {
 };
 
 template<char Dim>
-struct vector<Dim> {
+struct vector_proto {
 	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return vector<Dim, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return vector_t<Dim, Struct>(s); }
 };
+
+template<char Dim>
+constexpr auto vector() noexcept {
+	return vector_proto<Dim>();
+}
 
 } // namespace noarr
 

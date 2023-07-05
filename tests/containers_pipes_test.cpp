@@ -9,7 +9,7 @@
 
 TEST_CASE("Pipes vector", "[resizing]")
 {
-	noarr::vector<'x', noarr::scalar<float>> v;
+	auto v = noarr::vector_t<'x', noarr::scalar<float>>();
 	auto v2 = v ^ noarr::set_length<'x'>(10);
 
 	SECTION("size check 1") {
@@ -37,7 +37,7 @@ TEST_CASE("Pipes vector", "[resizing]")
 
 TEST_CASE("Pipes vector2", "[is_simple]")
 {
-	noarr::vector<'x', noarr::scalar<float>> v;
+	auto v = noarr::vector_t<'x', noarr::scalar<float>>();
 	auto v2 = v ^ noarr::set_length<'x'>(10);
 
 	SECTION("is_simple check 1") {

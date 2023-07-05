@@ -17,7 +17,7 @@ struct MatrixStructureGetter<MatrixDataLayout::Rows>
 {
 	static constexpr auto GetMatrixStructure()
 	{
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+		return noarr::vector_t<'x', noarr::vector_t<'y', noarr::scalar<int>>>();
 	}
 };
 
@@ -26,7 +26,7 @@ struct MatrixStructureGetter<MatrixDataLayout::Columns>
 {
 	static constexpr auto GetMatrixStructure()
 	{
-		return noarr::vector<'y', noarr::vector<'x', noarr::scalar<int>>>();
+		return noarr::vector_t<'y', noarr::vector_t<'x', noarr::scalar<int>>>();
 	}
 };
 

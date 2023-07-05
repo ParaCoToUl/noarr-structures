@@ -4,8 +4,8 @@
 #include <noarr/structures/structs/slice.hpp>
 
 TEST_CASE("Fixes and shifts", "[offsets]") {
-	noarr::vector<'x', noarr::scalar<float>> v;
-	noarr::array<'y', 20'000, noarr::vector<'x', noarr::scalar<float>>> v2;
+	auto v = noarr::vector_t<'x', noarr::scalar<float>>();
+	auto v2 = noarr::array_t<'y', 20'000, noarr::vector_t<'x', noarr::scalar<float>>>();
 
 	auto v_sized = v ^ noarr::set_length<'x'>(20);
 	auto v2_sized = v2 ^ noarr::set_length<'x'>(10'000);

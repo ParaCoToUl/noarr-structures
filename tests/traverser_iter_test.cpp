@@ -10,7 +10,7 @@
 using namespace noarr;
 
 TEST_CASE("Traverser begin end", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 	using iter_t = noarr::traverser_iterator_t<'x', noarr::union_t<s>, noarr::neutral_proto>;
 
 	auto t = noarr::traverser(s());
@@ -26,7 +26,7 @@ TEST_CASE("Traverser begin end", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser iter type traits", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 	using iter_t = noarr::traverser_iterator_t<'x', noarr::union_t<s>, noarr::neutral_proto>;
 
 	// iterator should only contain the structure (empty) and index
@@ -46,7 +46,7 @@ TEST_CASE("Traverser iter type traits", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser iter deref", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -63,7 +63,7 @@ TEST_CASE("Traverser iter deref", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser iter deref deref", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -84,7 +84,7 @@ TEST_CASE("Traverser iter deref deref", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser iter for", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -103,7 +103,7 @@ TEST_CASE("Traverser iter for", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser iter for for", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -130,7 +130,7 @@ TEST_CASE("Traverser iter for for", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser range deref", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -147,7 +147,7 @@ TEST_CASE("Traverser range deref", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser range for", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -166,7 +166,7 @@ TEST_CASE("Traverser range for", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser subrange deref", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -187,7 +187,7 @@ TEST_CASE("Traverser subrange deref", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser subrange for", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	auto t = noarr::traverser(s());
 
@@ -210,7 +210,7 @@ TEST_CASE("Traverser subrange for", "[traverser iter]") {
 }
 
 TEST_CASE("Traverser subrange for_each", "[traverser iter]") {
-	using s = noarr::array<'x', 20, noarr::scalar<int>>;
+	using s = noarr::array_t<'x', 20, noarr::scalar<int>>;
 
 	auto t = noarr::traverser(s());
 

@@ -9,11 +9,11 @@
 using namespace noarr;
 
 TEST_CASE("Traverser trivial", "[traverser]") {
-	using at = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
-	using bt = noarr::array<'y', 30, noarr::array<'z', 40, noarr::scalar<int>>>;
-	using ct = noarr::array<'x', 20, noarr::array<'z', 40, noarr::scalar<int>>>;
+	using at = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'y', 30, noarr::array_t<'z', 40, noarr::scalar<int>>>;
+	using ct = noarr::array_t<'x', 20, noarr::array_t<'z', 40, noarr::scalar<int>>>;
 
-	using xt = noarr::array<'z', 40, noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>>;
+	using xt = noarr::array_t<'z', 40, noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>>;
 
 	using u1t = union_t<at>;
 	using u2t = union_t<at, bt>;
@@ -72,11 +72,11 @@ TEST_CASE("Traverser trivial", "[traverser]") {
 }
 
 TEST_CASE("Traverser ordered", "[traverser]") {
-	using at = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
-	using bt = noarr::array<'y', 30, noarr::array<'z', 40, noarr::scalar<int>>>;
-	using ct = noarr::array<'x', 20, noarr::array<'z', 40, noarr::scalar<int>>>;
+	using at = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'y', 30, noarr::array_t<'z', 40, noarr::scalar<int>>>;
+	using ct = noarr::array_t<'x', 20, noarr::array_t<'z', 40, noarr::scalar<int>>>;
 
-	using xt = noarr::array<'z', 40, noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>>;
+	using xt = noarr::array_t<'z', 40, noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>>;
 
 	using u1t = union_t<at>;
 	using u2t = union_t<at, bt>;
@@ -131,11 +131,11 @@ TEST_CASE("Traverser ordered", "[traverser]") {
 }
 
 TEST_CASE("Traverser ordered renamed", "[traverser]") {
-	using at = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
-	using bt = noarr::array<'y', 30, noarr::array<'z', 40, noarr::scalar<int>>>;
-	using ct = noarr::array<'x', 20, noarr::array<'z', 40, noarr::scalar<int>>>;
+	using at = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'y', 30, noarr::array_t<'z', 40, noarr::scalar<int>>>;
+	using ct = noarr::array_t<'x', 20, noarr::array_t<'z', 40, noarr::scalar<int>>>;
 
-	using xt = noarr::array<'z', 40, noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>>;
+	using xt = noarr::array_t<'z', 40, noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>>;
 
 	using u1t = union_t<at>;
 	using u2t = union_t<at, bt>;
@@ -190,9 +190,9 @@ TEST_CASE("Traverser ordered renamed", "[traverser]") {
 }
 
 TEST_CASE("Traverser ordered renamed access", "[traverser]") {
-	using at = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
-	using bt = noarr::array<'y', 30, noarr::array<'z', 40, noarr::scalar<int>>>;
-	using ct = noarr::array<'x', 20, noarr::array<'z', 40, noarr::scalar<int>>>;
+	using at = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'y', 30, noarr::array_t<'z', 40, noarr::scalar<int>>>;
+	using ct = noarr::array_t<'x', 20, noarr::array_t<'z', 40, noarr::scalar<int>>>;
 
 	int ad[20*30];
 	int bd[30*40];
@@ -218,8 +218,8 @@ TEST_CASE("Traverser ordered renamed access", "[traverser]") {
 }
 
 TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
-	using at = noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>;
-	using bt = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using at = noarr::array_t<'y', 30, noarr::array_t<'x', 20, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	at a;
 	bt b;
@@ -240,8 +240,8 @@ TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
 }
 
 TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts blocks]") {
-	using at = noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>;
-	using bt = noarr::array<'x', 20, noarr::array<'y', 30, noarr::scalar<int>>>;
+	using at = noarr::array_t<'y', 30, noarr::array_t<'x', 20, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 
 	at a;
 	bt b;
@@ -264,7 +264,7 @@ TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts 
 }
 
 TEST_CASE("Traverser update_index (reverse example)", "[traverser shortcuts]") {
-	using at = noarr::array<'z', 40, noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>>;
+	using at = noarr::array_t<'z', 40, noarr::array_t<'y', 30, noarr::array_t<'x', 20, noarr::scalar<int>>>>;
 
 	at a;
 
@@ -285,7 +285,7 @@ TEST_CASE("Traverser update_index (reverse example)", "[traverser shortcuts]") {
 }
 
 TEST_CASE("Traverser neighbor (stencil example)", "[traverser shortcuts]") {
-	using at = noarr::array<'z', 40, noarr::array<'y', 30, noarr::array<'x', 20, noarr::scalar<int>>>>;
+	using at = noarr::array_t<'z', 40, noarr::array_t<'y', 30, noarr::array_t<'x', 20, noarr::scalar<int>>>>;
 
 	at a;
 

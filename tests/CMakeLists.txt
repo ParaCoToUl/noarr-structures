@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
-Include(FetchContent)
+include(FetchContent)
 
 # set the project name
 project(NoarrTests VERSION 0.20.0)
+
+include(CTest)
+enable_testing()
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -29,6 +32,8 @@ if(MSVC)
 else()
   target_compile_options(test-runner PRIVATE -Wall -Wextra -Wno-parentheses -pedantic)
 endif()
+
+add_test(NAME test-runner COMMAND test-runner)
 
 # setup CTest integration
 # DISABLED: because 1. it spits out test name warnings, 2. nobody uses it anyways

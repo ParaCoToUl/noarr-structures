@@ -36,12 +36,12 @@ The following example demonstrates the layout-agnostic method of accessing the v
 	// continuous array (matrix)
 
 // describes a layout of 20x30 two-dimensional array
-noarr::array<'x', 20, noarr::array<'y', 30, 
+noarr::array_t<'x', 20, noarr::array_t<'y', 30, 
 	noarr::scalar<int>>> foo;
 
 // describes a similar logical layout with switched dimensions 
 	// in the physical layout
-noarr::array<'y', 30, noarr::array<'x', 20, 
+noarr::array_t<'y', 30, noarr::array_t<'x', 20, 
 	noarr::scalar<int>>> bar;
 
 // getting the offset of the value at (x = 5; y = 10):

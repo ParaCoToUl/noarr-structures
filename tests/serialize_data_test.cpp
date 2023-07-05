@@ -7,7 +7,7 @@
 #include <noarr/structures/interop/serialize_data.hpp>
 
 TEST_CASE("Deserialize data", "[serialize_data]") {
-	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
+	noarr::array_t<'x', 3, noarr::array_t<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	std::stringstream stream("111 222 333 444 555\n666 777 888 999");
@@ -26,7 +26,7 @@ TEST_CASE("Deserialize data", "[serialize_data]") {
 }
 
 TEST_CASE("Deserialize data reordered", "[serialize_data]") {
-	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
+	noarr::array_t<'x', 3, noarr::array_t<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	std::stringstream stream("111 222 333 444 555\n666 777 888 999\n");
@@ -45,7 +45,7 @@ TEST_CASE("Deserialize data reordered", "[serialize_data]") {
 }
 
 TEST_CASE("Deserialize data incomplete", "[serialize_data]") {
-	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
+	noarr::array_t<'x', 3, noarr::array_t<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	std::stringstream stream("111 222 333 444 555");
@@ -55,7 +55,7 @@ TEST_CASE("Deserialize data incomplete", "[serialize_data]") {
 }
 
 TEST_CASE("Serialize data", "[serialize_data]") {
-	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
+	noarr::array_t<'x', 3, noarr::array_t<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	(structure | noarr::get_at<'x', 'y'>(ptr, 0, 0)) = 111;
@@ -75,7 +75,7 @@ TEST_CASE("Serialize data", "[serialize_data]") {
 }
 
 TEST_CASE("Serialize data reordered", "[serialize_data]") {
-	noarr::array<'x', 3, noarr::array<'y', 3, noarr::scalar<int>>> structure;
+	noarr::array_t<'x', 3, noarr::array_t<'y', 3, noarr::scalar<int>>> structure;
 	auto uptr = std::make_unique<char[]>(structure | noarr::get_size());
 	void *ptr = uptr.get();
 	(structure | noarr::get_at<'x', 'y'>(ptr, 0, 0)) = 111;

@@ -99,7 +99,7 @@ Only static values can be used for indexing and the result type may depend on th
 The simplest way to create a structure with such a dimension is [`noarr::tuple`](structs/tuple.md):
 
 ```cpp
-auto structure = noarr::make_tuple<'x'>(noarr::scalar<long>(), noarr::scalar<short>());
+auto structure = noarr::pack(noarr::scalar<long>(), noarr::scalar<short>()) ^ noarr::tuple<'x'>();
 
 auto size = structure | noarr::get_size(); // returns sizeof(long)+sizeof(short) as a *static* value
 auto length = structure | noarr::get_length<'x'>(); // returns 2 as a static value

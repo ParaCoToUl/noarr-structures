@@ -12,8 +12,8 @@
 using namespace noarr;
 
 TEST_CASE("Wrapper traverser", "[to_struct]") {
-	using at = noarr::array<'x', 2, noarr::array<'y', 3, noarr::scalar<int>>>;
-	using bt = noarr::array<'y', 3, noarr::array<'z', 4, noarr::scalar<int>>>;
+	using at = noarr::array_t<'x', 2, noarr::array_t<'y', 3, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'y', 3, noarr::array_t<'z', 4, noarr::scalar<int>>>;
 
 	auto a = at();
 	auto b = bt();
@@ -26,8 +26,8 @@ TEST_CASE("Wrapper traverser", "[to_struct]") {
 }
 
 TEST_CASE("Bag traverser", "[to_struct]") {
-	using at = noarr::array<'x', 2, noarr::array<'y', 3, noarr::scalar<int>>>;
-	using bt = noarr::array<'y', 3, noarr::array<'z', 4, noarr::scalar<int>>>;
+	using at = noarr::array_t<'x', 2, noarr::array_t<'y', 3, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'y', 3, noarr::array_t<'z', 4, noarr::scalar<int>>>;
 
 	auto a = at();
 	auto b = bt();
@@ -45,8 +45,8 @@ template<typename T>
 static bool eq(const T &t1, const T &t2) { return !std::memcmp(&t1, &t2, sizeof(T)); }
 
 TEST_CASE("Vector wrapper traverser", "[to_struct]") {
-	using at = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
-	using bt = noarr::vector<'y', noarr::vector<'z', noarr::scalar<int>>>;
+	using at = noarr::vector_t<'x', noarr::vector_t<'y', noarr::scalar<int>>>;
+	using bt = noarr::vector_t<'y', noarr::vector_t<'z', noarr::scalar<int>>>;
 
 	auto a = at() ^ noarr::set_length<'x', 'y'>(2, 3);
 	auto b = bt() ^ noarr::set_length<'y', 'z'>(3, 4);
@@ -58,8 +58,8 @@ TEST_CASE("Vector wrapper traverser", "[to_struct]") {
 }
 
 TEST_CASE("Vector bag traverser", "[to_struct]") {
-	using at = noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>;
-	using bt = noarr::vector<'y', noarr::vector<'z', noarr::scalar<int>>>;
+	using at = noarr::vector_t<'x', noarr::vector_t<'y', noarr::scalar<int>>>;
+	using bt = noarr::vector_t<'y', noarr::vector_t<'z', noarr::scalar<int>>>;
 
 	auto a = at() ^ noarr::set_length<'x', 'y'>(2, 3);
 	auto b = bt() ^ noarr::set_length<'y', 'z'>(3, 4);

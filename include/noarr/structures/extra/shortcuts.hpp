@@ -31,18 +31,21 @@ constexpr auto sized_vectors(LenT ...lengths) noexcept {
 	return (... ^ sized_vector<Dims>(lengths));
 }
 
-template<char Dim, std::size_t L, class SubStruct = void>
-struct array_impl {
-	using type = decltype(std::declval<SubStruct>() ^ sized_vector<Dim>(lit<L>));
+template<char Dim, std::size_t L>
+struct array_proto {
+	static constexpr bool proto_preserves_layout = false;
+
+	template<class Struct>
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s ^ sized_vector<Dim>(lit<L>); }
 };
+
+template<char Dim, std::size_t L, class SubStruct>
+using array_t = decltype(std::declval<SubStruct>() ^ array_proto<Dim, L>());
 
 template<char Dim, std::size_t L>
-struct array_impl<Dim, L, void> {
-	using type = decltype(sized_vector<Dim>(lit<L>));
-};
-
-template<char Dim, std::size_t L, class SubStruct = void>
-using array = typename array_impl<Dim, L, SubStruct>::type;
+constexpr auto array() noexcept {
+	return array_proto<Dim, L>();
+}
 
 template<char Dim, class Struct, class State>
 constexpr auto length_like(Struct structure, State state) noexcept {

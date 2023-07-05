@@ -18,7 +18,7 @@ struct GetImageStructureGetter<ImageDataLayout::ArrayOfArrays>
 {
 	static constexpr auto GetImageStructure()
 	{
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+		return noarr::vector_t<'x', noarr::vector_t<'y', noarr::scalar<int>>>();
 	}
 };
 
@@ -27,7 +27,7 @@ struct GetImageStructureGetter<ImageDataLayout::VectorOfVectors>
 {
 	static constexpr auto GetImageStructure()
 	{
-		return noarr::vector<'x', noarr::vector<'y', noarr::scalar<int>>>();
+		return noarr::vector_t<'x', noarr::vector_t<'y', noarr::scalar<int>>>();
 	}
 };
 
@@ -38,7 +38,7 @@ void histogram_template_test()
 
 	CHECK(image.get_size() == width * height * sizeof(int));
 
-	auto histogram = noarr::make_bag(noarr::array<'x', pixel_range, noarr::scalar<int>>());
+	auto histogram = noarr::make_bag(noarr::array_t<'x', pixel_range, noarr::scalar<int>>());
 	CHECK(histogram.get_size() == pixel_range * sizeof(int));
 
 	for (std::size_t i = 0; i < width; i++)

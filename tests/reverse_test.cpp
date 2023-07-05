@@ -48,9 +48,9 @@ TEST_CASE("Reverse tuple", "[reverse]") {
 	struct item0 { float field0; };
 	struct item1 { float field1; };
 	struct item2 { float field2; };
-	auto s = noarr::make_tuple<'x'>(noarr::scalar<item0>(), noarr::scalar<item1>(), noarr::scalar<item2>());
+	auto s = noarr::pack(noarr::scalar<item0>(), noarr::scalar<item1>(), noarr::scalar<item2>()) ^ noarr::tuple<'x'>();
 	auto r = s ^ noarr::reverse<'x'>();
-	auto q = noarr::make_tuple<'x'>(noarr::scalar<item2>(), noarr::scalar<item1>(), noarr::scalar<item0>());
+	auto q = noarr::pack(noarr::scalar<item2>(), noarr::scalar<item1>(), noarr::scalar<item0>()) ^ noarr::tuple<'x'>();
 
 	REQUIRE(!(std::is_same_v<decltype(r)::signature, decltype(s)::signature>));
 	REQUIRE((std::is_same_v<decltype(r)::signature, decltype(q)::signature>));
@@ -127,7 +127,7 @@ TEST_CASE("Reverse tuple traverser", "[reverse traverser]") {
 	struct item0 { float field0; };
 	struct item1 { float field1; };
 	struct item2 { float field2; };
-	auto s = noarr::make_tuple<'x'>(noarr::scalar<item0>(), noarr::scalar<item1>(), noarr::scalar<item2>());
+	auto s = noarr::pack(noarr::scalar<item0>(), noarr::scalar<item1>(), noarr::scalar<item2>()) ^ noarr::tuple<'x'>();
 	auto r = s ^ noarr::reverse<'x'>();
 
 	std::size_t x = 0;
