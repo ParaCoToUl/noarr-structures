@@ -105,7 +105,7 @@ struct contain_impl<> {};
  * 
  * @tparam TS the contained fields
  */
-template<class... TS>
+template<class... TS> requires (... && is_simple<TS>)
 struct contain : private helpers::contain_impl<TS...> {
 protected:
 	using helpers::contain_impl<TS...>::contain_impl;

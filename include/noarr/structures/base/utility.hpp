@@ -201,6 +201,19 @@ struct none {
 	}
 };
 
+template<class T>
+concept is_simple = true
+	&& std::is_standard_layout_v<T>
+	&& (!std::is_empty_v<T> || std::is_trivially_default_constructible_v<T>)
+	&& (!std::is_default_constructible_v<T> || std::is_trivially_default_constructible_v<T>)
+	&& std::is_trivially_copy_constructible_v<T>
+	&& std::is_trivially_move_constructible_v<T>
+	&& (std::is_trivially_copy_assignable_v<T> || !std::is_copy_assignable_v<T>)
+	&& (std::is_trivially_move_assignable_v<T> || !std::is_move_assignable_v<T>)
+	&& std::is_trivially_destructible_v<T>
+	;
+
+
 namespace constexpr_arithmetic {
 
 template<std::size_t N>

@@ -1,6 +1,8 @@
 #ifndef NOARR_TEST_DEFS_HPP
 #define NOARR_TEST_DEFS_HPP
 
+#include <type_traits>
+
 namespace noarr_test {
 	// A trivial-enough type. In addition to being a standard-layout type, it must satisfy the following conditions:
 	// - All special member functions must be trivial, if present.

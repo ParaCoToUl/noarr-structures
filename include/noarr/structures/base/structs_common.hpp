@@ -50,6 +50,7 @@ template<class... Args>
 struct pack : contain<Args...> {
 	using contain<Args...>::contain;
 
+	explicit constexpr pack() noexcept = default;
 	explicit constexpr pack(Args... args) noexcept : contain<Args...>(args...) {}
 };
 
@@ -61,7 +62,8 @@ template<class ProtoStruct>
 struct to_each : ProtoStruct {
 	using ProtoStruct::ProtoStruct;
 
-	to_each(ProtoStruct p) noexcept : ProtoStruct(p) {}
+	explicit constexpr to_each() noexcept = default;
+	explicit constexpr to_each(ProtoStruct p) noexcept : ProtoStruct(p) {}
 };
 
 template<class ProtoStruct>
@@ -173,6 +175,7 @@ struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : contain<pac
 	using base = contain<pack<InnerProtoStructs...>, OuterProtoStruct>;
 	using base::base;
 
+	explicit constexpr compose_proto() noexcept = default;
 	explicit constexpr compose_proto(pack<InnerProtoStructs...> i, OuterProtoStruct o) noexcept : base(i, o) {}
 
 	static constexpr bool proto_preserves_layout = (OuterProtoStruct::proto_preserves_layout && ... && InnerProtoStructs::proto_preserves_layout);
