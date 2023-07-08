@@ -1,4 +1,4 @@
-name: Noarr matrix example test macosl
+name: Noarr matrix example test macos-latest
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Noarr matrix example test Win
+name: Noarr matrix example test windows-latest
 
 on:
   push:

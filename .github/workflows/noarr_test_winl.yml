@@ -1,4 +1,4 @@
-name: Noarr test Win
+name: Noarr test windows-latest
 
 on:
   push:

@@ -2,14 +2,13 @@
 
 ## Noarr tests <!-- Exclude this line from linear documentation -->
 
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20docs%20check%20ubuntu-latest/badge.svg)
+[![Noarr docs check ubuntu-latest](../../actions/workflows/noarr_docs_check.yml/badge.svg)](../../actions/workflows/noarr_docs_check.yml)
 
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20test%20ubuntu-latest%20-%20clang/badge.svg)
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20test%20ubuntu-latest%20-%20gcc/badge.svg)
+[![Noarr test ubuntu-latest](../../actions/workflows/noarr_test_ubuntul.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntul.yml)
 
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20test%20macosl/badge.svg)
+[![Noarr test macos-latest](../../actions/workflows/noarr_test_macosl.yml/badge.svg)](../../actions/workflows/noarr_test_macosl.yml)
 
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20test%20Win/badge.svg)
+[![Noarr test windows-latest](../../actions/workflows/noarr_test_winl.yml/badge.svg)](../../actions/workflows/noarr_test_winl.yml)
 
 ## Introduction
 
@@ -101,12 +100,11 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 ### Matrix example tests  <!-- Exclude this line from linear documentation -->
 
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20clang/badge.svg)
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20ubuntu-latest%20-%20gcc/badge.svg)
+[![Noarr matrix example test ubuntu-latest](../../actions/workflows/noarr_matrix_example_test_ubuntul.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_ubuntul.yml)
 
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20macosl/badge.svg)
+[![Noarr matrix example test macos-latest](../../actions/workflows/noarr_matrix_example_test_macosl.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_macosl.yml)
 
-![CI status](https://github.com/ParaCoToUl/noarr-structures/workflows/Noarr%20matrix%20example%20test%20Win/badge.svg)
+[![Noarr matrix example test windows-latest](../../actions/workflows/noarr_matrix_example_test_winl.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_winl.yml)
 
 ## Running tests
 

@@ -1,4 +1,4 @@
-name: Noarr test macosl
+name: Noarr test macos-latest
 
 on:
   push:
