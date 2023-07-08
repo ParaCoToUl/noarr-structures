@@ -89,7 +89,7 @@ struct tuple_proto {
 template<char Dim>
 constexpr auto tuple() noexcept {
 	return tuple_proto<Dim>();
-};
+}
 
 /**
  * @brief unsized vector ready to be resized to the desired size, this vector does not have size yet
