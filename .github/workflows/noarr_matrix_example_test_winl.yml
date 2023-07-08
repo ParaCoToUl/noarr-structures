@@ -5,7 +5,7 @@ on:
     paths:
     - 'include/**'
     - 'examples/matrix/**'
-    - '.github/workflows/noarr_matrix_example_test_win.yml'
+    - '.github/workflows/noarr_matrix_example_test_winl.yml'
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
