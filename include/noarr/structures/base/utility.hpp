@@ -7,6 +7,61 @@
 
 namespace noarr {
 
+template<auto Tag>
+struct dim {
+	/* Currently unspecified content */
+
+	constexpr dim() noexcept = default;
+
+	template<auto Tag2> requires (std::is_same_v<decltype(Tag), decltype(Tag2)>)
+	constexpr bool operator==(const dim<Tag2> &) const noexcept {
+		return Tag == Tag2;
+	}
+
+	template<auto Tag2> requires (!std::is_same_v<decltype(Tag), decltype(Tag2)>)
+	constexpr bool operator==(const dim<Tag2> &) const noexcept {
+		return false;
+	}
+
+	template<auto Tag2>
+	constexpr bool operator!=(const dim<Tag2> &) const noexcept {
+		return !(*this == dim<Tag2>{});
+	}
+
+	friend constexpr bool operator==(char, const dim &) noexcept {
+		return false;
+	}
+
+	friend constexpr bool operator!=(char, const dim &) noexcept {
+		return true;
+	}
+
+	friend constexpr bool operator==(const dim &, char) noexcept {
+		return false;
+	}
+
+	friend constexpr bool operator!=(const dim &, char) noexcept {
+		return true;
+	}
+};
+
+template<class T>
+struct is_dim : std::false_type {};
+
+template<>
+struct is_dim<char> : std::true_type {};
+template<auto Tag>
+struct is_dim<dim<Tag>> : std::true_type {};
+
+template<class T>
+static constexpr bool is_dim_v = is_dim<T>::value;
+
+template<class T>
+concept IsDim = is_dim_v<T>;
+
+template<IsDim auto... T>
+struct dim_sequence {};
+
 namespace helpers {
 
 template<class... Packs>
@@ -40,90 +95,102 @@ struct integer_sequence_concat_sep_impl<std::integer_sequence<T, sep...>, std::i
 	using type = std::integer_sequence<T, vs1...>;
 };
 
-template<class T, T V, class Pack>
-struct integer_sequence_contains_impl;
+template<class... Packs>
+struct dim_sequence_concat_impl;
 
-template<class T, T V, class Pack>
-static constexpr bool integer_sequence_contains = integer_sequence_contains_impl<T, V, Pack>::value;
+template<auto... vs1, auto... vs2, class...Packs>
+struct dim_sequence_concat_impl<dim_sequence<vs1...>, dim_sequence<vs2...>, Packs...> {
+	using type = typename dim_sequence_concat_impl<dim_sequence<vs1..., vs2...>, Packs...>::type;
+};
 
-template<class T, T V, T... VS>
-struct integer_sequence_contains_impl<T, V, std::integer_sequence<T, V, VS...>> : std::true_type {};
+template<class T, T... vs1>
+struct dim_sequence_concat_impl<dim_sequence<vs1...>> {
+	using type = dim_sequence<vs1...>;
+};
 
-template<class T, T V, T v, T... VS> requires (v != V)
-struct integer_sequence_contains_impl<T, V, std::integer_sequence<T, v, VS...>> : integer_sequence_contains_impl<T, V, std::integer_sequence<T, VS...>> {};
+template<auto V, class Pack>
+struct dim_sequence_contains_impl;
 
-template<class T, T V>
-struct integer_sequence_contains_impl<T, V, std::integer_sequence<T>> : std::false_type {};
+template<auto V, class Pack>
+static constexpr bool dim_sequence_contains = dim_sequence_contains_impl<V, Pack>::value;
+
+template<auto V, auto... VS>
+struct dim_sequence_contains_impl<V, dim_sequence<V, VS...>> : std::true_type {};
+
+template<auto V, auto v, auto... VS> requires (v != V)
+struct dim_sequence_contains_impl<V, dim_sequence<v, VS...>> : dim_sequence_contains_impl<V, dim_sequence<VS...>> {};
+
+template<auto V>
+struct dim_sequence_contains_impl<V, dim_sequence<>> : std::false_type {};
 
 template<class In, class Set>
-struct integer_sequence_restrict_impl;
+struct dim_sequence_restrict_impl;
 
-template<class T, T v, T ...vs, class Set> requires integer_sequence_contains<T, v, Set>
-struct integer_sequence_restrict_impl<std::integer_sequence<T, v, vs...>, Set> {
-	using type = typename integer_sequence_concat_impl<std::integer_sequence<T, v>, typename integer_sequence_restrict_impl<std::integer_sequence<T, vs...>, Set>::type>::type;
+template<auto v, auto ...vs, class Set> requires dim_sequence_contains<v, Set>
+struct dim_sequence_restrict_impl<dim_sequence<v, vs...>, Set> {
+	using type = typename dim_sequence_concat_impl<dim_sequence<v>, typename dim_sequence_restrict_impl<dim_sequence<vs...>, Set>::type>::type;
 };
 
-template<class T, T v, T ...vs, class Set> requires (!integer_sequence_contains<T, v, Set>)
-struct integer_sequence_restrict_impl<std::integer_sequence<T, v, vs...>, Set> {
-	using type = typename integer_sequence_restrict_impl<std::integer_sequence<T, vs...>, Set>::type;
+template<auto v, auto ...vs, class Set> requires (!dim_sequence_contains<v, Set>)
+struct dim_sequence_restrict_impl<dim_sequence<v, vs...>, Set> {
+	using type = typename dim_sequence_restrict_impl<dim_sequence<vs...>, Set>::type;
 };
 
-template<class T, class Set>
-struct integer_sequence_restrict_impl<std::integer_sequence<T>, Set> {
-	using type = std::integer_sequence<T>;
+template<class Set>
+struct dim_sequence_restrict_impl<dim_sequence<>, Set> {
+	using type = dim_sequence<>;
 };
 
-template<class T, T v, class ...Branches>
-struct integer_tree {
-	using value_type = T;
-	static constexpr value_type root_value = v;
+template<auto v, class ...Branches>
+struct dim_tree {
+	static constexpr auto root_value = v;
 };
 
-template<class T, T v, class Tree>
-struct integer_tree_contains_impl : std::false_type {};
+template<auto v, class Tree>
+struct dim_tree_contains_impl : std::false_type {};
 
 
-template<class T, T v, class Tree>
-static constexpr bool integer_tree_contains = helpers::integer_tree_contains_impl<T, v, Tree>::value;
+template<auto v, class Tree>
+static constexpr bool dim_tree_contains = helpers::dim_tree_contains_impl<v, Tree>::value;
 
-template<class T, T v, T V, class ...Branches>
-struct integer_tree_contains_impl<T, v, integer_tree<T, V, Branches...>> {
+template<auto v, auto V, class ...Branches>
+struct dim_tree_contains_impl<v, dim_tree<V, Branches...>> {
 	using value_type = bool;
-	static constexpr bool value = ( ... || integer_tree_contains<T, v, Branches>);
+	static constexpr bool value = ( ... || dim_tree_contains<v, Branches>);
 };
 
-template<class T, T v, class ...Branches>
-struct integer_tree_contains_impl<T, v, integer_tree<T, v, Branches...>> : std::true_type {};
+template<auto v, class ...Branches>
+struct dim_tree_contains_impl< v, dim_tree<v, Branches...>> : std::true_type {};
 
 template<class Tree, class Set>
-struct integer_tree_restrict_impl;
+struct dim_tree_restrict_impl;
 
-template<class T, T v, class Branch, class Set> requires (!integer_sequence_contains<T, v, Set>)
-struct integer_tree_restrict_impl<integer_tree<T, v, Branch>, Set> {
-	using type = typename integer_tree_restrict_impl<Branch, Set>::type;
+template<auto v, class Branch, class Set> requires (!dim_sequence_contains<v, Set>)
+struct dim_tree_restrict_impl<dim_tree<v, Branch>, Set> {
+	using type = typename dim_tree_restrict_impl<Branch, Set>::type;
 };
 
-template<class T, T v, class ...Branches, class Set> requires (integer_sequence_contains<T, v, Set>)
-struct integer_tree_restrict_impl<integer_tree<T, v, Branches...>, Set> {
-	using type = integer_tree<T, v, typename integer_tree_restrict_impl<Branches, Set>::type...>;
+template<auto v, class ...Branches, class Set> requires (dim_sequence_contains<v, Set>)
+struct dim_tree_restrict_impl<dim_tree<v, Branches...>, Set> {
+	using type = dim_tree<v, typename dim_tree_restrict_impl<Branches, Set>::type...>;
 };
 
-template<class T, class Set>
-struct integer_tree_restrict_impl<std::integer_sequence<T>, Set>{
-	using type = std::integer_sequence<T>;
+template<class Set>
+struct dim_tree_restrict_impl<dim_sequence<>, Set>{
+	using type = dim_sequence<>;
 };
 
 template<class Sequence>
-struct integer_tree_from_sequence_impl;
+struct dim_tree_from_sequence_impl;
 
 template<class T, T v, T ...vs>
-struct integer_tree_from_sequence_impl<std::integer_sequence<T, v, vs...>> {
-	using type = integer_tree<T, v, typename integer_tree_from_sequence_impl<std::integer_sequence<T, vs...>>::type>;
+struct dim_tree_from_sequence_impl<dim_sequence<v, vs...>> {
+	using type = dim_tree<v, typename dim_tree_from_sequence_impl<dim_sequence<vs...>>::type>;
 };
 
-template<class T>
-struct integer_tree_from_sequence_impl<std::integer_sequence<T>> {
-	using type = std::integer_sequence<T>;
+template<>
+struct dim_tree_from_sequence_impl<dim_sequence<>> {
+	using type = dim_sequence<>;
 };
 
 
@@ -146,19 +213,19 @@ template<class... Packs>
 using integer_sequence_concat_sep = typename helpers::integer_sequence_concat_sep_impl<Packs...>::type;
 
 template<class In, class Set>
-using integer_sequence_restrict = typename helpers::integer_sequence_restrict_impl<In, Set>::type;
+using dim_sequence_restrict = typename helpers::dim_sequence_restrict_impl<In, Set>::type;
 
-using helpers::integer_sequence_contains;
+using helpers::dim_sequence_contains;
 
-using helpers::integer_tree;
+using helpers::dim_tree;
 
 template<class In, class Set>
-using integer_tree_restrict = typename helpers::integer_tree_restrict_impl<In, Set>::type;
+using dim_tree_restrict = typename helpers::dim_tree_restrict_impl<In, Set>::type;
 
-using helpers::integer_tree_contains;
+using helpers::dim_tree_contains;
 
 template<class Seq>
-using integer_tree_from_sequence = typename helpers::integer_tree_from_sequence_impl<Seq>::type;
+using dim_tree_from_sequence = typename helpers::dim_tree_from_sequence_impl<Seq>::type;
 
 /**
  * @brief an alias for std::integer_sequence<char, ...>

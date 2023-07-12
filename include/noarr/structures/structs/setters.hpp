@@ -9,7 +9,7 @@
 
 namespace noarr {
 
-template<char Dim, class T, class IdxT>
+template<IsDim auto Dim, class T, class IdxT>
 struct fix_t : contain<T, IdxT> {
 	using base = contain<T, IdxT>;
 	using base::base;
@@ -40,34 +40,32 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
+	constexpr auto sub_state(IsState auto state) const noexcept {
 		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(idx());
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char Dim, class IdxT>
+template<IsDim auto Dim, class IdxT>
 struct fix_proto : contain<IdxT> {
 	using base = contain<IdxT>;
 	using base::base;
@@ -84,13 +82,13 @@ struct fix_proto : contain<IdxT> {
  * @tparam Dims: the dimension names
  * @param ts: parameters for fixing the indices
  */
-template<char... Dim, class... IdxT>
+template<IsDim auto... Dim, class... IdxT>
 constexpr auto fix(IdxT... idx) noexcept { return (... ^ fix_proto<Dim, good_index_t<IdxT>>(idx)); }
 
 template<>
 constexpr auto fix<>() noexcept { return neutral_proto(); }
 
-template<char Dim, class T, class LenT>
+template<IsDim auto Dim, class T, class LenT>
 struct set_length_t : contain<T, LenT> {
 	using base = contain<T, LenT>;
 	using base::base;
@@ -119,34 +117,32 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "The length in this dimension is already set");
+	constexpr auto sub_state(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "The length in this dimension is already set");
 		return state.template with<length_in<Dim>>(len());
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char Dim, class LenT>
+template<IsDim auto Dim, class LenT>
 struct set_length_proto : contain<LenT> {
 	using base = contain<LenT>;
 	using base::base;
@@ -163,7 +159,7 @@ struct set_length_proto : contain<LenT> {
  * @tparam Dim: the dimension name of the transformed structure
  * @param length: the desired length
  */
-template<char... Dim, class... LenT>
+template<IsDim auto... Dim, class... LenT>
 constexpr auto set_length(LenT... len) noexcept { return (... ^ set_length_proto<Dim, good_index_t<LenT>>(len)); }
 
 template<>

@@ -26,7 +26,7 @@ using cuda_txyz = cuda_dims_pack<cuda_thread_x, cuda_thread_y, cuda_thread_z>;
 
 } // namespace helpers
 
-template<char Dim, class T, class CudaDim>
+template<IsDim auto Dim, class T, class CudaDim>
 struct cuda_fix_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -49,36 +49,34 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	static __device__ inline auto sub_state(State state) noexcept {
+	static __device__ inline auto sub_state(IsState auto state) noexcept {
 		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(CudaDim::idx());
 	}
 
-	template<class State>
-	__device__ inline std::size_t size(State state) const noexcept {
+	__device__ inline std::size_t size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	__device__ inline std::size_t strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	__device__ inline std::size_t strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	__device__ inline std::size_t length(State state) const noexcept {
+	template<IsDim auto QDim>
+	__device__ inline std::size_t length(IsState auto state) const noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	__device__ inline auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	__device__ inline auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
 namespace helpers {
 
-template<char DimB, char DimT, class CudaDimB, class CudaDimT>
+template<IsDim auto DimB, IsDim auto DimT, class CudaDimB, class CudaDimT>
 struct cuda_fix_pair_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -95,7 +93,7 @@ struct cuda_fix_pair_proto {
 template<class Struct, class Order, class DimsB, class DimsT, class CudaDimsB, class CudaDimsT>
 struct cuda_traverser_t;
 
-template<char... DimsB, char... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
+template<IsDim auto... DimsB, IsDim auto... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
 struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : traverser_t<Struct, Order> {
 	using base = traverser_t<Struct, Order>;
 	using base::base;
@@ -141,17 +139,17 @@ constexpr auto cuda_traverser(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser_t<Struct, Order, NewDimsB, NewDimsT, NewCudaDimsB, NewCudaDimsT>(t);
 }
 
-template<char DimBX, char DimTX, class Struct, class Order>
+template<IsDim auto DimBX, IsDim auto DimTX, class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser<char_sequence<DimBX>, char_sequence<DimTX>, helpers::cuda_bx, helpers::cuda_tx>(t);
 }
 
-template<char DimBX, char DimTX, char DimBY, char DimTY, class Struct, class Order>
+template<IsDim auto DimBX, IsDim auto DimTX, IsDim auto DimBY, IsDim auto DimTY, class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser<char_sequence<DimBX, DimBY>, char_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(t);
 }
 
-template<char DimBX, char DimTX, char DimBY, char DimTY, char DimBZ, char DimTZ, class Struct, class Order>
+template<IsDim auto DimBX, IsDim auto DimTX, IsDim auto DimBY, IsDim auto DimTY, IsDim auto DimBZ, IsDim auto DimTZ, class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
 	return cuda_traverser<char_sequence<DimBX, DimBY, DimBZ>, char_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz, helpers::cuda_txyz>(t);
 }

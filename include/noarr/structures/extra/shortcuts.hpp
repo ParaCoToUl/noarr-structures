@@ -15,23 +15,23 @@ namespace noarr {
 // Common compositions
 
 // TODO add tests
-template<char ...Dims>
+template<IsDim auto ...Dims>
 constexpr auto vectors() noexcept {
 	return (... ^ vector<Dims>());
 }
 
-template<char Dim, class LenT>
+template<IsDim auto Dim, class LenT>
 constexpr auto sized_vector(LenT length) noexcept {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
 // TODO add tests
-template<char ...Dims, class ...LenT>
+template<IsDim auto ...Dims, class ...LenT>
 constexpr auto sized_vectors(LenT ...lengths) noexcept {
 	return (... ^ sized_vector<Dims>(lengths));
 }
 
-template<char Dim, std::size_t L>
+template<IsDim auto Dim, std::size_t L>
 struct array_proto {
 	static constexpr bool proto_preserves_layout = false;
 
@@ -39,131 +39,131 @@ struct array_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s ^ sized_vector<Dim>(lit<L>); }
 };
 
-template<char Dim, std::size_t L, class SubStruct>
+template<IsDim auto Dim, std::size_t L, class SubStruct>
 using array_t = decltype(std::declval<SubStruct>() ^ array_proto<Dim, L>());
 
-template<char Dim, std::size_t L>
+template<IsDim auto Dim, std::size_t L>
 constexpr auto array() noexcept {
 	return array_proto<Dim, L>();
 }
 
-template<char Dim, class Struct, class State>
-constexpr auto length_like(Struct structure, State state) noexcept {
+template<IsDim auto Dim, class Struct>
+constexpr auto length_like(Struct structure, IsState auto state) noexcept {
 	return set_length<Dim>(structure | get_length<Dim>(state));
 }
 
-template<char Dim, class Struct>
+template<IsDim auto Dim, class Struct>
 constexpr auto length_like(Struct structure) noexcept {
 	return length_like<Dim>(structure, empty_state);
 }
 
-template<char ...Dims, class Struct, class State>
-constexpr auto lengths_like(Struct structure, State state) noexcept {
+template<IsDim auto ...Dims, class Struct>
+constexpr auto lengths_like(Struct structure, IsState auto state) noexcept {
 	return (... ^ length_like<Dims>(structure, state));
 }
 
-template<char ...Dims, class Struct>
+template<IsDim auto ...Dims, class Struct>
 constexpr auto lengths_like(Struct structure) noexcept {
 	return lengths_like<Dims...>(structure, empty_state);
 }
 
-template<char Dim, class Struct, class State>
-constexpr auto vector_like(Struct structure, State state) noexcept {
+template<IsDim auto Dim, class Struct>
+constexpr auto vector_like(Struct structure, IsState auto state) noexcept {
 	return (vector<Dim>() ^ length_like<Dim>(structure, state));
 }
 
-template<char Dim, class Struct>
+template<IsDim auto Dim, class Struct>
 constexpr auto vector_like(Struct structure) noexcept {
 	return vector_like<Dim>(structure, empty_state);
 }
 
-template<char ...Dims, class Struct, class State>
-constexpr auto vectors_like(Struct structure, State state) noexcept {
+template<IsDim auto ...Dims, class Struct>
+constexpr auto vectors_like(Struct structure, IsState auto state) noexcept {
 	return (... ^ (vector_like<Dims>(structure, state)));
 }
 
-template<char ...Dims, class Struct>
+template<IsDim auto ...Dims, class Struct>
 constexpr auto vectors_like(Struct structure) noexcept {
 	return vectors_like<Dims...>(structure, empty_state);
 }
 
-template<char Dim, char DimMajor, char DimMinor, class MinorLengthT>
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class MinorLengthT>
 constexpr auto into_blocks(MinorLengthT minor_length) noexcept {
 	return into_blocks<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
 }
 
-template<char Dim, char DimMajor, char DimMinor, char DimIsPresent, class MinorLengthT>
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class MinorLengthT>
 constexpr auto into_blocks_dynamic(MinorLengthT minor_length) noexcept {
 	return into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>() ^ set_length<DimMinor>(minor_length);
 }
 
-template<char DimMajor, char DimMinor, char Dim, class MinorLenT>
+template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class MinorLenT>
 constexpr auto merge_blocks(MinorLenT minor_length) noexcept {
 	return set_length<DimMinor>(minor_length) ^ merge_blocks<DimMajor, DimMinor, Dim>();
 }
 
-template<char Dim, char DimMajor, char DimMinor, class... OptionalMinorLengthT>
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class... OptionalMinorLengthT>
 constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) noexcept {
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
-template<char ...Dims, class ...LenTs>
+template<IsDim auto ...Dims, class ...LenTs>
 constexpr auto bcast(LenTs ...lengths) noexcept {
 	return (... ^ (bcast<Dims>() ^ set_length<Dims>(lengths)));
 }
 
 // Working with state (especially in traverser lambdas)
 
-template<char Dim, class State>
-constexpr auto get_index(State state) noexcept {
+template<IsDim auto Dim>
+constexpr auto get_index(IsState auto state) noexcept {
 	return state.template get<index_in<Dim>>();
 }
 
-template<char... Dim, class State>
-constexpr auto get_indices(State state) noexcept {
+template<IsDim auto... Dim>
+constexpr auto get_indices(IsState auto state) noexcept {
 	return std::make_tuple(state.template get<index_in<Dim>>()...);
 }
 
-template<char... Dim, class... ValueType>
+template<IsDim auto... Dim, class... ValueType>
 constexpr auto idx(ValueType... value) noexcept {
 	return state<state_item<index_in<Dim>, good_index_t<ValueType>>...>(value...);
 }
 
-template<char Dim, class State, class F>
-constexpr auto update_index(State state, F f) noexcept {
-	static_assert(State::template contains<index_in<Dim>>, "Requested dimension does not exist. To add a new dimension instead of updating existing one, use .template with<index_in<'...'>>(...)");
+template<IsDim auto Dim, class F>
+constexpr auto update_index(IsState auto state, F f) noexcept {
+	static_assert(decltype(state)::template contains<index_in<Dim>>, "Requested dimension does not exist. To add a new dimension instead of updating existing one, use .template with<index_in<'...'>>(...)");
 	auto new_index = f(state.template get<index_in<Dim>>());
 	return state.template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
 
-template<char... Dims, class ...Diffs, class State> requires (sizeof...(Dims) == sizeof...(Diffs))
-constexpr auto neighbor(State state, Diffs... diffs) noexcept {
+template<IsDim auto... Dims, class ...Diffs> requires (sizeof...(Dims) == sizeof...(Diffs))
+constexpr auto neighbor(IsState auto state, Diffs... diffs) noexcept {
 	using namespace noarr::constexpr_arithmetic;
-	static_assert((... && State::template contains<index_in<Dims>>), "Requested dimension does not exist");
-	static_assert((... && std::is_same_v<state_get_t<State, index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
+	static_assert((... && decltype(state)::template contains<index_in<Dims>>), "Requested dimension does not exist");
+	static_assert((... && std::is_same_v<state_get_t<decltype(state), index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
 	return state.template with<index_in<Dims>...>(good_diff_index_t<decltype(state.template get<index_in<Dims>>() + diffs)>(state.template get<index_in<Dims>>() + diffs)...);
 }
 
 // TODO add tests
-template<char ...Dims, class Struct, class Offset, class ...StateItems>
+template<IsDim auto ...Dims, class Struct, class Offset, class ...StateItems>
 constexpr auto symmetric_span(Struct structure, state<StateItems...> state, Offset offset) noexcept {
 	return (... ^ span<Dims>(offset, (structure | get_length<Dims>(state)) - offset));
 }
 
 // TODO add tests
-template<char ...Dims, class Struct, class Offset>
+template<IsDim auto ...Dims, class Struct, class Offset>
 constexpr auto symmetric_span(Struct structure, Offset offset) noexcept {
 	return symmetric_span<Dims...>(structure, empty_state, offset);
 }
 
 // TODO add tests
-template<char ...Dims, class Struct, class ...Offsets, class ...StateItems> requires (sizeof...(Dims) == sizeof...(Offsets))
+template<IsDim auto ...Dims, class Struct, class ...Offsets, class ...StateItems> requires (sizeof...(Dims) == sizeof...(Offsets))
 constexpr auto symmetric_spans(Struct structure, state<StateItems...> state, Offsets ...offsets) noexcept {
 	return (... ^ symmetric_span<Dims>(structure, state, offsets));
 }
 
 // TODO add tests
-template<char ...Dims, class Struct, class ...Offsets> requires (sizeof...(Dims) == sizeof...(Offsets))
+template<IsDim auto ...Dims, class Struct, class ...Offsets> requires (sizeof...(Dims) == sizeof...(Offsets))
 constexpr auto symmetric_spans(Struct structure, Offsets ...offsets) noexcept {
 	return symmetric_spans<Dims...>(structure, empty_state, offsets...);
 }
@@ -172,13 +172,13 @@ constexpr auto symmetric_spans(Struct structure, Offsets ...offsets) noexcept {
 
 namespace helpers {
 
-template<char Dim, class IdxT, class State>
-constexpr auto state_construct_fix(state_item<index_in<Dim>, IdxT>, State state) noexcept {
+template<IsDim auto Dim, class IdxT>
+constexpr auto state_construct_fix(state_item<index_in<Dim>, IdxT>, IsState auto state) noexcept {
 	return fix<Dim>(state);
 }
 
-template<class StateItem, class State>
-constexpr auto state_construct_fix(StateItem, State) noexcept {
+template<class StateItem>
+constexpr auto state_construct_fix(StateItem, IsState auto) noexcept {
 	return neutral_proto();
 }
 
@@ -189,7 +189,7 @@ constexpr auto fix(state<StateItem...> state) noexcept {
 	return (neutral_proto() ^ ... ^ helpers::state_construct_fix(StateItem(), state));
 }
 
-template<char Dim, char ...Dims, class... StateItem>
+template<IsDim auto Dim, IsDim auto ...Dims, class... StateItem>
 constexpr auto fix(state<StateItem...> state) noexcept {
 	return fix<Dim, Dims...>(get_index<Dim>(state), get_index<Dims>(state)...);
 }

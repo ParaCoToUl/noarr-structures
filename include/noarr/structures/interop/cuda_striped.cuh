@@ -32,6 +32,9 @@ constexpr std::size_t cuda_shm_bank_width = 4;
 // Tag for use in state
 struct cuda_stripe_index;
 
+template<>
+struct is_tag<cuda_stripe_index> : std::true_type {};
+
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth, class T>
 struct cuda_striped_t : contain<T> {
 	static_assert(is_struct<ElemType>(), "The element type of cuda_striped must be a noarr structure.");
@@ -67,8 +70,7 @@ public:
 
 	using signature = typename T::signature;
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
 		// substructure size
 		auto sub_size = sub_structure().size(state.template remove<cuda_stripe_index>());
@@ -80,8 +82,8 @@ public:
 		return stripe_len * make_const<total_width>();
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
 		auto sub_offset = offset_of<Sub>(sub_structure(), state.template remove<cuda_stripe_index>());
 		auto offset_major = sub_offset / make_const<stripe_width>();
@@ -94,13 +96,13 @@ public:
 		}
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		return sub_structure().template length<QDim>(state.template remove<cuda_stripe_index>());
 	}
 
-	template<class Sub, class State>
-	constexpr void strict_state_at(State) const noexcept {
+	template<class Sub>
+	constexpr void strict_state_at(IsState auto) const noexcept {
 		static_assert(always_false<cuda_striped_t>, "A cuda_striped_t cannot be used in this context");
 	}
 
@@ -120,11 +122,11 @@ public:
 	}
 
 private:
-	template<class State, class Idx>
-	constexpr auto offset_inner(State state, Idx index_of_period) const noexcept {
+	template<class Idx>
+	constexpr auto offset_inner(IsState auto state, Idx index_of_period) const noexcept {
 		using namespace constexpr_arithmetic;
 		auto offset_of_period = index_of_period * make_const<total_width>();
-		if constexpr(State::template contains<cuda_stripe_index>) {
+		if constexpr(decltype(state)::template contains<cuda_stripe_index>) {
 			auto offset_of_stripe = state.template get<cuda_stripe_index>() * make_const<stripe_padded_width>();
 			return offset_of_period + offset_of_stripe;
 		} else {

@@ -9,7 +9,7 @@
 
 namespace noarr {
 
-template<char Dim, class T, class StartT>
+template<IsDim auto Dim, class T, class StartT>
 struct shift_t : contain<T, StartT> {
 	using base = contain<T, StartT>;
 	using base::base;
@@ -53,38 +53,36 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
+	constexpr auto sub_state(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
 		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		if constexpr(State::template contains<index_in<Dim>>)
-			if constexpr(State::template contains<length_in<Dim>>)
+		if constexpr(decltype(state)::template contains<index_in<Dim>>)
+			if constexpr(decltype(state)::template contains<length_in<Dim>>)
 				return tmp_state.template with<index_in<Dim>, length_in<Dim>>(state.template get<index_in<Dim>>() + start(), state.template get<length_in<Dim>>() + start());
 			else
 				return tmp_state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
 		else
-			if constexpr(State::template contains<length_in<Dim>>)
+			if constexpr(decltype(state)::template contains<length_in<Dim>>)
 				return tmp_state.template with<length_in<Dim>>(state.template get<length_in<Dim>>() + start());
 			else
 				return tmp_state;
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
-			if constexpr(State::template contains<length_in<Dim>>) {
+			static_assert(!decltype(state)::template contains<index_in<Dim>>, "Index already set");
+			if constexpr(decltype(state)::template contains<length_in<Dim>>) {
 				return state.template get<length_in<Dim>>();
 			} else {
 				return sub_structure().template length<Dim>(state.template remove<index_in<Dim>, length_in<Dim>>()) - start();
@@ -94,13 +92,13 @@ public:
 		}
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char Dim, class StartT>
+template<IsDim auto Dim, class StartT>
 struct shift_proto : contain<StartT> {
 	using base = contain<StartT>;
 	using base::base;
@@ -117,13 +115,13 @@ struct shift_proto : contain<StartT> {
  * @tparam Dim: the dimension names
  * @param start: parameters for shifting the indices
  */
-template<char... Dim, class... StartT>
+template<IsDim auto... Dim, class... StartT>
 constexpr auto shift(StartT... start) noexcept { return (... ^ shift_proto<Dim, good_index_t<StartT>>(start)); }
 
 template<>
 constexpr auto shift<>() noexcept { return neutral_proto(); }
 
-template<char Dim, class T, class StartT, class LenT>
+template<IsDim auto Dim, class T, class StartT, class LenT>
 struct slice_t : contain<T, StartT, LenT> {
 	using base = contain<T, StartT, LenT>;
 	using base::base;
@@ -162,46 +160,44 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
+	constexpr auto sub_state(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<Dim>>)
+		if constexpr(decltype(state)::template contains<index_in<Dim>>)
 			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
 		else
 			return state;
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
+	constexpr auto size(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set slice length");
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set slice length");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set slice length");
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+			static_assert(!decltype(state)::template contains<index_in<Dim>>, "Index already set");
 			return len();
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set slice length");
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char Dim, class StartT, class LenT>
+template<IsDim auto Dim, class StartT, class LenT>
 struct slice_proto : contain<StartT, LenT> {
 	using base = contain<StartT, LenT>;
 	using base::base;
@@ -212,11 +208,11 @@ struct slice_proto : contain<StartT, LenT> {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return slice_t<Dim, Struct, StartT, LenT>(s, base::template get<0>(), base::template get<1>()); }
 };
 
-template<char Dim, class StartT, class LenT>
+template<IsDim auto Dim, class StartT, class LenT>
 constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, good_index_t<StartT>, good_index_t<LenT>>(start, len); }
 
 // TODO add tests
-template<char Dim, class T, class StartT, class EndT>
+template<IsDim auto Dim, class T, class StartT, class EndT>
 struct span_t : contain<T, StartT, EndT> {
 	using base = contain<T, StartT, EndT>;
 	using base::base;
@@ -255,47 +251,45 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
+	constexpr auto sub_state(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<Dim>>)
+		if constexpr(decltype(state)::template contains<index_in<Dim>>)
 			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
 		else
 			return state;
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+	constexpr auto size(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set span length");
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set span length");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set span length");
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+			static_assert(!decltype(state)::template contains<index_in<Dim>>, "Index already set");
 			return end() - start();
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set span length");
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char Dim, class StartT, class EndT>
+template<IsDim auto Dim, class StartT, class EndT>
 struct span_proto : contain<StartT, EndT> {
 	using base = contain<StartT, EndT>;
 	using base::base;
@@ -306,10 +300,10 @@ struct span_proto : contain<StartT, EndT> {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return span_t<Dim, Struct, StartT, EndT>(s, base::template get<0>(), base::template get<1>()); }
 };
 
-template<char Dim, class StartT, class EndT>
+template<IsDim auto Dim, class StartT, class EndT>
 constexpr auto span(StartT start, EndT end) noexcept { return span_proto<Dim, good_index_t<StartT>, good_index_t<EndT>>(start, end); }
 
-template<char Dim, class T, class StartT, class StrideT>
+template<IsDim auto Dim, class T, class StartT, class StrideT>
 struct step_t : contain<T, StartT, StrideT> {
 	using base = contain<T, StartT, StrideT>;
 	using base::base;
@@ -349,33 +343,31 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
+	constexpr auto sub_state(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<Dim>>)
+		if constexpr(decltype(state)::template contains<index_in<Dim>>)
 			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride() + start());
 		else
 			return state;
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+	constexpr auto size(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set length after step");
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set length after step");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set length after step");
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+			static_assert(!decltype(state)::template contains<index_in<Dim>>, "Index already set");
 			auto sub_length = sub_structure().template length<Dim>(state);
 			return (sub_length + stride() - start() - make_const<1>()) / stride();
 		} else {
@@ -383,14 +375,14 @@ public:
 		}
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set length after step");
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char Dim, class StartT, class StrideT>
+template<IsDim auto Dim, class StartT, class StrideT>
 struct step_proto : contain<StartT, StrideT> {
 	using base = contain<StartT, StrideT>;
 	using base::base;
@@ -401,7 +393,7 @@ struct step_proto : contain<StartT, StrideT> {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return step_t<Dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>()); }
 };
 
-template<char Dim, class StartT, class StrideT>
+template<IsDim auto Dim, class StartT, class StrideT>
 constexpr auto step(StartT start, StrideT stride) noexcept { return step_proto<Dim, good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
 
 template<class StartT, class StrideT>
@@ -414,7 +406,7 @@ struct auto_step_proto : contain<StartT, StrideT> {
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
 		static_assert(!Struct::signature::dependent, "Add a dimension name as the first parameter to step, or use a structure with a dynamic topmost dimension");
-		constexpr char dim = Struct::signature::dim;
+		constexpr IsDim auto dim = Struct::signature::dim;
 		return step_t<dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>());
 	}
 };
@@ -422,7 +414,7 @@ struct auto_step_proto : contain<StartT, StrideT> {
 template<class StartT, class StrideT>
 constexpr auto step(StartT start, StrideT stride) noexcept { return auto_step_proto<good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
 
-template<char Dim, class T>
+template<IsDim auto Dim, class T>
 struct reverse_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -454,10 +446,9 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
+	constexpr auto sub_state(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<Dim>>) {
+		if constexpr(decltype(state)::template contains<index_in<Dim>>) {
 			auto tmp_state = state.template remove<index_in<Dim>>();
 			return tmp_state.template with<index_in<Dim>>(sub_structure().template length<Dim>(tmp_state) - make_const<1>() - state.template get<index_in<Dim>>());
 		} else {
@@ -465,32 +456,31 @@ public:
 		}
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+			static_assert(!decltype(state)::template contains<index_in<Dim>>, "Index already set");
 		}
 		return sub_structure().template length<QDim>(state);
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char Dim>
+template<IsDim auto Dim>
 struct reverse_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -503,7 +493,7 @@ struct reverse_proto {
  *
  * @tparam Dim: the dimension names
  */
-template<char... Dim>
+template<IsDim auto... Dim>
 constexpr auto reverse() noexcept { return (... ^ reverse_proto<Dim>()); }
 
 template<>

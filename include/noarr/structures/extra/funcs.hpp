@@ -10,8 +10,8 @@
 
 namespace noarr {
 
-template<char Dim, class State>
-constexpr auto get_length(State state) noexcept { return [state](auto structure) constexpr noexcept {
+template<IsDim auto Dim>
+constexpr auto get_length(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
 	return structure.template length<Dim>(state);
 }; }
 
@@ -20,28 +20,26 @@ constexpr auto get_length(State state) noexcept { return [state](auto structure)
  * 
  * @tparam Dim: the dimension name of the desired structure
  */
-template<char Dim>
+template<IsDim auto Dim>
 constexpr auto get_length() noexcept { return get_length<Dim, state<>>(empty_state); }
 
-template<class SubStruct, class State>
-constexpr auto offset(State state) noexcept { return [state](auto structure) constexpr noexcept {
+template<class SubStruct>
+constexpr auto offset(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
 	return offset_of<SubStruct>(structure, state);
 }; }
 
-template<class SubStruct, char... Dims, class... Idxs>
+template<class SubStruct, IsDim auto... Dims, class... Idxs>
 constexpr auto offset(Idxs... idxs) noexcept { return offset<SubStruct>(empty_state.with<index_in<Dims>...>(idxs...)); }
 
-template<class State>
-constexpr auto offset(State state) noexcept { return [state](auto structure) constexpr noexcept {
-	using type = scalar_t<decltype(structure), State>;
+constexpr auto offset(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
+	using type = scalar_t<decltype(structure), decltype(state)>;
 	return offset_of<scalar<type>>(structure, state);
 }; }
 
-template<char... Dims, class... Idxs>
+template<IsDim auto... Dims, class... Idxs>
 constexpr auto offset(Idxs... idxs) noexcept { return offset(empty_state.with<index_in<Dims>...>(idxs...)); }
 
-template<class State>
-constexpr auto get_size(State state) noexcept { return [state](auto structure) constexpr noexcept {
+constexpr auto get_size(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
 	return structure.size(state);
 }; }
 
@@ -68,9 +66,9 @@ constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { ret
  * 
  * @param ptr: the pointer to blob structure
  */
-template<class State, class CvVoid>
-constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
-	using type = scalar_t<decltype(structure), State>;
+template<class CvVoid>
+constexpr auto get_at(CvVoid *ptr, IsState auto state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
+	using type = scalar_t<decltype(structure), decltype(state)>;
 	return *helpers::sub_ptr<type>(ptr, offset_of<scalar<type>>(structure, state));
 }; }
 
@@ -79,7 +77,7 @@ constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state](a
  * @tparam Dims: the dimension names of the fixed dimensions
  * @param ptr: the pointer to blob structure
  */
-template<char... Dims, class... Idxs, class CvVoid>
+template<IsDim auto... Dims, class... Idxs, class CvVoid>
 constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept { return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...)); }
 
 /**

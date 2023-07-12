@@ -12,9 +12,9 @@ namespace noarr {
 
 namespace helpers {
 
-template<class T, class State>
+template<class T, IsState State>
 struct reassemble_scalar;
-template<char Dim, class ArgLength, class RetSig, class State>
+template<IsDim auto Dim, class ArgLength, class RetSig, IsState State>
 struct reassemble_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 	template<bool cond = State::template contains<index_in<Dim>>, class = void>
 	struct ty;
@@ -23,7 +23,7 @@ struct reassemble_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 	template<class Useless>
 	struct ty<false, Useless> { using pe = scalar_sig<void>; };
 };
-template<char Dim, class... RetSigs, class State>
+template<IsDim auto Dim, class... RetSigs, IsState State>
 struct reassemble_scalar<dep_function_sig<Dim, RetSigs...>, State> {
 	template<bool cond = State::template contains<index_in<Dim>>, class = void>
 	struct ty;
@@ -32,15 +32,15 @@ struct reassemble_scalar<dep_function_sig<Dim, RetSigs...>, State> {
 	template<class Useless>
 	struct ty<false, Useless> { using pe = scalar_sig<void>; };
 };
-template<class ValueType, class State>
+template<class ValueType, IsState State>
 struct reassemble_scalar<scalar_sig<ValueType>, State> {
 	template<class = void>
 	struct ty { using pe = scalar_sig<ValueType>; };
 };
 
-template<class TopSig, class State, char... Dims>
+template<class TopSig, IsState State, IsDim auto... Dims>
 struct reassemble_build;
-template<class TopSig, class State, char Dim, char... Dims>
+template<class TopSig, IsState State, IsDim auto Dim, IsDim auto... Dims>
 struct reassemble_build<TopSig, State, Dim, Dims...> {
 	static_assert((... && (Dim != Dims)), "Duplicate dimension in reorder");
 	using found = sig_find_dim<Dim, State, TopSig>;
@@ -68,14 +68,14 @@ struct reassemble_build<TopSig, State, Dim, Dims...> {
 	};
 	using type = typename reassemble_scalar<TopSig, State>::template ty<>::pe;
 };
-template<class TopSig, class State>
+template<class TopSig, IsState State>
 struct reassemble_build<TopSig, State> : reassemble_scalar<TopSig, State> {};
 
 template<class T>
 struct reassemble_completeness;
-template<char Dim, class ArgLength, class RetSig>
+template<IsDim auto Dim, class ArgLength, class RetSig>
 struct reassemble_completeness<function_sig<Dim, ArgLength, RetSig>> : reassemble_completeness<RetSig> {};
-template<char Dim, class... RetSigs>
+template<IsDim auto Dim, class... RetSigs>
 struct reassemble_completeness<dep_function_sig<Dim, RetSigs...>> : std::integral_constant<bool, (... && reassemble_completeness<RetSigs>::value)> {};
 template<class ValueType>
 struct reassemble_completeness<scalar_sig<ValueType>> : std::true_type {};
@@ -84,13 +84,13 @@ struct reassemble_completeness<scalar_sig<void>> : std::false_type {};
 
 } // namespace helpers
 
-template<class Signature, char... Dims>
+template<class Signature, IsDim auto... Dims>
 using reassemble_sig = typename helpers::reassemble_build<Signature, state<>, Dims...>::template ty<>::pe;
 
 template<class ReassembledSignature>
 static constexpr bool reassemble_is_complete = helpers::reassemble_completeness<ReassembledSignature>::value;
 
-template<class T, char... Dims>
+template<class T, IsDim auto... Dims>
 struct reorder_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -105,31 +105,30 @@ struct reorder_t : contain<T> {
 	using signature = reassemble_sig<typename T::signature, Dims...>;
 	static constexpr bool complete = reassemble_is_complete<signature>;
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().size(state);
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		static_assert(complete || signature::template any_accept<QDim>, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().template length<QDim>(state);
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), state);
 	}
 };
 
-template<char... Dims>
+template<IsDim auto... Dims>
 struct reorder_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -137,10 +136,10 @@ struct reorder_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reorder_t<Struct, Dims...>(s); }
 };
 
-template<char... Dims>
+template<IsDim auto... Dims>
 using reorder = reorder_proto<Dims...>;
 
-template<char Dim, class T>
+template<IsDim auto Dim, class T>
 struct hoist_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -163,28 +162,27 @@ private:
 public:
 	using signature = function_sig<Dim, typename hoisted::arg_length, typename T::signature::template replace<dim_replacement, Dim>>;
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(state);
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
 		return sub_structure().template length<QDim>(state);
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), state);
 	}
 };
 
-template<char Dim>
+template<IsDim auto Dim>
 struct hoist_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -192,16 +190,16 @@ struct hoist_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return hoist_t<Dim, Struct>(s); }
 };
 
-template<char Dim>
+template<IsDim auto Dim>
 using hoist = hoist_proto<Dim>;
 
 namespace helpers {
 
-template<class EvenAcc, class OddAcc, char... DimPairs>
+template<class EvenAcc, class OddAcc, IsDim auto... DimPairs>
 struct rename_unzip_dim_pairs;
-template<char... EvenAcc, char... OddAcc, char Even, char Odd, char... DimPairs>
-struct rename_unzip_dim_pairs<std::integer_sequence<char, EvenAcc...>, std::integer_sequence<char, OddAcc...>, Even, Odd, DimPairs...>
-	: rename_unzip_dim_pairs<std::integer_sequence<char, EvenAcc..., Even>, std::integer_sequence<char, OddAcc..., Odd>, DimPairs...> {};
+template<IsDim auto... EvenAcc, IsDim auto... OddAcc, IsDim auto Even, IsDim auto Odd, IsDim auto... DimPairs>
+struct rename_unzip_dim_pairs<dim_sequence<EvenAcc...>, dim_sequence<OddAcc...>, Even, Odd, DimPairs...>
+	: rename_unzip_dim_pairs<dim_sequence<EvenAcc..., Even>, dim_sequence<OddAcc..., Odd>, DimPairs...> {};
 template<class EvenAcc, class OddAcc>
 struct rename_unzip_dim_pairs<EvenAcc, OddAcc> {
 	using even = EvenAcc;
@@ -210,34 +208,34 @@ struct rename_unzip_dim_pairs<EvenAcc, OddAcc> {
 
 template<class>
 struct rename_uniquity;
-template<char Dim, char... Dims>
-struct rename_uniquity<std::integer_sequence<char, Dim, Dims...>> {
-	static constexpr bool value = (... && (Dims != Dim)) && rename_uniquity<std::integer_sequence<char, Dims...>>::value;
+template<IsDim auto Dim, IsDim auto... Dims>
+struct rename_uniquity<dim_sequence<Dim, Dims...>> {
+	static constexpr bool value = (... && (Dims != Dim)) && rename_uniquity<dim_sequence<Dims...>>::value;
 };
 template<>
-struct rename_uniquity<std::integer_sequence<char>> : std::true_type {};
+struct rename_uniquity<dim_sequence<>> : std::true_type {};
 
-template<char QDim, class From, class To>
+template<IsDim auto QDim, class From, class To>
 struct rename_dim;
-template<char QDim, char FromHead, char... FromTail, char ToHead, char... ToTail>
-struct rename_dim<QDim, std::integer_sequence<char, FromHead, FromTail...>, std::integer_sequence<char, ToHead, ToTail...>>
-	: rename_dim<QDim, std::integer_sequence<char, FromTail...>, std::integer_sequence<char, ToTail...>> {};
-template<char FromHead, char... FromTail, char ToHead, char... ToTail>
-struct rename_dim<FromHead, std::integer_sequence<char, FromHead, FromTail...>, std::integer_sequence<char, ToHead, ToTail...>> {
-	static constexpr char dim = ToHead;
+template<IsDim auto QDim, IsDim auto FromHead, IsDim auto... FromTail, IsDim auto ToHead, IsDim auto... ToTail>
+struct rename_dim<QDim, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>>
+	: rename_dim<QDim, dim_sequence<FromTail...>, dim_sequence<ToTail...>> {};
+template<IsDim auto FromHead, IsDim auto... FromTail, IsDim auto ToHead, IsDim auto... ToTail>
+struct rename_dim<FromHead, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>> {
+	static constexpr auto dim = ToHead;
 };
-template<char QDim>
-struct rename_dim<QDim, std::integer_sequence<char>, std::integer_sequence<char>> {
-	static constexpr char dim = QDim;
+template<IsDim auto QDim>
+struct rename_dim<QDim, dim_sequence<>, dim_sequence<>> {
+	static constexpr auto dim = QDim;
 };
 
 template<class From, class To, class Signature>
 struct rename_sig;
-template<class From, class To, char Dim, class ArgLength, class RetSig>
+template<class From, class To, IsDim auto Dim, class ArgLength, class RetSig>
 struct rename_sig<From, To, function_sig<Dim, ArgLength, RetSig>> {
 	using type = function_sig<rename_dim<Dim, From, To>::dim, ArgLength, typename rename_sig<From, To, RetSig>::type>;
 };
-template<class From, class To, char Dim, class... RetSigs>
+template<class From, class To, IsDim auto Dim, class... RetSigs>
 struct rename_sig<From, To, dep_function_sig<Dim, RetSigs...>> {
 	using type = dep_function_sig<rename_dim<Dim, From, To>::dim, typename rename_sig<From, To, RetSigs>::type...>;
 };
@@ -246,14 +244,14 @@ struct rename_sig<From, To, scalar_sig<ValueType>> {
 	using type = scalar_sig<ValueType>;
 };
 
-template<class From, class To, class StateTag>
+template<class From, class To, IsTag StateTag>
 struct rename_state_tag;
-template<class From, class To, char Dim>
+template<class From, class To, IsDim auto Dim>
 struct rename_state_tag<From, To, index_in<Dim>> { using type = index_in<rename_dim<Dim, From, To>::dim>; };
-template<class From, class To, char Dim>
+template<class From, class To, IsDim auto Dim>
 struct rename_state_tag<From, To, length_in<Dim>> { using type = length_in<rename_dim<Dim, From, To>::dim>; };
 
-template<class From, class To, class State>
+template<class From, class To, IsState State>
 struct rename_state;
 template<class From, class To, class... StateItem>
 struct rename_state<From, To, state<StateItem...>> {
@@ -266,17 +264,17 @@ struct rename_state<From, To, state<StateItem...>> {
 
 } // namespace helpers
 
-template<class T, char... DimPairs>
+template<class T, IsDim auto... DimPairs>
 struct rename_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
 
 	static_assert(sizeof...(DimPairs) % 2 == 0, "Expected an even number of dimensions. Usage: rename<Old1, New1, Old2, New2, ...>()");
 private:
-	using unzip = helpers::rename_unzip_dim_pairs<std::integer_sequence<char>, std::integer_sequence<char>, DimPairs...>;
+	using unzip = helpers::rename_unzip_dim_pairs<dim_sequence<>, dim_sequence<>, DimPairs...>;
 	using internal = typename unzip::even;
 	using external = typename unzip::odd;
-	template<class State>
+	template<IsState State>
 	using rename_state = typename helpers::rename_state<external, internal, State>;
 public:
 	static_assert(helpers::rename_uniquity<internal>::value, "A dimension is renamed twice. Usage: rename<Old1, New1, Old2, New2, ...>()");
@@ -292,9 +290,9 @@ public:
 private:
 	template<class = external, class = internal>
 	struct assertion;
-	template<char... ExternalDims, char... InternalDims>
-	struct assertion<std::integer_sequence<char, ExternalDims...>, std::integer_sequence<char, InternalDims...>> {
-		template<char Dim>
+	template<IsDim auto... ExternalDims, IsDim auto... InternalDims>
+	struct assertion<dim_sequence<ExternalDims...>, dim_sequence<InternalDims...>> {
+		template<IsDim auto Dim>
 		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
 		static_assert((... && is_free<ExternalDims>), "The structure already has a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
 		// Note: in case a dimension is renamed to itself, is_free returns true. This is necessary to make the above assertion pass.
@@ -305,33 +303,31 @@ public:
 	static_assert(assertion<>::success);
 	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
-		return rename_state<State>::convert(state);
+	constexpr auto sub_state(IsState auto state) const noexcept {
+		return rename_state<decltype(state)>::convert(state);
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
-		return sub_structure().size(sub_state<State>(state));
+	constexpr auto size(IsState auto state) const noexcept {
+		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state<State>(state));
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
-		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state<State>(state));
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
+		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state(state));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state<State>(state));
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<char... DimPairs>
+template<IsDim auto... DimPairs>
 struct rename_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -339,7 +335,7 @@ struct rename_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return rename_t<Struct, DimPairs...>(s); }
 };
 
-template<char... DimPairs>
+template<IsDim auto... DimPairs>
 using rename = rename_proto<DimPairs...>;
 
 } // namespace noarr

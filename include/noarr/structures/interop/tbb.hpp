@@ -11,7 +11,7 @@
 namespace noarr {
 
 // declared in traverser_iter.hpp
-template<char Dim, class Struct, class Order>
+template<IsDim auto Dim, class Struct, class Order>
 template<class Split>
 constexpr traverser_range_t<Dim, Struct, Order>::traverser_range_t(traverser_range_t &orig, Split) noexcept : base(orig), begin_idx(orig.begin_idx + (orig.end_idx - orig.begin_idx) / 2), end_idx(orig.end_idx) {
 	static_assert(std::is_same_v<Split, tbb::split>, "Invalid constructor call");
@@ -25,7 +25,7 @@ inline void tbb_for_each(const Traverser &t, const F &f) noexcept {
 
 template<class Traverser, class FNeut, class FAcc, class FJoin, class OutStruct>
 inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_acc, const FJoin &f_join, const OutStruct &out_struct, void *out_ptr) noexcept {
-	constexpr char top_dim = helpers::traviter_top_dim<decltype(t.get_struct() ^ t.get_order())>;
+	constexpr IsDim auto top_dim = helpers::traviter_top_dim<decltype(t.get_struct() ^ t.get_order())>;
 	using range_t = decltype(t.range());
 	if constexpr(OutStruct::signature::template all_accept<top_dim>) {
 		// parallel writes will go to different offsets => out_ptr may be shared

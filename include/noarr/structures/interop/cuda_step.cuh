@@ -7,22 +7,22 @@
 
 namespace noarr {
 
-template<char Dim, class CG>
+template<IsDim auto Dim, class CG>
 __device__ inline auto cuda_step(const CG &cg) noexcept {
 	return step<Dim>(cg.thread_rank(), cg.num_threads());
 }
 
-template<char Dim, class CG>
+template<IsDim auto Dim, class CG>
 __device__ inline auto cuda_step() noexcept {
 	return step<Dim>(CG::thread_rank(), CG::num_threads());
 }
 
-template<char Dim>
+template<IsDim auto Dim>
 __device__ inline auto cuda_step_block() noexcept {
 	return cuda_step<Dim, ::cooperative_groups::thread_block>();
 }
 
-template<char Dim>
+template<IsDim auto Dim>
 __device__ inline auto cuda_step_grid() noexcept {
 	return cuda_step<Dim, ::cooperative_groups::grid_group>();
 }

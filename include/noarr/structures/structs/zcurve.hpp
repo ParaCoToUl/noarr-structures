@@ -11,9 +11,9 @@ namespace noarr {
 
 namespace helpers {
 
-template<char...>
+template<IsDim auto...>
 struct zc_uniquity;
-template<char Dim, char... Dims>
+template<IsDim auto Dim, IsDim auto... Dims>
 struct zc_uniquity<Dim, Dims...> {
 	static constexpr bool value = (... && (Dims != Dim)) && zc_uniquity<Dims...>::value;
 };
@@ -91,14 +91,14 @@ constexpr std::size_t zc_special(std::size_t z) noexcept {
 	return zc_special_inner<NDim>(z >> (NDim-Dim-1), std::make_integer_sequence<int, zc_special_helper<NDim>::num_iter>());
 }
 
-template<class Acc, char...>
+template<class Acc, IsDim auto...>
 struct zc_dims_pop;
-template<char... Acc, char Head, char... Tail>
-struct zc_dims_pop<std::integer_sequence<char, Acc...>, Head, Tail...> : zc_dims_pop<std::integer_sequence<char, Acc..., Head>, Tail...> {};
-template<char... Acc, char Last>
-struct zc_dims_pop<std::integer_sequence<char, Acc...>, Last> {
-	static constexpr char dim = Last;
-	using dims = std::integer_sequence<char, Acc...>;
+template<IsDim auto... Acc, IsDim auto Head, IsDim auto... Tail>
+struct zc_dims_pop<dim_sequence<Acc...>, Head, Tail...> : zc_dims_pop<dim_sequence<Acc..., Head>, Tail...> {};
+template<IsDim auto... Acc, IsDim auto Last>
+struct zc_dims_pop<dim_sequence<Acc...>, Last> {
+	static constexpr IsDim auto dim = Last;
+	using dims = dim_sequence<Acc...>;
 };
 
 template<std::size_t N>
@@ -113,7 +113,7 @@ struct zc_log2<1> {
 
 } // namespace helpers
 
-template<int SpecialLevel, int GeneralLevel, char Dim, class T, char... Dims>
+template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, class T, IsDim auto... Dims>
 struct merge_zcurve_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -165,11 +165,11 @@ public:
 
 	using is = std::make_index_sequence<sizeof...(Dims)>;
 
-	template<class State, std::size_t... DimsI>
-	constexpr auto sub_state(State state, std::index_sequence<DimsI...>) const noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+	template<std::size_t... DimsI>
+	constexpr auto sub_state(IsState auto state, std::index_sequence<DimsI...>) const noexcept {
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		auto clean_state = state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
-		if constexpr(State::template contains<index_in<Dim>>) {
+		if constexpr(decltype(state)::template contains<index_in<Dim>>) {
 			auto index = state.template get<index_in<Dim>>();
 			auto index_general = index >> SpecialLevel*sizeof...(Dims);
 			auto index_special = index & ((1 << SpecialLevel*sizeof...(Dims)) - 1);
@@ -180,21 +180,20 @@ public:
 		}
 	}
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state, is()));
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(State::template contains<index_in<Dim>>, "Index has not been set");
+	template<class Sub>
+	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+		static_assert(decltype(state)::template contains<index_in<Dim>>, "Index has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state, is()));
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
-		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+	template<IsDim auto QDim>
+	constexpr auto length(IsState auto state) const noexcept {
+		static_assert(!decltype(state)::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
+		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		if constexpr(QDim == Dim) {
 			auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();
 			return (... * sub_structure().template length<Dims>(clean_state));
@@ -203,13 +202,13 @@ public:
 		}
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state, is()));
 	}
 };
 
-template<int SpecialLevel, int GeneralLevel, char Dim, char... Dims>
+template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, IsDim auto... Dims>
 struct merge_zcurve_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -217,10 +216,10 @@ struct merge_zcurve_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_zcurve_t<SpecialLevel, GeneralLevel, Dim, Struct, Dims...>(s); }
 };
 
-template<char... AllDims>
+template<IsDim auto... AllDims>
 struct merge_zcurve {
 private:
-	using dims_pop = helpers::zc_dims_pop<std::integer_sequence<char>, AllDims...>;
+	using dims_pop = helpers::zc_dims_pop<dim_sequence<>, AllDims...>;
 	struct error { static_assert(always_false<merge_zcurve<AllDims...>>, "Do not instantiate this type directly, use merge_zcurve<'original dims', 'new dim'>::maxlen_alignment<len, alignment>()"); };
 
 public:
@@ -233,8 +232,8 @@ public:
 	}
 
 private:
-	template<int SpecialLevel, int GeneralLevel, char Dim, char... Dims>
-	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...> maxlen_alignment(std::integer_sequence<char, Dims...>) noexcept {
+	template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, IsDim auto... Dims>
+	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...> maxlen_alignment(dim_sequence<Dims...>) noexcept {
 		return {};
 	}
 };

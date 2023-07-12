@@ -5,6 +5,7 @@
 
 #include "utility.hpp"
 #include "signature.hpp"
+#include "state.hpp"
 
 namespace noarr {
 
@@ -25,11 +26,11 @@ struct type_param;
 template<class T, T V>
 struct value_param;
 
-template<char Dim>
+template<IsDim auto Dim>
 struct dim_param;
 
-template<class StructInner, class StructOuter, class State>
-constexpr auto offset_of(StructOuter structure, State state) noexcept {
+template<class StructInner, class StructOuter>
+constexpr auto offset_of(StructOuter structure, IsState auto state) noexcept {
 	if constexpr(std::is_same_v<StructInner, StructOuter>) {
 		return constexpr_arithmetic::make_const<0>();
 	} else {
@@ -37,8 +38,8 @@ constexpr auto offset_of(StructOuter structure, State state) noexcept {
 	}
 }
 
-template<class StructInner, class StructOuter, class State>
-constexpr auto state_at(StructOuter structure, State state) noexcept {
+template<class StructInner, class StructOuter>
+constexpr auto state_at(StructOuter structure, IsState auto state) noexcept {
 	if constexpr(std::is_same_v<StructInner, StructOuter>) {
 		return state;
 	} else {

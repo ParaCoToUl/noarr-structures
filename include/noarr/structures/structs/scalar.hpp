@@ -24,23 +24,22 @@ struct scalar : contain<> {
 
 	using signature = scalar_sig<T>;
 
-	template<class State>
-	static constexpr auto size(State) noexcept {
+	static constexpr auto size(IsState auto) noexcept {
 		return constexpr_arithmetic::make_const<sizeof(T)>();
 	}
 
-	template<class Sub, class State>
-	static constexpr void strict_offset_of(State) noexcept {
+	template<class Sub>
+	static constexpr void strict_offset_of(IsState auto) noexcept {
 		static_assert(always_false<Sub>, "Substructure was not found");
 	}
 
-	template<char QDim, class State>
-	static constexpr void length(State) noexcept {
+	template<IsDim auto QDim>
+	static constexpr void length(IsState auto) noexcept {
 		static_assert(value_always_false<QDim>, "Index in this dimension is not accepted by any substructure");
 	}
 
-	template<class Sub, class State>
-	static constexpr void strict_state_at(State) noexcept {
+	template<class Sub>
+	static constexpr void strict_state_at(IsState auto) noexcept {
 		static_assert(always_false<scalar<T>>, "A scalar cannot be used in this context");
 	}
 };

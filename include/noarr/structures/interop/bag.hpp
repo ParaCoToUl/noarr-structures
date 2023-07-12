@@ -112,7 +112,7 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<char... Dims, class... Ts>
+	template<IsDim auto... Dims, class... Ts>
 	constexpr decltype(auto) at(Ts... ts) const noexcept {
 		return structure() | noarr::get_at<Dims...>(data(), ts...);
 	}
@@ -122,8 +122,7 @@ public:
 	 *
 	 * @param ts: the dimension values
 	 */
-	template<class State>
-	constexpr decltype(auto) operator[](State state) const noexcept {
+	constexpr decltype(auto) operator[](IsState auto state) const noexcept {
 		return structure() | noarr::get_at(data(), state);
 	}
 
@@ -133,7 +132,7 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<char... Dims, class... Ts>
+	template<IsDim auto... Dims, class... Ts>
 	constexpr auto offset(Ts... ts) const noexcept {
 		return structure() | noarr::offset<Dims...>(ts...);
 	}
@@ -143,7 +142,7 @@ public:
 	 *
 	 * @tparam Dim: the dimension name
 	 */
-	template<char Dim>
+	template<IsDim auto Dim>
 	constexpr auto get_length() const noexcept {
 		return structure() | noarr::get_length<Dim>();
 	}

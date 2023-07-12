@@ -182,26 +182,24 @@ private:
 		return noarr::contain<T, U>::template get<1>();
 	}
 
-	template<class State>
-	constexpr auto sub_state(State state) const noexcept {
+	constexpr auto sub_state(noarr::IsState auto state) const noexcept {
 		return ...;
 	}
 public:
 
-	template<class State>
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(noarr::IsState auto state) const noexcept {
 		auto sub_size = sub_structure().size(sub_state(state));
 		return ...; // could return sub_size if it is the same
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_offset_of(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_offset_of(noarr::IsState auto state) const noexcept {
 		auto sub_offset = noarr::offset_of<Sub>(sub_structure(), sub_state(state));
 		return ...; // could return sub_offset if it is the same
 	}
 
-	template<char QDim, class State>
-	constexpr auto length(State state) const noexcept {
+	template<char QDim>
+	constexpr auto length(noarr::IsState auto state) const noexcept {
 		if constexpr(QDim == Dim) {
 			// here we return our own length
 			return ...;
@@ -211,8 +209,8 @@ public:
 		}
 	}
 
-	template<class Sub, class State>
-	constexpr auto strict_state_at(State state) const noexcept {
+	template<class Sub>
+	constexpr auto strict_state_at(noarr::IsState auto state) const noexcept {
 		return noarr::state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

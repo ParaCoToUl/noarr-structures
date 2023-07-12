@@ -55,7 +55,7 @@ substitutions = {
 	('docs/other/Functions.md', 1): {_PROLOG: "auto matrix = noarr::scalar<int>() ^ noarr::sized_vector<'x'>(1);"},
 	('docs/other/Mangling.md', 0): {'/\*\.\.\.\*/': '0'},
 	('docs/other/SeparateLengths.md', 2): {'.*get_length.*': ''},
-	('docs/other/Serialization.md', 1): {'/\*\.\.\.\*/': 'noarr::tuple_t<42>()', 'path/to/(src|dest)': '/dev/null', 'return 1': 'std::abort()'},
+	('docs/other/Serialization.md', 1): {'/\*\.\.\.\*/': 'noarr::tuple_t<\'*\'>()', 'path/to/(src|dest)': '/dev/null', 'return 1': 'std::abort()'},
 	('docs/other/StructureTraits.md', 0): {'State = state<>': 'State = noarr::state<>', '/\*\.\.\.\*/': 'void'},
 	('docs/structs/array.md', 0): {'using array = .*;': 'struct array_t;'},
 	('docs/structs/cuda_step.md', 1): {'cuda_step_grid\(\)': 'step(0, 1024*1024)'},

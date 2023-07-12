@@ -9,7 +9,7 @@
 
 namespace noarr {
 
-template<char Dim, class Struct, class Order>
+template<IsDim auto Dim, class Struct, class Order>
 struct traverser_iterator_t : contain<Struct, Order> {
 	using base = contain<Struct, Order>;
 	std::size_t idx;
@@ -58,7 +58,7 @@ public:
 	friend constexpr this_t operator+(difference_type diff, const this_t &iter) noexcept { return iter + diff; }
 };
 
-template<char Dim, class Struct, class Order>
+template<IsDim auto Dim, class Struct, class Order>
 struct traverser_range_t : contain<Struct, Order> {
 	using base = contain<Struct, Order>;
 	std::size_t begin_idx, end_idx;
@@ -115,19 +115,19 @@ template<class Sig>
 struct traviter_sig_top_dim {
 	static_assert(always_false<Sig>, "The top-level dimension (after applying order) must be dynamic in order to be convertible to a range");
 };
-template<char Dim, class ArgLength, class RetSig>
+template<IsDim auto Dim, class ArgLength, class RetSig>
 struct traviter_sig_top_dim<function_sig<Dim, ArgLength, RetSig>> {
-	static constexpr char dim = Dim;
+	static constexpr IsDim auto dim = Dim;
 };
 
 template<class Struct>
-static constexpr char traviter_top_dim = traviter_sig_top_dim<typename Struct::signature>::dim;
+static constexpr IsDim auto traviter_top_dim = traviter_sig_top_dim<typename Struct::signature>::dim;
 
 } // namespace helpers
 
 // declared in traverser.hpp
 template<class Struct, class Order>
-template<char Dim>
+template<IsDim auto Dim>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 	return traverser_range_t<Dim, Struct, Order>(*this, top_struct().template length<Dim>(empty_state));
 }
@@ -135,7 +135,7 @@ constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 // declared in traverser.hpp
 template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
-	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct())>;
+	constexpr IsDim auto dim = helpers::traviter_top_dim<decltype(top_struct())>;
 	return traverser_range_t<dim, Struct, Order>(*this, top_struct().template length<dim>(empty_state));
 }
 
@@ -143,7 +143,7 @@ constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::begin() const noexcept {
 	// same as range().begin()
-	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct())>;
+	constexpr IsDim auto dim = helpers::traviter_top_dim<decltype(top_struct())>;
 	return traverser_iterator_t<dim, Struct, Order>(*this, (std::size_t) 0);
 }
 
@@ -151,7 +151,7 @@ constexpr auto traverser_t<Struct, Order>::begin() const noexcept {
 template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::end() const noexcept {
 	// same as range().end()
-	constexpr char dim = helpers::traviter_top_dim<decltype(top_struct())>;
+	constexpr IsDim auto dim = helpers::traviter_top_dim<decltype(top_struct())>;
 	return traverser_iterator_t<dim, Struct, Order>(*this, top_struct().template length<dim>(empty_state));
 }
 
