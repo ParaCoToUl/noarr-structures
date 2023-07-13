@@ -147,7 +147,6 @@ struct traverser_t : contain<Struct, Order> {
 		for_each_impl(dim_tree(), f, empty_state);
 	}
 
-
 	template<auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_dims(F f) const noexcept {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
@@ -170,10 +169,13 @@ struct traverser_t : contain<Struct, Order> {
 	constexpr auto end() const noexcept; // defined in traverser_iter.hpp
 
 private:
-	template<auto Dim, class ...Branches, class F, std::size_t... I>
-	constexpr void for_each_impl_dep(F f, auto state, std::index_sequence<I...>) const noexcept {
-			(..., for_each_impl(Branches(), f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>())));
+	template<auto Dim, class Branch, class ...Branches, class F, std::size_t I, std::size_t... Is>
+	constexpr void for_each_impl_dep(F f, auto state, std::index_sequence<I, Is...>) const noexcept {
+		for_each_impl(Branch(), f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>()));
+		for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence<Is...>());
 	}
+	template<auto Dim, class F>
+	constexpr void for_each_impl_dep(F, auto, std::index_sequence<>) const noexcept {}
 	template<auto Dim, class ...Branches, class F>
 	constexpr void for_each_impl(dim_tree<Dim, Branches...>, F f, auto state) const noexcept {
 		using dim_sig = sig_find_dim<Dim, decltype(state), typename decltype(top_struct())::signature>;
