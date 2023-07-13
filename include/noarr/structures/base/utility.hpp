@@ -227,13 +227,6 @@ using helpers::dim_tree_contains;
 template<class Seq>
 using dim_tree_from_sequence = typename helpers::dim_tree_from_sequence_impl<Seq>::type;
 
-/**
- * @brief an alias for std::integer_sequence<char, ...>
- * 
- * @tparam VS: the contained values
- */
-template<char... VS>
-using char_sequence = std::integer_sequence<char, VS...>;
 
 template<std::size_t I>
 struct lit_t : std::integral_constant<std::size_t, I> {

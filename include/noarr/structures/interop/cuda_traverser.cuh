@@ -93,7 +93,7 @@ struct cuda_fix_pair_proto {
 template<class Struct, class Order, class DimsB, class DimsT, class CudaDimsB, class CudaDimsT>
 struct cuda_traverser_t;
 
-template<auto... DimsB, auto... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order> requires (... && (IsDim<decltype(DimsB)> && IsDim<decltype(DimsB)>))
+template<auto... DimsB, auto... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
 struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : traverser_t<Struct, Order> {
 	using base = traverser_t<Struct, Order>;
 	using base::base;

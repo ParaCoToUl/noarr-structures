@@ -217,13 +217,14 @@ struct rename_uniquity<dim_sequence<>> : std::true_type {};
 
 template<IsDim auto QDim, class From, class To>
 struct rename_dim;
-template<IsDim auto QDim, IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail> requires (... && (IsDim<decltype(FromTail)> && IsDim<decltype(ToTail)>))
+template<IsDim auto QDim, IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail>
 struct rename_dim<QDim, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>>
 	: rename_dim<QDim, dim_sequence<FromTail...>, dim_sequence<ToTail...>> {};
-template<IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail> requires (... && (IsDim<decltype(FromTail)> && IsDim<decltype(ToTail)>))
+template<IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail>
 struct rename_dim<FromHead, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>> {
 	static constexpr auto dim = ToHead;
 };
+
 template<IsDim auto QDim>
 struct rename_dim<QDim, dim_sequence<>, dim_sequence<>> {
 	static constexpr auto dim = QDim;
@@ -290,7 +291,7 @@ public:
 private:
 	template<class = external, class = internal>
 	struct assertion;
-	template<auto... ExternalDims, auto... InternalDims> requires (... && (IsDim<decltype(ExternalDims)> && IsDim<decltype(InternalDims)>))
+	template<auto... ExternalDims, auto... InternalDims>
 	struct assertion<dim_sequence<ExternalDims...>, dim_sequence<InternalDims...>> {
 		template<IsDim auto Dim>
 		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
