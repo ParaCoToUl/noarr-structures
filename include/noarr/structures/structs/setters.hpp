@@ -82,11 +82,13 @@ struct fix_proto : contain<IdxT> {
  * @tparam Dims: the dimension names
  * @param ts: parameters for fixing the indices
  */
-template<auto... Dim, class... IdxT> requires (... && IsDim<decltype(Dim)>)
-constexpr auto fix(IdxT... idx) noexcept { return (... ^ fix_proto<Dim, good_index_t<IdxT>>(idx)); }
-
-template<>
-constexpr auto fix<>() noexcept { return neutral_proto(); }
+template<auto... Dim, class... IdxT> requires ((sizeof...(Dim) == sizeof...(IdxT)) && ... && IsDim<decltype(Dim)>)
+constexpr auto fix(IdxT... idx) noexcept { 
+	if constexpr (sizeof...(Dim) > 0)
+		return (... ^ fix_proto<Dim, good_index_t<IdxT>>(idx));
+	else
+		return neutral_proto();
+}
 
 template<IsDim auto Dim, class T, class LenT>
 struct set_length_t : contain<T, LenT> {

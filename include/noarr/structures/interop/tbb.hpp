@@ -25,7 +25,7 @@ inline void tbb_for_each(const Traverser &t, const F &f) noexcept {
 
 template<class Traverser, class FNeut, class FAcc, class FJoin, class OutStruct>
 inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_acc, const FJoin &f_join, const OutStruct &out_struct, void *out_ptr) noexcept {
-	constexpr IsDim auto top_dim = helpers::traviter_top_dim<decltype(t.get_struct() ^ t.get_order())>;
+	constexpr auto top_dim = helpers::traviter_top_dim<decltype(t.get_struct() ^ t.get_order())>;
 	using range_t = decltype(t.range());
 	if constexpr(OutStruct::signature::template all_accept<top_dim>) {
 		// parallel writes will go to different offsets => out_ptr may be shared

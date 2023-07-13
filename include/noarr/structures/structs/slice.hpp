@@ -406,7 +406,7 @@ struct auto_step_proto : contain<StartT, StrideT> {
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
 		static_assert(!Struct::signature::dependent, "Add a dimension name as the first parameter to step, or use a structure with a dynamic topmost dimension");
-		constexpr IsDim auto dim = Struct::signature::dim;
+		constexpr auto dim = Struct::signature::dim;
 		return step_t<dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>());
 	}
 };

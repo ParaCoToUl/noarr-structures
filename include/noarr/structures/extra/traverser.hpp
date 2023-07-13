@@ -111,7 +111,7 @@ constexpr U make_union(const Ts &...s) noexcept {
 	return U(to_struct<Ts>::convert(s)...);
 }
 
-template<auto... Dim, class... IdxT> requires (... && IsDim<decltype(Dim)>)
+template<auto... Dim, class... IdxT> requires ((sizeof...(Dim) == sizeof...(IdxT)) && ... && IsDim<decltype(Dim)>)
 constexpr auto fix(IdxT...) noexcept; // defined in setters.hpp
 
 template<class Struct, class Order>
@@ -177,11 +177,7 @@ struct traverser_t : contain<Struct, Order> {
 private:
 	template<IsDim auto Dim, class ...Branches, class F, std::size_t... I>
 	constexpr void for_each_impl_dep(F f, IsState auto state, std::index_sequence<I...>) const noexcept {
-		if constexpr (sizeof...(Branches) == 1) {
-			(..., for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>())));
-		} else {
 			(..., for_each_impl(Branches(), f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>())));
-		}
 	}
 	template<IsDim auto Dim, class ...Branches, class F>
 	constexpr void for_each_impl(dim_tree<Dim, Branches...>, F f, IsState auto state) const noexcept {
@@ -195,8 +191,8 @@ private:
 				for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(i));
 		}
 	}
-	template<class F>
-	constexpr void for_each_impl(dim_sequence<>, F f, IsState auto state) const noexcept {
+	template<class F, class... StateItem> requires (sizeof ...(StateItem) > 0)
+	constexpr void for_each_impl(dim_sequence<>, F f, noarr::state<StateItem...> state) const noexcept {
 		f(order(fix(state)));
 	}
 	template<class F>

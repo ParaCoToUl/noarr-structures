@@ -186,6 +186,7 @@ constexpr auto state_construct_fix(StateItem, IsState auto) noexcept {
 
 template<class... StateItem>
 constexpr auto fix(state<StateItem...> state) noexcept {
+	(void)state;
 	return (neutral_proto() ^ ... ^ helpers::state_construct_fix(StateItem(), state));
 }
 

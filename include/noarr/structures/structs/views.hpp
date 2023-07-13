@@ -217,7 +217,7 @@ struct rename_uniquity<dim_sequence<>> : std::true_type {};
 
 template<IsDim auto QDim, class From, class To>
 struct rename_dim;
-template<IsDim auto QDim, IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail>
+template<IsDim auto QDim, IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail> requires (QDim != FromHead)
 struct rename_dim<QDim, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>>
 	: rename_dim<QDim, dim_sequence<FromTail...>, dim_sequence<ToTail...>> {};
 template<IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail>

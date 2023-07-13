@@ -97,7 +97,7 @@ template<auto... Acc, IsDim auto Head, auto... Tail>
 struct zc_dims_pop<dim_sequence<Acc...>, Head, Tail...> : zc_dims_pop<dim_sequence<Acc..., Head>, Tail...> {};
 template<auto... Acc, IsDim auto Last>
 struct zc_dims_pop<dim_sequence<Acc...>, Last> {
-	static constexpr IsDim auto dim = Last;
+	static constexpr auto dim = Last;
 	using dims = dim_sequence<Acc...>;
 };
 
