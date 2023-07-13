@@ -88,7 +88,7 @@ struct union_t : contain<Structs...> {
 	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
 
 private:
-	template<IsDim auto Dim, std::size_t I>
+	template<auto Dim, std::size_t I>
 	constexpr auto find_first_match() const noexcept {
 		using sub_sig = typename decltype(sub_structure<I>())::signature;
 		if constexpr(sub_sig::template any_accept<Dim>)
@@ -170,12 +170,12 @@ struct traverser_t : contain<Struct, Order> {
 	constexpr auto end() const noexcept; // defined in traverser_iter.hpp
 
 private:
-	template<IsDim auto Dim, class ...Branches, class F, std::size_t... I>
-	constexpr void for_each_impl_dep(F f, IsState auto state, std::index_sequence<I...>) const noexcept {
+	template<auto Dim, class ...Branches, class F, std::size_t... I>
+	constexpr void for_each_impl_dep(F f, auto state, std::index_sequence<I...>) const noexcept {
 			(..., for_each_impl(Branches(), f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>())));
 	}
-	template<IsDim auto Dim, class ...Branches, class F>
-	constexpr void for_each_impl(dim_tree<Dim, Branches...>, F f, IsState auto state) const noexcept {
+	template<auto Dim, class ...Branches, class F>
+	constexpr void for_each_impl(dim_tree<Dim, Branches...>, F f, auto state) const noexcept {
 		using dim_sig = sig_find_dim<Dim, decltype(state), typename decltype(top_struct())::signature>;
 		if constexpr(dim_sig::dependent) {
 			constexpr std::size_t len = std::tuple_size_v<typename dim_sig::ret_sig_tuple>;
@@ -186,8 +186,8 @@ private:
 				for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(i));
 		}
 	}
-	template<class F, class... StateItem> requires (sizeof ...(StateItem) > 0)
-	constexpr void for_each_impl(dim_sequence<>, F f, noarr::state<StateItem...> state) const noexcept {
+	template<class F, class StateItem, class... StateItems>
+	constexpr void for_each_impl(dim_sequence<>, F f, noarr::state<StateItem, StateItems...> state) const noexcept {
 		f(order(fix(state)));
 	}
 	template<class F>
