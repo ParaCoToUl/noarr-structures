@@ -130,6 +130,9 @@ TEST_CASE("Reverse tuple traverser", "[reverse traverser]") {
 	auto s = noarr::pack(noarr::scalar<item0>(), noarr::scalar<item1>(), noarr::scalar<item2>()) ^ noarr::tuple<'x'>();
 	auto r = s ^ noarr::reverse<'x'>();
 
+	REQUIRE((s | noarr::get_length<'x'>()) == 3);
+	REQUIRE((r | noarr::get_length<'x'>()) == 3);
+
 	std::size_t x = 0;
 	noarr::traverser(r).for_each([&](auto state) {
 		constexpr auto state_x = decltype(noarr::get_index<'x'>(state))::value;

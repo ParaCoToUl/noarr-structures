@@ -178,8 +178,7 @@ private:
 	constexpr void for_each_impl(dim_tree<Dim, Branches...>, F f, auto state) const noexcept {
 		using dim_sig = sig_find_dim<Dim, decltype(state), typename decltype(top_struct())::signature>;
 		if constexpr(dim_sig::dependent) {
-			constexpr std::size_t len = std::tuple_size_v<typename dim_sig::ret_sig_tuple>;
-			for_each_impl_dep<Dim, Branches...>(f, state, std::make_index_sequence<len>());
+			for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence_for<Branches...>());
 		} else {
 			std::size_t len = top_struct().template length<Dim>(state);
 			for(std::size_t i = 0; i < len; i++)
