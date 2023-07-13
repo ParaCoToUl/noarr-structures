@@ -39,7 +39,7 @@ assert(std::string(s::c_str, s::length) == "scalar<float>");
 assert(std::string(s::c_str) == "scalar<float>");
 
 // for templates
-static_assert(std::is_same_v<noarr::mangle<struct_type>, noarr::char_sequence<'s', 'c', 'a', 'l', 'a', 'r', '<', 'f', 'l', 'o', 'a', 't', '>'>>);
+static_assert(std::is_same_v<noarr::mangle<struct_type>, std::integer_sequence<char, 's', 'c', 'a', 'l', 'a', 'r', '<', 'f', 'l', 'o', 'a', 't', '>'>>);
 ```
 
 The `mangle_expr` function mangles both the type and the metadata (e.g. lengths, block sizes, etc).
