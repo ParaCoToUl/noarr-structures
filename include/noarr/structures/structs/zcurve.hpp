@@ -11,9 +11,9 @@ namespace noarr {
 
 namespace helpers {
 
-template<IsDim auto...>
+template<auto... Dim> requires (... && IsDim<decltype(Dim)>)
 struct zc_uniquity;
-template<IsDim auto Dim, IsDim auto... Dims>
+template<IsDim auto Dim, auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct zc_uniquity<Dim, Dims...> {
 	static constexpr bool value = (... && (Dims != Dim)) && zc_uniquity<Dims...>::value;
 };
@@ -91,11 +91,11 @@ constexpr std::size_t zc_special(std::size_t z) noexcept {
 	return zc_special_inner<NDim>(z >> (NDim-Dim-1), std::make_integer_sequence<int, zc_special_helper<NDim>::num_iter>());
 }
 
-template<class Acc, IsDim auto...>
+template<class Acc, auto...>
 struct zc_dims_pop;
-template<IsDim auto... Acc, IsDim auto Head, IsDim auto... Tail>
+template<auto... Acc, IsDim auto Head, auto... Tail>
 struct zc_dims_pop<dim_sequence<Acc...>, Head, Tail...> : zc_dims_pop<dim_sequence<Acc..., Head>, Tail...> {};
-template<IsDim auto... Acc, IsDim auto Last>
+template<auto... Acc, IsDim auto Last>
 struct zc_dims_pop<dim_sequence<Acc...>, Last> {
 	static constexpr IsDim auto dim = Last;
 	using dims = dim_sequence<Acc...>;
@@ -113,7 +113,7 @@ struct zc_log2<1> {
 
 } // namespace helpers
 
-template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, class T, IsDim auto... Dims>
+template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, class T, auto... Dims>
 struct merge_zcurve_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -208,7 +208,7 @@ public:
 	}
 };
 
-template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, IsDim auto... Dims>
+template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, auto... Dims>
 struct merge_zcurve_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -216,7 +216,7 @@ struct merge_zcurve_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_zcurve_t<SpecialLevel, GeneralLevel, Dim, Struct, Dims...>(s); }
 };
 
-template<IsDim auto... AllDims>
+template<auto... AllDims>
 struct merge_zcurve {
 private:
 	using dims_pop = helpers::zc_dims_pop<dim_sequence<>, AllDims...>;
@@ -232,7 +232,7 @@ public:
 	}
 
 private:
-	template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, IsDim auto... Dims>
+	template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, auto... Dims>
 	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...> maxlen_alignment(dim_sequence<Dims...>) noexcept {
 		return {};
 	}

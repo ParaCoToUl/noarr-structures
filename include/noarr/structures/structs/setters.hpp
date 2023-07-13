@@ -82,7 +82,7 @@ struct fix_proto : contain<IdxT> {
  * @tparam Dims: the dimension names
  * @param ts: parameters for fixing the indices
  */
-template<IsDim auto... Dim, class... IdxT>
+template<auto... Dim, class... IdxT> requires (... && IsDim<decltype(Dim)>)
 constexpr auto fix(IdxT... idx) noexcept { return (... ^ fix_proto<Dim, good_index_t<IdxT>>(idx)); }
 
 template<>
@@ -159,7 +159,7 @@ struct set_length_proto : contain<LenT> {
  * @tparam Dim: the dimension name of the transformed structure
  * @param length: the desired length
  */
-template<IsDim auto... Dim, class... LenT>
+template<auto... Dim, class... LenT> requires (... && IsDim<decltype(Dim)>)
 constexpr auto set_length(LenT... len) noexcept { return (... ^ set_length_proto<Dim, good_index_t<LenT>>(len)); }
 
 template<>

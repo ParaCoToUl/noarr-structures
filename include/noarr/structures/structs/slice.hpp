@@ -115,7 +115,7 @@ struct shift_proto : contain<StartT> {
  * @tparam Dim: the dimension names
  * @param start: parameters for shifting the indices
  */
-template<IsDim auto... Dim, class... StartT>
+template<auto... Dim, class... StartT> requires (... && IsDim<decltype(Dim)>)
 constexpr auto shift(StartT... start) noexcept { return (... ^ shift_proto<Dim, good_index_t<StartT>>(start)); }
 
 template<>
@@ -493,7 +493,7 @@ struct reverse_proto {
  *
  * @tparam Dim: the dimension names
  */
-template<IsDim auto... Dim>
+template<auto... Dim> requires (... && IsDim<decltype(Dim)>)
 constexpr auto reverse() noexcept { return (... ^ reverse_proto<Dim>()); }
 
 template<>

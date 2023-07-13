@@ -111,7 +111,7 @@ constexpr U make_union(const Ts &...s) noexcept {
 	return U(to_struct<Ts>::convert(s)...);
 }
 
-template<IsDim auto... Dim, class... IdxT>
+template<auto... Dim, class... IdxT> requires (... && IsDim<decltype(Dim)>)
 constexpr auto fix(IdxT...) noexcept; // defined in setters.hpp
 
 template<class Struct, class Order>
@@ -127,7 +127,7 @@ struct traverser_t : contain<Struct, Order> {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
 	}
 
-	template<IsDim auto Dim, IsDim auto... Dims, class F>
+	template<IsDim auto Dim, auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_each(F f) const noexcept {
 		for_sections<Dim, Dims...>([f](auto inner) { return f(inner.state()); });
 	}
@@ -138,7 +138,7 @@ struct traverser_t : contain<Struct, Order> {
 	}
 
 	// TODO add tests
-	template<IsDim auto Dim, IsDim auto... Dims, class F>
+	template<IsDim auto Dim, auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_sections(F f) const noexcept {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
 		static_assert((dim_tree_contains<Dim, dim_tree> && ... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
@@ -153,7 +153,7 @@ struct traverser_t : contain<Struct, Order> {
 	}
 
 
-	template<IsDim auto... Dims, class F>
+	template<auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_dims(F f) const noexcept {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
 		static_assert((... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");

@@ -59,7 +59,7 @@ static constexpr bool is_dim_v = is_dim<T>::value;
 template<class T>
 concept IsDim = is_dim_v<T>;
 
-template<IsDim auto... T>
+template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct dim_sequence {};
 
 namespace helpers {

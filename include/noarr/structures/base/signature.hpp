@@ -47,14 +47,14 @@ struct function_sig {
 	using ret_sig = RetSig;
 
 private:
-	template<bool Match, template<class Original> class Replacement, IsDim auto... QDims>
+	template<bool Match, template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	struct replace_inner;
-	template<template<class Original> class Replacement, IsDim auto... QDims>
+	template<template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<function_sig>::type; };
-	template<template<class Original> class Replacement, IsDim auto... QDims>
+	template<template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	struct replace_inner<false, Replacement, QDims...> { using type = function_sig<Dim, ArgLength, typename RetSig::template replace<Replacement, QDims...>>; };
 public:
-	template<template<class Original> class Replacement, IsDim auto... QDims>
+	template<template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
 
 	template<IsDim auto QDim>
@@ -75,14 +75,14 @@ struct dep_function_sig {
 	using ret_sig = std::tuple_element_t<N, ret_sig_tuple>;
 
 private:
-	template<bool Match, template<class Original> class Replacement, IsDim auto... QDims>
+	template<bool Match, template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	struct replace_inner;
-	template<template<class Original> class Replacement, IsDim auto... QDims>
+	template<template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	struct replace_inner<true, Replacement, QDims...> { using type = typename Replacement<dep_function_sig>::type; };
-	template<template<class Original> class Replacement, IsDim auto... QDims>
+	template<template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	struct replace_inner<false, Replacement, QDims...> { using type = dep_function_sig<Dim, typename RetSigs::template replace<Replacement, QDims...>...>; };
 public:
-	template<template<class Original> class Replacement, IsDim auto... QDims>
+	template<template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
 
 	template<IsDim auto QDim>
@@ -97,7 +97,7 @@ template<class ValueType>
 struct scalar_sig {
 	scalar_sig() = delete;
 
-	template<template<class Original> class Replacement, IsDim auto... QDims>
+	template<template<class Original> class Replacement, auto... QDims> requires (... && IsDim<decltype(QDims)>)
 	using replace = scalar_sig;
 
 	template<IsDim auto QDim>

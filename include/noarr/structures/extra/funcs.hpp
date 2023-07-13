@@ -28,7 +28,7 @@ constexpr auto offset(IsState auto state) noexcept { return [state](auto structu
 	return offset_of<SubStruct>(structure, state);
 }; }
 
-template<class SubStruct, IsDim auto... Dims, class... Idxs>
+template<class SubStruct, auto... Dims, class... Idxs> requires (... && IsDim<decltype(Dims)>)
 constexpr auto offset(Idxs... idxs) noexcept { return offset<SubStruct>(empty_state.with<index_in<Dims>...>(idxs...)); }
 
 constexpr auto offset(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
@@ -36,7 +36,7 @@ constexpr auto offset(IsState auto state) noexcept { return [state](auto structu
 	return offset_of<scalar<type>>(structure, state);
 }; }
 
-template<IsDim auto... Dims, class... Idxs>
+template<auto... Dims, class... Idxs> requires (... && IsDim<decltype(Dims)>)
 constexpr auto offset(Idxs... idxs) noexcept { return offset(empty_state.with<index_in<Dims>...>(idxs...)); }
 
 constexpr auto get_size(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
@@ -77,7 +77,7 @@ constexpr auto get_at(CvVoid *ptr, IsState auto state) noexcept { return [ptr, s
  * @tparam Dims: the dimension names of the fixed dimensions
  * @param ptr: the pointer to blob structure
  */
-template<IsDim auto... Dims, class... Idxs, class CvVoid>
+template<auto... Dims, class... Idxs, class CvVoid> requires (... && IsDim<decltype(Dims)>)
 constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept { return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...)); }
 
 /**

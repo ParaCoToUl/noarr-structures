@@ -93,8 +93,8 @@ struct cuda_fix_pair_proto {
 template<class Struct, class Order, class DimsB, class DimsT, class CudaDimsB, class CudaDimsT>
 struct cuda_traverser_t;
 
-template<IsDim auto... DimsB, IsDim auto... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
-struct cuda_traverser_t<Struct, Order, char_sequence<DimsB...>, char_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : traverser_t<Struct, Order> {
+template<auto... DimsB, auto... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order> requires (... && (IsDim<decltype(DimsB)> && IsDim<decltype(DimsB)>))
+struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : traverser_t<Struct, Order> {
 	using base = traverser_t<Struct, Order>;
 	using base::base;
 
@@ -141,17 +141,17 @@ constexpr auto cuda_traverser(traverser_t<Struct, Order> t) noexcept {
 
 template<IsDim auto DimBX, IsDim auto DimTX, class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
-	return cuda_traverser<char_sequence<DimBX>, char_sequence<DimTX>, helpers::cuda_bx, helpers::cuda_tx>(t);
+	return cuda_traverser<dim_sequence<DimBX>, dim_sequence<DimTX>, helpers::cuda_bx, helpers::cuda_tx>(t);
 }
 
 template<IsDim auto DimBX, IsDim auto DimTX, IsDim auto DimBY, IsDim auto DimTY, class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
-	return cuda_traverser<char_sequence<DimBX, DimBY>, char_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(t);
+	return cuda_traverser<dim_sequence<DimBX, DimBY>, dim_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(t);
 }
 
 template<IsDim auto DimBX, IsDim auto DimTX, IsDim auto DimBY, IsDim auto DimTY, IsDim auto DimBZ, IsDim auto DimTZ, class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
-	return cuda_traverser<char_sequence<DimBX, DimBY, DimBZ>, char_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz, helpers::cuda_txyz>(t);
+	return cuda_traverser<dim_sequence<DimBX, DimBY, DimBZ>, dim_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz, helpers::cuda_txyz>(t);
 }
 
 } // namespace noarr

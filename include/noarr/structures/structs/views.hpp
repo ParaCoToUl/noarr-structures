@@ -38,9 +38,9 @@ struct reassemble_scalar<scalar_sig<ValueType>, State> {
 	struct ty { using pe = scalar_sig<ValueType>; };
 };
 
-template<class TopSig, IsState State, IsDim auto... Dims>
+template<class TopSig, IsState State, auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct reassemble_build;
-template<class TopSig, IsState State, IsDim auto Dim, IsDim auto... Dims>
+template<class TopSig, IsState State, IsDim auto Dim, auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct reassemble_build<TopSig, State, Dim, Dims...> {
 	static_assert((... && (Dim != Dims)), "Duplicate dimension in reorder");
 	using found = sig_find_dim<Dim, State, TopSig>;
@@ -84,13 +84,13 @@ struct reassemble_completeness<scalar_sig<void>> : std::false_type {};
 
 } // namespace helpers
 
-template<class Signature, IsDim auto... Dims>
+template<class Signature, auto... Dims> requires (... && IsDim<decltype(Dims)>)
 using reassemble_sig = typename helpers::reassemble_build<Signature, state<>, Dims...>::template ty<>::pe;
 
 template<class ReassembledSignature>
 static constexpr bool reassemble_is_complete = helpers::reassemble_completeness<ReassembledSignature>::value;
 
-template<class T, IsDim auto... Dims>
+template<class T, auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct reorder_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -128,7 +128,7 @@ struct reorder_t : contain<T> {
 	}
 };
 
-template<IsDim auto... Dims>
+template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct reorder_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -136,7 +136,7 @@ struct reorder_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reorder_t<Struct, Dims...>(s); }
 };
 
-template<IsDim auto... Dims>
+template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
 using reorder = reorder_proto<Dims...>;
 
 template<IsDim auto Dim, class T>
@@ -195,9 +195,9 @@ using hoist = hoist_proto<Dim>;
 
 namespace helpers {
 
-template<class EvenAcc, class OddAcc, IsDim auto... DimPairs>
+template<class EvenAcc, class OddAcc, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
 struct rename_unzip_dim_pairs;
-template<IsDim auto... EvenAcc, IsDim auto... OddAcc, IsDim auto Even, IsDim auto Odd, IsDim auto... DimPairs>
+template<auto... EvenAcc, auto... OddAcc, IsDim auto Even, IsDim auto Odd, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
 struct rename_unzip_dim_pairs<dim_sequence<EvenAcc...>, dim_sequence<OddAcc...>, Even, Odd, DimPairs...>
 	: rename_unzip_dim_pairs<dim_sequence<EvenAcc..., Even>, dim_sequence<OddAcc..., Odd>, DimPairs...> {};
 template<class EvenAcc, class OddAcc>
@@ -208,7 +208,7 @@ struct rename_unzip_dim_pairs<EvenAcc, OddAcc> {
 
 template<class>
 struct rename_uniquity;
-template<IsDim auto Dim, IsDim auto... Dims>
+template<IsDim auto Dim, auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct rename_uniquity<dim_sequence<Dim, Dims...>> {
 	static constexpr bool value = (... && (Dims != Dim)) && rename_uniquity<dim_sequence<Dims...>>::value;
 };
@@ -217,10 +217,10 @@ struct rename_uniquity<dim_sequence<>> : std::true_type {};
 
 template<IsDim auto QDim, class From, class To>
 struct rename_dim;
-template<IsDim auto QDim, IsDim auto FromHead, IsDim auto... FromTail, IsDim auto ToHead, IsDim auto... ToTail>
+template<IsDim auto QDim, IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail> requires (... && (IsDim<decltype(FromTail)> && IsDim<decltype(ToTail)>))
 struct rename_dim<QDim, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>>
 	: rename_dim<QDim, dim_sequence<FromTail...>, dim_sequence<ToTail...>> {};
-template<IsDim auto FromHead, IsDim auto... FromTail, IsDim auto ToHead, IsDim auto... ToTail>
+template<IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail> requires (... && (IsDim<decltype(FromTail)> && IsDim<decltype(ToTail)>))
 struct rename_dim<FromHead, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>> {
 	static constexpr auto dim = ToHead;
 };
@@ -264,7 +264,7 @@ struct rename_state<From, To, state<StateItem...>> {
 
 } // namespace helpers
 
-template<class T, IsDim auto... DimPairs>
+template<class T, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
 struct rename_t : contain<T> {
 	using base = contain<T>;
 	using base::base;
@@ -290,7 +290,7 @@ public:
 private:
 	template<class = external, class = internal>
 	struct assertion;
-	template<IsDim auto... ExternalDims, IsDim auto... InternalDims>
+	template<auto... ExternalDims, auto... InternalDims> requires (... && (IsDim<decltype(ExternalDims)> && IsDim<decltype(InternalDims)>))
 	struct assertion<dim_sequence<ExternalDims...>, dim_sequence<InternalDims...>> {
 		template<IsDim auto Dim>
 		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
@@ -327,7 +327,7 @@ public:
 	}
 };
 
-template<IsDim auto... DimPairs>
+template<auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
 struct rename_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -335,7 +335,7 @@ struct rename_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return rename_t<Struct, DimPairs...>(s); }
 };
 
-template<IsDim auto... DimPairs>
+template<auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
 using rename = rename_proto<DimPairs...>;
 
 } // namespace noarr
