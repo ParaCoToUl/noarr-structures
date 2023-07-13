@@ -127,14 +127,9 @@ struct traverser_t : contain<Struct, Order> {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
 	}
 
-	template<IsDim auto Dim, auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
+	template<auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_each(F f) const noexcept {
-		for_sections<Dim, Dims...>([f](auto inner) { return f(inner.state()); });
-	}
-
-	template<class F>
-	constexpr void for_each(F f) const noexcept {
-		for_sections([f](auto inner) { return f(inner.state()); });
+		for_sections<Dims...>([f](auto inner) { return f(inner.state()); });
 	}
 
 	// TODO add tests

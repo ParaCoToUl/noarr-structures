@@ -103,7 +103,7 @@ struct dim_sequence_concat_impl<dim_sequence<vs1...>, dim_sequence<vs2...>, Pack
 	using type = typename dim_sequence_concat_impl<dim_sequence<vs1..., vs2...>, Packs...>::type;
 };
 
-template<class T, T... vs1>
+template<auto... vs1>
 struct dim_sequence_concat_impl<dim_sequence<vs1...>> {
 	using type = dim_sequence<vs1...>;
 };
@@ -153,11 +153,8 @@ struct dim_tree_contains_impl : std::false_type {};
 template<auto v, class Tree>
 static constexpr bool dim_tree_contains = helpers::dim_tree_contains_impl<v, Tree>::value;
 
-template<auto v, auto V, class ...Branches>
-struct dim_tree_contains_impl<v, dim_tree<V, Branches...>> {
-	using value_type = bool;
-	static constexpr bool value = ( ... || dim_tree_contains<v, Branches>);
-};
+template<auto v, auto V, class ...Branches> requires (v != V)
+struct dim_tree_contains_impl<v, dim_tree<V, Branches...>> : std::bool_constant<( ... || dim_tree_contains<v, Branches>)> {};
 
 template<auto v, class ...Branches>
 struct dim_tree_contains_impl< v, dim_tree<v, Branches...>> : std::true_type {};
@@ -183,7 +180,7 @@ struct dim_tree_restrict_impl<dim_sequence<>, Set>{
 template<class Sequence>
 struct dim_tree_from_sequence_impl;
 
-template<class T, T v, T ...vs>
+template<auto v, auto ...vs>
 struct dim_tree_from_sequence_impl<dim_sequence<v, vs...>> {
 	using type = dim_tree<v, typename dim_tree_from_sequence_impl<dim_sequence<vs...>>::type>;
 };
