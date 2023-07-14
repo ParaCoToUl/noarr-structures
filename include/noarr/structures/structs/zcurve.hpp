@@ -165,11 +165,11 @@ public:
 
 	using is = std::make_index_sequence<sizeof...(Dims)>;
 
-	template<std::size_t... DimsI>
-	constexpr auto sub_state(IsState auto state, std::index_sequence<DimsI...>) const noexcept {
-		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set z-curve length");
+	template<std::size_t... DimsI, IsState State>
+	constexpr auto sub_state(State state, std::index_sequence<DimsI...>) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		auto clean_state = state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
-		if constexpr(decltype(state)::template contains<index_in<Dim>>) {
+		if constexpr(State::template contains<index_in<Dim>>) {
 			auto index = state.template get<index_in<Dim>>();
 			auto index_general = index >> SpecialLevel*sizeof...(Dims);
 			auto index_special = index & ((1 << SpecialLevel*sizeof...(Dims)) - 1);
@@ -184,16 +184,16 @@ public:
 		return sub_structure().size(sub_state(state, is()));
 	}
 
-	template<class Sub>
-	constexpr auto strict_offset_of(IsState auto state) const noexcept {
-		static_assert(decltype(state)::template contains<index_in<Dim>>, "Index has not been set");
+	template<class Sub, IsState State>
+	constexpr auto strict_offset_of(State state) const noexcept {
+		static_assert(State::template contains<index_in<Dim>>, "Index has not been set");
 		return offset_of<Sub>(sub_structure(), sub_state(state, is()));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
-		static_assert(!decltype(state)::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
-		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set z-curve length");
+	template<IsDim auto QDim, IsState State>
+	constexpr auto length(State state) const noexcept {
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		if constexpr(QDim == Dim) {
 			auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();
 			return (... * sub_structure().template length<Dims>(clean_state));

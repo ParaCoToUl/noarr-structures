@@ -32,31 +32,32 @@ struct tuple_t : contain<TS...> {
 	static_assert(!(TS::signature::template any_accept<Dim> || ...), "Dimension name already used");
 	using signature = dep_function_sig<Dim, typename TS::signature...>;
 
-	constexpr auto size(IsState auto state) const noexcept {
-		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set tuple length");
+	template<IsState State>
+	constexpr auto size(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		return size_inner(is, state.template remove<index_in<Dim>>());
 	}
 
-	template<class Sub>
-	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set tuple length");
-		static_assert(decltype(state)::template contains<index_in<Dim>>, "All indices must be set");
-		static_assert(state_get_t<decltype(state), index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
-		constexpr std::size_t index = state_get_t<decltype(state), index_in<Dim>>::value;
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
+		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
+		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
+		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 		auto sub_state = state.template remove<index_in<Dim>>();
 		return size_inner(std::make_index_sequence<index>(), sub_state) + offset_of<Sub>(sub_structure<index>(), sub_state);
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
-		static_assert(!decltype(state)::template contains<length_in<Dim>>, "Cannot set tuple length");
+	template<IsDim auto QDim, IsState State>
+	constexpr auto length(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(QDim == Dim) {
-			static_assert(!decltype(state)::template contains<index_in<Dim>>, "Index already set");
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			return constexpr_arithmetic::make_const<sizeof...(TS)>();
 		} else {
-			static_assert(decltype(state)::template contains<index_in<Dim>>, "Tuple indices must be set");
-			constexpr std::size_t index = state_get_t<decltype(state), index_in<Dim>>::value;
+			static_assert(State::template contains<index_in<Dim>>, "Tuple indices must be set");
+			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 			return sub_structure<index>().template length<QDim>(state.template remove<index_in<Dim>>());
 		}
 	}
@@ -111,17 +112,18 @@ struct vector_t : contain<T> {
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
 	using signature = function_sig<Dim, unknown_arg_length, typename T::signature>;
 
-	constexpr auto size(IsState auto state) const noexcept {
+	template<IsState State>
+	constexpr auto size(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(decltype(state)::template contains<length_in<Dim>>, "Unknown vector length");
+		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
 		auto len = state.template get<length_in<Dim>>();
 		return len * sub_structure().size(state.template remove<index_in<Dim>, length_in<Dim>>());
 	}
 
-	template<class Sub>
-	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(decltype(state)::template contains<index_in<Dim>>, "All indices must be set");
+		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		if constexpr(!std::is_same_v<decltype(state.template get<length_in<Dim>>()), std::integral_constant<std::size_t, 1>>) {
 			// offset = index * elem_size + offset_within_elem
 			auto index = state.template get<index_in<Dim>>();
@@ -136,11 +138,11 @@ struct vector_t : contain<T> {
 		}
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<IsDim auto QDim, IsState State>
+	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
-			static_assert(!decltype(state)::template contains<index_in<Dim>>, "Index already set");
-			static_assert(decltype(state)::template contains<length_in<Dim>>, "This length has not been set yet");
+			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
+			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
 			return state.template get<length_in<Dim>>();
 		} else {
 			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>, length_in<Dim>>());

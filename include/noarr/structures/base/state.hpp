@@ -76,7 +76,7 @@ struct state_remove_item<Tag> {
 	using result = state_items_pack<>;
 };
 
-template<class StateItemsPack, IsTag... Tags>
+template<class StateItemsPack, class... Tags> requires (... && IsTag<Tags>)
 struct state_remove_items;
 
 template<class StateItemsPack>
@@ -84,7 +84,7 @@ struct state_remove_items<StateItemsPack> {
 	using result = StateItemsPack;
 };
 
-template<class... StateItems, IsTag Tag, IsTag... Tags>
+template<class... StateItems, class Tag, class... Tags> requires (IsTag<Tag> && ... && IsTag<Tags>)
 struct state_remove_items<state_items_pack<StateItems...>, Tag, Tags...> {
 	using recursion_result = typename state_remove_item<Tag, StateItems...>::result;
 	using result = typename state_remove_items<recursion_result, Tags...>::result;
@@ -97,15 +97,15 @@ struct state : contain<typename StateItems::value_type...> {
 	using base = contain<typename StateItems::value_type...>;
 	using base::base;
 
-	template<IsTag Tag>
+	template<class Tag> requires (IsTag<Tag>)
 	static constexpr auto index_of = helpers::state_index_of<Tag, StateItems...>::result;
 
-	template<IsTag Tag>
+	template<class Tag> requires (IsTag<Tag>)
 	static constexpr bool contains = index_of<Tag>.present;
 
 	static constexpr bool is_empty = !sizeof...(StateItems);
 
-	template<IsTag Tag>
+	template<class Tag> requires (IsTag<Tag>)
 	constexpr auto get() const noexcept {
 		static_assert(contains<Tag>, "No such item");
 		return base::template get<index_of<Tag>.value>();
@@ -116,17 +116,17 @@ struct state : contain<typename StateItems::value_type...> {
 		return state<KeptStateItems...>(get<typename KeptStateItems::tag>()...);
 	}
 
-	template<IsTag... NewTags, class... NewValueTypes, class... KeptStateItems>
+	template<class... NewTags, class... NewValueTypes, class... KeptStateItems> requires (... && IsTag<NewTags>)
 	constexpr state<KeptStateItems..., state_item<NewTags, NewValueTypes>...> items_restrict_add(helpers::state_items_pack<KeptStateItems...>, NewValueTypes... new_values) const noexcept {
 		return state<KeptStateItems..., state_item<NewTags, NewValueTypes>...>(get<typename KeptStateItems::tag>()..., new_values...);
 	}
 
-	template<IsTag... Tags>
+	template<class... Tags> requires (... && IsTag<Tags>)
 	constexpr auto remove() const noexcept {
 		return items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result());
 	}
 
-	template<IsTag... Tags, class... ValueTypes>
+	template<class... Tags, class... ValueTypes> requires (... && IsTag<Tags>)
 	constexpr auto with(ValueTypes... values) const noexcept {
 		return items_restrict_add<Tags...>(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result(), values...);
 	}
@@ -147,7 +147,7 @@ concept IsState = is_state_v<T>;
 template<IsState State, IsTag Tag>
 using state_get_t = decltype(std::declval<State>().template get<Tag>());
 
-template<IsState State, IsTag... Tags>
+template<IsState State, class... Tags> requires (... && IsTag<Tags>)
 using state_remove_t = decltype(std::declval<State>().template remove<Tags...>());
 
 static constexpr state<> empty_state;
@@ -188,7 +188,7 @@ using good_diff_index_t = decltype(helpers::supported_diff_index_type(std::declv
 
 
 
-template<IsTag... Tag, class... ValueType>
+template<class... Tag, class... ValueType> requires (... && IsTag<Tag>)
 constexpr auto make_state(ValueType... value) {
 	return state<state_item<Tag, good_index_t<ValueType>>...>(value...);
 }

@@ -31,8 +31,9 @@ constexpr auto offset(IsState auto state) noexcept { return [state](auto structu
 template<class SubStruct, auto... Dims, class... Idxs> requires (... && IsDim<decltype(Dims)>)
 constexpr auto offset(Idxs... idxs) noexcept { return offset<SubStruct>(empty_state.with<index_in<Dims>...>(idxs...)); }
 
-constexpr auto offset(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
-	using type = scalar_t<decltype(structure), decltype(state)>;
+template<IsState State>
+constexpr auto offset(State state) noexcept { return [state]<class Struct>(Struct structure) constexpr noexcept {
+	using type = scalar_t<Struct, State>;
 	return offset_of<scalar<type>>(structure, state);
 }; }
 
@@ -66,9 +67,9 @@ constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { ret
  * 
  * @param ptr: the pointer to blob structure
  */
-template<class CvVoid>
-constexpr auto get_at(CvVoid *ptr, IsState auto state) noexcept { return [ptr, state](auto structure) constexpr noexcept -> decltype(auto) {
-	using type = scalar_t<decltype(structure), decltype(state)>;
+template<class CvVoid, IsState State>
+constexpr auto get_at(CvVoid *ptr, State state) noexcept { return [ptr, state]<class Struct>(Struct structure) constexpr noexcept -> decltype(auto) {
+	using type = scalar_t<Struct, State>;
 	return *helpers::sub_ptr<type>(ptr, offset_of<scalar<type>>(structure, state));
 }; }
 

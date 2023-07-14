@@ -119,12 +119,11 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	constexpr auto sub_state(IsState auto state) const noexcept {
-		static_assert(!decltype(state)::template contains<length_in<Dim>>, "The length in this dimension is already set");
+	constexpr auto sub_state(auto state) const noexcept {
 		return state.template with<length_in<Dim>>(len());
 	}
 
-	constexpr auto size(IsState auto state) const noexcept {
+	constexpr auto size(auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 

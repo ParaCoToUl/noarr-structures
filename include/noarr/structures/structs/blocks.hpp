@@ -37,11 +37,12 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	constexpr auto sub_state(IsState auto state) const noexcept {
+	template<IsState State>
+	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-		constexpr bool have_indices = decltype(state)::template contains<index_in<DimMajor>> && decltype(state)::template contains<index_in<DimMinor>>;
-		if constexpr(decltype(state)::template contains<length_in<DimMajor>> && decltype(state)::template contains<length_in<DimMinor>>) {
+		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>;
+		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
 			auto major_length = state.template get<length_in<DimMajor>>();
 			auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
@@ -51,7 +52,7 @@ public:
 			} else {
 				return clean_state.template with<length_in<Dim>>(major_length*minor_length);
 			}
-		} else if constexpr(decltype(state)::template contains<length_in<DimMinor>>) {
+		} else if constexpr(State::template contains<length_in<DimMinor>>) {
 			auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
 				auto major_index = state.template get<index_in<DimMajor>>();
@@ -74,17 +75,17 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<IsDim auto QDim, IsState State>
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!decltype(state)::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimMinor) {
-			static_assert(decltype(state)::template contains<length_in<DimMinor>>, "Length has not been set");
+			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
 			return state.template get<length_in<DimMinor>>();
 		} else if constexpr(QDim == DimMajor) {
-			if constexpr(decltype(state)::template contains<length_in<DimMajor>>) {
+			if constexpr(State::template contains<length_in<DimMajor>>) {
 				return state.template get<length_in<DimMajor>>();
-			} else if constexpr(decltype(state)::template contains<length_in<DimMinor>>) {
+			} else if constexpr(State::template contains<length_in<DimMinor>>) {
 				auto minor_length = state.template get<length_in<DimMinor>>();
 				auto full_length = sub_structure().template length<Dim>(sub_state(state));
 				return full_length / minor_length;
@@ -149,12 +150,13 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	constexpr auto sub_state(IsState auto state) const noexcept {
+	template<IsState State>
+	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!decltype(state)::template contains<length_in<DimIsPresent>>, "This dimension cannot be resized");
+		static_assert(!State::template contains<length_in<DimIsPresent>>, "This dimension cannot be resized");
 		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
-		constexpr bool have_indices = decltype(state)::template contains<index_in<DimMajor>> && decltype(state)::template contains<index_in<DimMinor>> && decltype(state)::template contains<index_in<DimIsPresent>>;
-		if constexpr(decltype(state)::template contains<length_in<DimMajor>> && decltype(state)::template contains<length_in<DimMinor>>) {
+		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>> && State::template contains<index_in<DimIsPresent>>;
+		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
 			auto major_length = state.template get<length_in<DimMajor>>();
 			auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
@@ -164,7 +166,7 @@ public:
 			} else {
 				return clean_state.template with<length_in<Dim>>(major_length*minor_length);
 			}
-		} else if constexpr(decltype(state)::template contains<length_in<DimMinor>>) {
+		} else if constexpr(State::template contains<length_in<DimMinor>>) {
 			auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
 				auto major_index = state.template get<index_in<DimMajor>>();
@@ -187,14 +189,14 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<IsDim auto QDim, IsState State>
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!decltype(state)::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimIsPresent) {
-			static_assert(decltype(state)::template contains<length_in<DimMinor>>, "Length has not been set");
-			static_assert(decltype(state)::template contains<index_in<DimMajor>>, "Fix block index before querying this dimension (or pass the index in state)");
-			static_assert(decltype(state)::template contains<index_in<DimMinor>>, "Fix index within block before querying this dimension (or pass the index in state)");
+			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
+			static_assert(State::template contains<index_in<DimMajor>>, "Fix block index before querying this dimension (or pass the index in state)");
+			static_assert(State::template contains<index_in<DimMinor>>, "Fix index within block before querying this dimension (or pass the index in state)");
 			auto major_index = state.template get<index_in<DimMajor>>();
 			auto minor_index = state.template get<index_in<DimMinor>>();
 			auto minor_length = state.template get<length_in<DimMinor>>();
@@ -202,12 +204,12 @@ public:
 			auto full_index = major_index * minor_length + minor_index;
 			return std::size_t(full_index < full_length);
 		} else if constexpr(QDim == DimMinor) {
-			static_assert(decltype(state)::template contains<length_in<DimMinor>>, "Length has not been set");
+			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
 			return state.template get<length_in<DimMinor>>();
 		} else if constexpr(QDim == DimMajor) {
-			if constexpr(decltype(state)::template contains<length_in<DimMajor>>) {
+			if constexpr(State::template contains<length_in<DimMajor>>) {
 				return state.template get<length_in<DimMajor>>();
-			} else if constexpr(decltype(state)::template contains<length_in<DimMinor>>) {
+			} else if constexpr(State::template contains<length_in<DimMinor>>) {
 				auto minor_length = state.template get<length_in<DimMinor>>();
 				auto full_length = sub_structure().template length<Dim>(sub_state(state));
 				return (full_length + minor_length - make_const<1>()) / minor_length;
@@ -286,15 +288,16 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	constexpr auto sub_state(IsState auto state) const noexcept {
+	template<IsState State>
+	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!decltype(state)::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
-		static_assert(!decltype(state)::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
-		static_assert(!decltype(state)::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
+		static_assert(!State::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
+		static_assert(!State::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
+		static_assert(!State::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
 		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>();
-		if constexpr(decltype(state)::template contains<index_in<DimIsBorder>> && decltype(state)::template contains<index_in<DimMajor>> && decltype(state)::template contains<index_in<DimMinor>>) {
+		if constexpr(State::template contains<index_in<DimIsBorder>> && State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
 			auto minor_index = state.template get<index_in<DimMinor>>();
-			if constexpr(is_body<decltype(state)>()) {
+			if constexpr(is_body<State>()) {
 				auto major_index = state.template get<index_in<DimMajor>>();
 				return clean_state.template with<index_in<Dim>>(major_index*minor_length() + minor_index);
 			} else /*border*/ {
@@ -315,21 +318,21 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<IsDim auto QDim, IsState State>
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!decltype(state)::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimIsBorder) {
-			static_assert(!decltype(state)::template contains<length_in<DimIsBorder>>, "Cannot set length in this dimension");
+			static_assert(!State::template contains<length_in<DimIsBorder>>, "Cannot set length in this dimension");
 			return make_const<2>();
 		} else if constexpr(QDim == DimMinor) {
-			if constexpr(is_body<decltype(state)>()) {
+			if constexpr(is_body<State>()) {
 				return minor_length();
 			} else /*border*/ {
 				return sub_structure().template length<Dim>(sub_state(state)) % minor_length();
 			}
 		} else if constexpr(QDim == DimMajor) {
-			if constexpr(is_body<decltype(state)>()) {
+			if constexpr(is_body<State>()) {
 				return sub_structure().template length<Dim>(sub_state(state)) / minor_length();
 			} else /*border*/ {
 				return make_const<1>();
@@ -416,21 +419,22 @@ private:
 public:
 	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
 
-	constexpr auto sub_state(IsState auto state) const noexcept {
+	template<IsState State>
+	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
 		auto minor_length = sub_structure().template length<DimMinor>(clean_state);
-		if constexpr(decltype(state)::template contains<length_in<Dim>>) {
+		if constexpr(State::template contains<length_in<Dim>>) {
 			auto dim_length = state.template get<length_in<Dim>>();
 			auto major_length = dim_length / minor_length;
-			if constexpr(decltype(state)::template contains<index_in<Dim>>) {
+			if constexpr(State::template contains<index_in<Dim>>) {
 				auto index = state.template get<index_in<Dim>>();
 				return clean_state.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(index / minor_length, index % minor_length, major_length);
 			} else {
 				return clean_state.template with<length_in<DimMajor>>(major_length);
 			}
 		} else {
-			if constexpr(decltype(state)::template contains<index_in<Dim>>) {
+			if constexpr(State::template contains<index_in<Dim>>) {
 				auto index = state.template get<index_in<Dim>>();
 				return clean_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
 			} else {
@@ -448,12 +452,12 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<IsDim auto QDim, IsState State>
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!decltype(state)::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == Dim) {
-			if constexpr(decltype(state)::template contains<length_in<Dim>>) {
+			if constexpr(State::template contains<length_in<Dim>>) {
 				return state.template get<length_in<Dim>>();
 			} else {
 				auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();

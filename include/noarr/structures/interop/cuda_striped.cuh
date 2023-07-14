@@ -122,11 +122,11 @@ public:
 	}
 
 private:
-	template<class Idx>
-	constexpr auto offset_inner(IsState auto state, Idx index_of_period) const noexcept {
+	template<class Idx, IsState State>
+	constexpr auto offset_inner(State state, Idx index_of_period) const noexcept {
 		using namespace constexpr_arithmetic;
 		auto offset_of_period = index_of_period * make_const<total_width>();
-		if constexpr(decltype(state)::template contains<cuda_stripe_index>) {
+		if constexpr(State::template contains<cuda_stripe_index>) {
 			auto offset_of_stripe = state.template get<cuda_stripe_index>() * make_const<stripe_padded_width>();
 			return offset_of_period + offset_of_stripe;
 		} else {

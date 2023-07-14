@@ -8,7 +8,7 @@ namespace noarr {
 
 template<class Istream, class Struct>
 constexpr decltype(auto) deserialize_data(Istream &&in, Struct s, void *data) noexcept {
-	traverser(s).for_each([&in, s, data](auto state) noexcept {
+	traverser(s).for_each([&in, s, data](IsState auto state) noexcept {
 		in >> (s | get_at(data, state));
 	});
 	return std::forward<Istream>(in);
@@ -21,7 +21,7 @@ constexpr decltype(auto) deserialize_data(Istream &&in, Bag &&bag) noexcept {
 
 template<class Ostream, class Struct>
 constexpr decltype(auto) serialize_data(Ostream &&out, Struct s, const void *data) noexcept {
-	traverser(s).for_each([&out, s, data](auto state) noexcept {
+	traverser(s).for_each([&out, s, data](IsState auto state) noexcept {
 		out << (s | get_at(data, state)) << '\n';
 	});
 	return std::forward<Ostream>(out);

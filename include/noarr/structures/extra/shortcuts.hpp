@@ -15,7 +15,7 @@ namespace noarr {
 // Common compositions
 
 // TODO add tests
-template<IsDim auto ... Dims> requires (... && IsDim<decltype(Dims)>)
+template<auto ... Dims> requires (... && IsDim<decltype(Dims)>)
 constexpr auto vectors() noexcept {
 	return (... ^ vector<Dims>());
 }
@@ -107,7 +107,7 @@ constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) noexcep
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
-template<auto ...Dims, class ...LenTs> requires (... && IsDim<decltype(Dims)>)
+template<auto ...Dims, class ...LenTs> requires ((sizeof...(Dims) == sizeof...(LenTs)) && ... && IsDim<decltype(Dims)>)
 constexpr auto bcast(LenTs ...lengths) noexcept {
 	return (... ^ (bcast<Dims>() ^ set_length<Dims>(lengths)));
 }
@@ -129,18 +129,18 @@ constexpr auto idx(ValueType... value) noexcept {
 	return state<state_item<index_in<Dim>, good_index_t<ValueType>>...>(value...);
 }
 
-template<IsDim auto Dim, class F>
-constexpr auto update_index(IsState auto state, F f) noexcept {
-	static_assert(decltype(state)::template contains<index_in<Dim>>, "Requested dimension does not exist. To add a new dimension instead of updating existing one, use .template with<index_in<'...'>>(...)");
+template<IsDim auto Dim, class F, IsState State>
+constexpr auto update_index(State state, F f) noexcept {
+	static_assert(State::template contains<index_in<Dim>>, "Requested dimension does not exist. To add a new dimension instead of updating existing one, use .template with<index_in<'...'>>(...)");
 	auto new_index = f(state.template get<index_in<Dim>>());
 	return state.template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
 
-template<auto... Dims, class ...Diffs> requires ((sizeof...(Dims) == sizeof...(Diffs)) && ... && IsDim<decltype(Dims)>)
-constexpr auto neighbor(IsState auto state, Diffs... diffs) noexcept {
+template<auto... Dims, IsState State, class ...Diffs> requires ((sizeof...(Dims) == sizeof...(Diffs)) && ... && IsDim<decltype(Dims)>)
+constexpr auto neighbor(State state, Diffs... diffs) noexcept {
 	using namespace noarr::constexpr_arithmetic;
-	static_assert((... && decltype(state)::template contains<index_in<Dims>>), "Requested dimension does not exist");
-	static_assert((... && std::is_same_v<state_get_t<decltype(state), index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
+	static_assert((... && State::template contains<index_in<Dims>>), "Requested dimension does not exist");
+	static_assert((... && std::is_same_v<state_get_t<State, index_in<Dims>>, std::size_t>), "Cannot shift in a dimension that is not dynamic");
 	return state.template with<index_in<Dims>...>(good_diff_index_t<decltype(state.template get<index_in<Dims>>() + diffs)>(state.template get<index_in<Dims>>() + diffs)...);
 }
 
