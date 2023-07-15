@@ -66,9 +66,17 @@ struct dim_sequence {
 
 	static constexpr size_type size = sizeof...(Dims);
 
-	static consteval bool contains(auto dim) noexcept {
-		return (... || (dim == Dims));
-	}
+	template<auto Dim>
+	static constexpr bool contains = (... || (Dim == Dims));
+};
+
+template<class T>
+struct dim_sequence_contains;
+
+template<auto... Dims>
+struct dim_sequence_contains<dim_sequence<Dims...>> {
+	template<auto Dim>
+	static constexpr bool value = (... || (Dim == Dims));
 };
 
 namespace helpers {
@@ -117,30 +125,15 @@ struct dim_sequence_concat_impl<dim_sequence<vs1...>> {
 	using type = dim_sequence<vs1...>;
 };
 
-template<auto V, class Pack>
-struct dim_sequence_contains_impl;
-
-template<auto V, class Pack>
-static constexpr bool dim_sequence_contains = dim_sequence_contains_impl<V, Pack>::value;
-
-template<auto V, auto... VS>
-struct dim_sequence_contains_impl<V, dim_sequence<V, VS...>> : std::true_type {};
-
-template<auto V, auto v, auto... VS> requires (v != V)
-struct dim_sequence_contains_impl<V, dim_sequence<v, VS...>> : dim_sequence_contains_impl<V, dim_sequence<VS...>> {};
-
-template<auto V>
-struct dim_sequence_contains_impl<V, dim_sequence<>> : std::false_type {};
-
 template<class In, class Set>
 struct dim_sequence_restrict_impl;
 
-template<auto v, auto ...vs, class Set> requires dim_sequence_contains<v, Set>
+template<auto v, auto ...vs, class Set> requires (dim_sequence_contains<Set>::template value<v>)
 struct dim_sequence_restrict_impl<dim_sequence<v, vs...>, Set> {
 	using type = typename dim_sequence_concat_impl<dim_sequence<v>, typename dim_sequence_restrict_impl<dim_sequence<vs...>, Set>::type>::type;
 };
 
-template<auto v, auto ...vs, class Set> requires (!dim_sequence_contains<v, Set>)
+template<auto v, auto ...vs, class Set> requires (!dim_sequence_contains<Set>::template value<v>)
 struct dim_sequence_restrict_impl<dim_sequence<v, vs...>, Set> {
 	using type = typename dim_sequence_restrict_impl<dim_sequence<vs...>, Set>::type;
 };
@@ -171,12 +164,12 @@ struct dim_tree_contains_impl< v, dim_tree<v, Branches...>> : std::true_type {};
 template<class Tree, class Set>
 struct dim_tree_restrict_impl;
 
-template<auto v, class Branch, class Set> requires (!dim_sequence_contains<v, Set>)
+template<auto v, class Branch, class Set> requires (!dim_sequence_contains<Set>::template value<v>)
 struct dim_tree_restrict_impl<dim_tree<v, Branch>, Set> {
 	using type = typename dim_tree_restrict_impl<Branch, Set>::type;
 };
 
-template<auto v, class ...Branches, class Set> requires (dim_sequence_contains<v, Set>)
+template<auto v, class ...Branches, class Set> requires (dim_sequence_contains<Set>::template value<v>)
 struct dim_tree_restrict_impl<dim_tree<v, Branches...>, Set> {
 	using type = dim_tree<v, typename dim_tree_restrict_impl<Branches, Set>::type...>;
 };
@@ -220,8 +213,6 @@ using integer_sequence_concat_sep = typename helpers::integer_sequence_concat_se
 
 template<class In, class Set>
 using dim_sequence_restrict = typename helpers::dim_sequence_restrict_impl<In, Set>::type;
-
-using helpers::dim_sequence_contains;
 
 using helpers::dim_tree;
 

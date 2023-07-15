@@ -300,17 +300,20 @@ private:
 		// The `rename_uniquity<external>` check already ensures that if a dimension is renamed to itself, no other dimension is renamed to its name.
 		static constexpr bool success = true;
 	};
+
+	struct filter {
+		template<class Tag>
+		static constexpr bool value =
+			Tag::template any_accept<dim_sequence_contains<external>> ||
+			!Tag::template all_accept<dim_sequence_contains<internal>>;
+	};
+
 public:
 	static_assert(assertion<>::success);
 	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
 	constexpr auto sub_state(IsState auto state) const noexcept {
-		auto filtered = state.template filter<[](auto tag) consteval noexcept {
-			if constexpr (!tag.all_accept([](auto dim) consteval noexcept { return !external::contains(dim); }))
-				return true;
-			else
-				return !tag.all_accept([](auto dim) consteval noexcept { return internal::contains(dim); });
-		}>();
+		auto filtered = state.template filter<filter>();
 		return rename_state<decltype(filtered)>::convert(filtered);
 	}
 

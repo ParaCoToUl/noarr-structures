@@ -19,24 +19,28 @@ template<IsDim auto Dim>
 struct length_in {
 	static constexpr auto dim = Dim;
 
-	consteval bool all_accept(auto pred) const noexcept {
-		return pred(dim);
-	}
+	template<class Pred>
+	static constexpr bool all_accept = Pred::template value<Dim>;
 
-	template<auto fn>
-	using map = length_in<fn(dim)>;
+	template<class Pred>
+	static constexpr bool any_accept = Pred::template value<Dim>;
+
+	template<class Fn>
+	using map = length_in<Fn::template value<dim>>;
 };
 
 template<IsDim auto Dim>
 struct index_in {
 	static constexpr auto dim = Dim;
 
-	consteval bool all_accept(auto pred) const noexcept {
-		return pred(dim);
-	}
+	template<class Pred>
+	static constexpr bool all_accept = Pred::template value<Dim>;
 
-	template<auto fn>
-	using map = index_in<fn(dim)>;
+	template<class Pred>
+	static constexpr bool any_accept = Pred::template value<Dim>;
+
+	template<class Fn>
+	using map = index_in<Fn::template value<dim>>;
 };
 
 template<IsDim auto Dim>
@@ -109,28 +113,28 @@ struct state_remove_items<state_items_pack<StateItems...>, Tag, Tags...> {
 	using result = typename state_remove_items<recursion_result, Tags...>::result;
 };
 
-template<auto Pred, class... StateItems>
+template<class Pred, class... StateItems>
 struct state_filter_item;
 
-template<auto Pred, IsTag Tag, class ValueType, class... TailStateItems> requires (Pred(Tag{}))
+template<class Pred, IsTag Tag, class ValueType, class... TailStateItems> requires (Pred::template value<Tag>)
 struct state_filter_item<Pred, state_item<Tag, ValueType>, TailStateItems...> {
 	using result = typename state_filter_item<Pred, TailStateItems...>::result::template prepend<state_item<Tag, ValueType>>;
 };
 
-template<auto Pred, class HeadStateItem, class... TailStateItems>
+template<class Pred, class HeadStateItem, class... TailStateItems>
 struct state_filter_item<Pred, HeadStateItem, TailStateItems...> {
 	using result = typename state_filter_item<Pred, TailStateItems...>::result;
 };
 
-template<auto Pred>
+template<class Pred>
 struct state_filter_item<Pred> {
 	using result = state_items_pack<>;
 };
 
-template<class StateItemsPack, auto Pred>
+template<class StateItemsPack, class Pred>
 struct state_filter_items;
 
-template<class... StateItems, auto Pred>
+template<class... StateItems, class Pred>
 struct state_filter_items<state_items_pack<StateItems...>, Pred> {
 	using result = typename state_filter_item<Pred, StateItems...>::result;
 };
@@ -171,7 +175,7 @@ struct state : contain<typename StateItems::value_type...> {
 		return items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result());
 	}
 
-	template<auto Pred>
+	template<class Pred>
 	constexpr auto filter() const noexcept {
 		return items_restrict(typename helpers::state_filter_items<helpers::state_items_pack<StateItems...>, Pred>::result());
 	}
