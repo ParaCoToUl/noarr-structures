@@ -60,7 +60,16 @@ template<class T>
 concept IsDim = is_dim_v<T>;
 
 template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
-struct dim_sequence {};
+struct dim_sequence {
+	using type = dim_sequence;
+	using size_type = std::size_t;
+
+	static constexpr size_type size = sizeof...(Dims);
+
+	static consteval bool contains(auto dim) noexcept {
+		return (... || (dim == Dims));
+	}
+};
 
 namespace helpers {
 

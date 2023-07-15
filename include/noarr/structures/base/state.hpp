@@ -16,9 +16,28 @@ template<typename T>
 concept IsTag = is_tag_v<T>;
 
 template<IsDim auto Dim>
-struct length_in;
+struct length_in {
+	static constexpr auto dim = Dim;
+
+	consteval bool all_accept(auto pred) const noexcept {
+		return pred(dim);
+	}
+
+	template<auto fn>
+	using map = length_in<fn(dim)>;
+};
+
 template<IsDim auto Dim>
-struct index_in;
+struct index_in {
+	static constexpr auto dim = Dim;
+
+	consteval bool all_accept(auto pred) const noexcept {
+		return pred(dim);
+	}
+
+	template<auto fn>
+	using map = index_in<fn(dim)>;
+};
 
 template<IsDim auto Dim>
 struct is_tag<length_in<Dim>> : std::true_type {};
@@ -90,6 +109,32 @@ struct state_remove_items<state_items_pack<StateItems...>, Tag, Tags...> {
 	using result = typename state_remove_items<recursion_result, Tags...>::result;
 };
 
+template<auto Pred, class... StateItems>
+struct state_filter_item;
+
+template<auto Pred, IsTag Tag, class ValueType, class... TailStateItems> requires (Pred(Tag{}))
+struct state_filter_item<Pred, state_item<Tag, ValueType>, TailStateItems...> {
+	using result = typename state_filter_item<Pred, TailStateItems...>::result::template prepend<state_item<Tag, ValueType>>;
+};
+
+template<auto Pred, class HeadStateItem, class... TailStateItems>
+struct state_filter_item<Pred, HeadStateItem, TailStateItems...> {
+	using result = typename state_filter_item<Pred, TailStateItems...>::result;
+};
+
+template<auto Pred>
+struct state_filter_item<Pred> {
+	using result = state_items_pack<>;
+};
+
+template<class StateItemsPack, auto Pred>
+struct state_filter_items;
+
+template<class... StateItems, auto Pred>
+struct state_filter_items<state_items_pack<StateItems...>, Pred> {
+	using result = typename state_filter_item<Pred, StateItems...>::result;
+};
+
 } // namespace helpers
 
 template<class... StateItems>
@@ -124,6 +169,11 @@ struct state : contain<typename StateItems::value_type...> {
 	template<class... Tags> requires (... && IsTag<Tags>)
 	constexpr auto remove() const noexcept {
 		return items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result());
+	}
+
+	template<auto Pred>
+	constexpr auto filter() const noexcept {
+		return items_restrict(typename helpers::state_filter_items<helpers::state_items_pack<StateItems...>, Pred>::result());
 	}
 
 	template<class... Tags, class... ValueTypes> requires (... && IsTag<Tags>)

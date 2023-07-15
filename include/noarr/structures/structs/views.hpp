@@ -305,7 +305,13 @@ public:
 	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
 	constexpr auto sub_state(IsState auto state) const noexcept {
-		return rename_state<decltype(state)>::convert(state);
+		auto filtered = state.template filter<[](auto tag) consteval noexcept {
+			if constexpr (!tag.all_accept([](auto dim) consteval noexcept { return !external::contains(dim); }))
+				return true;
+			else
+				return !tag.all_accept([](auto dim) consteval noexcept { return internal::contains(dim); });
+		}>();
+		return rename_state<decltype(filtered)>::convert(filtered);
 	}
 
 	constexpr auto size(IsState auto state) const noexcept {
