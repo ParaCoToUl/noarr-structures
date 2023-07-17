@@ -8,23 +8,18 @@
 
 namespace noarr {
 
-namespace helpers {
-
 /**
- * @brief see `contain`. This is a helper structure implementing its functionality
+ * @brief A base class that contains the fields given as template arguments. It is similar to a tuple but it is a standard layout.
  * 
- * @tparam ...TS: contained fields
+ * @tparam TS the contained fields
  */
-template<class... TS>
-struct contain_impl;
+template<class... TS> requires (... && is_simple<TS>)
+struct contain;
 
 // an implementation for the pair (T, TS...) where neither is empty
-template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain_impl<TS...>>)
-struct contain_impl<T, TS...> {
-	contain_impl<T> t_;
-	contain_impl<TS...> ts_;
-
-	explicit constexpr contain_impl(T t, TS... ts) noexcept : t_(t), ts_(ts...) {}
+template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain<TS...>>)
+struct contain<T, TS...> {
+	explicit constexpr contain(T t, TS... ts) noexcept : t_(t), ts_(ts...) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
@@ -33,44 +28,49 @@ struct contain_impl<T, TS...> {
 		else
 			return ts_.template get<I - 1>();
 	}
+
+private:
+	contain<T> t_;
+	contain<TS...> ts_;
 };
 
 // an implementation for the pair (T, TS...) where TS... is empty
-template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain_impl<TS...>>)
-struct contain_impl<T, TS...> : private contain_impl<TS...> {
-	contain_impl<T> t_;
-
-	explicit constexpr contain_impl(T t, TS...) noexcept : t_(t) {}
+template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain<TS...>>)
+struct contain<T, TS...> : private contain<TS...> {
+	explicit constexpr contain(T t, TS...) noexcept : t_(t) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
 		if constexpr(I == 0)
 			return t_.template get<0>();
 		else
-			return contain_impl<TS...>::template get<I - 1>();
+			return contain<TS...>::template get<I - 1>();
 	}
+
+private:
+	contain<T> t_;
 };
 
 // an implementation for the pair (T, TS...) where T is empty
 template<class T, class... TS> requires (std::is_empty_v<T>)
-struct contain_impl<T, TS...> : private contain_impl<TS...> {
-	constexpr contain_impl() noexcept = default;
-	explicit constexpr contain_impl(T, TS... ts) noexcept : contain_impl<TS...>(ts...) {}
+struct contain<T, TS...> : private contain<TS...> {
+	constexpr contain() noexcept = default;
+	explicit constexpr contain(T, TS... ts) noexcept : contain<TS...>(ts...) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
 		if constexpr(I == 0)
 			return T();
 		else
-			return contain_impl<TS...>::template get<I - 1>();
+			return contain<TS...>::template get<I - 1>();
 	}
 };
 
 // an implementation for an empty T
 template<class T> requires (std::is_empty_v<T>)
-struct contain_impl<T> {
-	constexpr contain_impl() noexcept = default;
-	explicit constexpr contain_impl(T) noexcept {}
+struct contain<T> {
+	constexpr contain() noexcept = default;
+	explicit constexpr contain(T) noexcept {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
@@ -81,44 +81,23 @@ struct contain_impl<T> {
 
 // an implementation for an nonempty T
 template<class T> requires (!std::is_empty_v<T>)
-struct contain_impl<T> {
-	T t_;
-
-	constexpr contain_impl() noexcept = delete;
-	explicit constexpr contain_impl(T t) noexcept : t_(t) {}
+struct contain<T> {
+	constexpr contain() noexcept = delete;
+	explicit constexpr contain(T t) noexcept : t_(t) {}
 
 	template<std::size_t I>
 	constexpr decltype(auto) get() const noexcept {
 		static_assert(I == 0, "index out of bounds");
 		return t_;
 	}
+
+private:
+	T t_;
 };
 
 // contains nothing
 template<>
-struct contain_impl<> {};
-
-} // namespace helpers
-
-/**
- * @brief A base class that contains the fields given as template arguments. It is similar to a tuple but it is a standard layout.
- * 
- * @tparam TS the contained fields
- */
-template<class... TS> requires (... && is_simple<TS>)
-struct contain : private helpers::contain_impl<TS...> {
-protected:
-	using helpers::contain_impl<TS...>::contain_impl;
-
-public:
-	using helpers::contain_impl<TS...>::get;
-};
-
-template<>
-struct contain<> : private helpers::contain_impl<> {
-protected:
-	using helpers::contain_impl<>::contain_impl;
-};
+struct contain<> {};
 
 } // namespace noarr
 
