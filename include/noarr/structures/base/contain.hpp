@@ -13,7 +13,7 @@ namespace noarr {
  * 
  * @tparam TS the contained fields
  */
-template<class... TS> requires (... && is_simple<TS>)
+template<class... TS> requires (... && IsSimple<TS>)
 struct contain;
 
 // an implementation for the pair (T, TS...) where neither is empty

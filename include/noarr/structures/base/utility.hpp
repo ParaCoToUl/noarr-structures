@@ -71,12 +71,34 @@ struct dim_sequence {
 };
 
 template<class T>
+struct is_dim_sequence : std::false_type {};
+
+template<auto... Dims>
+struct is_dim_sequence<dim_sequence<Dims...>> : std::true_type {};
+
+template<class T>
+static constexpr bool is_dim_sequence_v = is_dim_sequence<T>::value;
+
+template<class T>
+concept IsDimSequence = is_dim_sequence_v<T>;
+
+template<class T>
 struct dim_sequence_contains;
 
 template<auto... Dims>
 struct dim_sequence_contains<dim_sequence<Dims...>> {
 	template<auto Dim>
 	static constexpr bool value = (... || (Dim == Dims));
+};
+
+struct dim_accepter {
+	template<auto Dim>
+	static constexpr bool value = is_dim_v<decltype(Dim)>;
+};
+
+struct dim_identity_mapper {
+	template<IsDim auto Dim>
+	static constexpr auto value = Dim;
 };
 
 namespace helpers {
@@ -259,7 +281,7 @@ struct none {
 };
 
 template<class T>
-concept is_simple = true
+concept IsSimple = true
 	&& std::is_standard_layout_v<T>
 	&& (!std::is_empty_v<T> || std::is_trivially_default_constructible_v<T>)
 	&& (!std::is_default_constructible_v<T> || std::is_trivially_default_constructible_v<T>)

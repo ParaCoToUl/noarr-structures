@@ -1,23 +1,22 @@
 #ifndef NOARR_STRUCTURES_STATE_HPP
 #define NOARR_STRUCTURES_STATE_HPP
 
+#include <concepts>
+
 #include "contain.hpp"
 #include "utility.hpp"
 
 namespace noarr {
 
 template<typename T>
-struct is_tag : std::false_type {};
-
-template<typename T>
-constexpr bool is_tag_v = is_tag<T>::value;
-
-template<typename T>
-concept IsTag = is_tag_v<T>;
+concept IsTag = IsDimSequence<typename T::dims> && requires (T a) {
+	{ T::template all_accept<dim_accepter> } -> std::convertible_to<bool>;
+	{ T::template any_accept<dim_accepter> } -> std::convertible_to<bool>;
+} && std::is_same_v<typename T::template map<dim_identity_mapper>, T>;
 
 template<IsDim auto Dim>
 struct length_in {
-	static constexpr auto dim = Dim;
+	using dims = dim_sequence<Dim>;
 
 	template<class Pred>
 	static constexpr bool all_accept = Pred::template value<Dim>;
@@ -26,12 +25,12 @@ struct length_in {
 	static constexpr bool any_accept = Pred::template value<Dim>;
 
 	template<class Fn>
-	using map = length_in<Fn::template value<dim>>;
+	using map = length_in<Fn::template value<Dim>>;
 };
 
 template<IsDim auto Dim>
 struct index_in {
-	static constexpr auto dim = Dim;
+	using dims = dim_sequence<Dim>;
 
 	template<class Pred>
 	static constexpr bool all_accept = Pred::template value<Dim>;
@@ -40,14 +39,8 @@ struct index_in {
 	static constexpr bool any_accept = Pred::template value<Dim>;
 
 	template<class Fn>
-	using map = index_in<Fn::template value<dim>>;
+	using map = index_in<Fn::template value<Dim>>;
 };
-
-template<IsDim auto Dim>
-struct is_tag<length_in<Dim>> : std::true_type {};
-
-template<IsDim auto Dim>
-struct is_tag<index_in<Dim>> : std::true_type {};
 
 template<IsTag Tag, class ValueType>
 struct state_item {
@@ -55,11 +48,23 @@ struct state_item {
 	using value_type = ValueType;
 };
 
+template<class T>
+struct is_state_item : std::false_type {};
+
+template<IsTag Tag, class ValueType>
+struct is_state_item<state_item<Tag, ValueType>> : std::true_type {};
+
+template<class T>
+static constexpr bool is_state_item_v = is_state_item<T>::value;
+
+template<class T>
+concept IsStateItem = is_state_item_v<T>;
+
 namespace helpers {
 
-template<class... StateItems>
+template<class... StateItems> requires (... && IsStateItem<StateItems>)
 struct state_items_pack {
-	template<class HeadStateItem>
+	template<IsStateItem HeadStateItem>
 	using prepend = state_items_pack<HeadStateItem, StateItems...>;
 };
 

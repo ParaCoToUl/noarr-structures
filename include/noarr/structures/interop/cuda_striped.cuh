@@ -30,10 +30,18 @@ constexpr std::size_t cuda_shm_bank_count = 32;
 constexpr std::size_t cuda_shm_bank_width = 4;
 
 // Tag for use in state
-struct cuda_stripe_index;
+struct cuda_stripe_index {
+	using dims = dim_sequence<>;
 
-template<>
-struct is_tag<cuda_stripe_index> : std::true_type {};
+	template<class Pred>
+	static constexpr bool all_accept = true;
+
+	template<class Pred>
+	static constexpr bool any_accept = false;
+
+	template<class Fn>
+	using map = cuda_stripe_index;
+};
 
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth, class T>
 struct cuda_striped_t : contain<T> {
