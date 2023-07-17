@@ -245,21 +245,21 @@ struct rename_sig<From, To, scalar_sig<ValueType>> {
 	using type = scalar_sig<ValueType>;
 };
 
-template<class From, class To, IsTag StateTag>
-struct rename_state_tag;
-template<class From, class To, IsDim auto Dim>
-struct rename_state_tag<From, To, index_in<Dim>> { using type = index_in<rename_dim<Dim, From, To>::dim>; };
-template<class From, class To, IsDim auto Dim>
-struct rename_state_tag<From, To, length_in<Dim>> { using type = length_in<rename_dim<Dim, From, To>::dim>; };
+template<class From, class To>
+struct rename_dim_map {
+	template<auto Dim>
+	static constexpr auto value = rename_dim<Dim, From, To>::dim;
+};
 
-template<class From, class To, IsState State>
-struct rename_state;
-template<class From, class To, class... StateItem>
-struct rename_state<From, To, state<StateItem...>> {
-	using type = state<state_item<typename rename_state_tag<From, To, typename StateItem::tag>::type, typename StateItem::value_type>...>;
-	static constexpr type convert(state<StateItem...> s) noexcept {
+template<class From, class To>
+struct rename_state {
+	template<class... StateItem>
+	using type = state<state_item<typename StateItem::tag::template map<rename_dim_map<From, To>>, typename StateItem::value_type>...>;
+
+	template<class... StateItem>
+	static constexpr type<StateItem...> convert(state<StateItem...> s) noexcept {
 		(void) s; // suppress warning about unused parameter when the pack below is empty
-		return type(s.template get<typename StateItem::tag>()...);
+		return type<StateItem...>(s.template get<typename StateItem::tag>()...);
 	}
 };
 
@@ -275,8 +275,7 @@ private:
 	using unzip = helpers::rename_unzip_dim_pairs<dim_sequence<>, dim_sequence<>, DimPairs...>;
 	using internal = typename unzip::even;
 	using external = typename unzip::odd;
-	template<IsState State>
-	using rename_state = typename helpers::rename_state<external, internal, State>;
+	using rename_state = typename helpers::rename_state<external, internal>;
 public:
 	static_assert(helpers::rename_uniquity<internal>::value, "A dimension is renamed twice. Usage: rename<Old1, New1, Old2, New2, ...>()");
 	static_assert(helpers::rename_uniquity<external>::value, "Multiple dimensions are renamed to the same name. Usage: rename<Old1, New1, Old2, New2, ...>()");
@@ -305,7 +304,7 @@ private:
 		template<class Tag>
 		static constexpr bool value =
 			Tag::template any_accept<dim_sequence_contains<external>> ||
-			!Tag::template all_accept<dim_sequence_contains<internal>>;
+			!Tag::template any_accept<dim_sequence_contains<internal>>;
 	};
 
 public:
@@ -313,8 +312,7 @@ public:
 	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
 	constexpr auto sub_state(IsState auto state) const noexcept {
-		auto filtered = state.template filter<filter>();
-		return rename_state<decltype(filtered)>::convert(filtered);
+		return rename_state::convert(state.template filter<filter>());
 	}
 
 	constexpr auto size(IsState auto state) const noexcept {
