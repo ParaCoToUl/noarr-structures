@@ -54,7 +54,7 @@ template<auto Tag>
 struct is_dim<dim<Tag>> : std::true_type {};
 
 template<class T>
-static constexpr bool is_dim_v = is_dim<T>::value;
+static constexpr bool is_dim_v = is_dim<std::remove_cvref_t<T>>::value;
 
 template<class T>
 concept IsDim = is_dim_v<T>;

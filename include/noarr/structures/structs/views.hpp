@@ -344,7 +344,7 @@ struct rename_proto {
 };
 
 template<auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
-using rename = rename_proto<DimPairs...>;
+constexpr rename_proto<DimPairs...> rename() noexcept { return {}; }
 
 } // namespace noarr
 
