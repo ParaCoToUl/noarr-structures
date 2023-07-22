@@ -92,9 +92,12 @@ struct dim_sequence_contains<dim_sequence<Dims...>> {
 };
 
 struct dim_accepter {
-	template<auto Dim>
+	template<IsDim auto Dim>
 	static constexpr bool value = is_dim_v<decltype(Dim)>;
 };
+
+template<class T>
+constexpr T unconst(const T t) noexcept { return t; }
 
 struct dim_identity_mapper {
 	template<IsDim auto Dim>
