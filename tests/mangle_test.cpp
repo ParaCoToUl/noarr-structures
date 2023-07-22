@@ -4,7 +4,6 @@
 #include <noarr/structures/extra/mangle.hpp>
 
 #include <string>
-#include <stdint.h>
 
 template<char... Chars>
 std::string cp2a(std::integer_sequence<char, Chars...>) { return {Chars...}; }

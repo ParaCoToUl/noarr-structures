@@ -1,8 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include <array>
-#include <iostream>
-
 #include <noarr/structures/extra/traverser.hpp>
 #include <noarr/structures_extended.hpp>
 

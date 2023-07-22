@@ -1,8 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include <iostream>
-#include <array>
-
 #include <noarr/structures_extended.hpp>
 #include "noarr_test_defs.hpp"
 

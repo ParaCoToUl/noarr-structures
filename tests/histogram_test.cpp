@@ -1,9 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include <array>
-#include <iostream>
-#include <tuple>
-
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>
 

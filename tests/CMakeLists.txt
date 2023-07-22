@@ -9,6 +9,7 @@ enable_testing()
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # download testing library Catch2
@@ -23,7 +24,7 @@ file(GLOB_RECURSE tests_source_files CONFIGURE_DEPENDS
     "*_test.cpp"
 )
 add_executable(test-runner ${tests_source_files})
-target_include_directories(test-runner PUBLIC ../include)
+target_include_directories(test-runner PRIVATE ../include)
 target_link_libraries(test-runner PRIVATE Catch2::Catch2WithMain)
 
 # ask compiler to print maximum warnings

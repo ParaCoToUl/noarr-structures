@@ -1,8 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
 
-#include <iostream>
-#include <tuple>
-
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>
 
@@ -69,8 +66,6 @@ bool are_equal_matrices(Matrix1& matrix1, Matrix2& matrix2)
 	for (std::size_t i = 0; i < x_size; i++) {
 		for (std::size_t j = 0; j < y_size; j++) {
 			if (matrix1.template at<'x', 'y'>(i, j) != matrix2.template at<'x', 'y'>(i, j)) {
-				std::cout << "at (x, y) = (" << i << ", " << j << "): " << matrix1.template at<'x', 'y'>(i, j) << " != " << matrix2.template at<'x', 'y'>(i, j) << std::endl;
-
 				return false;
 			}
 		}
