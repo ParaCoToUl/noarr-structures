@@ -22,6 +22,80 @@ TEST_CASE("Traverser begin end", "[traverser iter]") {
 	REQUIRE(e.idx == 20);
 }
 
+TEST_CASE("Traverser iter arithmetics", "[traverser iter]") {
+	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
+
+	auto t = noarr::traverser(s());
+
+	auto b = t.begin();
+	auto e = t.end();
+
+	REQUIRE(b + 0 == b);
+	REQUIRE(b - 0 == b);
+
+	REQUIRE(e + 0 == e);
+	REQUIRE(e - 0 == e);
+
+	REQUIRE(e - b == 20);
+	REQUIRE(b - e == -20);
+
+	REQUIRE(b + 20 == e);
+	REQUIRE(e - 20 == b);
+
+	auto lb = b++;
+	REQUIRE(b.idx == 1);
+	REQUIRE(lb.idx == 0);
+	REQUIRE(lb + 1 == b);
+
+	auto rb = ++b;
+	REQUIRE(b.idx == 2);
+	REQUIRE(rb.idx == 2);
+	REQUIRE(rb == b);
+
+	auto le = e--;
+	REQUIRE(e.idx == 19);
+	REQUIRE(le.idx == 20);
+	REQUIRE(le - 1 == e);
+
+	auto re = --e;
+	REQUIRE(e.idx == 18);
+	REQUIRE(re.idx == 18);
+	REQUIRE(re == e);
+
+	REQUIRE(lb <= rb);
+	REQUIRE(rb >= lb);
+	REQUIRE(!(lb > rb));
+	REQUIRE(!(rb < lb));
+
+	REQUIRE(b <= b);
+	REQUIRE(b >= b);
+	REQUIRE(!(b < b));
+	REQUIRE(!(b > b));
+
+	REQUIRE(lb < rb);
+	REQUIRE(rb > lb);
+	REQUIRE(!(lb >= rb));
+	REQUIRE(!(rb <= lb));
+
+	REQUIRE(lb != rb);
+	REQUIRE(rb != lb);
+	REQUIRE(!(lb == rb));
+	REQUIRE(!(rb == lb));
+
+	rb -= 2;
+	REQUIRE(rb == lb);
+	REQUIRE(!(rb != lb));
+
+	re += 2;
+	REQUIRE(re == le);
+	REQUIRE(!(re != le));
+
+	rb += 10;
+	re -= 10;
+	REQUIRE(rb == re);
+	REQUIRE((lb < b && b < rb && re < e && e < le));
+}
+
 TEST_CASE("Traverser iter type traits", "[traverser iter]") {
 	using s = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
 	using iter_t = noarr::traverser_iterator_t<'x', noarr::union_t<s>, noarr::neutral_proto>;
@@ -38,8 +112,7 @@ TEST_CASE("Traverser iter type traits", "[traverser iter]") {
 	REQUIRE(std::is_trivially_move_assignable_v<iter_t>);
 	REQUIRE(std::is_trivially_destructible_v<iter_t>);
 
-	// C++20:
-	//REQUIRE(std::random_access_iterator<iter_t>);
+	REQUIRE(std::random_access_iterator<iter_t>);
 }
 
 TEST_CASE("Traverser iter deref", "[traverser iter]") {
@@ -124,6 +197,46 @@ TEST_CASE("Traverser iter for for", "[traverser iter]") {
 		x++;
 	}
 	REQUIRE(x == 20);
+}
+
+TEST_CASE("Traverser range methods", "[traverser iter]") {
+	using matrix = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
+	using array = noarr::array_t<'x', 1, noarr::scalar<int>>;
+	using empty = noarr::array_t<'x', 0, noarr::scalar<int>>;
+
+	{
+		auto t = noarr::traverser(matrix());
+		auto r = t.range();
+
+		REQUIRE(r.size() == 20);
+		REQUIRE(r.begin() == t.begin());
+		REQUIRE(r.end() == t.end());
+		REQUIRE(r.empty() == false);
+		REQUIRE(r.is_divisible() == true);
+	}
+
+	{
+		auto t = noarr::traverser(array());
+		auto r = t.range();
+
+		REQUIRE(r.size() == 1);
+		REQUIRE(r.begin() == t.begin());
+		REQUIRE(r.end() == t.end());
+		REQUIRE(r.empty() == false);
+		REQUIRE(r.is_divisible() == false);
+	}
+
+	{
+		auto t = noarr::traverser(empty());
+		auto r = t.range();
+
+		REQUIRE(r.size() == 0);
+		REQUIRE(r.begin() == t.begin());
+		REQUIRE(r.end() == t.end());
+		REQUIRE(r.begin() == r.end());
+		REQUIRE(r.empty() == true);
+		REQUIRE(r.is_divisible() == false);
+	}
 }
 
 TEST_CASE("Traverser range deref", "[traverser iter]") {
