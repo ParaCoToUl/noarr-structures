@@ -125,6 +125,9 @@ using is_struct = helpers::is_struct_impl<T>;
 template<class T>
 static constexpr auto is_struct_v = is_struct<T>::value;
 
+template<class T>
+concept IsStruct = is_struct_v<T>;
+
 /**
  * @brief returns whether the type `T` meets the criteria for proto-structures
  * 
@@ -135,6 +138,9 @@ using is_proto_struct = helpers::is_proto_struct_impl<T>;
 
 template<class T>
 static constexpr auto is_proto_struct_v = is_proto_struct<T>::value;
+
+template<class T>
+concept IsProtoStruct = is_proto_struct_v<T>;
 
 template<bool PreservesLayout = false, class F>
 constexpr auto make_proto(F f) noexcept {
