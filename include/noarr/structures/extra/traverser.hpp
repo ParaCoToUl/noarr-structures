@@ -135,9 +135,9 @@ struct traverser_t : contain<Struct, Order> {
 	// TODO add tests
 	template<IsDim auto Dim, auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_sections(F f) const noexcept {
-		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
+		using dim_tree = dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dim, Dims...>>;
 		static_assert((dim_tree_contains<Dim, dim_tree> && ... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
-		for_each_impl(dim_tree_restrict<dim_tree, dim_sequence<Dim, Dims...>>(), f, empty_state);
+		for_each_impl(dim_tree(), f, empty_state);
 	}
 
 	// TODO add tests
@@ -149,7 +149,7 @@ struct traverser_t : contain<Struct, Order> {
 
 	template<auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_dims(F f) const noexcept {
-		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
+		using dim_tree = dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dims...>>;
 		static_assert((... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
 		for_each_impl(dim_tree_from_sequence<dim_sequence<Dims...>>(), f, empty_state);
 	}
