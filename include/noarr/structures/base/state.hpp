@@ -78,7 +78,7 @@ struct state_index_of<Tag, state_item<Tag, ValueType>, TailStateItems...> {
 
 template<IsTag Tag, class HeadStateItem, class... TailStateItems>
 struct state_index_of<Tag, HeadStateItem, TailStateItems...> {
-	static constexpr auto result = state_index_of<Tag, TailStateItems...>::result.and_then([](auto v){return v+1;});
+	static constexpr auto result = state_index_of<Tag, TailStateItems...>::result.and_then([](auto v)constexpr noexcept{return v+1;});
 };
 
 template<IsTag Tag>

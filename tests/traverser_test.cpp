@@ -125,6 +125,28 @@ TEST_CASE("Traverser ordered", "[traverser]") {
 	});
 
 	REQUIRE(i == 20*30*40);
+
+	traverser(a, b, c) ^ reorder<'x', 'y', 'z'>() | [&i](auto s){
+		static_assert(decltype(s)::template contains<index_in<'x'>>);
+		static_assert(decltype(s)::template contains<index_in<'y'>>);
+		static_assert(decltype(s)::template contains<index_in<'z'>>);
+
+		REQUIRE(s.template get<index_in<'x'>>() < 20);
+		REQUIRE(s.template get<index_in<'y'>>() < 30);
+		REQUIRE(s.template get<index_in<'z'>>() < 40);
+
+		int j =
+			+ s.template get<index_in<'x'>>() * 30 * 40
+			+ s.template get<index_in<'y'>>() * 40
+			+ s.template get<index_in<'z'>>()
+		;
+
+		REQUIRE(20*30*40 - i == j);
+
+		i--;
+	};
+
+	REQUIRE(i == 0);
 }
 
 TEST_CASE("Traverser ordered renamed", "[traverser]") {
@@ -163,7 +185,7 @@ TEST_CASE("Traverser ordered renamed", "[traverser]") {
 
 	int i = 0;
 
-	traverser(a, b, c).order(reorder<'x', 'y', 'z'>() ^ noarr::rename<'y', 't'>()).for_each([&i](auto s){
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>() ^ rename<'y', 't'>()).for_each([&i](auto s){
 		static_assert(decltype(s)::template contains<index_in<'x'>>);
 		static_assert(decltype(s)::template contains<index_in<'y'>>);
 		static_assert(decltype(s)::template contains<index_in<'z'>>);
@@ -184,6 +206,28 @@ TEST_CASE("Traverser ordered renamed", "[traverser]") {
 	});
 
 	REQUIRE(i == 20*30*40);
+
+	traverser(a, b, c) ^ reorder<'x', 'y', 'z'>() ^ rename<'y', 't'>() | [&i](auto s){
+		static_assert(decltype(s)::template contains<index_in<'x'>>);
+		static_assert(decltype(s)::template contains<index_in<'y'>>);
+		static_assert(decltype(s)::template contains<index_in<'z'>>);
+
+		REQUIRE(s.template get<index_in<'x'>>() < 20);
+		REQUIRE(s.template get<index_in<'y'>>() < 30);
+		REQUIRE(s.template get<index_in<'z'>>() < 40);
+
+		int j =
+			+ s.template get<index_in<'x'>>() * 30 * 40
+			+ s.template get<index_in<'y'>>() * 40
+			+ s.template get<index_in<'z'>>()
+		;
+
+		REQUIRE(20*30*40 - i == j);
+
+		i--;
+	};
+
+	REQUIRE(i == 0);
 }
 
 TEST_CASE("Traverser ordered renamed access", "[traverser]") {
@@ -203,7 +247,7 @@ TEST_CASE("Traverser ordered renamed access", "[traverser]") {
 	bt b;
 	ct c;
 
-	traverser(a, b, c).order(reorder<'x', 'y', 'z'>() ^ noarr::rename<'y', 't'>()).for_each([&](auto s){
+	auto action = [&](auto s){
 		REQUIRE((a | offset(s)) / sizeof(int) == s.template get<index_in<'x'>>() * 30 + s.template get<index_in<'y'>>());
 		REQUIRE((b | offset(s)) / sizeof(int) == s.template get<index_in<'y'>>() * 40 + s.template get<index_in<'z'>>());
 		REQUIRE((c | offset(s)) / sizeof(int) == s.template get<index_in<'x'>>() * 40 + s.template get<index_in<'z'>>());
@@ -211,7 +255,10 @@ TEST_CASE("Traverser ordered renamed access", "[traverser]") {
 		REQUIRE((char*) &(a | get_at(ap, s)) == (char*) ap + (a | offset(s)));
 		REQUIRE((char*) &(b | get_at(bp, s)) == (char*) bp + (b | offset(s)));
 		REQUIRE((char*) &(c | get_at(cp, s)) == (char*) cp + (c | offset(s)));
-	});
+	};
+
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>() ^ rename<'y', 't'>()).for_each(action);
+	traverser(a, b, c) ^ reorder<'x', 'y', 'z'>() ^ rename<'y', 't'>() | action;
 }
 
 TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
@@ -223,7 +270,7 @@ TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
 
 	std::size_t i = 0;
 
-	traverser(a, b).order(noarr::into_blocks<'x', 'u', 'v'>(4)).for_each([&](auto s){
+	traverser(a, b).order(into_blocks<'x', 'u', 'v'>(4)).for_each([&](auto s){
 		REQUIRE(!decltype(s)::template contains<index_in<'u'>> & !decltype(s)::template contains<index_in<'v'>>);
 		REQUIRE( decltype(s)::template contains<index_in<'x'>> &  decltype(s)::template contains<index_in<'y'>>);
 
@@ -234,6 +281,18 @@ TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
 	});
 
 	REQUIRE(i == 20*30);
+
+	traverser(a, b) ^ into_blocks<'x', 'u', 'v'>(4) | [&](auto s){
+		static_assert(decltype(s)::template contains<index_in<'x'>>);
+		static_assert(decltype(s)::template contains<index_in<'y'>>);
+
+		std::size_t x = s.template get<index_in<'x'>>();
+		std::size_t y = s.template get<index_in<'y'>>();
+		REQUIRE(y*20 + x == 20*30 - i);
+		i--;
+	};
+
+	REQUIRE(i == 0);
 }
 
 TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts blocks]") {
@@ -245,7 +304,7 @@ TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts 
 
 	std::size_t i = 0;
 
-	traverser(a, b).order(noarr::strip_mine<'x', 'u', 'v'>(4)).for_each([&](auto s){
+	traverser(a, b).order(strip_mine<'x', 'u', 'v'>(4)).for_each([&](auto s){
 		REQUIRE(!decltype(s)::template contains<index_in<'u'>> & !decltype(s)::template contains<index_in<'v'>>);
 		REQUIRE( decltype(s)::template contains<index_in<'x'>> &  decltype(s)::template contains<index_in<'y'>>);
 
@@ -258,6 +317,20 @@ TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts 
 	});
 
 	REQUIRE(i == 20*30);
+
+	traverser(a, b) ^ strip_mine<'x', 'u', 'v'>(4) | [&i](auto s){
+		static_assert(decltype(s)::template contains<index_in<'x'>>);
+		static_assert(decltype(s)::template contains<index_in<'y'>>);
+
+		std::size_t x = s.template get<index_in<'x'>>();
+		std::size_t y = s.template get<index_in<'y'>>();
+		std::size_t u = x / 4;
+		std::size_t v = x % 4;
+		REQUIRE(u*30*4 + y*4 + v == 20*30 - i);
+		i--;
+	};
+
+	REQUIRE(i == 0);
 }
 
 TEST_CASE("Traverser update_index (reverse example)", "[traverser shortcuts]") {

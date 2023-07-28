@@ -122,14 +122,13 @@ struct traverser_t : contain<Struct, Order> {
 	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
 	constexpr auto get_order() const noexcept { return base::template get<1>(); }
 
-	template<class NewOrder>
-	constexpr auto order(NewOrder new_order) const noexcept {
+	constexpr auto order(IsProtoStruct auto new_order) const noexcept {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
 	}
 
 	template<auto... Dims, class F> requires (... && IsDim<decltype(Dims)>)
 	constexpr void for_each(F f) const noexcept {
-		for_sections<Dims...>([f](auto inner) { return f(inner.state()); });
+		for_sections<Dims...>([f](auto inner) constexpr noexcept { return f(inner.state()); });
 	}
 
 	// TODO add tests
@@ -198,12 +197,37 @@ private:
 };
 
 template<class... Ts>
-constexpr auto traverser(const Ts &... s) noexcept 
+constexpr auto traverser(const Ts &... s) noexcept
 	-> traverser_t<union_t<typename to_struct<Ts>::type...>, neutral_proto>
 { return traverser(make_union(to_struct<Ts>::convert(s)...)); }
 
 template<class... Ts>
 constexpr auto traverser(union_t<Ts...> u) noexcept { return traverser_t<union_t<Ts...>, neutral_proto>(u, neutral_proto()); }
+
+template<class T>
+struct is_traverser : std::false_type {};
+
+template<class Struct, class Order>
+struct is_traverser<traverser_t<Struct, Order>> : std::true_type {};
+
+template<class T>
+struct is_traverser<const T> : is_traverser<T> {};
+
+template<class T>
+constexpr bool is_traverser_v = is_traverser<T>::value;
+
+template<class T>
+concept IsTraverser = is_traverser_v<T>;
+
+template<IsTraverser T>
+constexpr auto operator^(const T &t, IsProtoStruct auto order) noexcept {
+	return t.order(order);
+}
+
+template<IsTraverser T>
+constexpr auto operator|(const T &t, auto f) noexcept -> decltype(t.for_each(f)) {
+	return t.for_each(f);
+}
 
 } // namespace noarr
 
