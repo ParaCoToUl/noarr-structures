@@ -107,6 +107,30 @@ struct scalar_sig {
 };
 
 template<class T>
+struct is_function_sig : std::false_type {};
+template<IsDim auto Dim, class ArgLength, class RetSig>
+struct is_function_sig<function_sig<Dim, ArgLength, RetSig>> : std::true_type {};
+template<IsDim auto Dim, class... RetSigs>
+struct is_function_sig<dep_function_sig<Dim, RetSigs...>> : std::true_type {};
+
+template<class T>
+static constexpr bool is_function_sig_v = is_function_sig<T>::value;
+
+template<class T>
+concept IsFunctionSig = is_function_sig_v<T>;
+
+template<class T>
+struct is_ground_sig : std::false_type {};
+template<class ValueType>
+struct is_ground_sig<scalar_sig<ValueType>> : std::true_type {};
+
+template<class T>
+static constexpr bool is_ground_sig_v = is_ground_sig<T>::value;
+
+template<class T>
+concept IsGroundSig = is_ground_sig_v<T>;
+
+template<class T>
 struct is_signature : std::false_type {};
 template<IsDim auto Dim, class ArgLength, class RetSig>
 struct is_signature<function_sig<Dim, ArgLength, RetSig>> : std::true_type {};
@@ -117,6 +141,9 @@ struct is_signature<scalar_sig<ValueType>> : std::true_type {};
 
 template<class T>
 static constexpr bool is_signature_v = is_signature<T>::value;
+
+template<class T>
+concept IsSignature = is_signature_v<T>;
 
 } // namespace noarr
 
