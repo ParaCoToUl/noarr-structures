@@ -21,10 +21,10 @@ auto noarr_matrix_multiply(Matrix& matrix1, Matrix2& matrix2, Structure3 structu
 {
 	auto result = noarr::make_bag(structure);
 
-	std::size_t x1_size = matrix1.template get_length<'n'>();
-	std::size_t y1_size = matrix1.template get_length<'m'>();
-	std::size_t x2_size = matrix2.template get_length<'n'>();
-	std::size_t y2_size = matrix2.template get_length<'m'>();
+	std::size_t x1_size = matrix1.template length<'n'>();
+	std::size_t y1_size = matrix1.template length<'m'>();
+	std::size_t x2_size = matrix2.template length<'n'>();
+	std::size_t y2_size = matrix2.template length<'m'>();
 
 	assert(x1_size == y2_size);
 
@@ -59,8 +59,8 @@ auto noarr_matrix_copy(Matrix& source, Structure structure)
 {
 	auto result = noarr::make_bag(structure);
 
-	for (std::size_t i = 0; i < source.template get_length<'n'>(); i++)
-		for (std::size_t j = 0; j < source.template get_length<'m'>(); j++)
+	for (std::size_t i = 0; i < source.template length<'n'>(); i++)
+		for (std::size_t j = 0; j < source.template length<'m'>(); j++)
 			result.template at<'n', 'm'>(i, j) = source.template at<'n', 'm'>(i, j);
 
 	return result;
@@ -74,8 +74,8 @@ auto noarr_matrix_copy(Matrix& source, Structure structure)
 template<typename Matrix>
 void noarr_matrix_transpose(Matrix& matrix)
 {
-	std::size_t x_size = matrix.template get_length<'n'>();
-	std::size_t y_size = matrix.template get_length<'m'>();
+	std::size_t x_size = matrix.template length<'n'>();
+	std::size_t y_size = matrix.template length<'m'>();
 
 	assert(x_size == y_size);
 
@@ -98,8 +98,8 @@ void noarr_matrix_transpose(Matrix& matrix)
 template<typename Matrix>
 void noarr_matrix_scalar_multiplication(Matrix& matrix, int scalar)
 {
-	std::size_t x_size = matrix.template get_length<'n'>();
-	std::size_t y_size = matrix.template get_length<'m'>();
+	std::size_t x_size = matrix.template length<'n'>();
+	std::size_t y_size = matrix.template length<'m'>();
 
 	for (std::size_t i = 0; i < x_size; i++)
 		for (std::size_t j = 0; j < y_size; j++)

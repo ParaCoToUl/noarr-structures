@@ -143,16 +143,26 @@ public:
 	 * @tparam Dim: the dimension name
 	 */
 	template<IsDim auto Dim>
-	constexpr auto get_length() const noexcept {
+	constexpr auto length() const noexcept {
 		return structure() | noarr::get_length<Dim>();
+	}
+
+	template<IsDim auto Dim, IsState State>
+	constexpr auto length(State state) const noexcept {
+		return structure() | noarr::get_length<Dim>(state);
 	}
 
 	/**
 	 * @brief gets the size of the data described by the `structure`
 	 *
 	 */
-	constexpr auto get_size() const noexcept {
+	constexpr auto size() const noexcept {
 		return structure() | noarr::get_size();
+	}
+
+	template<IsDim auto Dim, IsState State>
+	constexpr auto size(State state) const noexcept {
+		return structure() | noarr::get_size<Dim>(state);
 	}
 
 	/**

@@ -123,8 +123,8 @@ template<typename Matrix>
 classic_matrix noarr_matrix_to_clasic(Matrix& source)
 {
 	// we will cache matrix size values
-	std::size_t n_size = source.template get_length<'n'>();
-	std::size_t m_size = source.template get_length<'m'>();
+	std::size_t n_size = source.template length<'n'>();
+	std::size_t m_size = source.template length<'m'>();
 
 	// we will allocate target classic matrix
 	classic_matrix target = get_clasic_matrix(n_size, m_size);

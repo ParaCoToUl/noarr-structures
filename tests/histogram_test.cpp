@@ -32,10 +32,10 @@ void histogram_template_test()
 {
 	auto image = noarr::make_bag(GetImageStructureGetter<layout>::GetImageStructure() ^  noarr::set_length<'x'>(width) ^ noarr::set_length<'y'>(height));
 
-	CHECK(image.get_size() == width * height * sizeof(int));
+	CHECK(image.size() == width * height * sizeof(int));
 
 	auto histogram = noarr::make_bag(noarr::array_t<'x', pixel_range, noarr::scalar<int>>());
-	CHECK(histogram.get_size() == pixel_range * sizeof(int));
+	CHECK(histogram.size() == pixel_range * sizeof(int));
 
 	for (std::size_t i = 0; i < width; i++)
 		for (std::size_t j = 0; j < height; j++)
@@ -44,10 +44,10 @@ void histogram_template_test()
 	for (std::size_t i = 0; i < pixel_range; i++)
 		histogram.template at<'x'>(i) = 0;
 
-	std::size_t x_size = image.template get_length<'x'>();
+	std::size_t x_size = image.template length<'x'>();
 	REQUIRE(x_size == width);
 
-	std::size_t y_size = image.template get_length<'y'>();
+	std::size_t y_size = image.template length<'y'>();
 	REQUIRE(y_size == height);
 
 	for (std::size_t i = 0; i < x_size; i++)

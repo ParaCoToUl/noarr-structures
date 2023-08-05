@@ -30,11 +30,11 @@ struct MatrixStructureGetter<MatrixDataLayout::Columns>
 template<typename MatrixSource, typename MatrixDestination>
 void matrix_copy(MatrixSource& matrix_src, MatrixDestination& matrix_dst)
 {
-	std::size_t x_size = matrix_src.template get_length<'x'>();
-	std::size_t y_size = matrix_src.template get_length<'y'>();
+	std::size_t x_size = matrix_src.template length<'x'>();
+	std::size_t y_size = matrix_src.template length<'y'>();
 
-	REQUIRE(x_size == matrix_dst.template get_length<'x'>());
-	REQUIRE(y_size == matrix_dst.template get_length<'y'>());
+	REQUIRE(x_size == matrix_dst.template length<'x'>());
+	REQUIRE(y_size == matrix_dst.template length<'y'>());
 
 	for (std::size_t i = 0; i < x_size; i++)
 		for (std::size_t j = 0; j < y_size; j++)
@@ -44,8 +44,8 @@ void matrix_copy(MatrixSource& matrix_src, MatrixDestination& matrix_dst)
 template<typename Matrix>
 void matrix_transpose(Matrix& matrix)
 {
-	std::size_t x_size = matrix.template get_length<'x'>();
-	std::size_t y_size = matrix.template get_length<'y'>();
+	std::size_t x_size = matrix.template length<'x'>();
+	std::size_t y_size = matrix.template length<'y'>();
 
 	REQUIRE(x_size == y_size);
 
@@ -57,11 +57,11 @@ void matrix_transpose(Matrix& matrix)
 template<typename Matrix1, typename Matrix2>
 bool are_equal_matrices(Matrix1& matrix1, Matrix2& matrix2)
 {
-	std::size_t x_size = matrix1.template get_length<'x'>();
-	std::size_t y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template length<'x'>();
+	std::size_t y_size = matrix1.template length<'y'>();
 
-	REQUIRE(x_size == matrix2.template get_length<'x'>());
-	REQUIRE(y_size == matrix2.template get_length<'y'>());
+	REQUIRE(x_size == matrix2.template length<'x'>());
+	REQUIRE(y_size == matrix2.template length<'y'>());
 
 	for (std::size_t i = 0; i < x_size; i++) {
 		for (std::size_t j = 0; j < y_size; j++) {
@@ -77,13 +77,13 @@ bool are_equal_matrices(Matrix1& matrix1, Matrix2& matrix2)
 template<typename Matrix1, typename Matrix2, typename Matrix3>
 void matrix_add(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
-	std::size_t x_size = matrix1.template get_length<'x'>();
-	std::size_t y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template length<'x'>();
+	std::size_t y_size = matrix1.template length<'y'>();
 
-	REQUIRE(x_size == matrix2.template get_length<'x'>());
-	REQUIRE(y_size == matrix2.template get_length<'y'>());
-	REQUIRE(x_size == matrix3.template get_length<'x'>());
-	REQUIRE(y_size == matrix3.template get_length<'y'>());
+	REQUIRE(x_size == matrix2.template length<'x'>());
+	REQUIRE(y_size == matrix2.template length<'y'>());
+	REQUIRE(x_size == matrix3.template length<'x'>());
+	REQUIRE(y_size == matrix3.template length<'y'>());
 
 	for (std::size_t i = 0; i < x_size; i++)
 		for (std::size_t j = 0; j < y_size; j++)
@@ -99,8 +99,8 @@ void matrix_add(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 template<typename Matrix1>
 void matrix_scalar_multiplication(Matrix1& matrix1, int scalar)
 {
-	std::size_t x_size = matrix1.template get_length<'x'>();
-	std::size_t y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template length<'x'>();
+	std::size_t y_size = matrix1.template length<'y'>();
 
 	for (std::size_t i = 0; i < x_size; i++)
 		for (std::size_t j = 0; j < y_size; j++)
@@ -110,12 +110,12 @@ void matrix_scalar_multiplication(Matrix1& matrix1, int scalar)
 template<typename Matrix1, typename Matrix2, typename Matrix3>
 void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
-	std::size_t x1_size = matrix1.template get_length<'x'>();
-	std::size_t y1_size = matrix1.template get_length<'y'>();
-	std::size_t x2_size = matrix2.template get_length<'x'>();
-	std::size_t y2_size = matrix2.template get_length<'y'>();
-	std::size_t x3_size = matrix3.template get_length<'x'>();
-	std::size_t y3_size = matrix3.template get_length<'y'>();
+	std::size_t x1_size = matrix1.template length<'x'>();
+	std::size_t y1_size = matrix1.template length<'y'>();
+	std::size_t x2_size = matrix2.template length<'x'>();
+	std::size_t y2_size = matrix2.template length<'y'>();
+	std::size_t x3_size = matrix3.template length<'x'>();
+	std::size_t y3_size = matrix3.template length<'y'>();
 
 	REQUIRE(x1_size == y2_size);
 	REQUIRE(y1_size == y3_size);
@@ -205,8 +205,8 @@ bool are_equal_classic_matrices(matrix& m1, matrix& m2)
 template<typename Matrix1>
 matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 {
-	std::size_t x_size = matrix1.template get_length<'x'>();
-	std::size_t y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template length<'x'>();
+	std::size_t y_size = matrix1.template length<'y'>();
 
 	matrix m = get_clasic_matrix(x_size, y_size);
 
@@ -220,8 +220,8 @@ matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 template<typename Matrix1>
 void clasic_matrix_to_noarr(matrix& m1, Matrix1& matrix1)
 {
-	std::size_t x_size = matrix1.template get_length<'x'>();
-	std::size_t y_size = matrix1.template get_length<'y'>();
+	std::size_t x_size = matrix1.template length<'x'>();
+	std::size_t y_size = matrix1.template length<'y'>();
 
 	for (std::size_t i = 0; i < x_size; i++)
 		for (std::size_t j = 0; j < y_size; j++)
