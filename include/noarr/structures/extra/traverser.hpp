@@ -82,7 +82,7 @@ struct union_t : contain<Structs...> {
 	using base::base;
 
 	using is = std::index_sequence_for<Structs...>;
-	using signature = typename helpers::sig_union<typename Structs::signature...>::type;
+	using signature = typename helpers::sig_union<typename to_struct<Structs>::type::signature...>::type;
 
 	template<std::size_t Index>
 	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
@@ -90,7 +90,7 @@ struct union_t : contain<Structs...> {
 private:
 	template<auto Dim, std::size_t I>
 	constexpr auto find_first_match() const noexcept {
-		using sub_sig = typename decltype(sub_structure<I>())::signature;
+		using sub_sig = typename to_struct<decltype(sub_structure<I>())>::type::signature;
 		if constexpr(sub_sig::template any_accept<Dim>)
 			return std::integral_constant<std::size_t, I>();
 		else
@@ -106,9 +106,9 @@ public:
 	}
 };
 
-template<class ...Ts, class U = union_t<typename to_struct<Ts>::type...>>
+template<class ...Ts, class U = union_t<Ts...>>
 constexpr U make_union(const Ts &...s) noexcept {
-	return U(to_struct<Ts>::convert(s)...);
+	return U(s...);
 }
 
 template<auto... Dim, class... IdxT> requires ((sizeof...(Dim) == sizeof...(IdxT)) && ... && IsDim<decltype(Dim)>)

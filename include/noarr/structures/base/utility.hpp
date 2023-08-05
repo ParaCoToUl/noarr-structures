@@ -217,6 +217,18 @@ struct dim_tree_from_sequence_impl<dim_sequence<>> {
 	using type = dim_sequence<>;
 };
 
+template<class DimTree>
+struct dim_tree_to_sequence_impl;
+
+template<auto v, class ...Branches> requires (sizeof...(Branches) == 1)
+struct dim_tree_to_sequence_impl<dim_tree<v, Branches...>> {
+	using type = typename dim_sequence_concat_impl<dim_sequence<v>, typename dim_tree_to_sequence_impl<Branches...>::type>::type;
+};
+
+template<>
+struct dim_tree_to_sequence_impl<dim_sequence<>> {
+	using type = dim_sequence<>;
+};
 
 } // namespace helpers
 
@@ -249,6 +261,8 @@ using helpers::dim_tree_contains;
 template<class Seq>
 using dim_tree_from_sequence = typename helpers::dim_tree_from_sequence_impl<Seq>::type;
 
+template<class DimTree>
+using dim_tree_to_sequence = typename helpers::dim_tree_to_sequence_impl<DimTree>::type;
 
 template<std::size_t I>
 struct lit_t : std::integral_constant<std::size_t, I> {
@@ -257,6 +271,8 @@ struct lit_t : std::integral_constant<std::size_t, I> {
 
 template<std::size_t I>
 constexpr lit_t<I> lit;
+
+struct empty_t {};
 
 template<class>
 static constexpr bool always_false = false;
