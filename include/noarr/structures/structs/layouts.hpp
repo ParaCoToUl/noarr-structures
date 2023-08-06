@@ -18,13 +18,14 @@ namespace noarr {
 template<IsDim auto Dim, class... TS>
 struct tuple_t : contain<TS...> {
 	using base = contain<TS...>;
-
-	template<std::size_t Index>
-	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
 	static constexpr char name[] = "tuple_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<TS>...>;
+
+	template<std::size_t Index>
+	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
+	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>>(); }
 
 	constexpr tuple_t() noexcept = default;
 	explicit constexpr tuple_t(TS... ss) noexcept requires (sizeof...(TS) > 0) : base(ss...) {}
@@ -35,7 +36,7 @@ struct tuple_t : contain<TS...> {
 	template<IsState State>
 	constexpr auto size(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
-		return size_inner(is, state.template remove<index_in<Dim>>());
+		return size_inner(is, sub_state(state));
 	}
 
 	template<class Sub, IsState State>
@@ -45,8 +46,8 @@ struct tuple_t : contain<TS...> {
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
 		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-		auto sub_state = state.template remove<index_in<Dim>>();
-		return size_inner(std::make_index_sequence<index>(), sub_state) + offset_of<Sub>(sub_structure<index>(), sub_state);
+		auto sub_stat = sub_state(state);
+		return size_inner(std::make_index_sequence<index>(), sub_stat) + offset_of<Sub>(sub_structure<index>(), sub_stat);
 	}
 
 	template<IsDim auto QDim, IsState State>
@@ -58,7 +59,7 @@ struct tuple_t : contain<TS...> {
 		} else {
 			static_assert(State::template contains<index_in<Dim>>, "Tuple indices must be set");
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-			return sub_structure<index>().template length<QDim>(state.template remove<index_in<Dim>>());
+			return sub_structure<index>().template length<QDim>(sub_state(state));
 		}
 	}
 
@@ -108,6 +109,7 @@ struct vector_t : contain<T> {
 	explicit constexpr vector_t(T sub_structure) noexcept : contain<T>(sub_structure) {}
 
 	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
+	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>, length_in<Dim>>(); }
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
 	using signature = function_sig<Dim, unknown_arg_length, typename T::signature>;
@@ -117,7 +119,7 @@ struct vector_t : contain<T> {
 		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
 		auto len = state.template get<length_in<Dim>>();
-		return len * sub_structure().size(state.template remove<index_in<Dim>, length_in<Dim>>());
+		return len * sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
@@ -128,13 +130,13 @@ struct vector_t : contain<T> {
 			// offset = index * elem_size + offset_within_elem
 			auto index = state.template get<index_in<Dim>>();
 			auto sub_struct = sub_structure();
-			auto sub_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-			return index * sub_struct.size(sub_state) + offset_of<Sub>(sub_struct, sub_state);
+			auto sub_stat = sub_state(state);
+			return index * sub_struct.size(sub_stat) + offset_of<Sub>(sub_struct, sub_stat);
 		} else {
 			// Optimization: length is one, thus the only valid index is zero.
 			// Assume the index is valid (caller's responsibility).
 			// offset = 0 * elem_size + offset_within_elem = offset_within_elem
-			return offset_of<Sub>(sub_structure(), state.template remove<index_in<Dim>, length_in<Dim>>());
+			return offset_of<Sub>(sub_structure(), sub_state(state));
 		}
 	}
 
@@ -145,7 +147,7 @@ struct vector_t : contain<T> {
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
 			return state.template get<length_in<Dim>>();
 		} else {
-			return sub_structure().template length<QDim>(state.template remove<index_in<Dim>, length_in<Dim>>());
+			return sub_structure().template length<QDim>(sub_state(state));
 		}
 	}
 

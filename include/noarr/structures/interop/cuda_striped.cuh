@@ -59,6 +59,7 @@ struct cuda_striped_t : contain<T> {
 	explicit constexpr cuda_striped_t(T sub_structure) noexcept : contain<T>(sub_structure) {}
 
 	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
+	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<cuda_stripe_index>(); }
 
 private:
 	static constexpr std::size_t elem_size = decltype(std::declval<ElemType>().size(state<>()))::value;
@@ -81,7 +82,7 @@ public:
 	constexpr auto size(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
 		// substructure size
-		auto sub_size = sub_structure().size(state.template remove<cuda_stripe_index>());
+		auto sub_size = sub_structure().size(sub_state(state));
 		// total elements in each stripe = total elements in sub-structure
 		auto sub_elements = sub_size / make_const<elem_size>();
 		// stripe length = ceil(total elements in stripe / total elements in stripe width)
@@ -93,7 +94,7 @@ public:
 	template<class Sub>
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		auto sub_offset = offset_of<Sub>(sub_structure(), state.template remove<cuda_stripe_index>());
+		auto sub_offset = offset_of<Sub>(sub_structure(), sub_state(state));
 		auto offset_major = sub_offset / make_const<stripe_width>();
 		if constexpr(std::is_same_v<Sub, ElemType> && stripe_width_elems == 1) {
 			// Optimization: offset_minor should be zero.
@@ -106,7 +107,7 @@ public:
 
 	template<IsDim auto QDim>
 	constexpr auto length(IsState auto state) const noexcept {
-		return sub_structure().template length<QDim>(state.template remove<cuda_stripe_index>());
+		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
 	template<class Sub>
