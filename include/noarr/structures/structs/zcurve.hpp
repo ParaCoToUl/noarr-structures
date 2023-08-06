@@ -195,8 +195,7 @@ public:
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		if constexpr(QDim == Dim) {
-			auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-			return (... * sub_structure().template length<Dims>(clean_state));
+			return (... * sub_structure().template length<Dims>(sub_state(state, is())));
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state, is()));
 		}

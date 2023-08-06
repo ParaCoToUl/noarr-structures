@@ -86,7 +86,7 @@ public:
 			if constexpr(State::template contains<length_in<Dim>>) {
 				return state.template get<length_in<Dim>>();
 			} else {
-				return sub_structure().template length<Dim>(state.template remove<index_in<Dim>, length_in<Dim>>()) - start();
+				return sub_structure().template length<Dim>(sub_state(state)) - start();
 			}
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
