@@ -66,7 +66,7 @@ struct dim_sequence {
 
 	static constexpr size_type size = sizeof...(Dims);
 
-	template<auto Dim>
+	template<IsDim auto Dim>
 	static constexpr bool contains = (... || (Dim == Dims));
 };
 
@@ -87,7 +87,7 @@ struct dim_sequence_contains;
 
 template<auto... Dims>
 struct dim_sequence_contains<dim_sequence<Dims...>> {
-	template<auto Dim>
+	template<IsDim auto Dim>
 	static constexpr bool value = (... || (Dim == Dims));
 };
 
@@ -285,7 +285,7 @@ struct some {
 	T value;
 
 	template<class F>
-	constexpr some<decltype(std::declval<F>()(std::declval<T>()))> and_then(const F &f) const noexcept {
+	constexpr auto and_then(const F &f) const noexcept -> some<decltype(f(value))> {
 		return {f(value)};
 	}
 };

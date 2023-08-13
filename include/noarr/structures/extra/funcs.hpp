@@ -91,7 +91,7 @@ constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept { return get_at(ptr, e
  * @return the result of the piping
  */
 template<class S, class F>
-constexpr auto operator|(const S &s, F f) noexcept -> decltype(f(std::declval<typename to_struct<S>::type>())) {
+constexpr auto operator|(const S &s, F f) noexcept -> decltype(f(to_struct<S>::convert(s))) {
 	return f(to_struct<S>::convert(s));
 }
 
