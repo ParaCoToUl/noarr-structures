@@ -12,7 +12,7 @@ template<typename T>
 concept IsTag = IsDimSequence<typename T::dims> && requires (T a) {
 	{ T::template all_accept<dim_accepter> } -> std::convertible_to<bool>;
 	{ T::template any_accept<dim_accepter> } -> std::convertible_to<bool>;
-} && std::is_same_v<typename T::template map<dim_identity_mapper>, T>;
+} && std::same_as<typename T::template map<dim_identity_mapper>, T>;
 
 template<IsDim auto Dim>
 struct length_in {
@@ -201,6 +201,12 @@ constexpr bool is_state_v = is_state<T>::value;
 
 template<class T>
 concept IsState = is_state_v<T>;
+
+template<class State, auto Dim>
+concept HasNotSetIndex = IsState<State> && !State::template contains<index_in<Dim>>;
+
+template<class State, auto Dim>
+concept HasSetIndex = IsState<State> && State::template contains<index_in<Dim>>;
 
 template<IsState State, IsTag Tag>
 using state_get_t = decltype(std::declval<State>().template get<Tag>());

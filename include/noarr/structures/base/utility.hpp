@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_UTILITY_HPP
 
 #include <cstddef>
+#include <concepts>
 #include <type_traits>
 #include <utility>
 
@@ -13,12 +14,12 @@ struct dim {
 
 	constexpr dim() noexcept = default;
 
-	template<auto Tag2> requires (std::is_same_v<decltype(Tag), decltype(Tag2)>)
+	template<auto Tag2> requires (std::same_as<decltype(Tag), decltype(Tag2)>)
 	constexpr bool operator==(const dim<Tag2> &) const noexcept {
 		return Tag == Tag2;
 	}
 
-	template<auto Tag2> requires (!std::is_same_v<decltype(Tag), decltype(Tag2)>)
+	template<auto Tag2> requires (!std::same_as<decltype(Tag), decltype(Tag2)>)
 	constexpr bool operator==(const dim<Tag2> &) const noexcept {
 		return false;
 	}

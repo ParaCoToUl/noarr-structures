@@ -116,11 +116,11 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
-	constexpr auto sub_state(auto state) const noexcept {
+	constexpr auto sub_state(IsState auto state) const noexcept {
 		return state.template with<length_in<Dim>>(len());
 	}
 
-	constexpr auto size(auto state) const noexcept {
+	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 

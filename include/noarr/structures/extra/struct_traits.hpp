@@ -9,7 +9,7 @@ namespace noarr {
 
 template<class T>
 struct sig_is_point : std::false_type {
-	static_assert(is_signature<T>(), "sig_is_point is only applicable to struct signatures");
+	static_assert(is_signature_v<T>, "sig_is_point is only applicable to struct signatures");
 };
 template<class ValueType>
 struct sig_is_point<scalar_sig<ValueType>> : std::true_type {};
@@ -26,7 +26,7 @@ struct is_point : sig_is_point<typename T::signature> {};
 
 template<class T>
 struct sig_is_cube : std::false_type {
-	static_assert(is_signature<T>(), "sig_is_cube is only applicable to struct signatures");
+	static_assert(is_signature_v<T>, "sig_is_cube is only applicable to struct signatures");
 };
 template<class ValueType>
 struct sig_is_cube<scalar_sig<ValueType>> : std::true_type {};

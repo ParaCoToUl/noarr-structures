@@ -29,16 +29,14 @@ struct bcast_t : contain<T> {
 		return sub_structure().size(sub_state(state));
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State> requires (HasSetIndex<State, Dim>)
 	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
 	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
 			return state.template get<length_in<Dim>>();
 		} else {
@@ -46,9 +44,8 @@ struct bcast_t : contain<T> {
 		}
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State> requires (HasSetIndex<State, Dim>)
 	constexpr auto strict_state_at(State state) const noexcept {
-		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

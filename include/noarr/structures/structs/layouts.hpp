@@ -50,11 +50,10 @@ struct tuple_t : contain<TS...> {
 		return size_inner(std::make_index_sequence<index>(), sub_stat) + offset_of<Sub>(sub_structure<index>(), sub_stat);
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
 	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			return constexpr_arithmetic::make_const<sizeof...(TS)>();
 		} else {
 			static_assert(State::template contains<index_in<Dim>>, "Tuple indices must be set");
@@ -140,10 +139,9 @@ struct vector_t : contain<T> {
 		}
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
 	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
-			static_assert(!State::template contains<index_in<Dim>>, "Index already set");
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
 			return state.template get<length_in<Dim>>();
 		} else {
