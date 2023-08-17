@@ -19,8 +19,8 @@ struct traverser_iterator_t : contain<Struct, Order> {
 	using this_t = traverser_iterator_t;
 	using order_with_fix = decltype(std::declval<Order>() ^ fix<Dim>(std::declval<std::size_t>()));
 
-	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
-	constexpr auto get_order() const noexcept { return base::template get<1>(); }
+	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
+	constexpr auto get_order() const noexcept { return this->template get<1>(); }
 
 	using difference_type = std::ptrdiff_t;
 	using value_type = traverser_t<Struct, order_with_fix>;
@@ -69,8 +69,8 @@ struct traverser_range_t : contain<Struct, Order> {
 	template<class Split>
 	constexpr traverser_range_t(traverser_range_t &, Split) noexcept; // defined in tbb_traverser.hpp
 
-	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
-	constexpr auto get_order() const noexcept { return base::template get<1>(); }
+	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
+	constexpr auto get_order() const noexcept { return this->template get<1>(); }
 
 	template<class NewOrder>
 	constexpr auto order(NewOrder new_order) const noexcept {

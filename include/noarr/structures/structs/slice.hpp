@@ -11,8 +11,7 @@ namespace noarr {
 
 template<IsDim auto Dim, class T, class StartT>
 struct shift_t : contain<T, StartT> {
-	using base = contain<T, StartT>;
-	using base::base;
+	using contain<T, StartT>::contain;
 
 	static constexpr char name[] = "shift_t";
 	using params = struct_params<
@@ -20,8 +19,8 @@ struct shift_t : contain<T, StartT> {
 		structure_param<T>,
 		type_param<StartT>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
-	constexpr StartT start() const noexcept { return base::template get<1>(); }
+	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr StartT start() const noexcept { return this->template get<1>(); }
 
 private:
 	template<class Original>
@@ -101,13 +100,12 @@ public:
 
 template<IsDim auto Dim, class StartT>
 struct shift_proto : contain<StartT> {
-	using base = contain<StartT>;
-	using base::base;
+	using contain<StartT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return shift_t<Dim, Struct, StartT>(s, base::template get<0>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return shift_t<Dim, Struct, StartT>(s, this->get()); }
 };
 
 /**
@@ -124,8 +122,7 @@ constexpr auto shift<>() noexcept { return neutral_proto(); }
 
 template<IsDim auto Dim, class T, class StartT, class LenT>
 struct slice_t : contain<T, StartT, LenT> {
-	using base = contain<T, StartT, LenT>;
-	using base::base;
+	using contain<T, StartT, LenT>::contain;
 
 	static constexpr char name[] = "slice_t";
 	using params = struct_params<
@@ -134,9 +131,9 @@ struct slice_t : contain<T, StartT, LenT> {
 		type_param<StartT>,
 		type_param<LenT>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
-	constexpr StartT start() const noexcept { return base::template get<1>(); }
-	constexpr LenT len() const noexcept { return base::template get<2>(); }
+	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr StartT start() const noexcept { return this->template get<1>(); }
+	constexpr LenT len() const noexcept { return this->template get<2>(); }
 
 private:
 	template<class Original>
@@ -200,13 +197,12 @@ public:
 
 template<IsDim auto Dim, class StartT, class LenT>
 struct slice_proto : contain<StartT, LenT> {
-	using base = contain<StartT, LenT>;
-	using base::base;
+	using contain<StartT, LenT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return slice_t<Dim, Struct, StartT, LenT>(s, base::template get<0>(), base::template get<1>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return slice_t<Dim, Struct, StartT, LenT>(s, this->template get<0>(), this->template get<1>()); }
 };
 
 template<IsDim auto Dim, class StartT, class LenT>
@@ -215,8 +211,7 @@ constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, 
 // TODO add tests
 template<IsDim auto Dim, class T, class StartT, class EndT>
 struct span_t : contain<T, StartT, EndT> {
-	using base = contain<T, StartT, EndT>;
-	using base::base;
+	using contain<T, StartT, EndT>::contain;
 
 	static constexpr char name[] = "span_t";
 	using params = struct_params<
@@ -225,9 +220,9 @@ struct span_t : contain<T, StartT, EndT> {
 		type_param<StartT>,
 		type_param<EndT>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
-	constexpr StartT start() const noexcept { return base::template get<1>(); }
-	constexpr EndT end() const noexcept { return base::template get<2>(); }
+	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr StartT start() const noexcept { return this->template get<1>(); }
+	constexpr EndT end() const noexcept { return this->template get<2>(); }
 
 private:
 	template<class Original>
@@ -294,13 +289,12 @@ public:
 
 template<IsDim auto Dim, class StartT, class EndT>
 struct span_proto : contain<StartT, EndT> {
-	using base = contain<StartT, EndT>;
-	using base::base;
+	using contain<StartT, EndT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return span_t<Dim, Struct, StartT, EndT>(s, base::template get<0>(), base::template get<1>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return span_t<Dim, Struct, StartT, EndT>(s, this->template get<0>(), this->template get<1>()); }
 };
 
 template<IsDim auto Dim, class StartT, class EndT>
@@ -308,8 +302,7 @@ constexpr auto span(StartT start, EndT end) noexcept { return span_proto<Dim, go
 
 template<IsDim auto Dim, class T, class StartT, class StrideT>
 struct step_t : contain<T, StartT, StrideT> {
-	using base = contain<T, StartT, StrideT>;
-	using base::base;
+	using contain<T, StartT, StrideT>::contain;
 
 	static constexpr char name[] = "step_t";
 	using params = struct_params<
@@ -318,9 +311,9 @@ struct step_t : contain<T, StartT, StrideT> {
 		type_param<StartT>,
 		type_param<StrideT>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
-	constexpr StartT start() const noexcept { return base::template get<1>(); }
-	constexpr StrideT stride() const noexcept { return base::template get<2>(); }
+	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr StartT start() const noexcept { return this->template get<1>(); }
+	constexpr StrideT stride() const noexcept { return this->template get<2>(); }
 
 private:
 	template<class Original>
@@ -389,13 +382,12 @@ public:
 
 template<IsDim auto Dim, class StartT, class StrideT>
 struct step_proto : contain<StartT, StrideT> {
-	using base = contain<StartT, StrideT>;
-	using base::base;
+	using contain<StartT, StrideT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return step_t<Dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return step_t<Dim, Struct, StartT, StrideT>(s, this->template get<0>(), this->template get<1>()); }
 };
 
 template<IsDim auto Dim, class StartT, class StrideT>
@@ -403,8 +395,7 @@ constexpr auto step(StartT start, StrideT stride) noexcept { return step_proto<D
 
 template<class StartT, class StrideT>
 struct auto_step_proto : contain<StartT, StrideT> {
-	using base = contain<StartT, StrideT>;
-	using base::base;
+	using contain<StartT, StrideT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -412,7 +403,7 @@ struct auto_step_proto : contain<StartT, StrideT> {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
 		static_assert(!Struct::signature::dependent, "Add a dimension name as the first parameter to step, or use a structure with a dynamic topmost dimension");
 		constexpr auto dim = Struct::signature::dim;
-		return step_t<dim, Struct, StartT, StrideT>(s, base::template get<0>(), base::template get<1>());
+		return step_t<dim, Struct, StartT, StrideT>(s, this->template get<0>(), this->template get<1>());
 	}
 };
 
@@ -421,15 +412,14 @@ constexpr auto step(StartT start, StrideT stride) noexcept { return auto_step_pr
 
 template<IsDim auto Dim, class T>
 struct reverse_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "reverse_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<T>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 private:
 	template<class Original>

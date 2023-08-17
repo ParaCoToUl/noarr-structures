@@ -159,9 +159,8 @@ struct state : contain<typename StateItems::value_type...> {
 
 	static constexpr bool is_empty = !sizeof...(StateItems);
 
-	template<class Tag> requires (IsTag<Tag>)
+	template<class Tag> requires (IsTag<Tag> && contains<Tag>)
 	constexpr auto get() const noexcept {
-		static_assert(contains<Tag>, "No such item");
 		return base::template get<index_of<Tag>.value>();
 	}
 

@@ -189,12 +189,12 @@ struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : contain<pac
 
 	template<class Struct>
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
-		return s ^ base::template get<0>() ^ base::template get<1>();
+		return s ^ this->template get<0>() ^ this->template get<1>();
 	}
 
 	template<class... Structs> requires (sizeof...(Structs) != 1)
 	constexpr auto instantiate_and_construct(Structs... s) const noexcept {
-		return pack(s...) ^ base::template get<0>() ^ base::template get<1>();
+		return pack(s...) ^ this->template get<0>() ^ this->template get<1>();
 	}
 };
 

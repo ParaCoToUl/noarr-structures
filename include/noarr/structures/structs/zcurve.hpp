@@ -115,8 +115,7 @@ struct zc_log2<1> {
 
 template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, class T, auto... Dims>
 struct merge_zcurve_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "merge_zcurve_t";
 	using params = struct_params<
@@ -126,7 +125,7 @@ struct merge_zcurve_t : contain<T> {
 		structure_param<T>,
 		dim_param<Dims>...>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	static_assert(SpecialLevel <= GeneralLevel && GeneralLevel < 8*sizeof(std::size_t), "Invalid parameters");
 	static_assert(sizeof...(Dims), "No dimensions to merge");

@@ -28,8 +28,7 @@ using cuda_txyz = cuda_dims_pack<cuda_thread_x, cuda_thread_y, cuda_thread_z>;
 
 template<IsDim auto Dim, class T, class CudaDim>
 struct cuda_fix_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "cuda_fix_t";
 	using params = struct_params<
@@ -37,7 +36,7 @@ struct cuda_fix_t : contain<T> {
 		structure_param<T>,
 		type_param<CudaDim>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 private:
 	template<class Original>
@@ -106,17 +105,17 @@ struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<Dims
 	using get_fixes = decltype((... ^ helpers::cuda_fix_pair_proto<DimsB, DimsT, CudaDimsB, CudaDimsT>()));
 
 	constexpr dim3 grid_dim() const noexcept {
-		auto full = base::top_struct();
+		auto full = this->top_struct();
 		return {(uint)full.template length<DimsB>(empty_state)...};
 	}
 
 	constexpr dim3 block_dim() const noexcept {
-		auto full = base::top_struct();
+		auto full = this->top_struct();
 		return {(uint)full.template length<DimsT>(empty_state)...};
 	}
 
 	explicit constexpr operator bool() const noexcept {
-		auto full = base::top_struct();
+		auto full = this->top_struct();
 		return (... && full.template length<DimsT>(empty_state)) && (... && full.template length<DimsB>(empty_state));
 	}
 

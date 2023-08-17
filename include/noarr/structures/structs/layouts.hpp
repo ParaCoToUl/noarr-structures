@@ -24,7 +24,7 @@ struct tuple_t : contain<TS...> {
 		structure_param<TS>...>;
 
 	template<std::size_t Index>
-	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
+	constexpr auto sub_structure() const noexcept { return this->template get<Index>(); }
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>>(); }
 
 	constexpr tuple_t() noexcept = default;
@@ -108,7 +108,7 @@ struct vector_t : contain<T> {
 	constexpr vector_t() noexcept = default;
 	explicit constexpr vector_t(T sub_structure) noexcept : contain<T>(sub_structure) {}
 
-	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return contain<T>::get(); }
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>, length_in<Dim>>(); }
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");

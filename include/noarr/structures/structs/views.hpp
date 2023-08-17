@@ -92,15 +92,14 @@ static constexpr bool reassemble_is_complete = helpers::reassemble_completeness<
 
 template<class T, auto... Dims> requires (... && IsDim<decltype(Dims)>)
 struct reorder_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "reorder_t";
 	using params = struct_params<
 		structure_param<T>,
 		dim_param<Dims>...>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	using signature = reassemble_sig<typename T::signature, Dims...>;
 	static constexpr bool complete = reassemble_is_complete<signature>;
@@ -141,15 +140,14 @@ using reorder = reorder_proto<Dims...>;
 
 template<IsDim auto Dim, class T>
 struct hoist_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "hoist_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<T>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 private:
 	using hoisted = sig_find_dim<Dim, state<>, typename T::signature>; // sig_find_dim also checks the dimension exists and is not within a tuple.
@@ -267,8 +265,7 @@ struct rename_state {
 
 template<class T, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
 struct rename_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static_assert(sizeof...(DimPairs) % 2 == 0, "Expected an even number of dimensions. Usage: rename<Old1, New1, Old2, New2, ...>()");
 private:
@@ -285,7 +282,7 @@ public:
 		structure_param<T>,
 		dim_param<DimPairs>...>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 private:
 	template<class = external, class = internal>

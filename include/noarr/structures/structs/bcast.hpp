@@ -19,7 +19,7 @@ struct bcast_t : contain<T> {
 	constexpr bcast_t() noexcept = default;
 	explicit constexpr bcast_t(T sub_structure) noexcept : contain<T>(sub_structure) {}
 
-	constexpr T sub_structure() const noexcept { return contain<T>::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return contain<T>::get(); }
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>, length_in<Dim>>(); }
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");

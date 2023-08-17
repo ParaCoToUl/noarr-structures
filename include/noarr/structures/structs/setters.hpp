@@ -11,8 +11,7 @@ namespace noarr {
 
 template<IsDim auto Dim, class T, class IdxT>
 struct fix_t : contain<T, IdxT> {
-	using base = contain<T, IdxT>;
-	using base::base;
+	using contain<T, IdxT>::contain;
 
 	static constexpr char name[] = "fix_t";
 	using params = struct_params<
@@ -20,8 +19,8 @@ struct fix_t : contain<T, IdxT> {
 		structure_param<T>,
 		type_param<IdxT>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
-	constexpr IdxT idx() const noexcept { return base::template get<1>(); }
+	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr IdxT idx() const noexcept { return this->template get<1>(); }
 
 private:
 	template<class Original>
@@ -67,13 +66,12 @@ public:
 
 template<IsDim auto Dim, class IdxT>
 struct fix_proto : contain<IdxT> {
-	using base = contain<IdxT>;
-	using base::base;
+	using contain<IdxT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return fix_t<Dim, Struct, IdxT>(s, base::template get<0>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return fix_t<Dim, Struct, IdxT>(s, this->get()); }
 };
 
 /**
@@ -92,8 +90,7 @@ constexpr auto fix(IdxT... idx) noexcept {
 
 template<IsDim auto Dim, class T, class LenT>
 struct set_length_t : contain<T, LenT> {
-	using base = contain<T, LenT>;
-	using base::base;
+	using contain<T, LenT>::contain;
 
 	static constexpr char name[] = "set_length_t";
 	using params = struct_params<
@@ -101,8 +98,8 @@ struct set_length_t : contain<T, LenT> {
 		structure_param<T>,
 		type_param<LenT>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
-	constexpr LenT len() const noexcept { return base::template get<1>(); }
+	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr LenT len() const noexcept { return this->template get<1>(); }
 
 private:
 	template<class Original>
@@ -145,13 +142,12 @@ public:
 
 template<IsDim auto Dim, class LenT>
 struct set_length_proto : contain<LenT> {
-	using base = contain<LenT>;
-	using base::base;
+	using contain<LenT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return set_length_t<Dim, Struct, LenT>(s, base::template get<0>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return set_length_t<Dim, Struct, LenT>(s, this->get()); }
 };
 
 /**

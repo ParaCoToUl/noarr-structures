@@ -99,7 +99,7 @@ public:
 	/**
 	 * @brief return the wrapped structure which describes the `data` blob
 	 */
-	constexpr auto structure() const noexcept { return base::template get<0>(); }
+	constexpr auto structure() const noexcept { return this->get(); }
 
 	/**
 	 * @brief returns the underlying data blob

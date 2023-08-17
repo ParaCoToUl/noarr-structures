@@ -11,8 +11,7 @@ namespace noarr {
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T>
 struct into_blocks_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "into_blocks_t";
 	using params = struct_params<
@@ -21,7 +20,7 @@ struct into_blocks_t : contain<T> {
 		dim_param<DimMinor>,
 		structure_param<T>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for both components of a dimension");
 	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>, "Dimension of this name already exists");
@@ -119,8 +118,7 @@ constexpr auto into_blocks() {
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T>
 struct into_blocks_dynamic_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "into_blocks_dynamic_t";
 	using params = struct_params<
@@ -130,7 +128,7 @@ struct into_blocks_dynamic_t : contain<T> {
 		dim_param<DimIsPresent>,
 		structure_param<T>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for two components of a dimension");
 	static_assert(DimMinor != DimIsPresent, "Cannot use the same name for two components of a dimension");
@@ -243,8 +241,7 @@ constexpr auto into_blocks_dynamic() {
 
 template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT>
 struct into_blocks_static_t : contain<T, MinorLenT> {
-	using base = contain<T, MinorLenT>;
-	using base::base;
+	using contain<T, MinorLenT>::contain;
 
 	static constexpr char name[] = "into_blocks_static_t";
 	using params = struct_params<
@@ -255,8 +252,8 @@ struct into_blocks_static_t : contain<T, MinorLenT> {
 		structure_param<T>,
 		type_param<MinorLenT>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
-	constexpr MinorLenT minor_length() const noexcept { return base::template get<1>(); }
+	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr MinorLenT minor_length() const noexcept { return this->template get<1>(); }
 
 	static_assert(DimIsBorder != DimMajor, "Cannot use the same name for multiple components of a dimension");
 	static_assert(DimIsBorder != DimMinor, "Cannot use the same name for multiple components of a dimension");
@@ -360,13 +357,12 @@ private:
 
 template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class MinorLenT>
 struct into_blocks_static_proto : contain<MinorLenT> {
-	using base = contain<MinorLenT>;
-	using base::base;
+	using contain<MinorLenT>::contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, Struct, MinorLenT>(s, base::template get<0>()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, Struct, MinorLenT>(s, this->get()); }
 };
 
 template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class MinorLenT>
@@ -376,8 +372,7 @@ constexpr auto into_blocks_static(MinorLenT minor_length) {
 
 template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class T>
 struct merge_blocks_t : contain<T> {
-	using base = contain<T>;
-	using base::base;
+	using contain<T>::contain;
 
 	static constexpr char name[] = "merge_blocks_t";
 	using params = struct_params<
@@ -386,7 +381,7 @@ struct merge_blocks_t : contain<T> {
 		dim_param<Dim>,
 		structure_param<T>>;
 
-	constexpr T sub_structure() const noexcept { return base::template get<0>(); }
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot merge a dimension with itself");
 	static_assert(Dim == DimMajor || Dim == DimMinor || !T::signature::template any_accept<Dim>, "Dimension of this name already exists");

@@ -78,14 +78,13 @@ using union_filter_accepted_t = typename union_filter_accepted<typename Struct::
 
 template<class... Structs>
 struct union_t : contain<Structs...> {
-	using base = contain<Structs...>;
-	using base::base;
+	using contain<Structs...>::contain;
 
 	using is = std::index_sequence_for<Structs...>;
 	using signature = typename helpers::sig_union<typename to_struct<Structs>::type::signature...>::type;
 
 	template<std::size_t Index>
-	constexpr auto sub_structure() const noexcept { return base::template get<Index>(); }
+	constexpr auto sub_structure() const noexcept { return this->template get<Index>(); }
 
 private:
 	template<auto Dim, std::size_t I>
@@ -102,7 +101,7 @@ public:
 
 	template<IsDim auto QDim>
 	constexpr auto length(IsState auto state) const noexcept {
-		return base::template get<first_match<QDim>>().template length<QDim>(state);
+		return this->template get<first_match<QDim>>().template length<QDim>(state);
 	}
 };
 
@@ -116,11 +115,10 @@ constexpr auto fix(IdxT...) noexcept; // defined in setters.hpp
 
 template<class Struct, class Order>
 struct traverser_t : contain<Struct, Order> {
-	using base = contain<Struct, Order>;
-	using base::base;
+	using contain<Struct, Order>::contain;
 
-	constexpr auto get_struct() const noexcept { return base::template get<0>(); }
-	constexpr auto get_order() const noexcept { return base::template get<1>(); }
+	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
+	constexpr auto get_order() const noexcept { return this->template get<1>(); }
 
 	constexpr auto order(IsProtoStruct auto new_order) const noexcept {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
