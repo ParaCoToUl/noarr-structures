@@ -71,9 +71,8 @@ private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
 	template<std::size_t... IS>
-	constexpr auto size_inner(std::index_sequence<IS...>, IsState auto sub_state) const noexcept {
+	constexpr auto size_inner(std::index_sequence<IS...>, [[maybe_unused]] IsState auto sub_state) const noexcept {
 		using namespace constexpr_arithmetic;
-		(void) sub_state; // don't complain about unused parameter in case of empty fold
 		return (make_const<0>() + ... + sub_structure<IS>().size(sub_state));
 	}
 };

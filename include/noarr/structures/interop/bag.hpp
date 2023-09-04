@@ -45,7 +45,7 @@ struct bag_policy<std::unique_ptr> {
 		return std::make_unique<char[]>(size);
 	}
 
-	static auto get(const std::unique_ptr<char[]> &ptr) noexcept {
+	static void *get(const std::unique_ptr<char[]> &ptr) noexcept {
 		return ptr.get();
 	}
 };
@@ -78,33 +78,31 @@ struct bag_policy<bag_const_raw_pointer_tag> {
  * @tparam BagPolicy: indicates what underlying structure contains the data blob (typically `std::unique_ptr`)
  */
 template<class Structure, class BagPolicy>
-class bag : contain<Structure> {
-	using base = contain<Structure>;
-
-	typename BagPolicy::type data_;
+class bag : flexible_contain<Structure, typename BagPolicy::type> {
+	using base = flexible_contain<Structure, typename BagPolicy::type>;
 
 public:
-	explicit constexpr bag(Structure s) : base(s), data_(BagPolicy::construct(s | noarr::get_size()))
+	explicit constexpr bag(Structure s) : base(s, BagPolicy::construct(s | noarr::get_size()))
 	{ }
 
-	explicit constexpr bag(Structure s, typename BagPolicy::type &&data) : base(s), data_(std::move(data))
+	explicit constexpr bag(Structure s, typename BagPolicy::type &&data) : base(s, std::move(data))
 	{ }
 
-	explicit constexpr bag(Structure s, const typename BagPolicy::type &data) : base(s), data_(data)
+	explicit constexpr bag(Structure s, const typename BagPolicy::type &data) : base(s, data)
 	{ }
 
-	explicit constexpr bag(Structure s, BagPolicy policy) : base(policy.construct(s)), data_(s | noarr::get_size())
+	explicit constexpr bag(Structure s, BagPolicy policy) : base(policy.construct(s), s | noarr::get_size())
 	{ }
 
 	/**
 	 * @brief return the wrapped structure which describes the `data` blob
 	 */
-	constexpr auto structure() const noexcept { return this->get(); }
+	constexpr auto structure() const noexcept { return base::template get<0>(); }
 
 	/**
 	 * @brief returns the underlying data blob
 	 */
-	constexpr auto data() const noexcept { return BagPolicy::get(data_); }
+	constexpr auto data() const noexcept { return BagPolicy::get(base::template get<1>()); }
 
 	/**
 	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
@@ -172,16 +170,18 @@ public:
 	constexpr auto get_ref() const noexcept;
 
 	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout)
+	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator ^(bag &&s, ProtoStruct p) {
 		auto new_struct = s.structure() ^ p;
-		return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.data_));
+		return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.template get<1>()));
 	}
 
 
 	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
+	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator ^(const bag &s, ProtoStruct p) {
 		auto new_struct = s.structure() ^ p;
-		return bag<decltype(new_struct), BagPolicy>(new_struct, s.data_);
+		return bag<decltype(new_struct), BagPolicy>(new_struct, s.template get<1>());
 	}
 
 };

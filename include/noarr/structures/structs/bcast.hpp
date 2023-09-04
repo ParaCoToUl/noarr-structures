@@ -44,7 +44,7 @@ struct bcast_t : contain<T> {
 		}
 	}
 
-	template<class Sub, IsState State> requires (HasSetIndex<State, Dim>)
+	template<class Sub, IsState State>
 	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}

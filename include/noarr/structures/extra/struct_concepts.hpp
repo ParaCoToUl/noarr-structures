@@ -3,6 +3,7 @@
 
 #include "../base/structs_common.hpp"
 #include "../extra/to_struct.hpp"
+#include "../extra/sig_utils.hpp"
 
 namespace noarr {
 
@@ -19,8 +20,8 @@ struct has_dims {
 
 } // namespace helpers
 
-template<class T, IsDim auto... Dims>
-concept HasDims = requires(T) {
+template<class T, auto... Dims>
+concept HasDims = (... && IsDim<decltype(Dims)>) && requires(T) {
 	typename to_struct<T>::type;
 } && helpers::has_dims<T, Dims...>::value;
 

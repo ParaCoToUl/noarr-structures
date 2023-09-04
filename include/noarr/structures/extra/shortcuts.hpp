@@ -107,6 +107,11 @@ constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) noexcep
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class... OptionalMinorLengthT>
+constexpr auto strip_mine_dynamic(OptionalMinorLengthT... optional_minor_length) noexcept {
+	return into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>(optional_minor_length...) ^ hoist<DimMajor>();
+}
+
 template<auto ...Dims, class ...LenTs> requires ((sizeof...(Dims) == sizeof...(LenTs)) && ... && IsDim<decltype(Dims)>)
 constexpr auto bcast(LenTs ...lengths) noexcept {
 	return (... ^ (bcast<Dims>() ^ set_length<Dims>(lengths)));
@@ -185,8 +190,7 @@ constexpr auto state_construct_fix(StateItem, IsState auto) noexcept {
 } // namespace helpers
 
 template<class... StateItem>
-constexpr auto fix(state<StateItem...> state) noexcept {
-	(void)state;
+constexpr auto fix([[maybe_unused]] state<StateItem...> state) noexcept {
 	return (neutral_proto() ^ ... ^ helpers::state_construct_fix(StateItem(), state));
 }
 

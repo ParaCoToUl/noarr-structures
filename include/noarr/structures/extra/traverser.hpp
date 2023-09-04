@@ -120,6 +120,7 @@ struct traverser_t : contain<Struct, Order> {
 	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
 	constexpr auto get_order() const noexcept { return this->template get<1>(); }
 
+	[[nodiscard("returns a new traverser")]]
 	constexpr auto order(IsProtoStruct auto new_order) const noexcept {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
 	}

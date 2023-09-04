@@ -255,8 +255,7 @@ struct rename_state {
 	using type = state<state_item<typename StateItem::tag::template map<rename_dim_map<From, To>>, typename StateItem::value_type>...>;
 
 	template<class... StateItem>
-	static constexpr type<StateItem...> convert(state<StateItem...> s) noexcept {
-		(void) s; // suppress warning about unused parameter when the pack below is empty
+	static constexpr type<StateItem...> convert([[maybe_unused]] state<StateItem...> s) noexcept {
 		return type<StateItem...>(s.template get<typename StateItem::tag>()...);
 	}
 };
