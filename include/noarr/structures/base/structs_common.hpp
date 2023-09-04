@@ -148,21 +148,25 @@ constexpr auto make_proto(F f) noexcept {
 }
 
 template<class Struct, class ProtoStruct> requires (IsStruct<Struct> && IsProtoStruct<ProtoStruct>)
+[[nodiscard("Constructs a new structure")]]
 constexpr auto operator ^(Struct s, ProtoStruct p) noexcept {
 	return p.instantiate_and_construct(s);
 }
 
 template<class... Structs, class ProtoStruct> requires (IsProtoStruct<ProtoStruct> && ... && IsStruct<Structs>)
+[[nodiscard("Constructs a new structure")]]
 constexpr auto operator ^(pack<Structs...> s, ProtoStruct p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
 
 template<class Arg, class... Args>
+[[nodiscard("Constructs a new pack of structures")]]
 constexpr auto operator ^(Arg s, pack<Args...> p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Args)>());
 }
 
 template<class... Structs, class Arg> requires (... && IsStruct<Structs>)
+[[nodiscard("Constructs a new pack of structures")]]
 constexpr auto operator ^(pack<Structs...> s, to_each<Arg> p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
@@ -199,11 +203,13 @@ struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : contain<pac
 };
 
 template<class InnerProtoStruct, class OuterProtoStruct> requires (IsProtoStruct<InnerProtoStruct> && IsProtoStruct<OuterProtoStruct>)
+[[nodiscard("Constructs a new proto-structure")]]
 constexpr compose_proto<pack<InnerProtoStruct>, OuterProtoStruct> operator ^(InnerProtoStruct i, OuterProtoStruct o) noexcept {
 	return compose_proto<pack<InnerProtoStruct>, OuterProtoStruct>(pack(i), o);
 }
 
 template<class... InnerProtoStructs, class OuterProtoStruct> requires (IsProtoStruct<OuterProtoStruct> && ... && IsProtoStruct<InnerProtoStructs>)
+[[nodiscard("Constructs a new proto-structure")]]
 constexpr compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> operator ^(pack<InnerProtoStructs...> i, OuterProtoStruct o) noexcept {
 	return compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct>(i, o);
 }

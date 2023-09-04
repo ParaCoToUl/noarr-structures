@@ -303,15 +303,17 @@ struct none {
 template<class T>
 concept IsSimple = true
 	&& std::is_standard_layout_v<T>
-	&& (!std::is_empty_v<T> || std::is_trivially_default_constructible_v<T>)
-	&& (!std::is_default_constructible_v<T> || std::is_trivially_default_constructible_v<T>)
+	&& (!std::is_empty_v<T> || std::is_trivially_default_constructible_v<T>) /* empty -> trivially_default_constructible */
+	&& (!std::is_default_constructible_v<T> || std::is_trivially_default_constructible_v<T>) /* default_constructible -> trivially_default_constructible */
 	&& std::is_trivially_copy_constructible_v<T>
 	&& std::is_trivially_move_constructible_v<T>
-	&& (std::is_trivially_copy_assignable_v<T> || !std::is_copy_assignable_v<T>)
-	&& (std::is_trivially_move_assignable_v<T> || !std::is_move_assignable_v<T>)
+	&& (!std::is_copy_assignable_v<T> || std::is_trivially_copy_assignable_v<T>) /* copy_assignable -> trivially_copy_assignable */
+	&& (!std::is_move_assignable_v<T> || std::is_trivially_move_assignable_v<T>) /* move_assignable -> trivially_move_assignable */
 	&& std::is_trivially_destructible_v<T>
 	;
 
+template<class T>
+concept IsContainable = (!std::is_empty_v<T> || std::is_default_constructible_v<T>); /* empty -> default_constructible */
 
 namespace constexpr_arithmetic {
 

@@ -21,7 +21,8 @@ struct contain_impl;
 // an implementation for the pair (T, TS...) where neither is empty
 template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> {
-	explicit constexpr contain_impl(T t, TS... ts) noexcept : t_(t), ts_(ts...) {}
+	template<class T_, class ...TS_>
+	explicit constexpr contain_impl(T_ &&t, TS_ &&... ts) noexcept : t_(std::forward<T_>(t)), ts_(std::forward<TS_>(ts)...) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
 	constexpr decltype(auto) get() const noexcept {
@@ -39,7 +40,8 @@ private:
 // an implementation for the pair (T, TS...) where TS... is empty
 template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
-	explicit constexpr contain_impl(T t, TS...) noexcept : t_(t) {}
+	template<class T_, class ...TS_>
+	explicit constexpr contain_impl(T_ &&t, TS_ &&...) noexcept : t_(std::forward<T_>(t)) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
 	constexpr decltype(auto) get() const noexcept {
@@ -57,7 +59,8 @@ private:
 template<class T, class... TS> requires (std::is_empty_v<T>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
 	constexpr contain_impl() noexcept = default;
-	explicit constexpr contain_impl(T, TS... ts) noexcept : contain_impl<TS...>(ts...) {}
+	template<class T_, class ...TS_>
+	explicit constexpr contain_impl(T_ &&, TS_ &&...ts) noexcept : contain_impl<TS...>(std::forward<TS_>(ts)...) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
 	constexpr decltype(auto) get() const noexcept {
@@ -72,7 +75,8 @@ struct contain_impl<T, TS...> : private contain_impl<TS...> {
 template<class T> requires (std::is_empty_v<T>)
 struct contain_impl<T> {
 	constexpr contain_impl() noexcept = default;
-	explicit constexpr contain_impl(T) noexcept {}
+	template<class T_>
+	explicit constexpr contain_impl(T_ &&) noexcept {}
 
 	template<std::size_t I = 0> requires (I == 0)
 	constexpr decltype(auto) get() const noexcept {
@@ -84,10 +88,11 @@ struct contain_impl<T> {
 template<class T> requires (!std::is_empty_v<T>)
 struct contain_impl<T> {
 	constexpr contain_impl() noexcept = delete;
-	explicit constexpr contain_impl(T t) noexcept : t_(t) {}
+	template<class T_>
+	explicit constexpr contain_impl(T_ &&t) noexcept : t_(std::forward<T_>(t)) {}
 
 	template<std::size_t I = 0> requires (I == 0)
-	constexpr decltype(auto) get() const noexcept {
+	constexpr const T &get() const noexcept {
 		return t_;
 	}
 
@@ -116,6 +121,21 @@ template<>
 struct contain<> : private helpers::contain_impl<> {
 	using helpers::contain_impl<>::contain_impl;
 };
+
+template<class... TS>
+contain(TS &&...) -> contain<std::remove_reference_t<TS>...>;
+
+template<class... TS> requires (... && IsContainable<TS>)
+struct flexible_contain : private helpers::contain_impl<TS...> {
+	using helpers::contain_impl<TS...>::contain_impl;
+	using helpers::contain_impl<TS...>::get;
+};
+
+template<>
+struct flexible_contain<> : private helpers::contain_impl<> {
+	using helpers::contain_impl<>::contain_impl;
+};
+
 
 } // namespace noarr
 

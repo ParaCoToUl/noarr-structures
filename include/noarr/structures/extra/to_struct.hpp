@@ -14,6 +14,11 @@ struct to_struct<T> {
 	static constexpr T convert(T t) noexcept { return t; }
 };
 
+template<class T>
+constexpr auto convert_to_struct(T &&t) noexcept {
+	return to_struct<std::remove_cvref_t<T>>::convert(t);
+}
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_TO_STRUCT_HPP
