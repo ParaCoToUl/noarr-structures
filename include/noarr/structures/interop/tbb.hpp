@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <type_traits>
+
 #include <tbb/tbb.h>
 
 #include "../interop/bag.hpp"

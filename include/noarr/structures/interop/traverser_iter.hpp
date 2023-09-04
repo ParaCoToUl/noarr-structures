@@ -63,7 +63,7 @@ struct traverser_range_t : contain<Struct, Order> {
 	using base = contain<Struct, Order>;
 	std::size_t begin_idx, end_idx;
 
-	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length) : base(traverser), begin_idx(0), end_idx(length) {}
+	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length) : base((const contain<Struct, Order> &)traverser), begin_idx(0), end_idx(length) {}
 
 	// TBB splitting constructor
 	template<class Split>
