@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_ZCURVE_HPP
 #define NOARR_STRUCTURES_ZCURVE_HPP
 
+#include <bit>
+
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"
 #include "../base/state.hpp"
@@ -99,16 +101,6 @@ template<auto... Acc, IsDim auto Last>
 struct zc_dims_pop<dim_sequence<Acc...>, Last> {
 	static constexpr auto dim = Last;
 	using dims = dim_sequence<Acc...>;
-};
-
-template<std::size_t N>
-struct zc_log2 {
-	static_assert(N && !(N & 1), "Z curve length bound and alignment must be powers of two");
-	static constexpr int value = zc_log2<(N>>1)>::value + 1;
-};
-template<>
-struct zc_log2<1> {
-	static constexpr int value = 0;
 };
 
 } // namespace helpers
@@ -224,9 +216,9 @@ public:
 	template<class = error>
 	merge_zcurve(error = {});
 
-	template<std::size_t MaxLen, std::size_t Alignment>
+	template<std::size_t MaxLen, std::size_t Alignment> requires (std::popcount(MaxLen) == 1 && std::popcount(Alignment) == 1) // must be powers of 2
 	static constexpr auto maxlen_alignment() noexcept {
-		return maxlen_alignment<helpers::zc_log2<Alignment>::value, helpers::zc_log2<MaxLen>::value, dims_pop::dim>(typename dims_pop::dims());
+		return maxlen_alignment<std::countr_zero(Alignment), std::countr_zero(MaxLen), dims_pop::dim>(typename dims_pop::dims());
 	}
 
 private:
