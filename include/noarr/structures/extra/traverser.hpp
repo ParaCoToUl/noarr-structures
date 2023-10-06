@@ -101,7 +101,7 @@ public:
 
 	template<IsDim auto QDim>
 	constexpr auto length(IsState auto state) const noexcept {
-		return this->template get<first_match<QDim>>().template length<QDim>(state);
+		return contain<Structs...>::template get<first_match<QDim>>().template length<QDim>(state);
 	}
 };
 

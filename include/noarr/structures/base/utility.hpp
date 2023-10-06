@@ -8,6 +8,9 @@
 
 namespace noarr {
 
+template<class T> requires (std::is_trivially_copyable_v<T>)
+constexpr T trivially_copy(const T &t) noexcept { return t; }
+
 template<auto Tag>
 struct dim {
 	/* Currently unspecified content */
@@ -60,7 +63,7 @@ static constexpr bool is_dim_v = is_dim<std::remove_cvref_t<T>>::value;
 template<class T>
 concept IsDim = is_dim_v<T>;
 
-template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<auto... Dims> requires (... && IsDim<decltype(trivially_copy(Dims))>)
 struct dim_sequence {
 	using type = dim_sequence;
 	using size_type = std::size_t;
@@ -96,9 +99,6 @@ struct dim_accepter {
 	template<IsDim auto Dim>
 	static constexpr bool value = is_dim_v<decltype(Dim)>;
 };
-
-template<class T>
-constexpr T unconst(const T t) noexcept { return t; }
 
 struct dim_identity_mapper {
 	template<IsDim auto Dim>

@@ -25,7 +25,7 @@ struct length_in {
 	static constexpr bool any_accept = Pred::template value<Dim>;
 
 	template<class Fn>
-	using map = length_in<unconst(Fn::template value<Dim>)>;
+	using map = length_in<trivially_copy(Fn::template value<Dim>)>;
 };
 
 template<IsDim auto Dim>
@@ -39,7 +39,7 @@ struct index_in {
 	static constexpr bool any_accept = Pred::template value<Dim>;
 
 	template<class Fn>
-	using map = index_in<unconst(Fn::template value<Dim>)>;
+	using map = index_in<trivially_copy(Fn::template value<Dim>)>;
 };
 
 template<IsTag Tag, class ValueType>
