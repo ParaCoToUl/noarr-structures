@@ -21,7 +21,7 @@ struct contain_impl;
 // an implementation for the pair (T, TS...) where neither is empty
 template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> {
-	template<class T_, class ...TS_>
+	template<class T_, class ...TS_> requires (sizeof...(TS) == sizeof...(TS_))
 	explicit constexpr contain_impl(T_ &&t, TS_ &&... ts) noexcept : t_(std::forward<T_>(t)), ts_(std::forward<TS_>(ts)...) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
@@ -40,7 +40,7 @@ private:
 // an implementation for the pair (T, TS...) where TS... is empty
 template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
-	template<class T_, class ...TS_>
+	template<class T_, class ...TS_> requires (sizeof...(TS) == sizeof...(TS_))
 	explicit constexpr contain_impl(T_ &&t, TS_ &&...) noexcept : t_(std::forward<T_>(t)) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
@@ -59,7 +59,7 @@ private:
 template<class T, class... TS> requires (std::is_empty_v<T>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
 	constexpr contain_impl() noexcept = default;
-	template<class T_, class ...TS_>
+	template<class T_, class ...TS_> requires (sizeof...(TS) == sizeof...(TS_))
 	explicit constexpr contain_impl(T_ &&, TS_ &&...ts) noexcept : contain_impl<TS...>(std::forward<TS_>(ts)...) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
@@ -75,7 +75,7 @@ struct contain_impl<T, TS...> : private contain_impl<TS...> {
 template<class T> requires (std::is_empty_v<T>)
 struct contain_impl<T> {
 	constexpr contain_impl() noexcept = default;
-	template<class T_>
+	template<class T_> requires (!std::is_base_of_v<contain_impl, std::remove_cvref_t<T_>>)
 	explicit constexpr contain_impl(T_ &&) noexcept {}
 
 	template<std::size_t I = 0> requires (I == 0)
@@ -88,7 +88,7 @@ struct contain_impl<T> {
 template<class T> requires (!std::is_empty_v<T>)
 struct contain_impl<T> {
 	constexpr contain_impl() noexcept = delete;
-	template<class T_>
+	template<class T_> requires (!std::is_base_of_v<contain_impl, std::remove_cvref_t<T_>>)
 	explicit constexpr contain_impl(T_ &&t) noexcept : t_(std::forward<T_>(t)) {}
 
 	template<std::size_t I = 0> requires (I == 0)
