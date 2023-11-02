@@ -12,25 +12,28 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# download testing library Catch2
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG        origin/devel)
-FetchContent_MakeAvailable(Catch2)
-
 # setup the test runner executable
 file(GLOB_RECURSE tests_source_files CONFIGURE_DEPENDS
     "*_test.cpp"
 )
 add_executable(test-runner ${tests_source_files})
 target_include_directories(test-runner PRIVATE ../include)
-target_link_libraries(test-runner PRIVATE Catch2::Catch2WithMain)
 
 # ask compiler to print maximum warnings
 if(MSVC)
+  add_library(msvc_tester STATIC msvc_tester/msvc_tester.cpp)
+  target_link_libraries(test-runner PRIVATE msvc_tester)
   target_compile_options(test-runner PRIVATE /W4)
+  target_include_directories(test-runner PRIVATE msvc_tester)
 else()
+  # download testing library Catch2
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        origin/devel)
+  FetchContent_MakeAvailable(Catch2)
+
+  target_link_libraries(test-runner PRIVATE Catch2::Catch2WithMain)
   target_compile_options(test-runner PRIVATE -Wall -Wextra -Wno-parentheses -pedantic)
 endif()
 

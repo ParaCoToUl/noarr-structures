@@ -216,7 +216,7 @@ public:
 	template<class = error>
 	merge_zcurve(error = {});
 
-	template<std::size_t MaxLen, std::size_t Alignment> requires (std::popcount(MaxLen) == 1 && std::popcount(Alignment) == 1) // must be powers of 2
+	template<std::size_t MaxLen, std::size_t Alignment> requires (std::popcount((std::size_t)MaxLen) == 1 && std::popcount((std::size_t)Alignment) == 1) // must be powers of 2
 	static constexpr auto maxlen_alignment() noexcept {
 		return maxlen_alignment<std::countr_zero(Alignment), std::countr_zero(MaxLen), dims_pop::dim>(typename dims_pop::dims());
 	}
