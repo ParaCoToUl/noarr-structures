@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 #include <type_traits>
 
 #include <noarr/structures_extended.hpp>

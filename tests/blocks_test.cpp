@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 
 #include <noarr/structures.hpp>
 #include <noarr/structures/structs/blocks.hpp>
@@ -9,7 +9,7 @@ TEST_CASE("Split", "[blocks]") {
 		^ noarr::array<'x', 10'000>()
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks<'x', 'b', 'a'>(16);
-	
+
 	REQUIRE((m | noarr::offset<'a', 'y', 'b'>(10, 3333, 500)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -18,7 +18,7 @@ TEST_CASE("Split reused as minor", "[blocks]") {
 		^ noarr::array<'x', 10'000>()
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks<'x', 'X', 'x'>(16);
-	
+
 	REQUIRE((m | noarr::offset<'x', 'y', 'X'>(10, 3333, 500)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -27,7 +27,7 @@ TEST_CASE("Split reused as major", "[blocks]") {
 		^ noarr::array<'x', 10'000>()
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks<'x', 'x', 'X'>(16);
-	
+
 	REQUIRE((m | noarr::offset<'X', 'y', 'x'>(10, 3333, 500)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -37,7 +37,7 @@ TEST_CASE("Split set length", "[blocks]") {
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks<'x', 'b', 'a'>(16)
 		^ noarr::set_length<'b'>(10'000/16);
-	
+
 	REQUIRE((m | noarr::offset<'a', 'y', 'b'>(10, 3333, 500)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -47,7 +47,7 @@ TEST_CASE("Split set length reused as minor", "[blocks]") {
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks<'x', 'X', 'x'>(16)
 		^ noarr::set_length<'X'>(10'000/16);
-	
+
 	REQUIRE((m | noarr::offset<'x', 'y', 'X'>(10, 3333, 500)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -57,7 +57,7 @@ TEST_CASE("Split set length reused as major", "[blocks]") {
 		^ noarr::array<'y', 20'000>()
 		^ noarr::into_blocks<'x', 'x', 'X'>(16)
 		^ noarr::set_length<'x'>(10'000/16);
-	
+
 	REQUIRE((m | noarr::offset<'X', 'y', 'x'>(10, 3333, 500)) == (10 + 500*16 + 3333*10'000L) * sizeof(float));
 }
 
@@ -67,7 +67,7 @@ TEST_CASE("Merge", "[blocks]") {
 		^ noarr::array<'y', 600>()
 		^ noarr::array<'z', 700>()
 		^ noarr::merge_blocks<'x', 'z', 'w'>();
-	
+
 	REQUIRE((m | noarr::offset<'w', 'y'>(1100, 123)) == (1100/700 + 123*500 + 1100%700*500L*600L) * sizeof(float));
 }
 
@@ -77,7 +77,7 @@ TEST_CASE("Merge reused minor", "[blocks]") {
 		^ noarr::array<'y', 600>()
 		^ noarr::array<'z', 700>()
 		^ noarr::merge_blocks<'x', 'z', 'z'>();
-	
+
 	REQUIRE((m | noarr::offset<'z', 'y'>(1100, 123)) == (1100/700 + 123*500 + 1100%700*500L*600L) * sizeof(float));
 }
 
@@ -87,7 +87,7 @@ TEST_CASE("Merge reused major", "[blocks]") {
 		^ noarr::array<'y', 600>()
 		^ noarr::array<'z', 700>()
 		^ noarr::merge_blocks<'x', 'z', 'x'>();
-	
+
 	REQUIRE((m | noarr::offset<'x', 'y'>(1100, 123)) == (1100/700 + 123*500 + 1100%700*500L*600L) * sizeof(float));
 }
 
@@ -98,7 +98,7 @@ TEST_CASE("Merge set length", "[blocks]") {
 		^ noarr::array<'z', 700>()
 		^ noarr::merge_blocks<'x', 'z', 'w'>()
 		^ noarr::set_length<'w'>(500*700L);
-	
+
 	REQUIRE((m | noarr::offset<'w', 'y'>(1100, 123)) == (1100/700 + 123*500 + 1100%700*500L*600L) * sizeof(float));
 }
 
@@ -109,7 +109,7 @@ TEST_CASE("Merge set length reused minor", "[blocks]") {
 		^ noarr::array<'z', 700>()
 		^ noarr::merge_blocks<'x', 'z', 'z'>()
 		^ noarr::set_length<'z'>(500*700L);
-	
+
 	REQUIRE((m | noarr::offset<'z', 'y'>(1100, 123)) == (1100/700 + 123*500 + 1100%700*500L*600L) * sizeof(float));
 }
 
@@ -120,7 +120,7 @@ TEST_CASE("Merge set length reused major", "[blocks]") {
 		^ noarr::array<'z', 700>()
 		^ noarr::merge_blocks<'x', 'z', 'x'>()
 		^ noarr::set_length<'x'>(500*700L);
-	
+
 	REQUIRE((m | noarr::offset<'x', 'y'>(1100, 123)) == (1100/700 + 123*500 + 1100%700*500L*600L) * sizeof(float));
 }
 

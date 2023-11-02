@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 
 #include <noarr/structures_extended.hpp>
 #include "noarr_test_defs.hpp"
@@ -48,7 +48,6 @@ TEST_CASE("Pipes vector2", "[is_simple]")
 		REQUIRE(noarr_test::type_is_simple(v3));
 	}
 }
-
 
 TEST_CASE("Pipes do not affect bitwise or", "[is_simple]")
 {
