@@ -1,10 +1,10 @@
 /**
  * @file compile_test.cpp
  * @brief This file contains the code snippets from the root README.md ensuring they are correct
- * 
+ *
  */
 
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>

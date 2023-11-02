@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 
 #include <type_traits>
 
@@ -38,7 +38,7 @@ TEST_CASE("Rename in tuple", "[rename]") {
 	using namespace noarr;
 
 	auto structure = tuple_t<'t', array_t<'x', 10, array_t<'y', 20, scalar<int>>>, array_t<'x', 10, array_t<'y', 20, scalar<int>>>>();
-	
+
 	auto structure_renamed = structure ^ rename<'x', 'z'>() ^ rename<'y', 'x'>() ^ rename<'z', 'y'>();
 	auto structure_renamed2 = structure ^ rename<'x', 'y', 't', 's', 'y', 'x'>();
 

@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 
 #include <noarr/structures_extended.hpp>
 #include "noarr_test_defs.hpp"
@@ -29,7 +29,7 @@ TEST_CASE("Pipes sizes", "[sizes sizes]") {
 	auto v2 = noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>();
 	auto t = noarr::tuple_t<'t', noarr::array_t<'x', 10, noarr::scalar<float>>, noarr::vector_t<'y', noarr::scalar<int>>>();
 	auto t2 = noarr::tuple_t<'t', noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>, noarr::vector_t<'a', noarr::array_t<'b', 20, noarr::scalar<int>>>>();
-	
+
 	auto v_sized = v ^ noarr::set_length<'x'>(20);
 
 	SECTION("check sizes") {

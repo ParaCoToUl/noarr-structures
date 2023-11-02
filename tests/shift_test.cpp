@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/structs/slice.hpp>
@@ -13,7 +13,7 @@ TEST_CASE("Fixes and shifts", "[offsets]") {
 	SECTION("check offsets") {
 		// trivial case
 		REQUIRE((v_sized | noarr::offset<'x'>(10)) == (v_sized ^ noarr::shift<'x'>(10) ^ noarr::fix<'x'>(0) | noarr::offset()));
-		
+
 		// composite case for one dimension
 		REQUIRE((v_sized | noarr::offset<'x'>(10)) == (v_sized ^ noarr::shift<'x'>(5) ^ noarr::fix<'x'>(5) | noarr::offset()));
 

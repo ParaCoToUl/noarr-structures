@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <noarr_test/macros.hpp>
 
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>
@@ -70,7 +70,7 @@ bool are_equal_matrices(Matrix1& matrix1, Matrix2& matrix2)
 			}
 		}
 	}
-	
+
 	return true;
 }
 
