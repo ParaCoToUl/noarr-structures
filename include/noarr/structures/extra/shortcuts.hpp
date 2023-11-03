@@ -20,14 +20,14 @@ constexpr auto vectors() noexcept {
 	return (... ^ vector<Dims>());
 }
 
-template<IsDim auto Dim, class LenT>
-constexpr auto sized_vector(LenT length) noexcept {
+template<IsDim auto Dim>
+constexpr auto sized_vector(auto length) noexcept {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
 // TODO add tests
-template<auto ...Dims, class ...LenT> requires (... && IsDim<decltype(Dims)>)
-constexpr auto sized_vectors(LenT ...lengths) noexcept {
+template<auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+constexpr auto sized_vectors(auto ...lengths) noexcept {
 	return (... ^ sized_vector<Dims>(lengths));
 }
 
@@ -87,33 +87,33 @@ constexpr auto vectors_like(Struct structure) noexcept {
 	return vectors_like<Dims...>(structure, empty_state);
 }
 
-template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class MinorLengthT>
-constexpr auto into_blocks(MinorLengthT minor_length) noexcept {
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor>
+constexpr auto into_blocks(auto minor_length) noexcept {
 	return into_blocks<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
 }
 
-template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class MinorLengthT>
-constexpr auto into_blocks_dynamic(MinorLengthT minor_length) noexcept {
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent>
+constexpr auto into_blocks_dynamic(auto minor_length) noexcept {
 	return into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>() ^ set_length<DimMinor>(minor_length);
 }
 
-template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class MinorLenT>
-constexpr auto merge_blocks(MinorLenT minor_length) noexcept {
+template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim>
+constexpr auto merge_blocks(auto minor_length) noexcept {
 	return set_length<DimMinor>(minor_length) ^ merge_blocks<DimMajor, DimMinor, Dim>();
 }
 
-template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class... OptionalMinorLengthT>
-constexpr auto strip_mine(OptionalMinorLengthT... optional_minor_length) noexcept {
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor>
+constexpr auto strip_mine(auto... optional_minor_length) noexcept {
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
-template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class... OptionalMinorLengthT>
-constexpr auto strip_mine_dynamic(OptionalMinorLengthT... optional_minor_length) noexcept {
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent>
+constexpr auto strip_mine_dynamic(auto... optional_minor_length) noexcept {
 	return into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>(optional_minor_length...) ^ hoist<DimMajor>();
 }
 
-template<auto ...Dims, class ...LenTs> requires ((sizeof...(Dims) == sizeof...(LenTs)) && ... && IsDim<decltype(Dims)>)
-constexpr auto bcast(LenTs ...lengths) noexcept {
+template<auto ...Dims>
+constexpr auto bcast(auto ...lengths) noexcept requires ((sizeof...(Dims) == sizeof...(lengths)) && ... && IsDim<decltype(Dims)>) {
 	return (... ^ (bcast<Dims>() ^ set_length<Dims>(lengths)));
 }
 
@@ -150,26 +150,28 @@ constexpr auto neighbor(State state, Diffs... diffs) noexcept {
 }
 
 // TODO add tests
-template<auto ...Dims, class Struct, class Offset, class ...StateItems> requires (... && IsDim<decltype(Dims)>)
-constexpr auto symmetric_span(Struct structure, state<StateItems...> state, Offset offset) noexcept {
+template<auto ...Dims, class Struct, class ...StateItems> requires (... && IsDim<decltype(Dims)>)
+constexpr auto symmetric_span(Struct structure, state<StateItems...> state, auto offset) noexcept {
 	return (... ^ span<Dims>(offset, (structure | get_length<Dims>(state)) - offset));
 }
 
 // TODO add tests
-template<auto ...Dims, class Struct, class Offset> requires (... && IsDim<decltype(Dims)>)
-constexpr auto symmetric_span(Struct structure, Offset offset) noexcept {
+template<auto ...Dims, class Struct> requires (... && IsDim<decltype(Dims)>)
+constexpr auto symmetric_span(Struct structure, auto offset) noexcept {
 	return symmetric_span<Dims...>(structure, empty_state, offset);
 }
 
 // TODO add tests
-template<auto ...Dims, class Struct, class ...Offsets, class ...StateItems> requires ((sizeof...(Dims) == sizeof...(Offsets)) &&  ... && IsDim<decltype(Dims)>)
-constexpr auto symmetric_spans(Struct structure, state<StateItems...> state, Offsets ...offsets) noexcept {
+template<auto ...Dims, class Struct, class ...StateItems>
+constexpr auto symmetric_spans(Struct structure, state<StateItems...> state, auto ...offsets) noexcept
+requires ((sizeof...(Dims) == sizeof...(offsets)) &&  ... && IsDim<decltype(Dims)>) {
 	return (... ^ symmetric_span<Dims>(structure, state, offsets));
 }
 
 // TODO add tests
-template<auto ...Dims, class Struct, class ...Offsets> requires ((sizeof...(Dims) == sizeof...(Offsets)) &&  ... && IsDim<decltype(Dims)>)
-constexpr auto symmetric_spans(Struct structure, Offsets ...offsets) noexcept {
+template<auto ...Dims, class Struct>
+constexpr auto symmetric_spans(Struct structure, auto ...offsets) noexcept
+requires ((sizeof...(Dims) == sizeof...(offsets)) &&  ... && IsDim<decltype(Dims)>) {
 	return symmetric_spans<Dims...>(structure, empty_state, offsets...);
 }
 
