@@ -117,7 +117,10 @@ template<class Struct, class Order>
 struct traverser_t : contain<Struct, Order> {
 	using contain<Struct, Order>::contain;
 
+	[[nodiscard("returns a copy of the underlying struct")]]
 	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
+
+	[[nodiscard("returns a copy of the underlying order")]]
 	constexpr auto get_order() const noexcept { return this->template get<1>(); }
 
 	[[nodiscard("returns a new traverser")]]
@@ -152,10 +155,12 @@ struct traverser_t : contain<Struct, Order> {
 		for_each_impl(dim_tree_from_sequence<dim_sequence<Dims...>>(), f, empty_state);
 	}
 
+	[[nodiscard("construct an object representing the state of the traverser")]]
 	constexpr auto state() const noexcept {
 		return state_at<Struct>(top_struct(), empty_state);
 	}
 
+	[[nodiscard("returns a copy of the top struct (combination of the underlying struct and order)")]]
 	constexpr auto top_struct() const noexcept {
 		return get_struct() ^ get_order();
 	}
@@ -219,6 +224,7 @@ template<class T>
 concept IsTraverser = is_traverser_v<T>;
 
 template<IsTraverser T>
+[[nodiscard("returns a new traverser")]]
 constexpr auto operator^(const T &t, IsProtoStruct auto order) noexcept {
 	return t.order(order);
 }
