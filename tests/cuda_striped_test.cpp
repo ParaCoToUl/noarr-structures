@@ -16,8 +16,8 @@ TEST_CASE("Cuda striped - 32bit scalar array", "[cuda]") {
 
 	auto s = noarr::scalar<std::uint32_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
-	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint32_t));
-	REQUIRE(s.max_conflict_size == throughput);
+	STATIC_REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint32_t));
+	STATIC_REQUIRE(s.max_conflict_size == throughput);
 
 	for(std::size_t j = 0; j < nstripes; j++) {
 		for(std::size_t i = 0; i < 100; i++) {
@@ -37,7 +37,7 @@ TEST_CASE("Cuda striped - 64bit scalar array", "[cuda]") {
 	auto s = noarr::scalar<std::uint64_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
 	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint64_t));
-	REQUIRE(s.max_conflict_size == throughput);
+	STATIC_REQUIRE(s.max_conflict_size == throughput);
 
 	for(std::size_t j = 0; j < nstripes; j++) {
 		for(std::size_t i = 0; i < 100; i++) {
@@ -56,29 +56,29 @@ TEST_CASE("Cuda striped - 16bit scalar array", "[cuda]") {
 
 	auto s = noarr::scalar<std::uint16_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
-	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint16_t));
-	REQUIRE(s.max_conflict_size == throughput);
+	STATIC_REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint16_t));
+	STATIC_REQUIRE(s.max_conflict_size == throughput);
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 0*period + 0*stripe_size + 1*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 1*period + 0*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 1*period + 0*stripe_size + 1*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 2*period + 0*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 2*period + 0*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 0*period + 0*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 1*period + 0*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 1*period + 0*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 2*period + 0*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 2*period + 0*stripe_size + 1*sizeof(std::uint16_t));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 1*period + 1*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 1*period + 1*stripe_size + 1*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 2*period + 1*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 2*period + 1*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 1*period + 1*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 1*period + 1*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 2*period + 1*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 2*period + 1*stripe_size + 1*sizeof(std::uint16_t));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 1*period + 2*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 1*period + 2*stripe_size + 1*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 2*period + 2*stripe_size + 0*sizeof(std::uint16_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 2*period + 2*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 1*period + 2*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 1*period + 2*stripe_size + 1*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 2*period + 2*stripe_size + 0*sizeof(std::uint16_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 2*period + 2*stripe_size + 1*sizeof(std::uint16_t));
 }
 
 TEST_CASE("Cuda striped - 8bit scalar array", "[cuda]") {
@@ -91,29 +91,29 @@ TEST_CASE("Cuda striped - 8bit scalar array", "[cuda]") {
 
 	auto s = noarr::scalar<std::uint8_t>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
-	REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint8_t));
-	REQUIRE(s.max_conflict_size == throughput);
+	STATIC_REQUIRE((s | noarr::get_size()) == 1000 * nstripes * sizeof(std::uint8_t));
+	STATIC_REQUIRE(s.max_conflict_size == throughput);
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size + 0*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 0*period + 0*stripe_size + 1*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 0*period + 0*stripe_size + 2*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 0*period + 0*stripe_size + 3*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 1*period + 0*stripe_size + 0*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 1*period + 0*stripe_size + 1*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 0))) == 0*period + 0*stripe_size + 0*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 0))) == 0*period + 0*stripe_size + 1*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 0))) == 0*period + 0*stripe_size + 2*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 0))) == 0*period + 0*stripe_size + 3*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 0))) == 1*period + 0*stripe_size + 0*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 0))) == 1*period + 0*stripe_size + 1*sizeof(std::uint8_t));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 0*period + 1*stripe_size + 2*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 0*period + 1*stripe_size + 3*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 1*period + 1*stripe_size + 0*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 1*period + 1*stripe_size + 1*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 1))) == 0*period + 1*stripe_size + 2*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 1))) == 0*period + 1*stripe_size + 3*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 1))) == 1*period + 1*stripe_size + 0*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 1*period + 1*stripe_size + 1*sizeof(std::uint8_t));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 0*period + 2*stripe_size + 2*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 0*period + 2*stripe_size + 3*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 1*period + 2*stripe_size + 0*sizeof(std::uint8_t));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 1*period + 2*stripe_size + 1*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(2, 2))) == 0*period + 2*stripe_size + 2*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(3, 2))) == 0*period + 2*stripe_size + 3*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(4, 2))) == 1*period + 2*stripe_size + 0*sizeof(std::uint8_t));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 1*period + 2*stripe_size + 1*sizeof(std::uint8_t));
 }
 
 TEST_CASE("Cuda striped - 24bit scalar array - 6 stripes", "[cuda]") {
@@ -128,36 +128,36 @@ TEST_CASE("Cuda striped - 24bit scalar array - 6 stripes", "[cuda]") {
 
 	auto s = noarr::scalar<color>() ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes>();
 
-	REQUIRE((s | noarr::get_size()) == 167 * period); // 167 = ceil(1000 / 6), where 6 = number of elems per stripe and period
-	REQUIRE(s.max_conflict_size == throughput);
+	STATIC_REQUIRE((s | noarr::get_size()) == 167 * period); // 167 = ceil(1000 / 6), where 6 = number of elems per stripe and period
+	STATIC_REQUIRE(s.max_conflict_size == throughput);
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 0, 0))) == 0*period + 0*stripe_size + 0*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 1, 0))) == 0*period + 0*stripe_size + 1*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 2, 0))) == 0*period + 0*stripe_size + 2*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 3, 0))) == 0*period + 0*stripe_size + 3*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 4, 0))) == 0*period + 0*stripe_size + 4*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 5, 0))) == 0*period + 0*stripe_size + 5*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 0, 0))) == 0*period + 0*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 1, 0))) == 0*period + 0*stripe_size + 1*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 2, 0))) == 0*period + 0*stripe_size + 2*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 3, 0))) == 0*period + 0*stripe_size + 3*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 4, 0))) == 0*period + 0*stripe_size + 4*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 5, 0))) == 0*period + 0*stripe_size + 5*sizeof(color));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 6, 0))) == 1*period + 0*stripe_size + 0*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(11, 0))) == 1*period + 0*stripe_size + 5*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(12, 0))) == 2*period + 0*stripe_size + 0*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(17, 0))) == 2*period + 0*stripe_size + 5*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(18, 0))) == 3*period + 0*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>( 6, 0))) == 1*period + 0*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(11, 0))) == 1*period + 0*stripe_size + 5*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(12, 0))) == 2*period + 0*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(17, 0))) == 2*period + 0*stripe_size + 5*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(18, 0))) == 3*period + 0*stripe_size + 0*sizeof(color));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 0*period + 1*stripe_size + 5*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(6, 1))) == 1*period + 1*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 1))) == 0*period + 1*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 1))) == 0*period + 1*stripe_size + 1*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 1))) == 0*period + 1*stripe_size + 5*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(6, 1))) == 1*period + 1*stripe_size + 0*sizeof(color));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 0*period + 2*stripe_size + 5*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(6, 2))) == 1*period + 2*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 2))) == 0*period + 2*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 2))) == 0*period + 2*stripe_size + 1*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 2))) == 0*period + 2*stripe_size + 5*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(6, 2))) == 1*period + 2*stripe_size + 0*sizeof(color));
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 11))) == 0*period + 11*stripe_size + 0*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 11))) == 0*period + 11*stripe_size + 1*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 11))) == 0*period + 11*stripe_size + 5*sizeof(color));
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(6, 11))) == 1*period + 11*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(0, 11))) == 0*period + 11*stripe_size + 0*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(1, 11))) == 0*period + 11*stripe_size + 1*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(5, 11))) == 0*period + 11*stripe_size + 5*sizeof(color));
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::cuda_stripe_index>(6, 11))) == 1*period + 11*stripe_size + 0*sizeof(color));
 }
 
 TEST_CASE("Cuda striped - 24bit non-scalar array - 6 stripes", "[cuda]") {
@@ -171,8 +171,8 @@ TEST_CASE("Cuda striped - 24bit non-scalar array - 6 stripes", "[cuda]") {
 	auto color_s = noarr::scalar<std::uint8_t>() ^ noarr::array<'c', 3>();
 	auto s = color_s ^ noarr::array<'x', 1000>() ^ noarr::cuda_striped<nstripes, decltype(color_s)>();
 
-	REQUIRE((s | noarr::get_size()) == 167 * period); // 167 = ceil(1000 / 6), where 6 = number of elems per stripe and period
-	REQUIRE(s.max_conflict_size == throughput);
+	STATIC_REQUIRE((s | noarr::get_size()) == 167 * period); // 167 = ceil(1000 / 6), where 6 = number of elems per stripe and period
+	STATIC_REQUIRE(s.max_conflict_size == throughput);
 
 	for(int c = 0; c < 3; c++) {
 		REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::index_in<'c'>, noarr::cuda_stripe_index>( 0, c, 0))) == 0*period + 0*stripe_size + 0*3 + c);
@@ -204,8 +204,8 @@ TEST_CASE("Cuda striped - 24bit non-scalar array - 6 stripes", "[cuda]") {
 		REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::index_in<'c'>, noarr::cuda_stripe_index>(6, c, 11))) == 1*period + 11*stripe_size + 0*3 + c);
 	}
 
-	REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::index_in<'c'>, noarr::cuda_stripe_index>(11, 1, 7))) == 1*period + 7*stripe_size + 5*3 + 1);
-	REQUIRE((s | noarr::offset<decltype(color_s)>(noarr::empty_state.with<noarr::index_in<'x'>,    noarr::cuda_stripe_index>(11,    7))) == 1*period + 7*stripe_size + 5*3);
+	STATIC_REQUIRE((s | noarr::offset(noarr::empty_state.with<noarr::index_in<'x'>, noarr::index_in<'c'>, noarr::cuda_stripe_index>(11, 1, 7))) == 1*period + 7*stripe_size + 5*3 + 1);
+	STATIC_REQUIRE((s | noarr::offset<decltype(color_s)>(noarr::empty_state.with<noarr::index_in<'x'>,    noarr::cuda_stripe_index>(11,    7))) == 1*period + 7*stripe_size + 5*3);
 }
 
 TEST_CASE("Cuda striped constexpr arithmetic", "[cuda cearithm]") {
