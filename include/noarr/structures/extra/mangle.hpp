@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_MANGLE_HPP
 #define NOARR_STRUCTURES_MANGLE_HPP
 
+#include <limits>
+
 #include "../base/contain.hpp"
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
@@ -143,8 +145,6 @@ struct mangle_expr_helpers {
 		constexpr auto maxsz = sizeof(U) * 3 + 1; // at most 3 digits per byte + sign
 		char buff[maxsz], *ptr = buff + maxsz;
 		std::size_t sz = 0;
-		if(neg)
-			u = -u;
 		do {
 			*--ptr = '0' + u % 10;
 			sz++;
@@ -168,14 +168,21 @@ struct mangle_expr_helpers {
 		using type_str = char_seq_to_str<typename scalar_name<T>::type>;
 		out.append(type_str::c_str, type_str::length);
 		out.push_back('{');
-		append_int(out, (t < 0), std::make_unsigned_t<T>(t));
+		if constexpr(std::is_signed_v<T>) {
+			if (t == std::numeric_limits<T>::min())
+				append_int(out, true, std::make_unsigned_t<T>(t));
+			else
+				append_int(out, (t < 0), std::make_unsigned_t<T>(t < 0 ? -t : t));
+		} else {
+			append_int(out, false, t);
+		}
 		out.push_back('}');
 	}
 
 	template<class String, std::size_t L>
-	static constexpr void append(String &out, const std::integral_constant<std::size_t, L> t) {
+	static constexpr void append(String &out, const std::integral_constant<std::size_t, L>) {
 		out.append("lit<", 4);
-		append_int(out, (t < 0), L);
+		append_int(out, false, L);
 		out.append(">", 1);
 	}
 };
