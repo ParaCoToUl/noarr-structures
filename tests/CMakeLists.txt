@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 
 # set the project name
-project(NoarrTests VERSION 0.20.0)
+project(
+  NoarrTests VERSION 0.20.0
+  DESCRIPTION "Tests for the Noarr library"
+  LANGUAGES CXX
+)
 
 include(CTest)
 enable_testing()
