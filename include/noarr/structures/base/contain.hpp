@@ -12,7 +12,7 @@ namespace helpers {
 
 /**
  * @brief see `contain`. This is a helper structure implementing its functionality
- * 
+ *
  * @tparam ...TS: contained fields
  */
 template<class... TS>
@@ -104,14 +104,7 @@ private:
 template<>
 struct contain_impl<> {};
 
-} // namespace helpers
-
-/**
- * @brief A base class that contains the fields given as template arguments. It is similar to a tuple but it is a standard layout.
- * 
- * @tparam TS the contained fields
- */
-template<class... TS> requires (... && IsSimple<TS>)
+template<class... TS>
 struct contain : private helpers::contain_impl<TS...> {
 	using helpers::contain_impl<TS...>::contain_impl;
 	using helpers::contain_impl<TS...>::get;
@@ -123,29 +116,61 @@ struct contain<> : private helpers::contain_impl<> {
 };
 
 template<class... TS>
-contain(TS &&...) -> contain<std::remove_reference_t<TS>...>;
+contain(TS &&...) -> contain<std::remove_cvref_t<TS>...>;
 
+template<class... TS1, class... TS2, class... Contains>
+constexpr auto contain_cat(const contain<TS1...> &c1, const contain<TS2...> &c2, Contains &&... contains) noexcept {
+	using iss1 = std::index_sequence_for<TS1...>;
+	using iss2 = std::index_sequence_for<TS2...>;
+	return contain_cat(c1, iss1(), c2, iss2(), std::forward<Contains>(contains)...);
+}
+
+template<class... TS1, std::size_t... Idxs1, class... TS2, std::size_t... Idxs2, class... Contains>
+constexpr auto contain_cat(const contain<TS1...> &c1, std::index_sequence<Idxs1...>, const contain<TS2...> &c2, std::index_sequence<Idxs2...>, Contains &&... contains) noexcept {
+	return contain_cat(contain(c1.template get<Idxs1>()..., c2.template get<Idxs2>()...), std::forward<Contains>(contains)...);
+}
+
+constexpr auto contain_cat() noexcept {
+	return contain();
+}
+
+template<class... TS>
+constexpr auto contain_cat(const contain<TS...> &c) noexcept {
+	return c;
+}
+
+} // namespace helpers
+
+/**
+ * @brief A base class that contains the fields given as template arguments. It is similar to a tuple but it is a standard layout.
+ *
+ * @tparam TS the contained fields
+ */
+template<class... TS> requires (... && IsSimple<TS>)
+using strict_contain = helpers::contain<TS...>;
+
+/**
+ * @brief A base class that contains the fields given as template arguments. It is similar to a tuple but it is a standard layout.
+ *
+ * @tparam TS the contained fields
+ */
 template<class... TS> requires (... && IsContainable<TS>)
-struct flexible_contain : private helpers::contain_impl<TS...> {
-	using helpers::contain_impl<TS...>::contain_impl;
-	using helpers::contain_impl<TS...>::get;
-};
+using flexible_contain = helpers::contain<TS...>;
 
-template<>
-struct flexible_contain<> : private helpers::contain_impl<> {
-	using helpers::contain_impl<>::contain_impl;
-};
-
+template<class... TS>
+constexpr auto contain_cat(TS &&... ts) noexcept {
+	return helpers::contain_cat(std::forward<TS>(ts)...);
+}
 
 } // namespace noarr
 
 template<std::size_t I, class... TS>
-struct std::tuple_element<I, noarr::contain<TS...>> {
-	using type = decltype(std::declval<noarr::contain<TS...>>().template get<I>());
+struct std::tuple_element<I, noarr::helpers::contain<TS...>> {
+	using type = decltype(std::declval<noarr::helpers::contain<TS...>>().template get<I>());
 };
 
 template<class... TS>
-struct std::tuple_size<noarr::contain<TS...>>
+struct std::tuple_size<noarr::helpers::contain<TS...>>
 	: std::integral_constant<std::size_t, sizeof...(TS)> { };
 
 #endif // NOARR_STRUCTURES_CONTAIN_HPP

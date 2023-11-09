@@ -91,8 +91,8 @@ template<class ReassembledSignature>
 static constexpr bool reassemble_is_complete = helpers::reassemble_completeness<ReassembledSignature>::value;
 
 template<class T, auto... Dims> requires (... && IsDim<decltype(Dims)>)
-struct reorder_t : contain<T> {
-	using contain<T>::contain;
+struct reorder_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "reorder_t";
 	using params = struct_params<
@@ -139,8 +139,8 @@ template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
 using reorder = reorder_proto<Dims...>;
 
 template<IsDim auto Dim, class T>
-struct hoist_t : contain<T> {
-	using contain<T>::contain;
+struct hoist_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "hoist_t";
 	using params = struct_params<
@@ -263,8 +263,8 @@ struct rename_state {
 } // namespace helpers
 
 template<class T, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
-struct rename_t : contain<T> {
-	using contain<T>::contain;
+struct rename_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static_assert(sizeof...(DimPairs) % 2 == 0, "Expected an even number of dimensions. Usage: rename<Old1, New1, Old2, New2, ...>()");
 private:

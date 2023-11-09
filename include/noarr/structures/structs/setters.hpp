@@ -10,8 +10,8 @@
 namespace noarr {
 
 template<IsDim auto Dim, class T, class IdxT>
-struct fix_t : contain<T, IdxT> {
-	using contain<T, IdxT>::contain;
+struct fix_t : strict_contain<T, IdxT> {
+	using strict_contain<T, IdxT>::strict_contain;
 
 	static constexpr char name[] = "fix_t";
 	using params = struct_params<
@@ -65,8 +65,8 @@ public:
 };
 
 template<IsDim auto Dim, class IdxT>
-struct fix_proto : contain<IdxT> {
-	using contain<IdxT>::contain;
+struct fix_proto : strict_contain<IdxT> {
+	using strict_contain<IdxT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -76,12 +76,12 @@ struct fix_proto : contain<IdxT> {
 
 /**
  * @brief fixes an index (or indices) given by dimension name(s) in a structure
- * 
+ *
  * @tparam Dims: the dimension names
  * @param ts: parameters for fixing the indices
  */
 template<auto... Dim, class... IdxT> requires ((sizeof...(Dim) == sizeof...(IdxT)) && ... && IsDim<decltype(Dim)>)
-constexpr auto fix(IdxT... idx) noexcept { 
+constexpr auto fix(IdxT... idx) noexcept {
 	if constexpr (sizeof...(Dim) > 0)
 		return (... ^ fix_proto<Dim, good_index_t<IdxT>>(idx));
 	else
@@ -89,8 +89,8 @@ constexpr auto fix(IdxT... idx) noexcept {
 }
 
 template<IsDim auto Dim, class T, class LenT>
-struct set_length_t : contain<T, LenT> {
-	using contain<T, LenT>::contain;
+struct set_length_t : strict_contain<T, LenT> {
+	using strict_contain<T, LenT>::strict_contain;
 
 	static constexpr char name[] = "set_length_t";
 	using params = struct_params<
@@ -141,8 +141,8 @@ public:
 };
 
 template<IsDim auto Dim, class LenT>
-struct set_length_proto : contain<LenT> {
-	using contain<LenT>::contain;
+struct set_length_proto : strict_contain<LenT> {
+	using strict_contain<LenT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -152,7 +152,7 @@ struct set_length_proto : contain<LenT> {
 
 /**
  * @brief sets the length of a `vector` specified by the dimension name
- * 
+ *
  * @tparam Dim: the dimension name of the transformed structure
  * @param length: the desired length
  */

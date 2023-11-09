@@ -10,8 +10,8 @@
 namespace noarr {
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T>
-struct into_blocks_t : contain<T> {
-	using contain<T>::contain;
+struct into_blocks_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "into_blocks_t";
 	using params = struct_params<
@@ -111,14 +111,14 @@ struct into_blocks_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_t<Dim, DimMajor, DimMinor, Struct>(s); }
 };
 
-template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor>
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor = Dim>
 constexpr auto into_blocks() {
 	return into_blocks_proto<Dim, DimMajor, DimMinor>();
 }
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T>
-struct into_blocks_dynamic_t : contain<T> {
-	using contain<T>::contain;
+struct into_blocks_dynamic_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "into_blocks_dynamic_t";
 	using params = struct_params<
@@ -240,8 +240,8 @@ constexpr auto into_blocks_dynamic() {
 }
 
 template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT>
-struct into_blocks_static_t : contain<T, MinorLenT> {
-	using contain<T, MinorLenT>::contain;
+struct into_blocks_static_t : strict_contain<T, MinorLenT> {
+	using strict_contain<T, MinorLenT>::strict_contain;
 
 	static constexpr char name[] = "into_blocks_static_t";
 	using params = struct_params<
@@ -356,8 +356,8 @@ private:
 };
 
 template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class MinorLenT>
-struct into_blocks_static_proto : contain<MinorLenT> {
-	using contain<MinorLenT>::contain;
+struct into_blocks_static_proto : strict_contain<MinorLenT> {
+	using strict_contain<MinorLenT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -371,8 +371,8 @@ constexpr auto into_blocks_static(MinorLenT minor_length) {
 }
 
 template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class T>
-struct merge_blocks_t : contain<T> {
-	using contain<T>::contain;
+struct merge_blocks_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "merge_blocks_t";
 	using params = struct_params<

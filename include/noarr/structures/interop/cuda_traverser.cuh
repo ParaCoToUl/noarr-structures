@@ -27,8 +27,8 @@ using cuda_txyz = cuda_dims_pack<cuda_thread_x, cuda_thread_y, cuda_thread_z>;
 } // namespace helpers
 
 template<IsDim auto Dim, class T, class CudaDim>
-struct cuda_fix_t : contain<T> {
-	using contain<T>::contain;
+struct cuda_fix_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "cuda_fix_t";
 	using params = struct_params<

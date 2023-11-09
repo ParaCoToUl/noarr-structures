@@ -10,8 +10,8 @@
 namespace noarr {
 
 template<IsDim auto Dim, class T, class StartT>
-struct shift_t : contain<T, StartT> {
-	using contain<T, StartT>::contain;
+struct shift_t : strict_contain<T, StartT> {
+	using strict_contain<T, StartT>::strict_contain;
 
 	static constexpr char name[] = "shift_t";
 	using params = struct_params<
@@ -98,8 +98,8 @@ public:
 };
 
 template<IsDim auto Dim, class StartT>
-struct shift_proto : contain<StartT> {
-	using contain<StartT>::contain;
+struct shift_proto : strict_contain<StartT> {
+	using strict_contain<StartT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -109,7 +109,7 @@ struct shift_proto : contain<StartT> {
 
 /**
  * @brief shifts an index (or indices) given by dimension name(s) in a structure
- * 
+ *
  * @tparam Dim: the dimension names
  * @param start: parameters for shifting the indices
  */
@@ -120,8 +120,8 @@ template<>
 constexpr auto shift<>() noexcept { return neutral_proto(); }
 
 template<IsDim auto Dim, class T, class StartT, class LenT>
-struct slice_t : contain<T, StartT, LenT> {
-	using contain<T, StartT, LenT>::contain;
+struct slice_t : strict_contain<T, StartT, LenT> {
+	using strict_contain<T, StartT, LenT>::strict_contain;
 
 	static constexpr char name[] = "slice_t";
 	using params = struct_params<
@@ -194,8 +194,8 @@ public:
 };
 
 template<IsDim auto Dim, class StartT, class LenT>
-struct slice_proto : contain<StartT, LenT> {
-	using contain<StartT, LenT>::contain;
+struct slice_proto : strict_contain<StartT, LenT> {
+	using strict_contain<StartT, LenT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -208,8 +208,8 @@ constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, 
 
 // TODO add tests
 template<IsDim auto Dim, class T, class StartT, class EndT>
-struct span_t : contain<T, StartT, EndT> {
-	using contain<T, StartT, EndT>::contain;
+struct span_t : strict_contain<T, StartT, EndT> {
+	using strict_contain<T, StartT, EndT>::strict_contain;
 
 	static constexpr char name[] = "span_t";
 	using params = struct_params<
@@ -285,8 +285,8 @@ public:
 };
 
 template<IsDim auto Dim, class StartT, class EndT>
-struct span_proto : contain<StartT, EndT> {
-	using contain<StartT, EndT>::contain;
+struct span_proto : strict_contain<StartT, EndT> {
+	using strict_contain<StartT, EndT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -298,8 +298,8 @@ template<IsDim auto Dim, class StartT, class EndT>
 constexpr auto span(StartT start, EndT end) noexcept { return span_proto<Dim, good_index_t<StartT>, good_index_t<EndT>>(start, end); }
 
 template<IsDim auto Dim, class T, class StartT, class StrideT>
-struct step_t : contain<T, StartT, StrideT> {
-	using contain<T, StartT, StrideT>::contain;
+struct step_t : strict_contain<T, StartT, StrideT> {
+	using strict_contain<T, StartT, StrideT>::strict_contain;
 
 	static constexpr char name[] = "step_t";
 	using params = struct_params<
@@ -377,8 +377,8 @@ public:
 };
 
 template<IsDim auto Dim, class StartT, class StrideT>
-struct step_proto : contain<StartT, StrideT> {
-	using contain<StartT, StrideT>::contain;
+struct step_proto : strict_contain<StartT, StrideT> {
+	using strict_contain<StartT, StrideT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -390,8 +390,8 @@ template<IsDim auto Dim, class StartT, class StrideT>
 constexpr auto step(StartT start, StrideT stride) noexcept { return step_proto<Dim, good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
 
 template<class StartT, class StrideT>
-struct auto_step_proto : contain<StartT, StrideT> {
-	using contain<StartT, StrideT>::contain;
+struct auto_step_proto : strict_contain<StartT, StrideT> {
+	using strict_contain<StartT, StrideT>::strict_contain;
 
 	static constexpr bool proto_preserves_layout = true;
 
@@ -407,8 +407,8 @@ template<class StartT, class StrideT>
 constexpr auto step(StartT start, StrideT stride) noexcept { return auto_step_proto<good_index_t<StartT>, good_index_t<StrideT>>(start, stride); }
 
 template<IsDim auto Dim, class T>
-struct reverse_t : contain<T> {
-	using contain<T>::contain;
+struct reverse_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "reverse_t";
 	using params = struct_params<

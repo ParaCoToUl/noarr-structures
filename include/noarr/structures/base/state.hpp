@@ -147,8 +147,8 @@ struct state_filter_items<state_items_pack<StateItems...>, Pred> {
 } // namespace helpers
 
 template<class... StateItems>
-struct state : contain<typename StateItems::value_type...> {
-	using base = contain<typename StateItems::value_type...>;
+struct state : strict_contain<typename StateItems::value_type...> {
+	using base = strict_contain<typename StateItems::value_type...>;
 	using base::base;
 
 	template<class Tag> requires (IsTag<Tag>)

@@ -10,16 +10,16 @@
 namespace noarr {
 
 template<IsDim auto Dim, class T>
-struct bcast_t : contain<T> {
+struct bcast_t : strict_contain<T> {
 	static constexpr char name[] = "bcast_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<T>>;
 
 	constexpr bcast_t() noexcept = default;
-	explicit constexpr bcast_t(T sub_structure) noexcept : contain<T>(sub_structure) {}
+	explicit constexpr bcast_t(T sub_structure) noexcept : strict_contain<T>(sub_structure) {}
 
-	constexpr T sub_structure() const noexcept { return contain<T>::get(); }
+	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>, length_in<Dim>>(); }
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");

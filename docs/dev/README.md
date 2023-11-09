@@ -9,4 +9,4 @@ so it has to give them the same interfaces it itself uses internally (e.g. [sign
 Currently, there are just two topics that even the most advanced clients can ignore:
 
 - the style and other [conventions](Conventions.md) that are to be followed by the library code, but does not apply to client code
-- the [`noarr::contain`](Contain.md) class, from which structures usually inherit, but usually are not required to
+- the [`noarr::strict_contain`](Contain.md) class, from which structures usually inherit, but usually are not required to

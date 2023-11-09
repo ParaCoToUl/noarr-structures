@@ -25,7 +25,7 @@ struct mangle_desc;
 
 /**
  * @brief Returns a textual representation of the type of a structure using `std::integer_sequence<char, ...>`
- * 
+ *
  * @tparam T: the structure
  */
 template<class T>
@@ -60,7 +60,7 @@ struct mangle_value_impl<T, V>
 
 /**
  * @brief returns a textual representation of a scalar type using `std::integer_sequence<char, ...>`
- * 
+ *
  * @tparam T: the scalar type
  */
 template<class T>
@@ -102,8 +102,8 @@ struct scalar_name<lit_t<L>> {
 };
 
 /**
- * @brief returns a textual representation of a template parameter description using `std::integer_sequence<char, 
- * 
+ * @brief returns a textual representation of a template parameter description using `std::integer_sequence<char,
+ *
  * @tparam T: one of the arguments to struct_params
  */
 template<class T>
@@ -131,7 +131,7 @@ struct mangle_desc<Name, std::index_sequence<Indices...>, struct_params<Params..
 
 struct mangle_expr_helpers {
 	template<class... Ts>
-	static inline std::index_sequence_for<Ts...> get_contain_indices(const contain<Ts...> &) noexcept; // undefined, use in decltype
+	static inline std::index_sequence_for<Ts...> get_contain_indices(const flexible_contain<Ts...> &) noexcept; // undefined, use in decltype
 
 	template<class String, class T, std::size_t... Indices>
 	static constexpr void append_items(String &out, const T &t, std::index_sequence<Indices...>) {

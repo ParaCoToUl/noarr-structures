@@ -106,8 +106,8 @@ struct zc_dims_pop<dim_sequence<Acc...>, Last> {
 } // namespace helpers
 
 template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, class T, auto... Dims>
-struct merge_zcurve_t : contain<T> {
-	using contain<T>::contain;
+struct merge_zcurve_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "merge_zcurve_t";
 	using params = struct_params<

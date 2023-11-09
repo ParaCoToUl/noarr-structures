@@ -11,11 +11,11 @@ namespace noarr {
 
 /**
  * @brief The ground structure for stored data
- * 
+ *
  * @tparam T the stored type
  */
 template<class T>
-struct scalar : contain<> {
+struct scalar : strict_contain<> {
 	static constexpr char name[] = "scalar";
 	using params = struct_params<
 		type_param<T>>;

@@ -41,7 +41,7 @@ Every type should satisfy the following (unless there is a reason not to):
   - move assignment
 - the default constructor should be present and trivial on empty types, and deleted on non-empty types
 
-Additionally, when defining a nestable type, one should consider using [`noarr::contain`](Contain.md) as the base class instead of defining any fields.
+Additionally, when defining a nestable type, one should consider using [`noarr::strict_contain`](Contain.md) as the base class instead of defining any fields.
 
 
 ## Functions

@@ -10,8 +10,8 @@
 namespace noarr {
 
 template<IsDim auto Dim, class Struct, class Order>
-struct traverser_iterator_t : contain<Struct, Order> {
-	using base = contain<Struct, Order>;
+struct traverser_iterator_t : strict_contain<Struct, Order> {
+	using base = strict_contain<Struct, Order>;
 	std::size_t idx;
 
 	constexpr traverser_iterator_t(const base &b, std::size_t idx) : base(b), idx(idx) {}
@@ -59,11 +59,11 @@ public:
 };
 
 template<IsDim auto Dim, class Struct, class Order>
-struct traverser_range_t : contain<Struct, Order> {
-	using base = contain<Struct, Order>;
+struct traverser_range_t : strict_contain<Struct, Order> {
+	using base = strict_contain<Struct, Order>;
 	std::size_t begin_idx, end_idx;
 
-	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length) : base((const contain<Struct, Order> &)traverser), begin_idx(0), end_idx(length) {}
+	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length) : base((const strict_contain<Struct, Order> &)traverser), begin_idx(0), end_idx(length) {}
 
 	// TBB splitting constructor
 	template<class Split>

@@ -134,7 +134,7 @@ Note that these two members should not be called directly, but only via `noarr::
 If [mangling](other/Mangling.md) support is desired, the structure must additionally:
 
 - be an instance of some template `T`
-- inherit from an instance of [`noarr::contain`](dev/Contain.md)
+- inherit from an instance of [`noarr::strict_contain`](dev/Contain.md)
 - not define any data members
 - define the following public members:
   - `static constexpr char name[]` that
@@ -148,7 +148,7 @@ If [mangling](other/Mangling.md) support is desired, the structure must addition
       - non-type arguments are described using `noarr::value_param`
   - all constructors inherited from the base class
 
-Using `contain` is recommended anyway, to avoid having the compiler inserting non-empty unused space in place of empty fields (which is otherwise required by C++).
+Using `strict_contain` is recommended anyway, to avoid having the compiler inserting non-empty unused space in place of empty fields (which is otherwise required by C++).
 
 ### Example manual structure definition
 
@@ -158,9 +158,9 @@ You can start with the following template template. It is a structure with one d
 // namespace foo:
 
 template<char Dim, class T, class U, std::size_t V>
-struct bar_t : public noarr::contain<T, U> {
+struct bar_t : public noarr::strict_contain<T, U> {
 	// inherit constructors
-	using noarr::contain<T, U>::contain;
+	using noarr::strict_contain<T, U>::strict_contain;
 
 	static constexpr char name[] = "::foo::bar_t";
 	using params = noarr::struct_params<
@@ -174,12 +174,12 @@ struct bar_t : public noarr::contain<T, U> {
 private:
 	constexpr T sub_structure() const noexcept {
 		// sub-structure is stored in an inherited field, retrieve it from there
-		return noarr::contain<T, U>::template get<0>();
+		return noarr::strict_contain<T, U>::template get<0>();
 	}
 
 	constexpr U get_u() const noexcept {
 		// the U value stored in an inherited field, retrieve it from there
-		return noarr::contain<T, U>::template get<1>();
+		return noarr::strict_contain<T, U>::template get<1>();
 	}
 
 	constexpr auto sub_state(noarr::IsState auto state) const noexcept {

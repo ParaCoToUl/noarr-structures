@@ -8,9 +8,9 @@
   - `offset`: retrieves offset of a substructure (if no substructure is specified it defaults to the innermost one: the scalar value), allows for ad-hoc fixing of dimensions
   - `get_at`: returns a reference to a value in a given blob the offset of which is specified by a dimensionless (same as `offset`) structure, allows for ad-hoc fixing of dimensions
 
-- [contain.hpp](contain.hpp): contains the implementation of the `contain` struct. It mimics the basic functionality of `std::tuple`. It facilitates creating structures (and other constructs like functions) so they are *trivial structured layouts* and so there is a structured way of retrieving fields.
+- [contain.hpp](contain.hpp): contains the implementation of the `strict_contain` struct. It mimics the basic functionality of `std::tuple`. It facilitates creating structures (and other constructs like functions) so they are *trivial structured layouts* and so there is a structured way of retrieving fields.
 
-  - `contain`: tuple-like struct, and a structured layout, that facilitates creation of new structures and functions
+  - `strict_contain`: tuple-like struct, and a structured layout, that facilitates creation of new structures and functions
 
 - [scalar.hpp](scalar.hpp): contains the implementation of the `scalar` structure. It serves as the bottom-most node for other structures (e.g. `vector<'v', scalar<int>>`).
 

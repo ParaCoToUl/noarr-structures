@@ -77,8 +77,8 @@ using union_filter_accepted_t = typename union_filter_accepted<typename Struct::
 } // namespace helpers
 
 template<class... Structs>
-struct union_t : contain<Structs...> {
-	using contain<Structs...>::contain;
+struct union_t : strict_contain<Structs...> {
+	using strict_contain<Structs...>::strict_contain;
 
 	using is = std::index_sequence_for<Structs...>;
 	using signature = typename helpers::sig_union<typename to_struct<Structs>::type::signature...>::type;
@@ -101,7 +101,7 @@ public:
 
 	template<IsDim auto QDim>
 	constexpr auto length(IsState auto state) const noexcept {
-		return contain<Structs...>::template get<first_match<QDim>>().template length<QDim>(state);
+		return strict_contain<Structs...>::template get<first_match<QDim>>().template length<QDim>(state);
 	}
 };
 
@@ -114,8 +114,8 @@ template<auto... Dim, class... IdxT> requires ((sizeof...(Dim) == sizeof...(IdxT
 constexpr auto fix(IdxT...) noexcept; // defined in setters.hpp
 
 template<class Struct, class Order>
-struct traverser_t : contain<Struct, Order> {
-	using contain<Struct, Order>::contain;
+struct traverser_t : strict_contain<Struct, Order> {
+	using strict_contain<Struct, Order>::strict_contain;
 
 	[[nodiscard("returns a copy of the underlying struct")]]
 	constexpr auto get_struct() const noexcept { return this->template get<0>(); }

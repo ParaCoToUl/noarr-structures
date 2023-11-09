@@ -16,8 +16,8 @@ namespace helpers {
 template<std::size_t Value, std::size_t Mul>
 constexpr std::size_t pad_to_multiple = (Value + Mul - 1) / Mul * Mul;
 
-struct simple_cg_t : contain<std::size_t, std::size_t> {
-	using contain<std::size_t, std::size_t>::contain;
+struct simple_cg_t : strict_contain<std::size_t, std::size_t> {
+	using strict_contain<std::size_t, std::size_t>::strict_contain;
 
 	constexpr std::size_t thread_rank() const noexcept { return this->template get<0>(); }
 	constexpr std::size_t num_threads() const noexcept { return this->template get<1>(); }
@@ -43,7 +43,7 @@ struct cuda_stripe_index {
 };
 
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth, class T>
-struct cuda_striped_t : contain<T> {
+struct cuda_striped_t : strict_contain<T> {
 	static_assert(is_struct_v<ElemType>, "The element type of cuda_striped must be a noarr structure.");
 
 	static constexpr char name[] = "cuda_striped_t";
@@ -55,9 +55,9 @@ struct cuda_striped_t : contain<T> {
 		structure_param<T>>;
 
 	constexpr cuda_striped_t() noexcept = default;
-	explicit constexpr cuda_striped_t(T sub_structure) noexcept : contain<T>(sub_structure) {}
+	explicit constexpr cuda_striped_t(T sub_structure) noexcept : strict_contain<T>(sub_structure) {}
 
-	constexpr T sub_structure() const noexcept { return contain<T>::get(); }
+	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<cuda_stripe_index>(); }
 
 private:

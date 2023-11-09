@@ -11,7 +11,7 @@ namespace noarr {
 
 /**
  * @brief a pack of the template parameters of the structure
- * 
+ *
  * @tparam Params: template parameters of the structure
  */
 template<class... Params>
@@ -48,11 +48,11 @@ constexpr auto state_at(StructOuter structure, IsState auto state) noexcept {
 }
 
 template<class... Args>
-struct pack : contain<Args...> {
-	using contain<Args...>::contain;
+struct pack : flexible_contain<Args...> {
+	using flexible_contain<Args...>::flexible_contain;
 
 	explicit constexpr pack() noexcept = default;
-	explicit constexpr pack(Args... args) noexcept : contain<Args...>(args...) {}
+	explicit constexpr pack(Args... args) noexcept : flexible_contain<Args...>(args...) {}
 };
 
 // this is for the consistency of packs of packs
@@ -116,7 +116,7 @@ constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, std::index_sequence
 
 /**
  * @brief returns whether the type `T` meets the criteria for structures
- * 
+ *
  * @tparam T: the input type
  */
 template<class T>
@@ -130,7 +130,7 @@ concept IsStruct = is_struct_v<T>;
 
 /**
  * @brief returns whether the type `T` meets the criteria for proto-structures
- * 
+ *
  * @tparam T: the input type
  */
 template<class T>
@@ -182,8 +182,8 @@ template<class InnerProtoStructPack, class OuterProtoStruct>
 struct compose_proto;
 
 template<class... InnerProtoStructs, class OuterProtoStruct>
-struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : contain<pack<InnerProtoStructs...>, OuterProtoStruct> {
-	using base = contain<pack<InnerProtoStructs...>, OuterProtoStruct>;
+struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : flexible_contain<pack<InnerProtoStructs...>, OuterProtoStruct> {
+	using base = flexible_contain<pack<InnerProtoStructs...>, OuterProtoStruct>;
 	using base::base;
 
 	explicit constexpr compose_proto() noexcept = default;
