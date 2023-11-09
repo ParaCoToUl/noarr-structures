@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_STATE_HPP
 
 #include <concepts>
+#include <type_traits>
 
 #include "contain.hpp"
 #include "utility.hpp"
@@ -190,11 +191,15 @@ struct state : strict_contain<typename StateItems::value_type...> {
 	}
 };
 
+
 template<class T>
-struct is_state : std::false_type {};
+struct is_state_impl : std::false_type {};
 
 template<class... T>
-struct is_state<state<T...>> : std::true_type {};
+struct is_state_impl<state<T...>> : std::true_type {};
+
+template<class T>
+using is_state = is_state_impl<std::remove_cvref_t<T>>;
 
 template<class T>
 constexpr bool is_state_v = is_state<T>::value;

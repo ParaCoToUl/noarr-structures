@@ -2,6 +2,7 @@
 #define NOARR_TEST_MACROS_HPP
 
 #include <iostream>
+#include <type_traits>
 
 #include "counter.hpp"
 
@@ -29,6 +30,19 @@ bool test_case_failed = false;
 		throw noarr_test::requirement_failed{}; \
 	} else { \
 		noarr_test::assertion_passed(); \
+	} while (false)
+
+#define STATIC_REQUIRE(...) \
+	do { \
+		const bool cond = [](auto cond) constexpr { return std::is_constant_evaluated() ? cond : true; }(!(__VA_ARGS__)); \
+		if (cond) { \
+			std::cerr << __FILE__ ":" TO_STRING(__LINE__) ": error: STATIC_REQUIRE(" #__VA_ARGS__  ") failed" << std::endl; \
+			noarr_test::assertion_failed(); \
+			noarr_test::test_case_failed = true; \
+			throw noarr_test::requirement_failed{}; \
+		} else { \
+			noarr_test::assertion_passed(); \
+		} \
 	} while (false)
 
 #define CHECK(...) \

@@ -42,9 +42,9 @@ TEST_CASE("Traverser trivial", "[traverser]") {
 	int i = 0;
 
 	traverser(a, b, c).for_each([&i](auto s){
-		static_assert(decltype(s)::template contains<index_in<'x'>>);
-		static_assert(decltype(s)::template contains<index_in<'y'>>);
-		static_assert(decltype(s)::template contains<index_in<'z'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'x'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'y'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'z'>>);
 
 		REQUIRE(s.template get<index_in<'x'>>() < 20);
 		REQUIRE(s.template get<index_in<'y'>>() < 30);
@@ -105,9 +105,9 @@ TEST_CASE("Traverser ordered", "[traverser]") {
 	int i = 0;
 
 	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).for_each([&i](auto s){
-		static_assert(decltype(s)::template contains<index_in<'x'>>);
-		static_assert(decltype(s)::template contains<index_in<'y'>>);
-		static_assert(decltype(s)::template contains<index_in<'z'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'x'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'y'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'z'>>);
 
 		REQUIRE(s.template get<index_in<'x'>>() < 20);
 		REQUIRE(s.template get<index_in<'y'>>() < 30);
@@ -127,9 +127,9 @@ TEST_CASE("Traverser ordered", "[traverser]") {
 	REQUIRE(i == 20*30*40);
 
 	traverser(a, b, c) ^ reorder<'x', 'y', 'z'>() | [&i](auto s){
-		static_assert(decltype(s)::template contains<index_in<'x'>>);
-		static_assert(decltype(s)::template contains<index_in<'y'>>);
-		static_assert(decltype(s)::template contains<index_in<'z'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'x'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'y'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'z'>>);
 
 		REQUIRE(s.template get<index_in<'x'>>() < 20);
 		REQUIRE(s.template get<index_in<'y'>>() < 30);
@@ -186,9 +186,9 @@ TEST_CASE("Traverser ordered renamed", "[traverser]") {
 	int i = 0;
 
 	traverser(a, b, c).order(reorder<'x', 'y', 'z'>() ^ rename<'y', 't'>()).for_each([&i](auto s){
-		static_assert(decltype(s)::template contains<index_in<'x'>>);
-		static_assert(decltype(s)::template contains<index_in<'y'>>);
-		static_assert(decltype(s)::template contains<index_in<'z'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'x'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'y'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'z'>>);
 
 		REQUIRE(s.template get<index_in<'x'>>() < 20);
 		REQUIRE(s.template get<index_in<'y'>>() < 30);
@@ -208,9 +208,9 @@ TEST_CASE("Traverser ordered renamed", "[traverser]") {
 	REQUIRE(i == 20*30*40);
 
 	traverser(a, b, c) ^ reorder<'x', 'y', 'z'>() ^ rename<'y', 't'>() | [&i](auto s){
-		static_assert(decltype(s)::template contains<index_in<'x'>>);
-		static_assert(decltype(s)::template contains<index_in<'y'>>);
-		static_assert(decltype(s)::template contains<index_in<'z'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'x'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'y'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'z'>>);
 
 		REQUIRE(s.template get<index_in<'x'>>() < 20);
 		REQUIRE(s.template get<index_in<'y'>>() < 30);
@@ -271,8 +271,8 @@ TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
 	std::size_t i = 0;
 
 	traverser(a, b).order(into_blocks<'x', 'u', 'v'>(4)).for_each([&](auto s){
-		REQUIRE(!decltype(s)::template contains<index_in<'u'>> & !decltype(s)::template contains<index_in<'v'>>);
-		REQUIRE( decltype(s)::template contains<index_in<'x'>> &  decltype(s)::template contains<index_in<'y'>>);
+		STATIC_REQUIRE(!s.template contains<index_in<'u'>> & !s.template contains<index_in<'v'>>);
+		STATIC_REQUIRE( s.template contains<index_in<'x'>> &  s.template contains<index_in<'y'>>);
 
 		std::size_t x = s.template get<index_in<'x'>>();
 		std::size_t y = s.template get<index_in<'y'>>();
@@ -283,8 +283,8 @@ TEST_CASE("Traverser ordered renamed access blocked", "[traverser blocks]") {
 	REQUIRE(i == 20*30);
 
 	traverser(a, b) ^ into_blocks<'x', 'u', 'v'>(4) | [&](auto s){
-		static_assert(decltype(s)::template contains<index_in<'x'>>);
-		static_assert(decltype(s)::template contains<index_in<'y'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'x'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'y'>>);
 
 		std::size_t x = s.template get<index_in<'x'>>();
 		std::size_t y = s.template get<index_in<'y'>>();
@@ -305,8 +305,8 @@ TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts 
 	std::size_t i = 0;
 
 	traverser(a, b).order(strip_mine<'x', 'u', 'v'>(4)).for_each([&](auto s){
-		REQUIRE(!decltype(s)::template contains<index_in<'u'>> & !decltype(s)::template contains<index_in<'v'>>);
-		REQUIRE( decltype(s)::template contains<index_in<'x'>> &  decltype(s)::template contains<index_in<'y'>>);
+		STATIC_REQUIRE(!s.template contains<index_in<'u'>> & !s.template contains<index_in<'v'>>);
+		STATIC_REQUIRE( s.template contains<index_in<'x'>> &  s.template contains<index_in<'y'>>);
 
 		std::size_t x = s.template get<index_in<'x'>>();
 		std::size_t y = s.template get<index_in<'y'>>();
@@ -319,8 +319,8 @@ TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts 
 	REQUIRE(i == 20*30);
 
 	traverser(a, b) ^ strip_mine<'x', 'u', 'v'>(4) | [&i](auto s){
-		static_assert(decltype(s)::template contains<index_in<'x'>>);
-		static_assert(decltype(s)::template contains<index_in<'y'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'x'>>);
+		STATIC_REQUIRE(s.template contains<index_in<'y'>>);
 
 		std::size_t x = s.template get<index_in<'x'>>();
 		std::size_t y = s.template get<index_in<'y'>>();
@@ -372,14 +372,14 @@ TEST_CASE("Traverser neighbor (stencil example)", "[traverser shortcuts]") {
 		auto sa3 = neighbor<'y', 'x'>(sa, +1, +1);
 
 		// does not hold generally (`neighbor` could reorder the indices in the state)
-		REQUIRE(std::is_same_v<decltype(sa7), decltype(sa)>);
-		REQUIRE(std::is_same_v<decltype(sa8), decltype(sa)>);
-		REQUIRE(std::is_same_v<decltype(sa9), decltype(sa)>);
-		REQUIRE(std::is_same_v<decltype(sa4), decltype(sa)>);
-		REQUIRE(std::is_same_v<decltype(sa6), decltype(sa)>);
-		REQUIRE(std::is_same_v<decltype(sa1), decltype(sa)>);
-		REQUIRE(std::is_same_v<decltype(sa2), decltype(sa)>);
-		REQUIRE(std::is_same_v<decltype(sa3), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa7), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa8), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa9), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa4), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa6), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa1), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa2), decltype(sa)>);
+		STATIC_REQUIRE(std::is_same_v<decltype(sa3), decltype(sa)>);
 
 		REQUIRE(sa7.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>() - 1);
 		REQUIRE(sa8.template get<index_in<'x'>>() == sa.template get<index_in<'x'>>());

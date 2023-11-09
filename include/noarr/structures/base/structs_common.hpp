@@ -1,8 +1,6 @@
 #ifndef NOARR_STRUCTURES_STRUCTS_COMMON_HPP
 #define NOARR_STRUCTURES_STRUCTS_COMMON_HPP
 
-#include <tuple>
-
 #include "utility.hpp"
 #include "signature.hpp"
 #include "state.hpp"

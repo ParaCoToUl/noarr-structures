@@ -21,5 +21,5 @@ TEST_CASE("Literality test", "[low-lvl]") {
 	constexpr auto test_fixed_dim = vector_t<'x', scalar<int>>() ^ set_length<'x'>(0) ^ fix<'x'>(10);
 	constexpr auto test_fixed_dim_size = test_fixed_dim | get_size();
 
-	REQUIRE(std::integral_constant<std::size_t, (test_array_size + test_sized_vector_size + test_tuple_size + test_sfixed_dim_size + test_fixed_dim_size)>::value == 1204UL);
+	STATIC_REQUIRE(std::integral_constant<std::size_t, (test_array_size + test_sized_vector_size + test_tuple_size + test_sfixed_dim_size + test_fixed_dim_size)>::value == 1204UL);
 }

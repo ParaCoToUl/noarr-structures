@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_ZCURVE_HPP
 
 #include <bit>
+#include <tuple>
 
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"

@@ -15,8 +15,8 @@ TEST_CASE("Traverser begin end", "[traverser iter]") {
 	auto b = t.begin();
 	auto e = t.end();
 
-	REQUIRE(std::is_same_v<decltype(b), iter_t>);
-	REQUIRE(std::is_same_v<decltype(e), iter_t>);
+	STATIC_REQUIRE(std::is_same_v<decltype(b), iter_t>);
+	STATIC_REQUIRE(std::is_same_v<decltype(e), iter_t>);
 
 	REQUIRE(b.idx == 0);
 	REQUIRE(e.idx == 20);
@@ -101,18 +101,18 @@ TEST_CASE("Traverser iter type traits", "[traverser iter]") {
 	using iter_t = noarr::traverser_iterator_t<'x', noarr::union_t<s>, noarr::neutral_proto>;
 
 	// iterator should only contain the structure (empty) and index
-	REQUIRE(sizeof(iter_t) == sizeof(std::size_t));
+	STATIC_REQUIRE(sizeof(iter_t) == sizeof(std::size_t));
 
 	// like noarr_test::is_simple, but in addition require assignability
 	// and do *not* require the *absence* of default ctor (since its *presence* is required by std::random_access_iterator)
-	REQUIRE(std::is_standard_layout_v<iter_t>);
-	REQUIRE(std::is_trivially_copy_constructible_v<iter_t>);
-	REQUIRE(std::is_trivially_move_constructible_v<iter_t>);
-	REQUIRE(std::is_trivially_copy_assignable_v<iter_t>);
-	REQUIRE(std::is_trivially_move_assignable_v<iter_t>);
-	REQUIRE(std::is_trivially_destructible_v<iter_t>);
+	STATIC_REQUIRE(std::is_standard_layout_v<iter_t>);
+	STATIC_REQUIRE(std::is_trivially_copy_constructible_v<iter_t>);
+	STATIC_REQUIRE(std::is_trivially_move_constructible_v<iter_t>);
+	STATIC_REQUIRE(std::is_trivially_copy_assignable_v<iter_t>);
+	STATIC_REQUIRE(std::is_trivially_move_assignable_v<iter_t>);
+	STATIC_REQUIRE(std::is_trivially_destructible_v<iter_t>);
 
-	REQUIRE(std::random_access_iterator<iter_t>);
+	STATIC_REQUIRE(std::random_access_iterator<iter_t>);
 }
 
 TEST_CASE("Traverser iter deref", "[traverser iter]") {

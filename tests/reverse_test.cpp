@@ -135,7 +135,7 @@ TEST_CASE("Reverse tuple traverser", "[reverse traverser]") {
 
 	std::size_t x = 0;
 	noarr::traverser(r).for_each([&](auto state) {
-		constexpr auto state_x = decltype(noarr::get_index<'x'>(state))::value;
+		constexpr auto state_x = noarr::get_index<'x'>(state).value;
 		REQUIRE(state_x == x);
 		REQUIRE((r | noarr::offset(state)) == (s | noarr::offset<'x'>(lit<2-state_x>)));
 		x++;
