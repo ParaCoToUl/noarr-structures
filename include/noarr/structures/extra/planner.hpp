@@ -40,20 +40,20 @@ struct planner_ending_elem_t : flexible_contain<F> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(Planner planner) const noexcept {
+	constexpr void operator()(const Planner &planner) const noexcept {
 		run(planner, std::make_index_sequence<Planner::num_structs>());
 	}
 
 private:
 	template<class Planner, std::size_t... Idxs>
-    constexpr void run(Planner planner, std::index_sequence<Idxs...>) const noexcept
+    constexpr void run(const Planner &planner, std::index_sequence<Idxs...>) const noexcept
 	requires (requires(F f) { f(planner.template get_struct<Idxs>()[planner.state()]...); })
 	{
 		flexible_contain<F>::get()(planner.template get_struct<Idxs>()[planner.state()]...);
 	}
 
 	template<class Planner, std::size_t... Idxs>
-    constexpr void run(Planner planner, std::index_sequence<Idxs...>) const noexcept
+    constexpr void run(const Planner &planner, std::index_sequence<Idxs...>) const noexcept
 	requires (requires(F f) { f(planner.state(), planner.template get_struct<Idxs>()[planner.state()]...); })
 	{
 		flexible_contain<F>::get()(planner.state(), planner.template get_struct<Idxs>()[planner.state()]...);
@@ -82,7 +82,7 @@ struct planner_ending_t : flexible_contain<F> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(Planner planner) const noexcept {
+	constexpr void operator()(const Planner &planner) const noexcept {
 		flexible_contain<F>::get()(planner.state());
 	}
 };
@@ -164,7 +164,7 @@ struct planner_endings : flexible_contain<Endings...> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(Planner planner) const noexcept requires is_activated_v<decltype(this->order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))> {
+	constexpr void operator()(const Planner &planner) const noexcept requires is_activated_v<decltype(this->order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))> {
 		this->template get<decltype(std::declval<planner_endings>().order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))::activated_index()>()(planner.pop_endings());
 	}
 };
@@ -210,7 +210,7 @@ struct planner_sections_t : flexible_contain<F> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(Planner planner) const noexcept {
+	constexpr void operator()(const Planner &planner) const noexcept {
 		flexible_contain<F>::get()(planner);
 	}
 };
