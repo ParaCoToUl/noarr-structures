@@ -14,7 +14,7 @@ struct cuda_thread_x { static __device__ inline auto idx() noexcept { return thr
 struct cuda_thread_y { static __device__ inline auto idx() noexcept { return threadIdx.y; } };
 struct cuda_thread_z { static __device__ inline auto idx() noexcept { return threadIdx.z; } };
 
-template<class... CudaDim>
+template<class ...CudaDims>
 struct cuda_dims_pack;
 
 using cuda_bx = cuda_dims_pack<cuda_block_x>;
@@ -92,7 +92,7 @@ struct cuda_fix_pair_proto {
 template<class Struct, class Order, class DimsB, class DimsT, class CudaDimsB, class CudaDimsT>
 struct cuda_traverser_t;
 
-template<auto... DimsB, auto... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
+template<auto ...DimsB, auto ...DimsT, class ...CudaDimsB, class ...CudaDimsT, class Struct, class Order>
 struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : traverser_t<Struct, Order> {
 	using base = traverser_t<Struct, Order>;
 	using base::base;

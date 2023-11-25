@@ -23,7 +23,7 @@ struct reassemble_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 	template<class Useless>
 	struct ty<false, Useless> { using pe = scalar_sig<void>; };
 };
-template<IsDim auto Dim, class... RetSigs, IsState State>
+template<IsDim auto Dim, class ...RetSigs, IsState State>
 struct reassemble_scalar<dep_function_sig<Dim, RetSigs...>, State> {
 	template<bool cond = State::template contains<index_in<Dim>>, class = void>
 	struct ty;
@@ -38,9 +38,9 @@ struct reassemble_scalar<scalar_sig<ValueType>, State> {
 	struct ty { using pe = scalar_sig<ValueType>; };
 };
 
-template<class TopSig, IsState State, auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<class TopSig, IsState State, auto ...Dims> requires IsDimPack<decltype(Dims)...>
 struct reassemble_build;
-template<class TopSig, IsState State, IsDim auto Dim, auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<class TopSig, IsState State, IsDim auto Dim, auto ...Dims> requires IsDimPack<decltype(Dims)...>
 struct reassemble_build<TopSig, State, Dim, Dims...> {
 	static_assert((... && (Dim != Dims)), "Duplicate dimension in reorder");
 	using found = sig_find_dim<Dim, State, TopSig>;
@@ -52,7 +52,7 @@ struct reassemble_build<TopSig, State, Dim, Dims...> {
 		using sub_sig = typename reassemble_build<TopSig, sub_state, Dims...>::template ty<>::pe;
 		using pe = function_sig<Dim, ArgLength, sub_sig>;
 	};
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct ty<dep_function_sig<Dim, RetSigs...>> {
 		template<std::size_t N>
 		using sub_state = decltype(std::declval<State>().template with<index_in<Dim>>(std::integral_constant<std::size_t, N>()));
@@ -61,7 +61,7 @@ struct reassemble_build<TopSig, State, Dim, Dims...> {
 
 		template<class = std::index_sequence_for<RetSigs...>>
 		struct pack_helper;
-		template<std::size_t... N>
+		template<std::size_t ...N>
 		struct pack_helper<std::index_sequence<N...>> { using type = dep_function_sig<Dim, sub_sig<N>...>; };
 
 		using pe = typename pack_helper<>::type;
@@ -75,7 +75,7 @@ template<class T>
 struct reassemble_completeness;
 template<IsDim auto Dim, class ArgLength, class RetSig>
 struct reassemble_completeness<function_sig<Dim, ArgLength, RetSig>> : reassemble_completeness<RetSig> {};
-template<IsDim auto Dim, class... RetSigs>
+template<IsDim auto Dim, class ...RetSigs>
 struct reassemble_completeness<dep_function_sig<Dim, RetSigs...>> : std::integral_constant<bool, (... && reassemble_completeness<RetSigs>::value)> {};
 template<class ValueType>
 struct reassemble_completeness<scalar_sig<ValueType>> : std::true_type {};
@@ -84,13 +84,13 @@ struct reassemble_completeness<scalar_sig<void>> : std::false_type {};
 
 } // namespace helpers
 
-template<class Signature, auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<class Signature, auto ...Dims> requires IsDimPack<decltype(Dims)...>
 using reassemble_sig = typename helpers::reassemble_build<Signature, state<>, Dims...>::template ty<>::pe;
 
 template<class ReassembledSignature>
 static constexpr bool reassemble_is_complete = helpers::reassemble_completeness<ReassembledSignature>::value;
 
-template<class T, auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<class T, auto ...Dims> requires IsDimPack<decltype(Dims)...>
 struct reorder_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
@@ -127,7 +127,7 @@ struct reorder_t : strict_contain<T> {
 	}
 };
 
-template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
 struct reorder_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -135,7 +135,7 @@ struct reorder_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reorder_t<Struct, Dims...>(s); }
 };
 
-template<auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
 using reorder = reorder_proto<Dims...>;
 
 template<IsDim auto Dim, class T>
@@ -193,9 +193,9 @@ using hoist = hoist_proto<Dim>;
 
 namespace helpers {
 
-template<class EvenAcc, class OddAcc, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
+template<class EvenAcc, class OddAcc, auto ...DimPairs> requires IsDimPack<decltype(DimPairs)...>
 struct rename_unzip_dim_pairs;
-template<auto... EvenAcc, auto... OddAcc, IsDim auto Even, IsDim auto Odd, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
+template<auto ...EvenAcc, auto ...OddAcc, IsDim auto Even, IsDim auto Odd, auto ...DimPairs> requires IsDimPack<decltype(DimPairs)...>
 struct rename_unzip_dim_pairs<dim_sequence<EvenAcc...>, dim_sequence<OddAcc...>, Even, Odd, DimPairs...>
 	: rename_unzip_dim_pairs<dim_sequence<EvenAcc..., Even>, dim_sequence<OddAcc..., Odd>, DimPairs...> {};
 template<class EvenAcc, class OddAcc>
@@ -206,7 +206,7 @@ struct rename_unzip_dim_pairs<EvenAcc, OddAcc> {
 
 template<class>
 struct rename_uniquity;
-template<IsDim auto Dim, auto... Dims> requires (... && IsDim<decltype(Dims)>)
+template<IsDim auto Dim, auto ...Dims> requires IsDimPack<decltype(Dims)...>
 struct rename_uniquity<dim_sequence<Dim, Dims...>> {
 	static constexpr bool value = (... && (Dims != Dim)) && rename_uniquity<dim_sequence<Dims...>>::value;
 };
@@ -215,10 +215,10 @@ struct rename_uniquity<dim_sequence<>> : std::true_type {};
 
 template<IsDim auto QDim, class From, class To>
 struct rename_dim;
-template<IsDim auto QDim, IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail> requires (QDim != FromHead)
+template<IsDim auto QDim, IsDim auto FromHead, auto ...FromTail, IsDim auto ToHead, auto ...ToTail> requires (QDim != FromHead)
 struct rename_dim<QDim, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>>
 	: rename_dim<QDim, dim_sequence<FromTail...>, dim_sequence<ToTail...>> {};
-template<IsDim auto FromHead, auto... FromTail, IsDim auto ToHead, auto... ToTail>
+template<IsDim auto FromHead, auto ...FromTail, IsDim auto ToHead, auto ...ToTail>
 struct rename_dim<FromHead, dim_sequence<FromHead, FromTail...>, dim_sequence<ToHead, ToTail...>> {
 	static constexpr auto dim = ToHead;
 };
@@ -234,7 +234,7 @@ template<class From, class To, IsDim auto Dim, class ArgLength, class RetSig>
 struct rename_sig<From, To, function_sig<Dim, ArgLength, RetSig>> {
 	using type = function_sig<rename_dim<Dim, From, To>::dim, ArgLength, typename rename_sig<From, To, RetSig>::type>;
 };
-template<class From, class To, IsDim auto Dim, class... RetSigs>
+template<class From, class To, IsDim auto Dim, class ...RetSigs>
 struct rename_sig<From, To, dep_function_sig<Dim, RetSigs...>> {
 	using type = dep_function_sig<rename_dim<Dim, From, To>::dim, typename rename_sig<From, To, RetSigs>::type...>;
 };
@@ -251,10 +251,10 @@ struct rename_dim_map {
 
 template<class From, class To>
 struct rename_state {
-	template<class... StateItem>
+	template<class ...StateItem>
 	using type = state<state_item<typename StateItem::tag::template map<rename_dim_map<From, To>>, typename StateItem::value_type>...>;
 
-	template<class... StateItem>
+	template<class ...StateItem>
 	static constexpr type<StateItem...> convert([[maybe_unused]] state<StateItem...> s) noexcept {
 		return type<StateItem...>(s.template get<typename StateItem::tag>()...);
 	}
@@ -262,7 +262,7 @@ struct rename_state {
 
 } // namespace helpers
 
-template<class T, auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
+template<class T, auto ...DimPairs> requires IsDimPack<decltype(DimPairs)...>
 struct rename_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
@@ -286,7 +286,7 @@ public:
 private:
 	template<class = external, class = internal>
 	struct assertion;
-	template<auto... ExternalDims, auto... InternalDims>
+	template<auto ...ExternalDims, auto ...InternalDims>
 	struct assertion<dim_sequence<ExternalDims...>, dim_sequence<InternalDims...>> {
 		template<IsDim auto Dim>
 		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
@@ -331,7 +331,7 @@ public:
 	}
 };
 
-template<auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
+template<auto ...DimPairs> requires IsDimPack<decltype(DimPairs)...>
 struct rename_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -339,7 +339,7 @@ struct rename_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return rename_t<Struct, DimPairs...>(s); }
 };
 
-template<auto... DimPairs> requires (... && IsDim<decltype(DimPairs)>)
+template<auto ...DimPairs> requires IsDimPack<decltype(DimPairs)...>
 constexpr rename_proto<DimPairs...> rename() noexcept { return {}; }
 
 } // namespace noarr

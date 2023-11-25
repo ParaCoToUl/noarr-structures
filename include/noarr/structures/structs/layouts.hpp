@@ -13,9 +13,9 @@ namespace noarr {
  * @brief tuple
  *
  * @tparam Dim dimension added by the structure
- * @tparam T,TS... substructure types
+ * @tparam T,TS ...substructure types
  */
-template<IsDim auto Dim, class... TS>
+template<IsDim auto Dim, class ...TS>
 struct tuple_t : strict_contain<TS...> {
 	using base = strict_contain<TS...>;
 	static constexpr char name[] = "tuple_t";
@@ -28,7 +28,7 @@ struct tuple_t : strict_contain<TS...> {
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>>(); }
 
 	constexpr tuple_t() noexcept = default;
-	explicit constexpr tuple_t(TS... ss) noexcept requires (sizeof...(TS) > 0) : base(ss...) {}
+	explicit constexpr tuple_t(TS ...ss) noexcept requires (sizeof...(TS) > 0) : base(ss...) {}
 
 	static_assert(!(TS::signature::template any_accept<Dim> || ...), "Dimension name already used");
 	using signature = dep_function_sig<Dim, typename TS::signature...>;
@@ -70,7 +70,7 @@ struct tuple_t : strict_contain<TS...> {
 private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
-	template<std::size_t... IS>
+	template<std::size_t ...IS>
 	constexpr auto size_inner(std::index_sequence<IS...>, [[maybe_unused]] IsState auto sub_state) const noexcept {
 		using namespace constexpr_arithmetic;
 		return (make_const<0>() + ... + sub_structure<IS>().size(sub_state));
@@ -81,8 +81,8 @@ template<IsDim auto Dim>
 struct tuple_proto {
 	static constexpr bool proto_preserves_layout = false;
 
-	template<class... Structs>
-	constexpr auto instantiate_and_construct(Structs... s) const noexcept { return tuple_t<Dim, Structs...>(s...); }
+	template<class ...Structs>
+	constexpr auto instantiate_and_construct(Structs ...s) const noexcept { return tuple_t<Dim, Structs...>(s...); }
 };
 
 template<IsDim auto Dim>

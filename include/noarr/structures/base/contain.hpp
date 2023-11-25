@@ -22,7 +22,7 @@ struct contain_impl;
 template<class T, class... TS> requires (!std::is_empty_v<T> && !std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> {
 	template<class T_, class ...TS_> requires (sizeof...(TS) == sizeof...(TS_))
-	explicit constexpr contain_impl(T_ &&t, TS_ &&... ts) noexcept : t_(std::forward<T_>(t)), ts_(std::forward<TS_>(ts)...) {}
+	explicit constexpr contain_impl(T_ &&t, TS_ &&...ts) noexcept : t_(std::forward<T_>(t)), ts_(std::forward<TS_>(ts)...) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
 	constexpr decltype(auto) get() const noexcept {
@@ -119,14 +119,14 @@ template<class... TS>
 contain(TS &&...) -> contain<std::remove_cvref_t<TS>...>;
 
 template<class... TS1, class... TS2, class... Contains>
-constexpr auto contain_cat(const contain<TS1...> &c1, const contain<TS2...> &c2, Contains &&... contains) noexcept {
+constexpr auto contain_cat(const contain<TS1...> &c1, const contain<TS2...> &c2, Contains &&...contains) noexcept {
 	using iss1 = std::index_sequence_for<TS1...>;
 	using iss2 = std::index_sequence_for<TS2...>;
 	return contain_cat(c1, iss1(), c2, iss2(), std::forward<Contains>(contains)...);
 }
 
 template<class... TS1, std::size_t... Idxs1, class... TS2, std::size_t... Idxs2, class... Contains>
-constexpr auto contain_cat(const contain<TS1...> &c1, std::index_sequence<Idxs1...>, const contain<TS2...> &c2, std::index_sequence<Idxs2...>, Contains &&... contains) noexcept {
+constexpr auto contain_cat(const contain<TS1...> &c1, std::index_sequence<Idxs1...>, const contain<TS2...> &c2, std::index_sequence<Idxs2...>, Contains &&...contains) noexcept {
 	return contain_cat(contain(c1.template get<Idxs1>()..., c2.template get<Idxs2>()...), std::forward<Contains>(contains)...);
 }
 
@@ -158,7 +158,7 @@ template<class... TS> requires (... && IsContainable<TS>)
 using flexible_contain = helpers::contain<TS...>;
 
 template<class... TS>
-constexpr auto contain_cat(TS &&... ts) noexcept {
+constexpr auto contain_cat(TS &&...ts) noexcept {
 	return helpers::contain_cat(std::forward<TS>(ts)...);
 }
 

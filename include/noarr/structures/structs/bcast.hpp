@@ -58,8 +58,8 @@ struct bcast_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return bcast_t<Dim, Struct>(s); }
 };
 
-template<auto... Dim> requires (... && IsDim<decltype(Dim)>)
-constexpr auto bcast() noexcept { return (... ^ bcast_proto<Dim>()); }
+template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
+constexpr auto bcast() noexcept { return (... ^ bcast_proto<Dims>()); }
 
 template<>
 constexpr auto bcast<>() noexcept { return neutral_proto(); }

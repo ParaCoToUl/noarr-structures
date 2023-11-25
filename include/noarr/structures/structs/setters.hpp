@@ -30,7 +30,7 @@ private:
 		static_assert(ArgLength::is_known, "Index cannot be fixed until its length is set");
 		using type = RetSig;
 	};
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(IdxT::value || true, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
@@ -80,10 +80,10 @@ struct fix_proto : strict_contain<IdxT> {
  * @tparam Dims: the dimension names
  * @param ts: parameters for fixing the indices
  */
-template<auto... Dim, class... IdxT> requires ((sizeof...(Dim) == sizeof...(IdxT)) && ... && IsDim<decltype(Dim)>)
-constexpr auto fix(IdxT... idx) noexcept {
-	if constexpr (sizeof...(Dim) > 0)
-		return (... ^ fix_proto<Dim, good_index_t<IdxT>>(idx));
+template<auto ...Dims, class ...IdxT> requires (sizeof...(Dims) == sizeof...(IdxT)) && IsDimPack<decltype(Dims)...>
+constexpr auto fix(IdxT ...idx) noexcept {
+	if constexpr (sizeof...(Dims) > 0)
+		return (... ^ fix_proto<Dims, good_index_t<IdxT>>(idx));
 	else
 		return neutral_proto();
 }
@@ -109,7 +109,7 @@ private:
 		static_assert(!ArgLength::is_known, "The length in this dimension is already set");
 		using type = function_sig<Dim, arg_length_from_t<LenT>, RetSig>;
 	};
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		static_assert(value_always_false<Dim>, "Cannot set tuple length");
 	};
@@ -156,8 +156,8 @@ struct set_length_proto : strict_contain<LenT> {
  * @tparam Dim: the dimension name of the transformed structure
  * @param length: the desired length
  */
-template<auto... Dim, class... LenT> requires (... && IsDim<decltype(Dim)>)
-constexpr auto set_length(LenT... len) noexcept { return (... ^ set_length_proto<Dim, good_index_t<LenT>>(len)); }
+template<auto ...Dims, class ...LenT> requires IsDimPack<decltype(Dims)...>
+constexpr auto set_length(LenT ...len) noexcept { return (... ^ set_length_proto<Dims, good_index_t<LenT>>(len)); }
 
 template<>
 constexpr auto set_length<>() noexcept { return neutral_proto(); }

@@ -16,7 +16,7 @@ struct sig_is_point<scalar_sig<ValueType>> : std::true_type {};
 
 /**
  * @brief returns whether the structure is a point (a structure with no dimensions, or with all dimensions being fixed)
- * 
+ *
  * @tparam T: the structure
  */
 template<class T>
@@ -35,7 +35,7 @@ struct sig_is_cube<function_sig<Dim, ArgLength, RetSig>> : std::integral_constan
 
 /**
  * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all dynamic)
- * 
+ *
  * @tparam T: the structure
  */
 template<class T>
@@ -49,7 +49,7 @@ template<IsDim auto Dim, class ArgLength, class RetSig, IsState State>
 struct sig_get_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 	using type = typename sig_get_scalar<RetSig, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
-template<IsDim auto Dim, class... RetSigs, IsState State>
+template<IsDim auto Dim, class ...RetSigs, IsState State>
 struct sig_get_scalar<dep_function_sig<Dim, RetSigs...>, State> {
 	static_assert(State::template contains<index_in<Dim>>, "Not all tuple dimensions are fixed");
 	static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
@@ -62,7 +62,7 @@ struct sig_get_scalar<scalar_sig<ValueType>, State> {
 
 /**
  * @brief returns the type of the value described by a `scalar<...>`
- * 
+ *
  * @tparam T: the `scalar<...>`
  */
 template<class T, IsState State = state<>>

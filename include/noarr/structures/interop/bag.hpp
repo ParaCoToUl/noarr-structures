@@ -110,8 +110,8 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<auto... Dims, class... Ts> requires (... && IsDim<decltype(Dims)>)
-	constexpr decltype(auto) at(Ts... ts) const noexcept {
+	template<auto ...Dims, class ...Ts> requires IsDimPack<decltype(Dims)...>
+	constexpr decltype(auto) at(Ts ...ts) const noexcept {
 		return structure() | noarr::get_at<Dims...>(data(), ts...);
 	}
 
@@ -130,8 +130,8 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<auto... Dims, class... Ts> requires (... && IsDim<decltype(Dims)>)
-	constexpr auto offset(Ts... ts) const noexcept {
+	template<auto ...Dims, class ...Ts> requires IsDimPack<decltype(Dims)...>
+	constexpr auto offset(Ts ...ts) const noexcept {
 		return structure() | noarr::offset<Dims...>(ts...);
 	}
 

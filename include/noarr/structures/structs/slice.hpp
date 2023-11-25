@@ -35,7 +35,7 @@ private:
 		struct subtract<static_arg_length<L>, std::integral_constant<std::size_t, S>> { using type = static_arg_length<L-S>; };
 		using type = function_sig<Dim, typename subtract<ArgLength, StartT>::type, RetSig>;
 	};
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(StartT::value || true, "Cannot shift a tuple dimension dynamically");
@@ -44,7 +44,7 @@ private:
 
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
-		template<std::size_t... Indices>
+		template<std::size_t ...Indices>
 		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices+start>...>; };
 
 		using type = typename pack_helper<>::type;
@@ -113,8 +113,8 @@ struct shift_proto : strict_contain<StartT> {
  * @tparam Dim: the dimension names
  * @param start: parameters for shifting the indices
  */
-template<auto... Dim, class... StartT> requires (... && IsDim<decltype(Dim)>)
-constexpr auto shift(StartT... start) noexcept { return (... ^ shift_proto<Dim, good_index_t<StartT>>(start)); }
+template<auto ...Dims, class ...StartT> requires IsDimPack<decltype(Dims)...>
+constexpr auto shift(StartT ...start) noexcept { return (... ^ shift_proto<Dims, good_index_t<StartT>>(start)); }
 
 template<>
 constexpr auto shift<>() noexcept { return neutral_proto(); }
@@ -139,7 +139,7 @@ private:
 	struct dim_replacement;
 	template<class ArgLength, class RetSig>
 	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> { using type = function_sig<Dim, arg_length_from_t<LenT>, RetSig>; };
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(StartT::value || true, "Cannot slice a tuple dimension dynamically");
@@ -149,7 +149,7 @@ private:
 
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
-		template<std::size_t... Indices>
+		template<std::size_t ...Indices>
 		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices+start>...>; };
 
 		using type = typename pack_helper<>::type;
@@ -227,7 +227,7 @@ private:
 	struct dim_replacement;
 	template<class ArgLength, class RetSig>
 	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> { using type = function_sig<Dim, arg_length_from_t<EndT>, RetSig>; };
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(StartT::value || true, "Cannot span a tuple dimension dynamically");
@@ -237,7 +237,7 @@ private:
 
 		template<class Indices = std::make_index_sequence<end - start>>
 		struct pack_helper;
-		template<std::size_t... Indices>
+		template<std::size_t ...Indices>
 		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices+start>...>; };
 
 		using type = typename pack_helper<>::type;
@@ -317,7 +317,7 @@ private:
 	struct dim_replacement;
 	template<class ArgLength, class RetSig>
 	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> { using type = function_sig<Dim, arg_length_from_t<StrideT>, RetSig>; };
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
 		static_assert(StartT::value || true, "Cannot slice a tuple dimension dynamically");
@@ -328,7 +328,7 @@ private:
 
 		template<class Indices = std::make_index_sequence<(sub_length + stride - start - 1) / stride>>
 		struct pack_helper;
-		template<std::size_t... Indices>
+		template<std::size_t ...Indices>
 		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<Indices*stride+start>...>; };
 
 		using type = typename pack_helper<>::type;
@@ -422,14 +422,14 @@ private:
 	struct dim_replacement {
 		using type = Original;
 	};
-	template<class... RetSigs>
+	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
 		static constexpr std::size_t len = sizeof...(RetSigs);
 
 		template<class Indices = std::make_index_sequence<len>>
 		struct pack_helper;
-		template<std::size_t... Indices>
+		template<std::size_t ...Indices>
 		struct pack_helper<std::index_sequence<Indices...>> { using type = dep_function_sig<Dim, typename original::template ret_sig<len-1-Indices>...>; };
 
 		using type = typename pack_helper<>::type;
@@ -481,8 +481,8 @@ struct reverse_proto {
  *
  * @tparam Dim: the dimension names
  */
-template<auto... Dim> requires (... && IsDim<decltype(Dim)>)
-constexpr auto reverse() noexcept { return (... ^ reverse_proto<Dim>()); }
+template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
+constexpr auto reverse() noexcept { return (... ^ reverse_proto<Dims>()); }
 
 template<>
 constexpr auto reverse<>() noexcept { return neutral_proto(); }

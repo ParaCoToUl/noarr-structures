@@ -8,9 +8,6 @@
 
 namespace noarr {
 
-template<class T> requires (std::is_trivially_copyable_v<T>)
-constexpr T trivially_copy(const T &t) noexcept { return t; }
-
 template<auto Tag>
 struct dim {
 	/* Currently unspecified content */
@@ -50,20 +47,26 @@ struct dim {
 };
 
 template<class T>
-struct is_dim : std::false_type {};
+struct is_dim_impl : std::false_type {};
 
 template<>
-struct is_dim<char> : std::true_type {};
+struct is_dim_impl<char> : std::true_type {};
 template<auto Tag>
-struct is_dim<dim<Tag>> : std::true_type {};
+struct is_dim_impl<dim<Tag>> : std::true_type {};
 
 template<class T>
-static constexpr bool is_dim_v = is_dim<std::remove_cvref_t<T>>::value;
+using is_dim = is_dim_impl<std::remove_cvref_t<T>>;
+
+template<class T>
+static constexpr bool is_dim_v = is_dim<T>::value;
 
 template<class T>
 concept IsDim = is_dim_v<T>;
 
-template<auto... Dims> requires (... && IsDim<decltype(trivially_copy(Dims))>)
+template<class ...Ts>
+concept IsDimPack = (... && IsDim<Ts>);
+
+template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
 struct dim_sequence {
 	using type = dim_sequence;
 	using size_type = std::size_t;
@@ -77,7 +80,7 @@ struct dim_sequence {
 template<class T>
 struct is_dim_sequence : std::false_type {};
 
-template<auto... Dims>
+template<auto ...Dims>
 struct is_dim_sequence<dim_sequence<Dims...>> : std::true_type {};
 
 template<class T>
@@ -89,7 +92,7 @@ concept IsDimSequence = is_dim_sequence_v<T>;
 template<class T>
 struct dim_sequence_contains;
 
-template<auto... Dims>
+template<auto ...Dims>
 struct dim_sequence_contains<dim_sequence<Dims...>> {
 	template<IsDim auto Dim>
 	static constexpr bool value = (... || (Dim == Dims));
@@ -107,46 +110,46 @@ struct dim_identity_mapper {
 
 namespace helpers {
 
-template<class... Packs>
+template<class ...Packs>
 struct integer_sequence_concat_impl;
 
-template<class T, T... vs1, T... vs2, class...Packs>
+template<class T, T ...vs1, T ...vs2, class...Packs>
 struct integer_sequence_concat_impl<std::integer_sequence<T, vs1...>, std::integer_sequence<T, vs2...>, Packs...> {
 	using type = typename integer_sequence_concat_impl<std::integer_sequence<T, vs1..., vs2...>, Packs...>::type;
 };
 
-template<class T, T... vs1>
+template<class T, T ...vs1>
 struct integer_sequence_concat_impl<std::integer_sequence<T, vs1...>> {
 	using type = std::integer_sequence<T, vs1...>;
 };
 
-template<class Sep, class... Packs>
+template<class Sep, class ...Packs>
 struct integer_sequence_concat_sep_impl;
 
-template<class T, T... vs1, T... vs2, T... sep, class...Packs>
+template<class T, T ...vs1, T ...vs2, T ...sep, class...Packs>
 struct integer_sequence_concat_sep_impl<std::integer_sequence<T, sep...>, std::integer_sequence<T, vs1...>, std::integer_sequence<T, vs2...>, Packs...> {
 	using type = typename integer_sequence_concat_sep_impl<std::integer_sequence<T, sep...>, std::integer_sequence<T, vs1..., vs2...>, Packs...>::type;
 };
 
-template<class T, T v1, T v2, T... vs1, T... vs2, T... sep, class...Packs>
+template<class T, T v1, T v2, T ...vs1, T ...vs2, T ...sep, class...Packs>
 struct integer_sequence_concat_sep_impl<std::integer_sequence<T, sep...>, std::integer_sequence<T, v1, vs1...>, std::integer_sequence<T, v2, vs2...>, Packs...> {
 	using type = typename integer_sequence_concat_sep_impl<std::integer_sequence<T, sep...>, std::integer_sequence<T, v1, vs1..., sep..., v2, vs2...>, Packs...>::type;
 };
 
-template<class T, T... vs1, T... sep>
+template<class T, T ...vs1, T ...sep>
 struct integer_sequence_concat_sep_impl<std::integer_sequence<T, sep...>, std::integer_sequence<T, vs1...>> {
 	using type = std::integer_sequence<T, vs1...>;
 };
 
-template<class... Packs>
+template<class ...Packs>
 struct dim_sequence_concat_impl;
 
-template<auto... vs1, auto... vs2, class...Packs>
+template<auto ...vs1, auto ...vs2, class...Packs>
 struct dim_sequence_concat_impl<dim_sequence<vs1...>, dim_sequence<vs2...>, Packs...> {
 	using type = typename dim_sequence_concat_impl<dim_sequence<vs1..., vs2...>, Packs...>::type;
 };
 
-template<auto... vs1>
+template<auto ...vs1>
 struct dim_sequence_concat_impl<dim_sequence<vs1...>> {
 	using type = dim_sequence<vs1...>;
 };
@@ -235,18 +238,18 @@ struct dim_tree_to_sequence_impl<dim_sequence<>> {
 
 /**
  * @brief concatenates multiple integral `Packs`
- * 
+ *
  * @tparam Packs: the input integral packs
  */
-template<class... Packs>
+template<class ...Packs>
 using integer_sequence_concat = typename helpers::integer_sequence_concat_impl<Packs...>::type;
 
 /**
  * @brief concatenates multiple integral packs (the 2nd, 3rd etc. member of `Packs`) pasting the 1st member of `Packs` between each consecutive packs
- * 
+ *
  * @tparam Packs: the input integral packs, the first one is the separator used when concatenating
  */
-template<class... Packs>
+template<class ...Packs>
 using integer_sequence_concat_sep = typename helpers::integer_sequence_concat_sep_impl<Packs...>::type;
 
 template<class In, class Set>
