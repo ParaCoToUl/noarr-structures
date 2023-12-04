@@ -167,7 +167,7 @@ struct bar_t : public noarr::strict_contain<T, U> {
 		noarr::dim_param<Dim>,
 		noarr::structure_param<T>,
 		noarr::type_param<U>,
-		noarr::value_param<std::size_t, V>>;
+		noarr::value_param<V>>;
 
 	using signature = ...;
 

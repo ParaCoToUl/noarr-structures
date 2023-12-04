@@ -18,19 +18,29 @@ namespace noarr {
  * @tparam Params: template parameters of the structure
  */
 template<class ...Params>
-struct struct_params;
+struct struct_params : flexible_contain<Params...> {
+	using flexible_contain<Params...>::flexible_contain;
+};
 
-template<class>
-struct structure_param;
+template<class Struct>
+struct structure_param {
+	using type = Struct;
+};
 
-template<class>
-struct type_param;
+template<class T>
+struct type_param {
+	using type = T;
+};
 
-template<class T, T V>
-struct value_param;
+template<auto V>
+struct value_param {
+	static constexpr auto value = V;
+};
 
 template<IsDim auto Dim>
-struct dim_param;
+struct dim_param {
+	static constexpr auto value = Dim;
+};
 
 template<class StructInner, class StructOuter>
 constexpr auto offset_of(StructOuter structure, IsState auto state) noexcept {

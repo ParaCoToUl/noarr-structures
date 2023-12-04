@@ -48,10 +48,10 @@ struct cuda_striped_t : strict_contain<T> {
 
 	static constexpr char name[] = "cuda_striped_t";
 	using params = struct_params<
-		value_param<std::size_t, NumStripes>,
+		value_param<NumStripes>,
 		structure_param<ElemType>,
-		value_param<std::size_t, BankCount>,
-		value_param<std::size_t, BankWidth>,
+		value_param<BankCount>,
+		value_param<BankWidth>,
 		structure_param<T>>;
 
 	constexpr cuda_striped_t() noexcept = default;

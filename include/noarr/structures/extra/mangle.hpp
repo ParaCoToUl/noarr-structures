@@ -119,8 +119,8 @@ struct mangle_param<structure_param<T>> { using type = integer_sequence_concat<m
 template<class T>
 struct mangle_param<type_param<T>> { using type = integer_sequence_concat<typename scalar_name<T>::type>; };
 
-template<class T, T V>
-struct mangle_param<value_param<T, V>> { using type = integer_sequence_concat<std::integer_sequence<char, '('>, typename scalar_name<T>::type, std::integer_sequence<char, ')'>, mangle_value<T, V>>; };
+template<auto V>
+struct mangle_param<value_param<V>> { using type = integer_sequence_concat<std::integer_sequence<char, '('>, typename scalar_name<decltype(V)>::type, std::integer_sequence<char, ')'>, mangle_value<decltype(V), V>>; };
 
 template<char Dim>
 struct mangle_param<dim_param<Dim>> { using type = integer_sequence_concat<std::integer_sequence<char, '\'', Dim, '\''>>; };

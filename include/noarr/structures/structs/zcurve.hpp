@@ -115,8 +115,8 @@ struct merge_zcurve_t : strict_contain<T> {
 
 	static constexpr char name[] = "merge_zcurve_t";
 	using params = struct_params<
-		value_param<int, SpecialLevel>,
-		value_param<int, GeneralLevel>,
+		value_param<SpecialLevel>,
+		value_param<GeneralLevel>,
 		dim_param<Dim>,
 		structure_param<T>,
 		dim_param<Dims>...>;
