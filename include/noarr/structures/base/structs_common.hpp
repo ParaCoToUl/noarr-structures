@@ -123,7 +123,7 @@ constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, std::index_sequence
  * @tparam T: the input type
  */
 template<class T>
-using is_struct = helpers::is_struct_impl<T>;
+using is_struct = helpers::is_struct_impl<std::remove_cvref_t<T>>;
 
 template<class T>
 static constexpr auto is_struct_v = is_struct<T>::value;
@@ -137,13 +137,16 @@ concept IsStruct = is_struct_v<T>;
  * @tparam T: the input type
  */
 template<class T>
-using is_proto_struct = helpers::is_proto_struct_impl<T>;
+using is_proto_struct = helpers::is_proto_struct_impl<std::remove_cvref_t<T>>;
 
 template<class T>
 static constexpr auto is_proto_struct_v = is_proto_struct<T>::value;
 
 template<class T>
 concept IsProtoStruct = is_proto_struct_v<T>;
+
+template<class T>
+concept IsStructOrProtoStruct = IsStruct<T> || IsProtoStruct<T>;
 
 template<bool PreservesLayout = false, class F>
 constexpr auto make_proto(F f) noexcept {
