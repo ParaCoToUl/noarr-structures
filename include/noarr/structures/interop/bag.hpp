@@ -1,10 +1,14 @@
 #ifndef NOARR_BAG_HPP
 #define NOARR_BAG_HPP
 
+#include <cstddef>
 #include <memory>
+#include <type_traits>
 #include <vector>
 
+#include "../base/contain.hpp"
 #include "../extra/struct_traits.hpp"
+#include "../extra/to_struct.hpp"
 #include "../extra/funcs.hpp"
 
 namespace noarr {
@@ -172,15 +176,15 @@ public:
 	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout)
 	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator ^(bag &&s, ProtoStruct p) {
-		auto new_struct = s.structure() ^ p;
-		return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(s.template get<1>()));
+		const auto new_struct = s.structure() ^ p;
+		return bag<decltype(new_struct), BagPolicy>(new_struct, std::move(std::move(s).template get<1>()));
 	}
 
 
 	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
 	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator ^(const bag &s, ProtoStruct p) {
-		auto new_struct = s.structure() ^ p;
+		const auto new_struct = s.structure() ^ p;
 		return bag<decltype(new_struct), BagPolicy>(new_struct, s.template get<1>());
 	}
 
@@ -258,7 +262,7 @@ constexpr auto bag<Structure, BagPolicy>::get_ref() const noexcept {
 
 template<class T, class P>
 struct to_struct<bag<T, P>> {
-	using type = T;
+	using type = std::remove_cvref_t<T>;
 	static constexpr T convert(const bag<T, P> &b) noexcept { return b.structure(); }
 };
 

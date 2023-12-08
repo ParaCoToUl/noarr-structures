@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 #define NOARR_STRUCTURES_STRUCT_TRAITS_HPP
 
+#include <type_traits>
+
 #include "../base/signature.hpp"
 #include "../base/state.hpp"
 #include "../base/utility.hpp"

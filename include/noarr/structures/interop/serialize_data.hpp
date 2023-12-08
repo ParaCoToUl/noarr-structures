@@ -2,7 +2,6 @@
 #define NOARR_STRUCTURES_SERIALIZE_DATA_HPP
 
 #include "../extra/traverser.hpp"
-#include "../interop/bag.hpp"
 
 namespace noarr {
 
@@ -15,7 +14,7 @@ constexpr decltype(auto) deserialize_data(Istream &&in, Struct s, void *data) no
 }
 
 template<class Istream, class Bag>
-constexpr decltype(auto) deserialize_data(Istream &&in, Bag &&bag) noexcept {
+constexpr decltype(auto) deserialize_data(Istream &&in, Bag &bag) noexcept {
 	return deserialize_data(std::forward<Istream>(in), bag.structure(), bag.data());
 }
 

@@ -1,8 +1,13 @@
 #ifndef NOARR_STRUCTURES_TRAVERSER_ITER_HPP
 #define NOARR_STRUCTURES_TRAVERSER_ITER_HPP
 
+#include <cstddef>
 #include <iterator>
+#include <utility>
 
+#include "../base/contain.hpp"
+#include "../base/signature.hpp"
+#include "../base/state.hpp"
 #include "../extra/traverser.hpp"
 #include "../structs/setters.hpp"
 #include "../structs/slice.hpp"
@@ -36,7 +41,7 @@ private:
 		return construct_base();
 	}
 public:
-	explicit constexpr traverser_iterator_t() noexcept : base(construct_base()) {}
+	[[deprecated]] explicit constexpr traverser_iterator_t() noexcept : base(construct_base()), idx() {}
 
 	constexpr difference_type operator-(const this_t &other) const noexcept { return idx - other.idx; }
 	constexpr this_t operator+(difference_type diff) const noexcept { return this_t(*this, idx + diff); }
@@ -45,8 +50,8 @@ public:
 	constexpr this_t &operator-=(difference_type diff) noexcept { idx -= diff; return *this; }
 	constexpr this_t &operator++() noexcept { idx++; return *this; }
 	constexpr this_t &operator--() noexcept { idx--; return *this; }
-	constexpr this_t operator++(int) noexcept { auto copy = *this; idx++; return copy; }
-	constexpr this_t operator--(int) noexcept { auto copy = *this; idx--; return copy; }
+	this_t operator++(int) noexcept { const auto copy = *this; idx++; return copy; }
+	this_t operator--(int) noexcept { const auto copy = *this; idx--; return copy; }
 	constexpr bool operator==(const this_t &other) const noexcept { return idx == other.idx; }
 	constexpr bool operator!=(const this_t &other) const noexcept { return idx != other.idx; }
 	constexpr bool operator<(const this_t &other) const noexcept { return idx < other.idx; }
@@ -75,7 +80,7 @@ struct traverser_range_t : strict_contain<Struct, Order> {
 	template<class NewOrder>
 	constexpr auto order(NewOrder new_order) const noexcept {
 		// equivalent to as_traverser().order(new_order)
-		auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
+		const auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
 		return traverser_t<Struct, decltype(get_order() ^ slice_order ^ new_order)>(get_struct(), get_order() ^ slice_order ^ new_order);
 	}
 
@@ -85,7 +90,7 @@ struct traverser_range_t : strict_contain<Struct, Order> {
 	}
 
 	constexpr auto as_traverser() const noexcept {
-		auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
+		const auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
 		return traverser_t<Struct, decltype(get_order() ^ slice_order)>(get_struct(), get_order() ^ slice_order);
 	}
 

@@ -1,6 +1,10 @@
 #ifndef NOARR_STRUCTURES_SIGNATURE_HPP
 #define NOARR_STRUCTURES_SIGNATURE_HPP
 
+#include <cstddef>
+#include <tuple>
+#include <type_traits>
+
 #include "contain.hpp"
 
 namespace noarr {

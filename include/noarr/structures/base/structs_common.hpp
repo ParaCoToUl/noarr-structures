@@ -1,6 +1,11 @@
 #ifndef NOARR_STRUCTURES_STRUCTS_COMMON_HPP
 #define NOARR_STRUCTURES_STRUCTS_COMMON_HPP
 
+#include <cstddef>
+#include <type_traits>
+#include <utility>
+
+#include "contain.hpp"
 #include "utility.hpp"
 #include "signature.hpp"
 #include "state.hpp"

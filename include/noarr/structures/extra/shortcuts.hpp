@@ -1,6 +1,10 @@
 #ifndef NOARR_STRUCTURES_SHORTCUTS_HPP
 #define NOARR_STRUCTURES_SHORTCUTS_HPP
 
+#include <cstddef>
+
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
 #include "../extra/funcs.hpp"
 #include "../structs/bcast.hpp"
@@ -137,7 +141,7 @@ constexpr auto idx(ValueType ...value) noexcept {
 template<IsDim auto Dim, class F, IsState State>
 constexpr auto update_index(State state, F f) noexcept {
 	static_assert(State::template contains<index_in<Dim>>, "Requested dimension does not exist. To add a new dimension instead of updating existing one, use .template with<index_in<'...'>>(...)");
-	auto new_index = f(state.template get<index_in<Dim>>());
+	const auto new_index = f(state.template get<index_in<Dim>>());
 	return state.template with<index_in<Dim>>(good_index_t<decltype(new_index)>(new_index));
 }
 

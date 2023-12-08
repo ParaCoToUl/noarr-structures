@@ -1,6 +1,9 @@
 #ifndef NOARR_STRUCTURES_BLOCKS_HPP
 #define NOARR_STRUCTURES_BLOCKS_HPP
 
+#include <cstddef>
+#include <type_traits>
+
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"
 #include "../base/state.hpp"
@@ -39,23 +42,23 @@ public:
 	template<IsState State>
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
+		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
 		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>;
 		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
-			auto major_length = state.template get<length_in<DimMajor>>();
-			auto minor_length = state.template get<length_in<DimMinor>>();
+			const auto major_length = state.template get<length_in<DimMajor>>();
+			const auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
-				auto major_index = state.template get<index_in<DimMajor>>();
-				auto minor_index = state.template get<index_in<DimMinor>>();
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
 				return clean_state.template with<length_in<Dim>, index_in<Dim>>(major_length*minor_length, major_index*minor_length + minor_index);
 			} else {
 				return clean_state.template with<length_in<Dim>>(major_length*minor_length);
 			}
 		} else if constexpr(State::template contains<length_in<DimMinor>>) {
-			auto minor_length = state.template get<length_in<DimMinor>>();
+			const auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
-				auto major_index = state.template get<index_in<DimMajor>>();
-				auto minor_index = state.template get<index_in<DimMinor>>();
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
 				return clean_state.template with<index_in<Dim>>(major_index*minor_length + minor_index);
 			} else {
 				return clean_state;
@@ -85,8 +88,8 @@ public:
 			if constexpr(State::template contains<length_in<DimMajor>>) {
 				return state.template get<length_in<DimMajor>>();
 			} else if constexpr(State::template contains<length_in<DimMinor>>) {
-				auto minor_length = state.template get<length_in<DimMinor>>();
-				auto full_length = sub_structure().template length<Dim>(sub_state(state));
+				const auto minor_length = state.template get<length_in<DimMinor>>();
+				const auto full_length = sub_structure().template length<Dim>(sub_state(state));
 				return full_length / minor_length;
 			} else {
 				static_assert(value_always_false<QDim>, "Length has not been set (and cannot be computed from the total size because block size has also not been set)");
@@ -152,23 +155,23 @@ public:
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<DimIsPresent>>, "This dimension cannot be resized");
-		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
+		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
 		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>> && State::template contains<index_in<DimIsPresent>>;
 		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
-			auto major_length = state.template get<length_in<DimMajor>>();
-			auto minor_length = state.template get<length_in<DimMinor>>();
+			const auto major_length = state.template get<length_in<DimMajor>>();
+			const auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
-				auto major_index = state.template get<index_in<DimMajor>>();
-				auto minor_index = state.template get<index_in<DimMinor>>();
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
 				return clean_state.template with<length_in<Dim>, index_in<Dim>>(major_length*minor_length, major_index*minor_length + minor_index);
 			} else {
 				return clean_state.template with<length_in<Dim>>(major_length*minor_length);
 			}
 		} else if constexpr(State::template contains<length_in<DimMinor>>) {
-			auto minor_length = state.template get<length_in<DimMinor>>();
+			const auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
-				auto major_index = state.template get<index_in<DimMajor>>();
-				auto minor_index = state.template get<index_in<DimMinor>>();
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
 				return clean_state.template with<index_in<Dim>>(major_index*minor_length + minor_index);
 			} else {
 				return clean_state;
@@ -195,11 +198,11 @@ public:
 			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
 			static_assert(State::template contains<index_in<DimMajor>>, "Fix block index before querying this dimension (or pass the index in state)");
 			static_assert(State::template contains<index_in<DimMinor>>, "Fix index within block before querying this dimension (or pass the index in state)");
-			auto major_index = state.template get<index_in<DimMajor>>();
-			auto minor_index = state.template get<index_in<DimMinor>>();
-			auto minor_length = state.template get<length_in<DimMinor>>();
-			auto full_length = sub_structure().template length<Dim>(sub_state(state));
-			auto full_index = major_index * minor_length + minor_index;
+			const auto major_index = state.template get<index_in<DimMajor>>();
+			const auto minor_index = state.template get<index_in<DimMinor>>();
+			const auto minor_length = state.template get<length_in<DimMinor>>();
+			const auto full_length = sub_structure().template length<Dim>(sub_state(state));
+			const auto full_index = major_index * minor_length + minor_index;
 			return std::size_t(full_index < full_length);
 		} else if constexpr(QDim == DimMinor) {
 			static_assert(State::template contains<length_in<DimMinor>>, "Length has not been set");
@@ -208,8 +211,8 @@ public:
 			if constexpr(State::template contains<length_in<DimMajor>>) {
 				return state.template get<length_in<DimMajor>>();
 			} else if constexpr(State::template contains<length_in<DimMinor>>) {
-				auto minor_length = state.template get<length_in<DimMinor>>();
-				auto full_length = sub_structure().template length<Dim>(sub_state(state));
+				const auto minor_length = state.template get<length_in<DimMinor>>();
+				const auto full_length = sub_structure().template length<Dim>(sub_state(state));
 				return (full_length + minor_length - make_const<1>()) / minor_length;
 			} else {
 				static_assert(value_always_false<QDim>, "Length has not been set (and cannot be computed from the total size because block size has also not been set)");
@@ -291,14 +294,14 @@ public:
 		static_assert(!State::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
-		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>();
+		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>();
 		if constexpr(State::template contains<index_in<DimIsBorder>> && State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
-			auto minor_index = state.template get<index_in<DimMinor>>();
+			const auto minor_index = state.template get<index_in<DimMinor>>();
 			if constexpr(is_body<State>()) {
-				auto major_index = state.template get<index_in<DimMajor>>();
+				const auto major_index = state.template get<index_in<DimMajor>>();
 				return clean_state.template with<index_in<Dim>>(major_index*minor_length() + minor_index);
 			} else /*border*/ {
-				auto major_length = sub_structure().template length<Dim>(clean_state) / minor_length();
+				const auto major_length = sub_structure().template length<Dim>(clean_state) / minor_length();
 				return clean_state.template with<index_in<Dim>>(major_length*minor_length() + minor_index);
 			}
 		} else {
@@ -417,20 +420,20 @@ public:
 	template<IsState State>
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
-		auto minor_length = sub_structure().template length<DimMinor>(clean_state);
+		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
+		const auto minor_length = sub_structure().template length<DimMinor>(clean_state);
 		if constexpr(State::template contains<length_in<Dim>>) {
-			auto dim_length = state.template get<length_in<Dim>>();
-			auto major_length = dim_length / minor_length;
+			const auto dim_length = state.template get<length_in<Dim>>();
+			const auto major_length = dim_length / minor_length;
 			if constexpr(State::template contains<index_in<Dim>>) {
-				auto index = state.template get<index_in<Dim>>();
+				const auto index = state.template get<index_in<Dim>>();
 				return clean_state.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(index / minor_length, index % minor_length, major_length);
 			} else {
 				return clean_state.template with<length_in<DimMajor>>(major_length);
 			}
 		} else {
 			if constexpr(State::template contains<index_in<Dim>>) {
-				auto index = state.template get<index_in<Dim>>();
+				const auto index = state.template get<index_in<Dim>>();
 				return clean_state.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
 			} else {
 				return clean_state;

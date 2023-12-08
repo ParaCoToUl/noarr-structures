@@ -1,6 +1,10 @@
 #ifndef NOARR_STRUCTURES_SLICE_HPP
 #define NOARR_STRUCTURES_SLICE_HPP
 
+#include <cstddef>
+#include <type_traits>
+#include <utility>
+
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"
 #include "../base/state.hpp"
@@ -55,7 +59,7 @@ public:
 	template<IsState State>
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		const auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
 		if constexpr(State::template contains<index_in<Dim>>)
 			if constexpr(State::template contains<length_in<Dim>>)
 				return tmp_state.template with<index_in<Dim>, length_in<Dim>>(state.template get<index_in<Dim>>() + start(), state.template get<length_in<Dim>>() + start());
@@ -362,7 +366,7 @@ public:
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
 		if constexpr(QDim == Dim) {
-			auto sub_length = sub_structure().template length<Dim>(state);
+			const auto sub_length = sub_structure().template length<Dim>(state);
 			return (sub_length + stride() - start() - make_const<1>()) / stride();
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
@@ -441,7 +445,7 @@ public:
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(State::template contains<index_in<Dim>>) {
-			auto tmp_state = state.template remove<index_in<Dim>>();
+			const auto tmp_state = state.template remove<index_in<Dim>>();
 			return tmp_state.template with<index_in<Dim>>(sub_structure().template length<Dim>(tmp_state) - make_const<1>() - state.template get<index_in<Dim>>());
 		} else {
 			return state;

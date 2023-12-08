@@ -1,6 +1,7 @@
 #ifndef NOARR_STRUCTURES_STATE_HPP
 #define NOARR_STRUCTURES_STATE_HPP
 
+#include <cstddef>
 #include <concepts>
 #include <type_traits>
 
@@ -167,7 +168,7 @@ struct state : strict_contain<typename StateItems::value_type...> {
 	template<class Tag> requires IsTag<Tag>
 	static constexpr bool contains = index_of<Tag>.present;
 
-	static constexpr bool is_empty = !sizeof...(StateItems);
+	static constexpr bool is_empty = sizeof...(StateItems) == 0;
 
 	template<class Tag> requires IsTag<Tag> && contains<Tag>
 	constexpr auto get() const noexcept {

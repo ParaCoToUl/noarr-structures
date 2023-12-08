@@ -6,6 +6,7 @@
 
 #include <tbb/tbb.h>
 
+#include "../base/state.hpp"
 #include "../interop/bag.hpp"
 #include "../interop/traverser_iter.hpp"
 
@@ -39,7 +40,7 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 		// parallel writes may go to colliding offsets => out_ptr must be privatized
 		struct private_ptr {
 			void *raw;
-			constexpr private_ptr() noexcept : raw(nullptr) {}
+			constexpr private_ptr() : raw(nullptr) {}
 			private_ptr(const private_ptr &) = delete;
 			private_ptr(private_ptr &&) = delete;
 			private_ptr &operator=(const private_ptr &) = delete;
@@ -71,19 +72,19 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 
 template<class Traverser, class FNeut, class FAcc, class FJoin, class OutBag>
 inline void tbb_reduce_bag(const Traverser &t, const FNeut &f_neut, const FAcc &f_acc, const FJoin &f_join, const OutBag &out_bag) noexcept {
-	auto out_struct = out_bag.structure();
+	const auto out_struct = out_bag.structure();
 	return tbb_reduce(t,
 		[out_struct, &f_neut](auto out_state, void *out_left) {
-			auto bag = make_bag(out_struct, (char *)out_left);
+			const auto bag = make_bag(out_struct, (char *)out_left);
 			f_neut(out_state, bag);
 		},
 		[out_struct, &f_acc](auto in_state, void *out_left) {
-			auto bag = make_bag(out_struct, (char *)out_left);
+			const auto bag = make_bag(out_struct, (char *)out_left);
 			f_acc(in_state, bag);
 		},
 		[out_struct, &f_join](auto out_state, void *out_left, const void *out_right) {
-			auto left_bag = make_bag(out_struct, (char *)out_left);
-			auto right_bag = make_bag(out_struct, (const char *)out_right);
+			const auto left_bag = make_bag(out_struct, (char *)out_left);
+			const auto right_bag = make_bag(out_struct, (const char *)out_right);
 			f_join(out_state, left_bag, right_bag);
 		},
 		out_struct,

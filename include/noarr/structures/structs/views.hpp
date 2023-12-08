@@ -1,6 +1,10 @@
 #ifndef NOARR_STRUCTURES_VIEWS_HPP
 #define NOARR_STRUCTURES_VIEWS_HPP
 
+#include <cstddef>
+#include <type_traits>
+#include <utility>
+
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"
 #include "../base/state.hpp"

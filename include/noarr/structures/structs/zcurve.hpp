@@ -1,8 +1,11 @@
 #ifndef NOARR_STRUCTURES_ZCURVE_HPP
 #define NOARR_STRUCTURES_ZCURVE_HPP
 
+#include <cstddef>
 #include <bit>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"
@@ -160,12 +163,12 @@ public:
 	template<std::size_t ...DimsI, class State> requires (sizeof...(DimsI) == sizeof...(Dims) && IsState<State>)
 	constexpr auto sub_state(State state, std::index_sequence<DimsI...>) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
-		auto clean_state = state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
+		const auto clean_state = state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
 		if constexpr(State::template contains<index_in<Dim>>) {
-			auto index = state.template get<index_in<Dim>>();
-			auto index_general = index >> SpecialLevel*sizeof...(Dims);
-			auto index_special = index & ((1 << SpecialLevel*sizeof...(Dims)) - 1);
-			auto indices = helpers::zc_general<GeneralLevel-SpecialLevel>(index_general, (sub_structure().template length<Dims>(clean_state) >> SpecialLevel)...);
+			const auto index = state.template get<index_in<Dim>>();
+			const auto index_general = index >> SpecialLevel*sizeof...(Dims);
+			const auto index_special = index & ((1 << SpecialLevel*sizeof...(Dims)) - 1);
+			const auto indices = helpers::zc_general<GeneralLevel-SpecialLevel>(index_general, (sub_structure().template length<Dims>(clean_state) >> SpecialLevel)...);
 			return clean_state.template with<index_in<Dims>...>(((std::get<DimsI>(indices) << SpecialLevel) + helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
 		} else {
 			return clean_state;

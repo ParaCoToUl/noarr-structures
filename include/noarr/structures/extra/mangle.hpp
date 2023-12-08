@@ -1,7 +1,9 @@
 #ifndef NOARR_STRUCTURES_MANGLE_HPP
 #define NOARR_STRUCTURES_MANGLE_HPP
 
+#include <cstddef>
 #include <limits>
+#include <utility>
 
 #include "../base/contain.hpp"
 #include "../base/structs_common.hpp"

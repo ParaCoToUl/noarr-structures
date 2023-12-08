@@ -105,17 +105,17 @@ struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<Dims
 	using get_fixes = decltype((... ^ helpers::cuda_fix_pair_proto<DimsB, DimsT, CudaDimsB, CudaDimsT>()));
 
 	constexpr dim3 grid_dim() const noexcept {
-		auto full = this->top_struct();
+		const auto full = this->top_struct();
 		return {(uint)full.template length<DimsB>(empty_state)...};
 	}
 
 	constexpr dim3 block_dim() const noexcept {
-		auto full = this->top_struct();
+		const auto full = this->top_struct();
 		return {(uint)full.template length<DimsT>(empty_state)...};
 	}
 
 	explicit constexpr operator bool() const noexcept {
-		auto full = this->top_struct();
+		const auto full = this->top_struct();
 		return (... && full.template length<DimsT>(empty_state)) && (... && full.template length<DimsB>(empty_state));
 	}
 

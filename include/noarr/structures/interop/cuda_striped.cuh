@@ -81,11 +81,11 @@ public:
 	constexpr auto size(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
 		// substructure size
-		auto sub_size = sub_structure().size(sub_state(state));
+		const auto sub_size = sub_structure().size(sub_state(state));
 		// total elements in each stripe = total elements in sub-structure
-		auto sub_elements = sub_size / make_const<elem_size>();
+		const auto sub_elements = sub_size / make_const<elem_size>();
 		// stripe length = ceil(total elements in stripe / total elements in stripe width)
-		auto stripe_len = (sub_elements + make_const<stripe_width_elems - 1>()) / make_const<stripe_width_elems>();
+		const auto stripe_len = (sub_elements + make_const<stripe_width_elems - 1>()) / make_const<stripe_width_elems>();
 		// total size = stripe length (i.e. total length) * total width
 		return stripe_len * make_const<total_width>();
 	}
@@ -93,13 +93,13 @@ public:
 	template<class Sub>
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		using namespace constexpr_arithmetic;
-		auto sub_offset = offset_of<Sub>(sub_structure(), sub_state(state));
-		auto offset_major = sub_offset / make_const<stripe_width>();
+		const auto sub_offset = offset_of<Sub>(sub_structure(), sub_state(state));
+		const auto offset_major = sub_offset / make_const<stripe_width>();
 		if constexpr(std::is_same_v<Sub, ElemType> && stripe_width_elems == 1) {
 			// Optimization: offset_minor should be zero.
 			return offset_inner(state, offset_major);
 		} else {
-			auto offset_minor = sub_offset % make_const<stripe_width>();
+			const auto offset_minor = sub_offset % make_const<stripe_width>();
 			return offset_inner(state, offset_major) + offset_minor;
 		}
 	}
@@ -133,9 +133,9 @@ private:
 	template<class Idx, IsState State>
 	constexpr auto offset_inner(State state, Idx index_of_period) const noexcept {
 		using namespace constexpr_arithmetic;
-		auto offset_of_period = index_of_period * make_const<total_width>();
+		const auto offset_of_period = index_of_period * make_const<total_width>();
 		if constexpr(State::template contains<cuda_stripe_index>) {
-			auto offset_of_stripe = state.template get<cuda_stripe_index>() * make_const<stripe_padded_width>();
+			const auto offset_of_stripe = state.template get<cuda_stripe_index>() * make_const<stripe_padded_width>();
 			return offset_of_period + offset_of_stripe;
 		} else {
 			std::size_t offset_of_stripe = (threadIdx.x % NumStripes) * stripe_padded_width;

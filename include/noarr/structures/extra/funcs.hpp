@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_FUNCS_HPP
 #define NOARR_STRUCTURES_FUNCS_HPP
 
+#include <cstddef>
+
 #include "../base/state.hpp"
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"

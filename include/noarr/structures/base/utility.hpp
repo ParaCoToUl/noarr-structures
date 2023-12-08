@@ -270,7 +270,7 @@ using dim_tree_to_sequence = typename helpers::dim_tree_to_sequence_impl<DimTree
 
 template<std::size_t I>
 struct lit_t : std::integral_constant<std::size_t, I> {
-	auto operator()() = delete; // using `lit<42>()` by mistake should be rejected, not evaluate to dynamic size_t of 42
+	constexpr auto operator()() const = delete; // using `lit<42>()` by mistake should be rejected, not evaluate to dynamic size_t of 42
 };
 
 template<std::size_t I>
@@ -304,8 +304,7 @@ struct none {
 };
 
 template<class T>
-concept IsSimple = true
-	&& std::is_standard_layout_v<T>
+concept IsSimple = std::is_standard_layout_v<T>
 	&& (!std::is_empty_v<T> || std::is_trivially_default_constructible_v<T>) /* empty -> trivially_default_constructible */
 	&& (!std::is_default_constructible_v<T> || std::is_trivially_default_constructible_v<T>) /* default_constructible -> trivially_default_constructible */
 	&& std::is_trivially_copy_constructible_v<T>

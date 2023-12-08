@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_STRUCT_CONCEPTS_HPP
 
 #include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
 #include "../extra/to_struct.hpp"
 #include "../extra/sig_utils.hpp"
 

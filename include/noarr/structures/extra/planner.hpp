@@ -1,6 +1,10 @@
 #ifndef NOARR_STRUCTURES_PLANNER_HPP
 #define NOARR_STRUCTURES_PLANNER_HPP
 
+#include <cstddef>
+#include <type_traits>
+#include <utility>
+
 #include "../base/contain.hpp"
 #include "../base/state.hpp"
 #include "../base/structs_common.hpp"

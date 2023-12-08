@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_SIG_UTILS_HPP
 #define NOARR_STRUCTURES_SIG_UTILS_HPP
 
+#include <cstddef>
+
 #include "../base/signature.hpp"
 #include "../base/state.hpp"
 #include "../base/utility.hpp"
