@@ -11,10 +11,12 @@
 namespace noarr {
 
 template<typename T>
-concept IsTag = IsDimSequence<typename T::dims> && requires (T a) {
+concept IsTag = requires (T a) {
+	requires IsDimSequence<typename T::dims>;
 	{ T::template all_accept<dim_accepter> } -> std::convertible_to<bool>;
 	{ T::template any_accept<dim_accepter> } -> std::convertible_to<bool>;
-} && std::same_as<typename T::template map<dim_identity_mapper>, T>;
+	typename T::template map<dim_identity_mapper>;
+};
 
 template<class ...Ts>
 concept IsTagPack = (... && IsTag<Ts>);
