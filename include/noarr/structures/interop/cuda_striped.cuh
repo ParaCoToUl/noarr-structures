@@ -44,7 +44,7 @@ struct cuda_stripe_index {
 
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth, class T>
 struct cuda_striped_t : strict_contain<T> {
-	static_assert(is_struct_v<ElemType>, "The element type of cuda_striped must be a noarr structure.");
+	static_assert(IsStruct<ElemType>, "The element type of cuda_striped must be a noarr structure.");
 
 	static constexpr char name[] = "cuda_striped_t";
 	using params = struct_params<
@@ -146,7 +146,7 @@ private:
 
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth>
 struct cuda_striped_proto {
-	static_assert(is_struct_v<ElemType>, "The element type of cuda_striped must be a noarr structure. Omit the type to imply scalar<...>, or specify scalar<...> (or any other noarr structure) explicitly.");
+	static_assert(IsStruct<ElemType>, "The element type of cuda_striped must be a noarr structure. Omit the type to imply scalar<...>, or specify scalar<...> (or any other noarr structure) explicitly.");
 	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>

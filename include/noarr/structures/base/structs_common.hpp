@@ -73,19 +73,23 @@ struct to_each : ProtoStruct {
 template<class ProtoStruct>
 to_each(ProtoStruct) -> to_each<ProtoStruct>;
 
+/**
+ * @brief returns whether the type `T` meets the criteria for structures
+ *
+ * @tparam T: the input type
+ */
+template<class T>
+concept IsStruct = IsSignature<typename T::signature>;
+
+/**
+ * @brief returns whether the type `T` meets the criteria for proto-structures
+ *
+ * @tparam T: the input type
+ */
+template<class T>
+concept IsProtoStruct = std::same_as<decltype(T::proto_preserves_layout), const bool>;
+
 namespace helpers {
-
-template<class T>
-struct is_struct_impl : std::false_type {};
-template<class T> requires requires { typename T::signature; }
-struct is_struct_impl<T> : std::true_type {
-	static_assert(is_signature_v<typename T::signature>, "The signature of a structure must be a valid signature");
-};
-
-template<class T>
-struct is_proto_struct_impl : std::false_type {};
-template<class T> requires std::same_as<decltype(T::proto_preserves_layout), const bool>
-struct is_proto_struct_impl<T> : std::true_type {};
 
 template<class F, bool PreservesLayout>
 struct make_proto_impl {
@@ -100,7 +104,7 @@ struct make_proto_impl {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return f_(s); }
 };
 
-template<class ...Structs, class ProtoStruct, std::size_t ...Indices> requires (is_proto_struct_impl<ProtoStruct>::value)
+template<class ...Structs, class ProtoStruct, std::size_t ...Indices> requires IsProtoStruct<ProtoStruct>
 constexpr auto pass_pack(pack<Structs...> s, ProtoStruct p, std::index_sequence<Indices...>) noexcept {
 	return p.instantiate_and_construct(s.template get<Indices>()...);
 }
@@ -116,34 +120,6 @@ constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, std::index_sequence
 }
 
 } // namespace helpers
-
-/**
- * @brief returns whether the type `T` meets the criteria for structures
- *
- * @tparam T: the input type
- */
-template<class T>
-using is_struct = helpers::is_struct_impl<std::remove_cvref_t<T>>;
-
-template<class T>
-static constexpr auto is_struct_v = is_struct<T>::value;
-
-template<class T>
-concept IsStruct = is_struct_v<T>;
-
-/**
- * @brief returns whether the type `T` meets the criteria for proto-structures
- *
- * @tparam T: the input type
- */
-template<class T>
-using is_proto_struct = helpers::is_proto_struct_impl<std::remove_cvref_t<T>>;
-
-template<class T>
-static constexpr auto is_proto_struct_v = is_proto_struct<T>::value;
-
-template<class T>
-concept IsProtoStruct = is_proto_struct_v<T>;
 
 template<class T>
 concept IsStructOrProtoStruct = IsStruct<T> || IsProtoStruct<T>;
