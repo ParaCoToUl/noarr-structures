@@ -172,6 +172,8 @@ struct state : strict_contain<typename StateItems::value_type...> {
 
 	static constexpr bool is_empty = sizeof...(StateItems) == 0;
 
+	using items_pack = helpers::state_items_pack<StateItems...>;
+
 	template<class Tag> requires IsTag<Tag> && contains<Tag>
 	constexpr auto get() const noexcept {
 		return base::template get<index_of<Tag>.value>();
@@ -189,17 +191,17 @@ struct state : strict_contain<typename StateItems::value_type...> {
 
 	template<class ...Tags> requires IsTagPack<Tags...>
 	constexpr auto remove() const noexcept {
-		return items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result());
+		return items_restrict(typename helpers::state_remove_items<items_pack, Tags...>::result());
 	}
 
 	template<class Pred>
 	constexpr auto filter() const noexcept {
-		return items_restrict(typename helpers::state_filter_items<helpers::state_items_pack<StateItems...>, Pred>::result());
+		return items_restrict(typename helpers::state_filter_items<items_pack, Pred>::result());
 	}
 
 	template<class ...Tags, class ...ValueTypes> requires IsTagPack<Tags...>
 	constexpr auto with(ValueTypes ...values) const noexcept {
-		return items_restrict_add<Tags...>(typename helpers::state_remove_items<helpers::state_items_pack<StateItems...>, Tags...>::result(), values...);
+		return items_restrict_add<Tags...>(typename helpers::state_remove_items<items_pack, Tags...>::result(), values...);
 	}
 };
 
@@ -270,13 +272,130 @@ using good_diff_index_t = decltype(helpers::supported_diff_index_type(std::declv
 
 
 template<class ...Tags, class ...ValueTypes> requires IsTagPack<Tags...>
-constexpr auto make_state(ValueTypes ...values) {
+constexpr auto make_state(ValueTypes ...values) noexcept {
 	return state<state_item<Tags, good_index_t<ValueTypes>>...>(values...);
 }
 
 template<class ...StateItemsA, class ...StateItemsB>
-constexpr state<StateItemsA..., StateItemsB...> operator&(state<StateItemsA...> state_a, state<StateItemsB...> state_b) noexcept {
-	return state<StateItemsA..., StateItemsB...>(state_a.template get<typename StateItemsA::tag>()..., state_b.template get<typename StateItemsB::tag>()...);
+constexpr auto operator&(state<StateItemsA...> state_a, [[maybe_unused]] state<StateItemsB...> state_b) noexcept {
+	return state_a.template with<typename StateItemsB::tag...>(state_b.template get<typename StateItemsB::tag>()...);
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator+([[maybe_unused]] state<StateItems...> state_a) noexcept {
+	return state_a;
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator-([[maybe_unused]] state<StateItems...> state_a) noexcept {
+	using namespace noarr::constexpr_arithmetic;
+	return state<StateItems...>(-state_a.template get<typename StateItems::tag>()...);
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator+(state<StateItems...> state_a, state<StateItems...> state_b) noexcept {
+	using namespace noarr::constexpr_arithmetic;
+	return state<StateItems...>(state_a.template get<typename StateItems::tag>() + state_b.template get<typename StateItems::tag>()...);
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator+(state<StateItems...> state_a, [[maybe_unused]] state<> state_b) noexcept {
+	return state_a;
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator+([[maybe_unused]] state<> state_a, state<StateItems...> state_b) noexcept {
+	return state_b;
+}
+
+constexpr state<> operator+([[maybe_unused]] state<> state_a, [[maybe_unused]] state<> state_b) noexcept {
+	return empty_state;
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr auto operator+(state<StateItemsA...> state_a, state<StateItemsB...> state_b) noexcept {
+	// items that are in just one of the states
+	const auto base = state_a.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsA...>, typename StateItemsB::tag...>::result())
+		& state_b.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsB...>, typename StateItemsA::tag...>::result());
+
+	return [=]<class ...StateItems>(state<StateItems...> base) constexpr noexcept {
+		// items that are in both states
+		const auto added = state_a.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsA...>, typename StateItems::tag...>::result())
+			+ state_b.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsA...>, typename StateItems::tag...>::result());
+
+		return added & base;
+	}(base);
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator-(state<StateItems...> state_a, state<StateItems...> state_b) noexcept {
+	using namespace noarr::constexpr_arithmetic;
+	return state<StateItems...>(state_a.template get<typename StateItems::tag>() - state_b.template get<typename StateItems::tag>()...);
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator-(state<StateItems...> state_a, [[maybe_unused]] state<> state_b) noexcept {
+	return state_a;
+}
+
+template<class ...StateItems>
+constexpr state<StateItems...> operator-([[maybe_unused]] state<> state_a, state<StateItems...> state_b) noexcept {
+	return -state_b;
+}
+
+constexpr state<> operator-([[maybe_unused]] state<> state_a, [[maybe_unused]] state<> state_b) noexcept {
+	return empty_state;
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr auto operator-(state<StateItemsA...> state_a, state<StateItemsB...> state_b) noexcept {
+	const auto base = state_a.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsA...>, typename StateItemsB::tag...>::result())
+		& -state_b.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsB...>, typename StateItemsA::tag...>::result());
+
+	return [=]<class ...StateItems>(state<StateItems...> base) constexpr noexcept {
+		const auto added = state_a.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsA...>, typename StateItems::tag...>::result())
+			- state_b.items_restrict(typename helpers::state_remove_items<helpers::state_items_pack<StateItemsA...>, typename StateItems::tag...>::result());
+
+		return added & base;
+	}(base);
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr bool operator==([[maybe_unused]] state<StateItemsA...> state_a, [[maybe_unused]] state<StateItemsB...> state_b) noexcept {
+	if constexpr ((... && state<StateItemsB...>::template contains<typename StateItemsA::tag>) && (... && state<StateItemsA...>::template contains<typename StateItemsB::tag>)) {
+		return (... && (state_a.template get<typename StateItemsA::tag>() == state_b.template get<typename StateItemsA::tag>()));
+	} else {
+		return false;
+	}
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr bool operator!=(state<StateItemsA...> state_a, state<StateItemsB...> state_b) noexcept {
+	return !(state_a == state_b);
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr bool operator<=([[maybe_unused]] state<StateItemsA...> state_a, [[maybe_unused]] state<StateItemsB...> state_b) noexcept {
+	if constexpr ((... && state<StateItemsB...>::template contains<typename StateItemsA::tag>)) {
+		return (... && (state_a.template get<typename StateItemsA::tag>() <= state_b.template get<typename StateItemsA::tag>()));
+	} else {
+		return false;
+	}
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr bool operator>=(state<StateItemsA...> state_a,  state<StateItemsB...> state_b) noexcept {
+	return state_b <= state_a;
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr bool operator<(state<StateItemsA...> state_a, state<StateItemsB...> state_b) noexcept {
+	return state_a <= state_b && state_a != state_b;
+}
+
+template<class ...StateItemsA, class ...StateItemsB>
+constexpr bool operator>(state<StateItemsA...> state_a,  state<StateItemsB...> state_b) noexcept {
+	return state_b < state_a;
 }
 
 } // namespace noarr
