@@ -57,12 +57,12 @@ The `ArgLength` further specifies the [length](Glossary.md#length) in dimension 
 
 ### Dependent function
 
-This type of signature is most prominently used for tuples. It is represented as `noarr::function_sig<Dim, RetSigs...>`.
+This type of signature is most prominently used for tuples. It is represented as `noarr::dep_function_sig<Dim, RetSigs...>`.
 It is similar to the Function type: it accepts an index in `Dim` in addition to the indices accepted by `RetSigs`.
 
 The main difference is that in the return type.
 Where a Function returns the same type for any value of index, a Dependent function may return a different type for each possible value of index.
-In other words: what other dimensions are accepted by the structure depends on the element of `RetSigs` that is choosen according to the index in `Dim`.
+In other words: what other dimensions are accepted by the structure depends on the element of `RetSigs` that is chosen according to the index in `Dim`.
 (This places a further requirement on the type of index that can be passed, see [tuple-like dimensions](DimensionKinds.md#tuple-like-dimensions-static-length-static-index) for more details.)
 
 Also, unlike Function, there is no need for an `ArgLength` parameter: the [length](Glossary.md#length) in `Dim` always corresponds to the count of `RetSigs` variadic parameters.
