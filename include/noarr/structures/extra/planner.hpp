@@ -44,20 +44,20 @@ struct planner_ending_elem_t : flexible_contain<F> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(const Planner &planner) const noexcept {
+	constexpr void operator()(const Planner &planner) const {
 		run(planner, std::make_index_sequence<Planner::num_structs>());
 	}
 
 private:
 	template<class Planner, std::size_t ...Idxs>
-    constexpr void run(const Planner &planner, std::index_sequence<Idxs...>) const noexcept
+    constexpr void run(const Planner &planner, std::index_sequence<Idxs...>) const
 	requires (requires(F f) { f(planner.template get_struct<Idxs>()[planner.state()]...); })
 	{
 		flexible_contain<F>::get()(planner.template get_struct<Idxs>()[planner.state()]...);
 	}
 
 	template<class Planner, std::size_t ...Idxs>
-    constexpr void run(const Planner &planner, std::index_sequence<Idxs...>) const noexcept
+    constexpr void run(const Planner &planner, std::index_sequence<Idxs...>) const
 	requires (requires(F f) { f(planner.state(), planner.template get_struct<Idxs>()[planner.state()]...); })
 	{
 		flexible_contain<F>::get()(planner.state(), planner.template get_struct<Idxs>()[planner.state()]...);
@@ -86,7 +86,7 @@ struct planner_ending_t : flexible_contain<F> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(const Planner &planner) const noexcept {
+	constexpr void operator()(const Planner &planner) const {
 		flexible_contain<F>::get()(planner.state());
 	}
 };
@@ -168,7 +168,7 @@ struct planner_endings : flexible_contain<Endings...> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(const Planner &planner) const noexcept requires is_activated_v<decltype(this->order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))> {
+	constexpr void operator()(const Planner &planner) const requires is_activated_v<decltype(this->order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))> {
 		this->template get<decltype(std::declval<planner_endings>().order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))::activated_index()>()(planner.pop_endings());
 	}
 };
@@ -214,7 +214,7 @@ struct planner_sections_t : flexible_contain<F> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(const Planner &planner) const noexcept {
+	constexpr void operator()(const Planner &planner) const {
 		flexible_contain<F>::get()(planner);
 	}
 };
@@ -269,21 +269,21 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 
 	template<class F> requires (std::same_as<Ending, planner_endings<>>)
 	[[nodiscard("returns a new planner")]]
-	constexpr auto for_each(F f) const noexcept {
+	constexpr auto for_each(F f) const {
 		using signature = typename decltype(get_union())::signature;
 		return make_planner(get_union(), get_order(), planner_endings(planner_ending_t<signature, F>(f)));
 	}
 
 	template<class F> requires (std::same_as<Ending, planner_endings<>>)
 	[[nodiscard("returns a new planner")]]
-	constexpr auto for_each_elem(F f) const noexcept {
+	constexpr auto for_each_elem(F f) const {
 		using signature = typename decltype(get_union())::signature;
 		return make_planner(get_union(), get_order(), planner_endings(planner_ending_elem_t<signature, F>(f)));
 	}
 
 	template<auto ...Dims, class F> requires IsDimPack<decltype(Dims)...>
 	[[nodiscard("returns a new planner")]]
-	constexpr auto for_sections(F f) const noexcept {
+	constexpr auto for_sections(F f) const {
 		using union_sig = typename decltype(get_union())::signature;
 		struct sigholder_t {
 			using signature = union_sig;
@@ -295,12 +295,12 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 		return make_planner(get_union(), get_order(), get_ending().add_ending(planner_sections_t<signature, F>(f)));
 	}
 
-	constexpr void execute() const noexcept requires (!std::same_as<Ending, planner_endings<>>) {
+	constexpr void execute() const requires (!std::same_as<Ending, planner_endings<>>) {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
 		for_each_impl(dim_tree(), empty_state);
 	}
 
-	constexpr void operator()() const noexcept requires (!std::same_as<Ending, planner_endings<>>) {
+	constexpr void operator()() const requires (!std::same_as<Ending, planner_endings<>>) {
 		execute();
 	}
 
@@ -316,14 +316,14 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 
 private:
 	template<auto Dim, class Branch, class ...Branches, std::size_t I, std::size_t ...Is>
-	constexpr void for_each_impl_dep(auto state, std::index_sequence<I, Is...>) const noexcept {
+	constexpr void for_each_impl_dep(auto state, std::index_sequence<I, Is...>) const {
 		for_each_impl(Branch(), state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>()));
 		for_each_impl_dep<Dim, Branches...>(state, std::index_sequence<Is...>());
 	}
 	template<auto Dim, class F>
-	constexpr void for_each_impl_dep(F, auto, std::index_sequence<>) const noexcept {}
+	constexpr void for_each_impl_dep(F, auto, std::index_sequence<>) const {}
 	template<auto Dim, class ...Branches, IsState State>
-	constexpr void for_each_impl(dim_tree<Dim, Branches...>, State state) const noexcept {
+	constexpr void for_each_impl(dim_tree<Dim, Branches...>, State state) const {
 		if constexpr (is_activated_v<decltype(get_ending().order(fix(state_at<union_struct>(top_struct(), state))))>) {
 			get_ending()(order(fix(state)));
 		} else {
@@ -338,7 +338,7 @@ private:
 		}
 	}
 	template<IsState State>
-	constexpr void for_each_impl(dim_sequence<>, State state) const noexcept {
+	constexpr void for_each_impl(dim_sequence<>, State state) const {
 		static_assert(is_activated_v<decltype(get_ending().order(fix(state_at<union_struct>(top_struct(), state))))>);
 		get_ending()(order(fix(state)));
 	}
