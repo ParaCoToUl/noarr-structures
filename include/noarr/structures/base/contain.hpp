@@ -133,7 +133,7 @@ constexpr auto contain_cat(const contain<TS1...> &c1, std::index_sequence<Idxs1.
 }
 
 constexpr auto contain_cat() noexcept {
-	return contain();
+	return contain<>();
 }
 
 template<class... TS>
