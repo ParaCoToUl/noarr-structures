@@ -137,7 +137,6 @@ struct traverser_t : strict_contain<Struct, Order> {
 		for_sections<Dims...>([f](auto inner) constexpr { return f(inner.state()); });
 	}
 
-	// TODO add tests
 	template<IsDim auto Dim, auto ...Dims, class F> requires IsDimPack<decltype(Dims)...>
 	constexpr void for_sections(F f) const {
 		using dim_tree = dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dim, Dims...>>;
@@ -145,7 +144,6 @@ struct traverser_t : strict_contain<Struct, Order> {
 		for_each_impl(dim_tree(), f, empty_state);
 	}
 
-	// TODO add tests
 	template<class F>
 	constexpr void for_sections(F f) const {
 		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;

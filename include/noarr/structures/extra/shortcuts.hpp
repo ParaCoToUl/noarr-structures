@@ -18,7 +18,6 @@ namespace noarr {
 
 // Common compositions
 
-// TODO add tests
 template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
 constexpr auto vectors() noexcept {
 	return (... ^ vector<Dims>());
@@ -29,7 +28,6 @@ constexpr auto sized_vector(auto length) noexcept {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
-// TODO add tests
 template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
 constexpr auto sized_vectors(auto ...lengths) noexcept {
 	return (... ^ sized_vector<Dims>(lengths));
@@ -153,25 +151,21 @@ constexpr auto neighbor(State state, Diffs ...diffs) noexcept {
 	return state.template with<index_in<Dims>...>(good_diff_index_t<decltype(state.template get<index_in<Dims>>() + diffs)>(state.template get<index_in<Dims>>() + diffs)...);
 }
 
-// TODO add tests
 template<auto ...Dims, class Struct, class ...StateItems> requires IsDimPack<decltype(Dims)...>
 constexpr auto symmetric_span(Struct structure, state<StateItems...> state, auto offset) noexcept {
 	return (... ^ span<Dims>(offset, (structure | get_length<Dims>(state)) - offset));
 }
 
-// TODO add tests
 template<auto ...Dims, class Struct> requires IsDimPack<decltype(Dims)...>
 constexpr auto symmetric_span(Struct structure, auto offset) noexcept {
 	return symmetric_span<Dims...>(structure, empty_state, offset);
 }
 
-// TODO add tests
 template<auto ...Dims, class Struct, class ...StateItems, class ...Offsets> requires (sizeof...(Dims) == sizeof...(Offsets)) && IsDimPack<decltype(Dims)...>
 constexpr auto symmetric_spans(Struct structure, state<StateItems...> state, Offsets ...offsets) noexcept {
 	return (... ^ symmetric_span<Dims>(structure, state, offsets));
 }
 
-// TODO add tests
 template<auto ...Dims, class Struct, class ...Offsets> requires (sizeof...(Dims) == sizeof...(Offsets)) && IsDimPack<decltype(Dims)...>
 constexpr auto symmetric_spans(Struct structure, Offsets ...offsets) noexcept {
 	return symmetric_spans<Dims...>(structure, empty_state, offsets...);

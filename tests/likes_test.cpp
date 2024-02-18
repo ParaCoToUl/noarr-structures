@@ -10,8 +10,8 @@ TEST_CASE("Likes", "[shortcut]") {
 	auto sa = scalar ^ noarr::sized_vector<'x'>(100);
 	auto sa_ = scalar ^ noarr::vector<'x'>();
 
-	auto sb = scalar ^ noarr::sized_vector<'x'>(100) ^ noarr::sized_vector<'y'>(200);
-	auto sb_ = scalar ^ noarr::vector<'x'>() ^ noarr::vector<'y'>();
+	auto sb = scalar ^ noarr::sized_vectors<'x', 'y'>(100, 200);
+	auto sb_ = scalar ^ noarr::vectors<'x', 'y'>();
 
 	// reconstruct sa from scalar:
 	REQUIRE(std::is_same_v<decltype(sa), decltype(scalar ^ noarr::vector_like<'x'>(sa))>);

@@ -333,6 +333,162 @@ TEST_CASE("Traverser ordered renamed access strip mined", "[traverser shortcuts 
 	REQUIRE(i == 0);
 }
 
+TEST_CASE("Traverser sections", "[traverser]") {
+	using at = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
+	using bt = noarr::array_t<'y', 30, noarr::array_t<'z', 40, noarr::scalar<int>>>;
+	using ct = noarr::array_t<'x', 20, noarr::array_t<'z', 40, noarr::scalar<int>>>;
+
+	using xt = noarr::array_t<'z', 40, noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>>;
+
+	using u1t = union_t<at>;
+	using u2t = union_t<at, bt>;
+	using u3t = union_t<at, bt, ct>;
+
+	at a;
+	bt b;
+	ct c;
+
+	u1t u1;
+	u2t u2;
+	u3t u3;
+
+	REQUIRE(u1.length<'x'>(state<>()) == 20);
+	REQUIRE(u1.length<'y'>(state<>()) == 30);
+
+	REQUIRE(u2.length<'x'>(state<>()) == 20);
+	REQUIRE(u2.length<'y'>(state<>()) == 30);
+	REQUIRE(u2.length<'z'>(state<>()) == 40);
+
+	REQUIRE(u3.length<'x'>(state<>()) == 20);
+	REQUIRE(u3.length<'y'>(state<>()) == 30);
+	REQUIRE(u3.length<'z'>(state<>()) == 40);
+
+	REQUIRE(std::is_same_v<u1t::signature, at::signature>);
+	REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
+	REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
+
+	int i = 0;
+	int iters = 0;
+
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).template for_sections<'x', 'y'>([&i, &iters](auto inner){
+		auto s = inner.state();
+
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'x'>>);
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'y'>>);
+
+		REQUIRE(s.template get<index_in<'x'>>() < 20);
+		REQUIRE(s.template get<index_in<'y'>>() < 30);
+
+		int j =
+			+ s.template get<index_in<'x'>>() * 30
+			+ s.template get<index_in<'y'>>()
+		;
+
+		REQUIRE(i == j);
+
+		inner.for_each([&iters, &j](auto s){
+			STATIC_REQUIRE(decltype(s)::template contains<index_in<'z'>>);
+
+			REQUIRE(s.template get<index_in<'z'>>() < 40);
+
+			int k = j * 40 + s.template get<index_in<'z'>>();
+
+			REQUIRE(iters == k);
+
+			iters++;
+		});
+
+		i++;
+	});
+
+	REQUIRE(i == 20*30);
+	REQUIRE(iters == 20*30*40);
+
+	iters = 0;
+
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).template for_sections<'z', 'x', 'y'>([&i, &iters](auto inner){
+		auto s = inner.state();
+
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'x'>>);
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'y'>>);
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'z'>>);
+
+		REQUIRE(s.template get<index_in<'x'>>() < 20);
+		REQUIRE(s.template get<index_in<'y'>>() < 30);
+		REQUIRE(s.template get<index_in<'z'>>() < 40);
+
+		int j =
+			+ s.template get<index_in<'x'>>() * 30 * 40
+			+ s.template get<index_in<'y'>>() * 40
+			+ s.template get<index_in<'z'>>()
+		;
+
+		REQUIRE(iters == j);
+
+		iters++;
+	});
+
+	REQUIRE(iters == 20*30*40);
+
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).for_sections([&i, &iters](auto inner){
+		auto s = inner.state();
+
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'x'>>);
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'y'>>);
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'z'>>);
+
+		REQUIRE(s.template get<index_in<'x'>>() < 20);
+		REQUIRE(s.template get<index_in<'y'>>() < 30);
+		REQUIRE(s.template get<index_in<'z'>>() < 40);
+
+		int j =
+			+ s.template get<index_in<'x'>>() * 30 * 40
+			+ s.template get<index_in<'y'>>() * 40
+			+ s.template get<index_in<'z'>>()
+		;
+
+		REQUIRE(20*30*40 - iters == j);
+
+		iters--;
+	});
+
+	REQUIRE(iters == 0);
+
+	traverser(a, b, c).order(reorder<'y', 'z', 'x'>()).template for_sections<'x', 'y'>([&i, &iters](auto inner){
+		auto s = inner.state();
+
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'x'>>);
+		STATIC_REQUIRE(decltype(s)::template contains<index_in<'y'>>);
+
+		REQUIRE(s.template get<index_in<'x'>>() < 20);
+		REQUIRE(s.template get<index_in<'y'>>() < 30);
+
+		int j =
+			+ s.template get<index_in<'x'>>()
+			+ s.template get<index_in<'y'>>() * 20
+		;
+
+		REQUIRE(20*30 - i == j);
+
+		inner.for_each([&iters, &j](auto s){
+			STATIC_REQUIRE(decltype(s)::template contains<index_in<'z'>>);
+
+			REQUIRE(s.template get<index_in<'z'>>() < 40);
+
+			int k = j * 40 + s.template get<index_in<'z'>>();
+
+			REQUIRE(iters == k);
+
+			iters++;
+		});
+
+		i--;
+	});
+
+	REQUIRE(i == 0);
+	REQUIRE(iters == 20*30*40);
+}
+
 TEST_CASE("Traverser update_index (reverse example)", "[traverser shortcuts]") {
 	using at = noarr::array_t<'z', 40, noarr::array_t<'y', 30, noarr::array_t<'x', 20, noarr::scalar<int>>>>;
 
@@ -361,7 +517,7 @@ TEST_CASE("Traverser neighbor (stencil example)", "[traverser shortcuts]") {
 
 	int i = 0;
 
-	traverser(a).order(slice<'x'>(1, 18) ^ slice<'y'>(1, 28)).for_each([&](auto sa){
+	auto method = [&](auto sa){
 		auto sa7 = neighbor<'y', 'x'>(sa, -1, -1);
 		auto sa8 = neighbor<'y', 'x'>(sa, -1,  0);
 		auto sa9 = neighbor<'y', 'x'>(sa, -1, +1);
@@ -416,9 +572,15 @@ TEST_CASE("Traverser neighbor (stencil example)", "[traverser shortcuts]") {
 		REQUIRE(sa3.template get<index_in<'y'>>() < 30);
 
 		i++;
-	});
+	};
+
+	traverser(a).order(slice<'x'>(1, 18) ^ slice<'y'>(1, 28)).for_each(method);
 
 	REQUIRE(i == 40*28*18);
+
+	traverser(a).order(span<'x'>(1, 19) ^ span<'y'>(1, 29)).for_each(method);
+
+	REQUIRE(i == 2 * 40*28*18);
 }
 
 TEST_CASE("Traverser step in order", "[traverser shortcuts]") {
@@ -471,6 +633,7 @@ TEST_CASE("Nested traverser traditional", "[traverser]") {
 		REQUIRE(ej == 50-ei);
 		ei++;
 	});
+
 	REQUIRE(ei == 50);
 }
 
@@ -494,6 +657,7 @@ TEST_CASE("Nested traverser simplified", "[traverser]") {
 		REQUIRE(ej == 50-ei);
 		ei++;
 	});
+
 	REQUIRE(ei == 50);
 }
 
@@ -506,7 +670,7 @@ TEST_CASE("Nested traverser for_dims", "[traverser]") {
 		auto i = get_index<'i'>(trav.state());
 		REQUIRE(i == ei);
 		unsigned ej = 0;
-		trav.order(slice<'j'>(i, 50 - i)).for_each([&](auto idxs) {
+		trav.order(shift<'j'>(i)).for_each([&](auto idxs) {
 			auto j = get_index<'j'>(idxs);
 			REQUIRE(j-i == ej);
 			auto o = mat | offset(idxs);
@@ -517,6 +681,50 @@ TEST_CASE("Nested traverser for_dims", "[traverser]") {
 		ei++;
 	});
 	REQUIRE(ei == 50);
+}
+
+TEST_CASE("Nested traverser for_dims with symmetric_span", "[traverser]") {
+	auto mat = scalar<float>() ^ array<'j', 50>() ^ array<'i', 50>();
+
+	unsigned ei = 0;
+
+	traverser(mat).order(span<'i'>(25)).template for_dims<'i'>([&](auto trav) {
+		auto i = get_index<'i'>(trav.state());
+		REQUIRE(i == ei);
+		unsigned ej = 0;
+		trav.order(symmetric_span<'j'>(trav.top_struct(), i)).for_each([&](auto idxs) {
+			auto j = get_index<'j'>(idxs);
+			REQUIRE(j-i == ej);
+			auto o = mat | offset(idxs);
+			REQUIRE(o == (50*ei + ei+ej) * sizeof(float));
+			ej++;
+		});
+		REQUIRE(ej == 50-2*ei);
+		ei++;
+	});
+	REQUIRE(ei == 50/2);
+}
+
+TEST_CASE("Nested traverser for_dims with symmetric_spans", "[traverser]") {
+	auto mat = scalar<float>() ^ array<'j', 50>() ^ array<'i', 50>();
+
+	unsigned ei = 0;
+
+	traverser(mat).order(symmetric_spans<'i', 'j'>(mat, 3, 4)).template for_dims<'i'>([&](auto trav) {
+		auto i = get_index<'i'>(trav.state());
+		REQUIRE(i == ei + 3);
+		unsigned ej = 0;
+		trav.for_each([&](auto idxs) {
+			auto j = get_index<'j'>(idxs);
+			REQUIRE(j == ej + 4);
+			auto o = mat | offset(idxs);
+			REQUIRE(o == (50*i + j) * sizeof(float));
+			ej++;
+		});
+		REQUIRE(ej == 50-2*4);
+		ei++;
+	});
+	REQUIRE(ei == 50-2*3);
 }
 
 TEST_CASE("Traverser single state", "[traverser]") {
