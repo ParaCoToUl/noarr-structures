@@ -101,8 +101,8 @@ private:
 	}
 	template<IsDim auto Dim>
 	static constexpr std::size_t first_match = decltype(std::declval<union_t<Structs...>>().template find_first_match<Dim, 0>())::value;
-public:
 
+public:
 	template<IsDim auto QDim>
 	constexpr auto length(IsState auto state) const noexcept {
 		return strict_contain<Structs...>::template get<first_match<QDim>>().template length<QDim>(state);
