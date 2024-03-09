@@ -231,9 +231,67 @@ constexpr auto operator^(const T &t, IsProtoStruct auto order) noexcept {
 	return t.order(order);
 }
 
+namespace helpers {
+
+template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+struct for_each_t : public F {
+	using F::F;
+	template<class F_, auto ...Dims_> requires (... && IsDim<decltype(Dims_)>)
+	constexpr for_each_t(F_ &&f) noexcept : F(std::forward<F_>(f)) {}
+	using F::operator();
+};
+
+template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+struct for_dims_t : public F {
+	using F::F;
+	template<class F_, auto ...Dims_> requires (... && IsDim<decltype(Dims_)>)
+	constexpr for_dims_t(F_ &&f) noexcept : F(std::forward<F_>(f)) {}
+	using F::operator();
+};
+
+template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+struct for_sections_t : public F {
+	using F::F;
+	template<class F_, auto ...Dims_> requires (... && IsDim<decltype(Dims_)>)
+	constexpr for_sections_t(F_ &&f) noexcept : F(std::forward<F_>(f)) {}
+	using F::operator();
+};
+
+} // namespace helpers
+
+template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
+constexpr auto for_each(F &&f) noexcept {
+	return helpers::for_each_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
+}
+
+template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
+constexpr auto for_dims(F &&f) noexcept {
+	return helpers::for_dims_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
+}
+
+template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
+constexpr auto for_sections(F &&f) noexcept {
+	return helpers::for_sections_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
+}
+
 template<IsTraverser T>
 constexpr auto operator|(const T &t, auto f) -> decltype(t.for_each(f)) {
 	return t.for_each(f);
+}
+
+template<IsTraverser T, auto ...Dims, class F>
+constexpr auto operator|(const T &t, const helpers::for_each_t<F, Dims...> &f) -> decltype(t.template for_each<Dims...>(f)) {
+	return t.template for_each<Dims...>(f);
+}
+
+template<IsTraverser T, auto ...Dims, class F>
+constexpr auto operator|(const T &t, const helpers::for_dims_t<F, Dims...> &f) -> decltype(t.template for_dims<Dims...>(f)) {
+	return t.template for_dims<Dims...>(f);
+}
+
+template<IsTraverser T, auto ...Dims, class F>
+constexpr auto operator|(const T &t, const helpers::for_sections_t<F, Dims...> &f) -> decltype(t.template for_sections<Dims...>(f)) {
+	return t.template for_sections<Dims...>(f);
 }
 
 } // namespace noarr

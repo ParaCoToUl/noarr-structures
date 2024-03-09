@@ -173,13 +173,13 @@ public:
 	 */
 	constexpr auto get_ref() const noexcept;
 
-	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout)
+	template<IsProtoStruct ProtoStruct> requires (ProtoStruct::proto_preserves_layout)
 	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator ^(bag &&s, ProtoStruct p) {
 		return bag<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p, std::move(std::move(s).template get<1>()));
 	}
 
-	template<class ProtoStruct> requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
+	template<IsProtoStruct ProtoStruct> requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
 	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator ^(const bag &s, ProtoStruct p) {
 		return bag<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p, s.template get<1>());

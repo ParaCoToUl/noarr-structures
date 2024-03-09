@@ -352,8 +352,65 @@ template<class ...Ts>
 constexpr auto planner(const Ts &...s) noexcept
 { return planner(make_union(s.get_ref()...)); }
 
+template<class T>
+struct is_planner : std::false_type {};
+
+template<class Union, class Order, class Ending>
+struct is_planner<planner_t<Union, Order, Ending>> : std::true_type {};
+
+template<class T>
+struct is_planner<const T> : is_planner<T> {};
+
+template<class T>
+constexpr bool is_planner_v = is_planner<T>::value;
+
+template<class T>
+concept IsPlanner = is_planner_v<T>;
+
 template<class ...Ts>
 constexpr planner_t<union_t<Ts...>, neutral_proto, planner_endings<>> planner(union_t<Ts...> u) noexcept { return planner_t<union_t<Ts...>, neutral_proto, planner_endings<>>(u, neutral_proto(), planner_endings<>()); }
+
+template<IsPlanner P>
+constexpr auto operator^(const P &p, IsProtoStruct auto order) noexcept {
+	return p.order(order);
+}
+
+template<IsPlanner P, class F>
+constexpr auto operator|(const P &p, F f) -> decltype(p.for_each(f)) {
+	return p.for_each(f);
+}
+
+namespace helpers {
+
+template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+struct for_each_elem_t : public F {
+	using F::F;
+	template<class F_, auto ...Dims_> requires (... && IsDim<decltype(Dims_)>)
+	constexpr for_each_elem_t(F_ &&f) noexcept : F(std::forward<F_>(f)) {}
+	using F::operator();
+};
+
+} // namespace helpers
+
+template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
+constexpr auto for_each_elem(F &&f) noexcept {
+	return helpers::for_each_elem_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
+}
+
+template<IsPlanner P, auto ...Dims, class F>
+constexpr auto operator^(const P &p, const helpers::for_each_t<F, Dims...> &f) -> decltype(p.template for_each<Dims...>(f)) {
+	return p.template for_each<Dims...>(f);
+}
+
+template<IsPlanner P, auto ...Dims, class F>
+constexpr auto operator^(const P &p, const helpers::for_each_elem_t<F, Dims...> &f) -> decltype(p.template for_each_elem<Dims...>(f)) {
+	return p.template for_each_elem<Dims...>(f);
+}
+
+template<IsPlanner P, auto ...Dims, class F>
+constexpr auto operator^(const P &p, const helpers::for_sections_t<F, Dims...> &f) -> decltype(p.template for_sections<Dims...>(f)) {
+	return p.template for_sections<Dims...>(f);
+}
 
 } // namespace noarr
 

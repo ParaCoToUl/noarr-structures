@@ -32,23 +32,115 @@ TEST_CASE("Simple use-case of dims", "[dim]") {
 	traverser(structure).template for_each<x, y>([=, &iterations](auto state) {
 		auto [i, j] = noarr::get_indices<x, y>(state);
 
-		REQUIRE(i < 10);
-		REQUIRE(j < 20);
-
-		++iterations;
+		REQUIRE(iterations++ == i * 20 + j);
 	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure).template for_each<y, x>([=, &iterations](auto state) {
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure) | for_each<x, y>([=, &iterations](auto state) {
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure) | for_each<y, x>([=, &iterations](auto state) {
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
 
 	traverser(structure).template for_dims<x, y>([=, &iterations](auto inner) {
 		auto state = inner.state();
 		auto [i, j] = noarr::get_indices<x, y>(state);
 
-		REQUIRE(i < 10);
-		REQUIRE(j < 20);
-
-		++iterations;
+		REQUIRE(iterations++ == i * 20 + j);
 	});
 
-	REQUIRE(iterations == 2 * 10 * 20);
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure).template for_dims<y, x>([=, &iterations](auto inner) {
+		auto state = inner.state();
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == j * 10 + i);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure) | for_dims<x, y>([=, &iterations](auto inner) {
+		auto state = inner.state();
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure) | for_dims<y, x>([=, &iterations](auto inner) {
+		auto state = inner.state();
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == j * 10 + i);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure).template for_sections<x, y>([=, &iterations](auto inner) {
+		auto state = inner.state();
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure).template for_sections<y, x>([=, &iterations](auto inner) {
+		auto state = inner.state();
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure) | for_sections<x, y>([=, &iterations](auto inner) {
+		auto state = inner.state();
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
+
+	REQUIRE(iterations == 10 * 20);
+	iterations = 0;
+
+	traverser(structure) | for_sections<y, x>([=, &iterations](auto inner) {
+		auto state = inner.state();
+		auto [i, j] = noarr::get_indices<x, y>(state);
+
+		REQUIRE(iterations++ == i * 20 + j);
+	});
 }
 
 TEST_CASE("into_blocks_dynamic use-case of dims", "[dim]") {
