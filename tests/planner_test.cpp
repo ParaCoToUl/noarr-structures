@@ -200,8 +200,8 @@ TEST_CASE("Planner trivial functional", "[planner]") {
 	a_plan();
 	b_plan();
 	c_plan();
-	(abc_plan ^ reorder<'z', 'x', 'y'>())();
-	(abc_plan ^ reorder<'x', 'z', 'y'>())();
+	abc_plan ^ reorder<'z', 'x', 'y'>() | planner_execute();
+	abc_plan ^ reorder<'x', 'z', 'y'>() | planner_execute();
 	c_check_plan();
 
 	REQUIRE(i == 2*20*30*40);

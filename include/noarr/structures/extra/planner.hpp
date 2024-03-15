@@ -390,7 +390,12 @@ struct for_each_elem_t : public F {
 	using F::operator();
 };
 
+
 } // namespace helpers
+
+struct planner_execute_t {};
+
+constexpr planner_execute_t planner_execute() noexcept { return planner_execute_t(); }
 
 template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
 constexpr auto for_each_elem(F &&f) noexcept {
@@ -410,6 +415,11 @@ constexpr auto operator^(const P &p, const helpers::for_each_elem_t<F, Dims...> 
 template<IsPlanner P, auto ...Dims, class F>
 constexpr auto operator^(const P &p, const helpers::for_sections_t<F, Dims...> &f) -> decltype(p.template for_sections<Dims...>(f)) {
 	return p.template for_sections<Dims...>(f);
+}
+
+template<IsPlanner P>
+constexpr void operator|(const P &p, planner_execute_t) {
+	p.execute();
 }
 
 } // namespace noarr
