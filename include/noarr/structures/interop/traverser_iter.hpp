@@ -40,8 +40,9 @@ private:
 		static_assert(always_false<this_t>, "Cannot use the default constructor of traverser iterator");
 		return construct_base();
 	}
+
 public:
-	[[deprecated]] explicit constexpr traverser_iterator_t() noexcept : base(construct_base()), idx() {}
+	[[deprecated("The default iterator for traversers is not well-definable")]] explicit constexpr traverser_iterator_t() noexcept : base(construct_base()), idx() {}
 
 	constexpr difference_type operator-(const this_t &other) const noexcept { return idx - other.idx; }
 	constexpr this_t operator+(difference_type diff) const noexcept { return this_t(*this, idx + diff); }
@@ -52,14 +53,13 @@ public:
 	constexpr this_t &operator--() noexcept { idx--; return *this; }
 	this_t operator++(int) noexcept { const auto copy = *this; idx++; return copy; }
 	this_t operator--(int) noexcept { const auto copy = *this; idx--; return copy; }
+
 	constexpr bool operator==(const this_t &other) const noexcept { return idx == other.idx; }
-	constexpr bool operator!=(const this_t &other) const noexcept { return idx != other.idx; }
-	constexpr bool operator<(const this_t &other) const noexcept { return idx < other.idx; }
-	constexpr bool operator<=(const this_t &other) const noexcept { return idx <= other.idx; }
-	constexpr bool operator>=(const this_t &other) const noexcept { return idx >= other.idx; }
-	constexpr bool operator>(const this_t &other) const noexcept { return idx > other.idx; }
+	constexpr auto operator<=>(const this_t &other) const noexcept { return idx <=> other.idx; }
+
 	constexpr value_type operator*() const noexcept { return value_type(get_struct(), get_order() ^ fix<Dim>(idx)); }
 	constexpr value_type operator[](difference_type i) const noexcept { return value_type(get_struct(), get_order() ^ fix<Dim>(idx + i)); }
+
 	friend constexpr this_t operator+(difference_type diff, const this_t &iter) noexcept { return iter + diff; }
 };
 
