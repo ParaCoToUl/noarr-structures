@@ -231,6 +231,12 @@ constexpr auto operator^(const T &t, IsProtoStruct auto order) noexcept {
 	return t.order(order);
 }
 
+template<IsTraverser T>
+struct to_state<T> {
+	using type = std::remove_cvref_t<decltype(std::declval<T>().state())>;
+	static constexpr type convert(const T &t) noexcept { return t.state(); }
+};
+
 namespace helpers {
 
 template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)

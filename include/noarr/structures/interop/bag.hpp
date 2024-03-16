@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "../base/contain.hpp"
+#include "../base/state.hpp"
 #include "../extra/struct_traits.hpp"
 #include "../extra/to_struct.hpp"
 #include "../extra/funcs.hpp"
@@ -124,8 +125,8 @@ public:
 	 *
 	 * @param ts: the dimension values
 	 */
-	constexpr decltype(auto) operator[](IsState auto state) const noexcept {
-		return structure() | noarr::get_at(data(), state);
+	constexpr decltype(auto) operator[](ToState auto state) const noexcept {
+		return structure() | noarr::get_at(data(), convert_to_state(state));
 	}
 
 	/**

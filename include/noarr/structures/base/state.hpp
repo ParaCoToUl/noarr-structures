@@ -235,6 +235,25 @@ using state_remove_t = decltype(std::declval<State>().template remove<Tags...>()
 
 static constexpr state<> empty_state;
 
+template<class T>
+struct to_state;
+
+template<IsState T>
+struct to_state<T> {
+	using type = std::remove_cvref_t<T>;
+	static constexpr type convert(T t) noexcept { return t; }
+};
+
+template<class T>
+constexpr auto convert_to_state(T &&t) noexcept {
+	return to_state<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
+}
+
+template<class T>
+concept ToState = requires (T t) {
+	{ convert_to_state(t) } -> IsState;
+};
+
 namespace helpers {
 
 constexpr std::size_t supported_index_type(std::size_t);

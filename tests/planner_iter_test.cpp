@@ -201,10 +201,10 @@ TEST_CASE("Planner trivial iteration", "[planner iter]") {
 	std::size_t x = 0, y = 0;
 	for (auto col : p) {
 		STATIC_REQUIRE(std::is_same_v<decltype(col), decltype(p ^ fix<'x'>(0))>);
-		REQUIRE(noarr::get_index<'x'>(col.state()) == x++);
+		REQUIRE(noarr::get_index<'x'>(col) == x++);
 		for (auto cell : col) {
 			STATIC_REQUIRE(std::is_same_v<decltype(cell), decltype(col ^ fix<'y'>(0))>);
-			REQUIRE(noarr::get_index<'y'>(cell.state()) == y++);
+			REQUIRE(noarr::get_index<'y'>(cell) == y++);
 		}
 		y = 0;
 	}

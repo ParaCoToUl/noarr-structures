@@ -73,8 +73,8 @@ TEST_CASE("Planner trivial", "[planner]") {
 	});
 
 	auto cba_plan = planner(a, b, c).template for_sections<'x', 'z'>([&i](auto inner) {
-		auto z = get_index<'z'>(inner.state());
-		auto x = get_index<'x'>(inner.state());
+		auto z = get_index<'z'>(inner);
+		auto x = get_index<'x'>(inner);
 
 		REQUIRE(z < 40);
 		REQUIRE(x < 20);

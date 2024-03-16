@@ -375,10 +375,11 @@ constexpr auto operator^(const P &p, IsProtoStruct auto order) noexcept {
 	return p.order(order);
 }
 
-template<IsPlanner P, class F>
-constexpr auto operator|(const P &p, F f) -> decltype(p.for_each(f)) {
-	return p.for_each(f);
-}
+template<IsPlanner P>
+struct to_state<P> {
+	using type = std::remove_cvref_t<decltype(std::declval<P>().state())>;
+	static constexpr type convert(const P &p) noexcept { return p.state(); }
+};
 
 namespace helpers {
 

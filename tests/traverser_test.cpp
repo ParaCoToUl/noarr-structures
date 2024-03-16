@@ -667,7 +667,7 @@ TEST_CASE("Nested traverser for_dims", "[traverser]") {
 	unsigned ei = 0;
 
 	traverser(mat).for_dims<'i'>([&](auto trav) {
-		auto i = get_index<'i'>(trav.state());
+		auto i = get_index<'i'>(trav);
 		REQUIRE(i == ei);
 		unsigned ej = 0;
 		trav.order(shift<'j'>(i)).for_each([&](auto idxs) {
@@ -689,7 +689,7 @@ TEST_CASE("Nested traverser for_dims with symmetric_span", "[traverser]") {
 	unsigned ei = 0;
 
 	traverser(mat).order(span<'i'>(25)).template for_dims<'i'>([&](auto trav) {
-		auto i = get_index<'i'>(trav.state());
+		auto i = get_index<'i'>(trav);
 		REQUIRE(i == ei);
 		unsigned ej = 0;
 		trav.order(symmetric_span<'j'>(trav.top_struct(), i)).for_each([&](auto idxs) {

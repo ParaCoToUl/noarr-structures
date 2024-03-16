@@ -122,13 +122,13 @@ constexpr auto bcast(Lengths ...lengths) noexcept requires (sizeof...(Dims) == s
 // Working with state (especially in traverser lambdas)
 
 template<IsDim auto Dim>
-constexpr auto get_index(IsState auto state) noexcept {
-	return state.template get<index_in<Dim>>();
+constexpr auto get_index(ToState auto state) noexcept {
+	return convert_to_state(state).template get<index_in<Dim>>();
 }
 
 template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
-constexpr auto get_indices(IsState auto state) noexcept {
-	return std::make_tuple(state.template get<index_in<Dims>>()...);
+constexpr auto get_indices(ToState auto state) noexcept {
+	return std::make_tuple(convert_to_state(state).template get<index_in<Dims>>()...);
 }
 
 template<auto ...Dims, class ...ValueType> requires IsDimPack<decltype(Dims)...>
