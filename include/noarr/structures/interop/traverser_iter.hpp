@@ -68,7 +68,7 @@ struct traverser_range_t : strict_contain<Struct, Order> {
 	using base = strict_contain<Struct, Order>;
 	std::size_t begin_idx, end_idx;
 
-	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length) : base((const strict_contain<Struct, Order> &)traverser), begin_idx(0), end_idx(length) {}
+	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length) : base((const base &)traverser), begin_idx(0), end_idx(length) {}
 
 	// TBB splitting constructor
 	template<class Split>
@@ -141,7 +141,7 @@ constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 template<class Struct, class Order>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 	constexpr auto dim = helpers::traviter_top_dim<decltype(top_struct())>;
-	return traverser_range_t<dim, Struct, Order>(*this, top_struct().template length<dim>(empty_state));
+	return range<dim>();
 }
 
 // declared in traverser.hpp

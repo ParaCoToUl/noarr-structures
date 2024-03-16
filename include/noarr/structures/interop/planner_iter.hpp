@@ -82,6 +82,83 @@ public:
 	friend constexpr this_t operator+(difference_type diff, const this_t &iter) noexcept { return iter + diff; }
 };
 
+template<IsDim auto Dim, class Union, class Order, class Ending>
+struct planner_range_t;
+
+template<IsDim auto Dim, class ...Structs, class Order, class Ending>
+struct planner_range_t<Dim, union_t<Structs...>, Order, Ending> : strict_contain<union_t<Structs...>, Order, Ending> {
+	using this_t = planner_range_t;
+	using base = strict_contain<union_t<Structs...>, Order, Ending>;
+	std::size_t begin_idx, end_idx;
+
+	using union_struct = union_t<Structs...>;
+	using order_type = Order;
+	using ending_type = Ending;
+
+	static constexpr std::size_t num_structs = sizeof...(Structs);
+
+	[[nodiscard]]
+	constexpr auto get_union() const noexcept { return this->template get<0>(); }
+	[[nodiscard]]
+	constexpr auto get_order() const noexcept { return this->template get<1>(); }
+	[[nodiscard]]
+	constexpr auto get_ending() const noexcept { return this->template get<2>(); }
+
+	template<std::size_t I>
+	[[nodiscard]]
+	constexpr auto get_struct() const noexcept { return get_union().template get<I>(); }
+
+	constexpr planner_range_t(const planner_t<union_t<Structs...>, Order, Ending> &planner, std::size_t length) : base((const base &)planner), begin_idx(0), end_idx(length) {}
+
+	template<class NewOrder>
+	constexpr auto order(NewOrder new_order) const noexcept {
+		// equivalent to as_planner().order(new_order)
+		const auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
+		return planner_t<union_t<Structs...>, decltype(get_order() ^ slice_order ^ new_order), Ending>(get_union(), get_order() ^ slice_order ^ new_order, get_ending());
+	}
+
+	template<class F>
+	[[nodiscard("Returns a new planner")]]
+	constexpr auto for_each(F f) const {
+		return as_planner().for_each(f);
+	}
+
+	constexpr auto as_planner() const noexcept {
+		const auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
+		return planner_t<union_t<Structs...>, decltype(get_order() ^ slice_order), Ending>(get_union(), get_order() ^ slice_order, get_ending());
+	}
+
+	// empty() and is_divisible() are required by TBB, but it could also be useful to call them directly, so they are implemented here
+	constexpr bool empty() const noexcept { return end_idx == begin_idx; }
+	constexpr bool is_divisible() const noexcept { return end_idx - begin_idx > 1; }
+
+	using iterator = planner_iterator_t<Dim, union_t<Structs...>, Order, Ending>;
+	using const_iterator = iterator;
+	using value_type = typename iterator::value_type;
+	using reference = typename iterator::reference;
+	using const_reference = const reference;
+	using difference_type = typename iterator::difference_type;
+	using size_type = std::size_t;
+
+	constexpr iterator begin() const noexcept { return iterator(*this, begin_idx); }
+	constexpr iterator end() const noexcept { return iterator(*this, end_idx); }
+	constexpr const_iterator cbegin() const noexcept { return begin(); }
+	constexpr const_iterator cend() const noexcept { return end(); }
+	constexpr size_type size() const noexcept { return end_idx - begin_idx; }
+	constexpr value_type operator[](size_type i) const noexcept { return value_type(get_union(), get_order() ^ fix<Dim>(begin_idx + i), get_ending()); }
+};
+
+template<IsDim auto Dim, class ...Structs, class Order, class Ending>
+constexpr auto range(const planner_t<union_t<Structs...>, Order, Ending> &planner) {
+	return planner_range_t<Dim, union_t<Structs...>, Order, Ending>(planner, planner.top_struct().template length<Dim>(empty_state));
+}
+
+template<class ...Structs, class Order, class Ending>
+constexpr auto range(const planner_t<union_t<Structs...>, Order, Ending> &planner) {
+	constexpr auto dim = helpers::traviter_top_dim<decltype(planner.top_struct())>;
+	return range<dim>(planner);
+}
+
 template<class ...Structs, class Order, class Ending>
 constexpr auto begin(const planner_t<union_t<Structs...>, Order, Ending> &planner) {
 	constexpr auto dim = helpers::traviter_top_dim<decltype(planner.top_struct())>;

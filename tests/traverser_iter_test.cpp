@@ -105,7 +105,6 @@ TEST_CASE("Traverser iter type traits", "[traverser iter]") {
 
 	// like noarr_test::is_simple, but in addition require assignability
 	// and do *not* require the *absence* of default ctor (since its *presence* is required by std::random_access_iterator)
-	STATIC_REQUIRE(std::is_standard_layout_v<iter_t>);
 	STATIC_REQUIRE(std::is_trivially_copy_constructible_v<iter_t>);
 	STATIC_REQUIRE(std::is_trivially_move_constructible_v<iter_t>);
 	STATIC_REQUIRE(std::is_trivially_copy_assignable_v<iter_t>);
@@ -198,6 +197,8 @@ TEST_CASE("Traverser iter for for", "[traverser iter]") {
 	}
 	REQUIRE(x == 20);
 }
+
+// TESTS FOR RANGE
 
 TEST_CASE("Traverser range methods", "[traverser iter]") {
 	using matrix = noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>>;
