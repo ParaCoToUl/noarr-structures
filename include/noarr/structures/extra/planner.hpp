@@ -402,14 +402,14 @@ constexpr auto for_each_elem(F &&f) noexcept {
 	return helpers::for_each_elem_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
 }
 
-template<IsPlanner P, auto ...Dims, class F>
-constexpr auto operator^(const P &p, const helpers::for_each_t<F, Dims...> &f) -> decltype(p.template for_each<Dims...>(f)) {
-	return p.template for_each<Dims...>(f);
+template<IsPlanner P, class F>
+constexpr auto operator^(const P &p, const helpers::for_each_t<F> &f) -> decltype(p.for_each(f)) {
+	return p.for_each(f);
 }
 
-template<IsPlanner P, auto ...Dims, class F>
-constexpr auto operator^(const P &p, const helpers::for_each_elem_t<F, Dims...> &f) -> decltype(p.template for_each_elem<Dims...>(f)) {
-	return p.template for_each_elem<Dims...>(f);
+template<IsPlanner P, class F>
+constexpr auto operator^(const P &p, const helpers::for_each_elem_t<F> &f) -> decltype(p.for_each_elem(f)) {
+	return p.for_each_elem(f);
 }
 
 template<IsPlanner P, auto ...Dims, class F>
