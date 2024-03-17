@@ -418,6 +418,16 @@ constexpr auto operator^(const P &p, const helpers::for_sections_t<F, Dims...> &
 	return p.template for_sections<Dims...>(f);
 }
 
+template<IsPlanner P, auto ...Dims, class F> requires (sizeof...(Dims) > 0)
+constexpr auto operator^(const P &p, const helpers::for_dims_t<F, Dims...> &f) -> decltype(p.template for_sections<Dims...>(f).order(hoist<Dims...>())) {
+	return p.template for_sections<Dims...>(f).order(hoist<Dims...>());
+}
+
+template<IsPlanner P, class F>
+constexpr auto operator^(const P &p, const helpers::for_dims_t<F> &f) -> decltype(p.for_sections(f)) {
+	return p.for_sections(f);
+}
+
 template<IsPlanner P>
 constexpr void operator|(const P &p, planner_execute_t) {
 	p.execute();
