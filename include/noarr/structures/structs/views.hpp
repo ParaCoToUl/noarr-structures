@@ -192,8 +192,14 @@ struct hoist_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return hoist_t<Dim, Struct>(s); }
 };
 
-template<IsDim auto Dim>
-using hoist = hoist_proto<Dim>;
+template<auto Dim, auto ...Dims> requires IsDimPack<decltype(Dim), decltype(Dims)...>
+constexpr auto hoist() noexcept {
+	if constexpr (sizeof...(Dims) == 0) {
+		return hoist_proto<Dim>();
+	} else {
+		return hoist<Dims...>() ^ hoist_proto<Dim>();
+	}
+}
 
 namespace helpers {
 

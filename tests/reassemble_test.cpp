@@ -109,6 +109,13 @@ TEST_CASE("hoist: array ^ array", "[reassemble]") {
 	REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'y'>())::signature, array_t<'y', 20, array_t<'x', 10, scalar<int>>>::signature>);
 }
 
+TEST_CASE("hoist hoist == double hoist", "[reassemble]") {
+	array_t<'x', 10, array_t<'y', 20, scalar<int>>> array_x_array;
+
+	REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'x'>() ^ hoist<'y'>())::signature, decltype(array_x_array ^ hoist<'y', 'x'>())::signature>);
+	REQUIRE(std::is_same_v<decltype(array_x_array ^ hoist<'y'>() ^ hoist<'x'>())::signature, decltype(array_x_array ^ hoist<'x', 'y'>())::signature>);
+}
+
 template<char Dim, class T>
 using dynarray = set_length_t<Dim, vector_t<Dim, T>, std::size_t>;
 
