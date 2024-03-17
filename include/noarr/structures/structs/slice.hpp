@@ -210,6 +210,9 @@ struct slice_proto : strict_contain<StartT, LenT> {
 template<IsDim auto Dim, class StartT, class LenT>
 constexpr auto slice(StartT start, LenT len) noexcept { return slice_proto<Dim, good_index_t<StartT>, good_index_t<LenT>>(start, len); }
 
+template<IsDim auto Dim, class LenT>
+constexpr auto slice(LenT len) noexcept { return slice_proto<Dim, good_index_t<lit_t<0>>, good_index_t<LenT>>(lit<0>, len); }
+
 template<IsDim auto Dim, class T, class StartT, class EndT>
 struct span_t : strict_contain<T, StartT, EndT> {
 	using strict_contain<T, StartT, EndT>::strict_contain;
