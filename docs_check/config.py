@@ -46,11 +46,11 @@ substitutions = {
 	('docs/Traverser.md', 14): {'#pragma omp parallel for': ''},
 	('docs/Traverser.md', 18): {
 		'matrix_data': 'std::calloc(300*400, sizeof(float))',
-		f'(noarr::tbb_reduce_bag{_ANY}*,)({_ANY}*)noarr::tbb_reduce_bag.*,': lambda mo: ''.join(mo.group(1, 2, 1)),
+		f'(noarr::tbb_reduce{_ANY}*,)({_ANY}*)noarr::tbb_reduce.*,': lambda mo: ''.join(mo.group(1, 2, 1)),
 	},
 	('docs/Traverser.md', 19): {_PROLOG: 'void *values_data = nullptr; std::size_t size = 0;'},
+	('docs/Traverser.md', 20): {'[ab]_data': '(void*)nullptr'},
 	('docs/Traverser.md', 21): {'[ab]_data': '(void*)nullptr'},
-	('docs/Traverser.md', 22): {'[ab]_data': '(void*)nullptr'},
 	('docs/other/Functions.md', 0): {_PROLOG: "auto matrix = noarr::scalar<int>() ^ noarr::sized_vector<'x'>(1);", '.*(will not work|not make sense).*': ''},
 	('docs/other/Functions.md', 1): {_PROLOG: "auto matrix = noarr::scalar<int>() ^ noarr::sized_vector<'x'>(1);"},
 	('docs/other/Mangling.md', 0): {'/\*\.\.\.\*/': '0'},

@@ -317,6 +317,18 @@ concept IsSimple = std::is_standard_layout_v<T>
 template<class T>
 concept IsContainable = (!std::is_empty_v<T> || std::is_default_constructible_v<T>); /* empty -> default_constructible */
 
+template<class T, template<class...> class Template>
+struct is_specialization : std::false_type {};
+
+template<template<class...> class Template, class... Args>
+struct is_specialization<Template<Args...>, Template> : std::true_type {};
+
+template<class T, template<class...> class Template>
+static constexpr bool is_specialization_v = is_specialization<T, Template>::value;
+
+template<class T, template<class...> class Template>
+concept IsSpecialization = is_specialization_v<std::remove_cvref_t<T>, Template>;
+
 namespace constexpr_arithmetic {
 
 template<std::size_t N>

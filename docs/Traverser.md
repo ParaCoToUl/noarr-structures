@@ -450,9 +450,8 @@ noarr::tbb_for_each(noarr::traverser(matrix), [&](auto state) {
 
 ### Parallel reduction
 
-Noarr provides two functions for parallel with non-scalar result (i.e. reducing to a structure, not just one value).
-Their names are `noarr::tbb_reduce` and `noarr::tbb_reduce_bag` and behave both the same (differing only in interface).
-In the following example, we use the latter to sum the rows and columns of a matrix:
+Noarr provides a function `noarr::tbb_reduce` for parallel with non-scalar result (i.e. reducing to a structure, not just one value).
+In the following example, we use it to sum the rows and columns of a matrix:
 
 ```cpp
 auto matrix = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 300>() ^ noarr::array<'i', 400>(), matrix_data);
@@ -471,7 +470,7 @@ noarr::traverser(matrix).for_each([&](auto state) {
 
 // row sums - parallel version:
 
-noarr::tbb_reduce_bag(
+noarr::tbb_reduce(
 	// input traverser
 	noarr::traverser(matrix),
 
@@ -496,7 +495,7 @@ noarr::tbb_reduce_bag(
 
 // column sums - parallel version:
 
-noarr::tbb_reduce_bag(/* ... all args the same ... */, col_sums);
+noarr::tbb_reduce(/* ... all args the same ... */, col_sums);
 ```
 
 These functions automatically detect the parallelization strategy.
@@ -519,7 +518,7 @@ auto values = noarr::make_bag(noarr::scalar<std::uint8_t>() ^ noarr::sized_vecto
 // histogram of the values, indexed by the value ('v'), gives the number of occurrences
 auto histogram = noarr::make_bag(noarr::scalar<std::size_t>() ^ noarr::array<'v', 256>());
 
-noarr::tbb_reduce_bag(
+noarr::tbb_reduce(
 	// input traverser
 	noarr::traverser(values),
 
@@ -541,41 +540,6 @@ noarr::tbb_reduce_bag(
 
 	// output bag
 	histogram
-);
-```
-
-We also use this example to show the difference between `noarr::tbb_reduce_bag` and `noarr::tbb_reduce`:
-
-```cpp
-// vector of values in range [0, 256), indexed by some 'i'
-auto values_struct = noarr::scalar<std::uint8_t>() ^ noarr::sized_vector<'i'>(size);
-// histogram of the values, indexed by the value ('v'), gives the number of occurrences
-auto histogram_struct = noarr::scalar<std::size_t>() ^ noarr::array<'v', 256>();
-void *histogram_data = operator new(histogram_struct | noarr::get_size());
-
-noarr::tbb_reduce(
-	// input traverser
-	noarr::traverser(values_struct),
-
-	// fill the output with neutral elements
-	[=](auto histo_state, void *histo) {
-		histogram_struct | noarr::get_at(histo, histo_state) = 0;
-	},
-
-	// accumulate elements into (partial) result
-	[=](auto values_state, void *histo) {
-		std::uint8_t value = values_struct | noarr::get_at(values_data, values_state);
-		histogram_struct | noarr::get_at<'v'>(histo, value) += 1;
-	},
-
-	// in-place join partial results
-	[=](auto histo_state, void *histo_left, const void *histo_right) {
-		histogram_struct | noarr::get_at(histo_left, histo_state) += histogram_struct | noarr::get_at(histo_right, histo_state);
-	},
-
-	// instead of bag, we need two args
-	histogram_struct,
-	histogram_data
 );
 ```
 

@@ -187,6 +187,9 @@ public:
 	}
 };
 
+template<class T>
+concept IsBag = IsSpecialization<T, bag>;
+
 template<class Structure>
 using unique_bag = bag<Structure, helpers::bag_policy<std::unique_ptr>>;
 
