@@ -129,7 +129,7 @@ struct planner_endings : flexible_contain<Endings...> {
 	[[nodiscard]]
 	static constexpr auto get_next_ending(auto order, auto ending) noexcept {
 		if constexpr (is_activated_v<decltype(ending.order(order))>)
-			return helpers::contain();
+			return helpers::contain<>();
 		else
 			return helpers::contain(ending);
 	}
