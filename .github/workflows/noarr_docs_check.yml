@@ -5,6 +5,7 @@ on:
     paths:
     - 'include/**'
     - 'docs/**'
+    - 'docs_check/**'
     - '.github/workflows/noarr_docs_check.yml'
 
 jobs:
