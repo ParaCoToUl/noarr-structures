@@ -65,6 +65,8 @@ def _():
 		for h in headers:
 			if not h.endswith('.hpp'):
 				continue
+			elif h.endswith('/omp.hpp'):
+				continue
 			f.write(f'#include <{h}>\n')
 		f.write(global_decls)
 		f.write('#define UNIQ_A(CTR) UNIQ_##CTR\n')
