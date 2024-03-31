@@ -9,6 +9,7 @@
 #include "../base/state.hpp"
 #include "../interop/bag.hpp"
 #include "../interop/traverser_iter.hpp"
+#include "../interop/planner_iter.hpp"
 
 namespace noarr {
 
@@ -89,6 +90,19 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 		},
 		out_struct,
 		out_bag.data());
+}
+
+struct planner_tbb_execute_t {};
+
+constexpr planner_tbb_execute_t planner_tbb_execute() noexcept {
+	return planner_tbb_execute_t();
+}
+
+template<IsPlanner Planner>
+inline void operator|(const Planner &planner, planner_tbb_execute_t) {
+	tbb::parallel_for(range(planner), [](const auto &sub_range) {
+		sub_range.as_planner().execute();
+	});
 }
 
 } // namespace noarr
