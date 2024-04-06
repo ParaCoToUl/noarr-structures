@@ -112,7 +112,7 @@ struct state_remove_item<Tag> {
 	using result = state_items_pack<>;
 };
 
-template<class StateItemsPack, class ...Tags> requires IsTagPack<Tags...>
+template<class StateItemsPack, class ...Tags>
 struct state_remove_items;
 
 template<class StateItemsPack>
@@ -120,12 +120,12 @@ struct state_remove_items<StateItemsPack> {
 	using result = StateItemsPack;
 };
 
-template<class ...StateItems, class Tag> requires IsTag<Tag>
+template<class ...StateItems, class Tag>
 struct state_remove_items<state_items_pack<StateItems...>, Tag> {
 	using result = typename state_remove_item<Tag, StateItems...>::result;
 };
 
-template<class ...StateItems, class Tag, class ...Tags> requires IsTagPack<Tag, Tags...>
+template<class ...StateItems, class Tag, class ...Tags>
 struct state_remove_items<state_items_pack<StateItems...>, Tag, Tags...> {
 	using recursion_result = typename state_remove_item<Tag, StateItems...>::result;
 	using result = typename state_remove_items<recursion_result, Tags...>::result;
