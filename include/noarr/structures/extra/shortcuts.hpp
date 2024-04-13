@@ -89,7 +89,7 @@ constexpr auto vectors_like(Struct structure) noexcept {
 	return vectors_like<Dims...>(structure, empty_state);
 }
 
-template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor>
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor = Dim>
 constexpr auto into_blocks(auto minor_length) noexcept {
 	return into_blocks<Dim, DimMajor, DimMinor>() ^ set_length<DimMinor>(minor_length);
 }
@@ -99,12 +99,12 @@ constexpr auto into_blocks_dynamic(auto minor_length) noexcept {
 	return into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>() ^ set_length<DimMinor>(minor_length);
 }
 
-template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim>
+template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim = DimMinor>
 constexpr auto merge_blocks(auto minor_length) noexcept {
 	return set_length<DimMinor>(minor_length) ^ merge_blocks<DimMajor, DimMinor, Dim>();
 }
 
-template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor>
+template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor = Dim>
 constexpr auto strip_mine(auto ...optional_minor_length) noexcept {
 	return into_blocks<Dim, DimMajor, DimMinor>(optional_minor_length...) ^ hoist<DimMajor>();
 }

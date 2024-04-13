@@ -479,7 +479,7 @@ struct merge_blocks_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_blocks_t<DimMajor, DimMinor, Dim, Struct>(s); }
 };
 
-template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim>
+template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim = DimMinor>
 constexpr auto merge_blocks() {
 	return merge_blocks_proto<DimMajor, DimMinor, Dim>();
 }
