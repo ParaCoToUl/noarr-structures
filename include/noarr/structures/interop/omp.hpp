@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_OMP_HPP
 #define NOARR_STRUCTURES_OMP_HPP
 
+#include <utility>
+
 #include "../interop/traverser_iter.hpp"
 #include "../interop/planner_iter.hpp"
 
@@ -13,18 +15,16 @@
 
 namespace noarr {
 
-template<class Traverser, class F>
-inline auto omp_for_each(const Traverser &t, F &&f) -> decltype(f) {
+template<IsTraverser Traverser, class F>
+inline void omp_for_each(const Traverser &t, const F &f) {
 	#pragma omp parallel for
 	for(auto t_inner : t) {
-		t_inner.for_each(std::forward<F>(f));
+		t_inner.for_each(f);
 	}
-
-	return std::forward<F>(f);
 }
 
-template<class Traverser, class F>
-inline auto omp_for_sections(const Traverser &t, F &&f) -> decltype(f) {
+template<IsTraverser Traverser, class F>
+inline void omp_for_sections(const Traverser &t, const F &f) {
 	#pragma omp parallel for
 	for(auto t_inner : t) {
 		f(t_inner);

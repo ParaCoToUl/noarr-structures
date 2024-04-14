@@ -21,12 +21,20 @@ constexpr traverser_range_t<Dim, Struct, Order>::traverser_range_t(traverser_ran
 	orig.end_idx = begin_idx;
 }
 
-template<class Traverser, class F>
+template<IsTraverser Traverser, class F>
 inline void tbb_for_each(const Traverser &t, const F &f) {
 	tbb::parallel_for(t.range(), [&f](const auto &subrange) { subrange.for_each(f); });
 }
 
-template<class Traverser, class FNeut, class FAcc, class FJoin, class OutStruct>
+template<IsTraverser Traverser, class F>
+inline void tbb_for_sections(const Traverser &t, const F &f) {
+	tbb::parallel_for(t.range(), [&f](const auto &subrange) {
+		constexpr auto top_dim = helpers::traviter_top_dim<decltype(subrange.get_struct() ^ subrange.get_order())>;
+		subrange.as_traverser().template for_sections<top_dim>(f);
+	});
+}
+
+template<IsTraverser Traverser, class FNeut, class FAcc, class FJoin, class OutStruct>
 inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_acc, const FJoin &f_join, const OutStruct &out_struct, void *out_ptr) {
 	constexpr auto top_dim = helpers::traviter_top_dim<decltype(t.get_struct() ^ t.get_order())>;
 	using range_t = decltype(t.range());
@@ -71,7 +79,7 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 	}
 }
 
-template<class Traverser, class FNeut, class FAcc, class FJoin, IsBag OutBag>
+template<IsTraverser Traverser, class FNeut, class FAcc, class FJoin, IsBag OutBag>
 inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_acc, const FJoin &f_join, const OutBag &out_bag) {
 	const auto out_struct = out_bag.structure();
 	return tbb_reduce(t,
