@@ -406,7 +406,7 @@ TEST_CASE("Traverser sections", "[traverser]") {
 
 	iters = 0;
 
-	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).template for_sections<'z', 'x', 'y'>([&i, &iters](auto inner){
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).template for_sections<'z', 'x', 'y'>([&iters](auto inner){
 		auto s = inner.state();
 
 		STATIC_REQUIRE(decltype(s)::template contains<index_in<'x'>>);
@@ -430,7 +430,7 @@ TEST_CASE("Traverser sections", "[traverser]") {
 
 	REQUIRE(iters == 20*30*40);
 
-	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).for_sections([&i, &iters](auto inner){
+	traverser(a, b, c).order(reorder<'x', 'y', 'z'>()).for_sections([&iters](auto inner){
 		auto s = inner.state();
 
 		STATIC_REQUIRE(decltype(s)::template contains<index_in<'x'>>);
