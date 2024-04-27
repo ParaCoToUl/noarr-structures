@@ -23,8 +23,8 @@ constexpr auto vectors() noexcept {
 	return (... ^ vector<Dims>());
 }
 
-template<IsDim auto Dim>
-constexpr auto vector(auto length) noexcept {
+template<IsDim auto Dim, class Length>
+constexpr auto vector(Length length) noexcept {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
@@ -42,7 +42,7 @@ struct array_proto {
 };
 
 template<IsDim auto Dim, std::size_t L, class SubStruct>
-using array_t = decltype(std::declval<SubStruct>() ^ array_proto<Dim, L>());
+using array_t = decltype(std::declval<const SubStruct>() ^ array_proto<Dim, L>());
 
 template<IsDim auto Dim, std::size_t L>
 constexpr auto array() noexcept {
