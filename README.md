@@ -6,8 +6,6 @@
 
 [![Noarr test ubuntu-latest](../../actions/workflows/noarr_test_ubuntul.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntul.yml)
 
-[![Noarr test macos-latest](../../actions/workflows/noarr_test_macosl.yml/badge.svg)](../../actions/workflows/noarr_test_macosl.yml)
-
 [![Noarr test windows-latest](../../actions/workflows/noarr_test_winl.yml/badge.svg)](../../actions/workflows/noarr_test_winl.yml)
 
 ## Introduction
@@ -101,8 +99,6 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 ### Matrix example tests  <!-- Exclude this line from linear documentation -->
 
 [![Noarr matrix example test ubuntu-latest](../../actions/workflows/noarr_matrix_example_test_ubuntul.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_ubuntul.yml)
-
-[![Noarr matrix example test macos-latest](../../actions/workflows/noarr_matrix_example_test_macosl.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_macosl.yml)
 
 [![Noarr matrix example test windows-latest](../../actions/workflows/noarr_matrix_example_test_winl.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_winl.yml)
 
