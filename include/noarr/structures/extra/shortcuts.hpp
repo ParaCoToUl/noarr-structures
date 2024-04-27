@@ -38,11 +38,11 @@ struct array_proto {
 	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s ^ vector<Dim>(lit<L>); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s ^ vector<Dim>() ^ set_length<Dim>(lit<L>); }
 };
 
 template<IsDim auto Dim, std::size_t L, class SubStruct>
-using array_t = decltype(std::declval<const SubStruct>() ^ array_proto<Dim, L>());
+using array_t = decltype(std::declval<SubStruct>() ^ array_proto<Dim, L>());
 
 template<IsDim auto Dim, std::size_t L>
 constexpr auto array() noexcept {
