@@ -40,7 +40,7 @@ See the first section of [Dimension Kinds](../DimensionKinds.md) for the allowed
 This structure can be used to have a [traverser](../Traverser.md) visit each element repeatedly:
 
 ```cpp
-auto structure = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42);
+auto structure = noarr::scalar<float>() ^ noarr::vector<'i'>(42);
 
 noarr::traverser(structure ^ noarr::bcast<'r'>(5)).for_each([&](auto state) {
 	int round = noarr::get_index<'r'>(state);

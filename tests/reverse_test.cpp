@@ -13,7 +13,7 @@ static auto mkstate(std::size_t x) {
 }
 
 TEST_CASE("Reverse sized vector", "[reverse]") {
-	auto s = noarr::scalar<float>() ^ noarr::sized_vector<'x'>(42);
+	auto s = noarr::scalar<float>() ^ noarr::vector<'x'>(42);
 	auto r = s ^ noarr::reverse<'x'>();
 
 	REQUIRE((std::is_same_v<decltype(r)::signature, decltype(s)::signature>));
@@ -61,7 +61,7 @@ TEST_CASE("Reverse tuple", "[reverse]") {
 }
 
 TEST_CASE("Reverse sized vector traverser", "[reverse traverser]") {
-	auto s = noarr::scalar<float>() ^ noarr::sized_vector<'x'>(42);
+	auto s = noarr::scalar<float>() ^ noarr::vector<'x'>(42);
 	auto r = s ^ noarr::reverse<'x'>();
 
 	std::size_t x = 0;

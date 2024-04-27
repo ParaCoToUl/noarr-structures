@@ -514,7 +514,7 @@ In the following example, the input structure only has an `'i'` dimension, while
 
 ```cpp
 // vector of values in range [0, 256), indexed by some 'i'
-auto values = noarr::make_bag(noarr::scalar<std::uint8_t>() ^ noarr::sized_vector<'i'>(size), values_data);
+auto values = noarr::make_bag(noarr::scalar<std::uint8_t>() ^ noarr::vector<'i'>(size), values_data);
 // histogram of the values, indexed by the value ('v'), gives the number of occurrences
 auto histogram = noarr::make_bag(noarr::scalar<std::size_t>() ^ noarr::array<'v', 256>());
 

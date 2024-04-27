@@ -32,8 +32,8 @@ In the following example, we copy a vector indexed by `'i'` into one indexed by 
 
 ```cpp
 // let's say we cannot change these definitions
-auto from = noarr::make_bag(noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42), /*...*/);
-auto to = noarr::make_bag(noarr::scalar<float>() ^ noarr::sized_vector<'x'>(42));
+auto from = noarr::make_bag(noarr::scalar<float>() ^ noarr::vector<'i'>(42), /*...*/);
+auto to = noarr::make_bag(noarr::scalar<float>() ^ noarr::vector<'x'>(42));
 
 // create a view of `from` that is compatible with `to`
 auto from_view = from ^ noarr::rename<'i', 'x'>();

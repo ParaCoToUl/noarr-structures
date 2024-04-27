@@ -34,7 +34,7 @@ or if you want to split the iteration logic from the logic that chooses the dime
 you can use the second kind (`for_each`-like) in combination with `noarr::hoist`.
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(4) ^ noarr::sized_vector<'i'>(3);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(4) ^ noarr::vector<'i'>(3);
 
 // various ways to do a i-major traversal (row-by-row if i is row index)
 

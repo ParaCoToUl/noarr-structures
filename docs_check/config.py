@@ -3,8 +3,8 @@ _EPILOG = r'\Z'
 _ANY = '(?:.|\n)'
 
 _tmp_mulsc = '''
-auto sc = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42) ^ noarr::sized_vector<'j'>(42);
-auto sr = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(42) ^ noarr::sized_vector<'i'>(42);
+auto sc = noarr::scalar<float>() ^ noarr::vector<'i'>(42) ^ noarr::vector<'j'>(42);
+auto sr = noarr::scalar<float>() ^ noarr::vector<'j'>(42) ^ noarr::vector<'i'>(42);
 auto bc = noarr::make_bag(sc, (void*)nullptr);
 auto br = noarr::make_bag(sr, (void*)nullptr);
 '''
@@ -51,8 +51,8 @@ substitutions = {
 	('docs/Traverser.md', 19): {_PROLOG: 'void *values_data = nullptr; std::size_t size = 0;'},
 	('docs/Traverser.md', 20): {'[ab]_data': '(void*)nullptr'},
 	('docs/Traverser.md', 21): {'[ab]_data': '(void*)nullptr'},
-	('docs/other/Functions.md', 0): {_PROLOG: "auto matrix = noarr::scalar<int>() ^ noarr::sized_vector<'x'>(1);", '.*(will not work|not make sense).*': ''},
-	('docs/other/Functions.md', 1): {_PROLOG: "auto matrix = noarr::scalar<int>() ^ noarr::sized_vector<'x'>(1);"},
+	('docs/other/Functions.md', 0): {_PROLOG: "auto matrix = noarr::scalar<int>() ^ noarr::vector<'x'>(1);", '.*(will not work|not make sense).*': ''},
+	('docs/other/Functions.md', 1): {_PROLOG: "auto matrix = noarr::scalar<int>() ^ noarr::vector<'x'>(1);"},
 	('docs/other/Mangling.md', 0): {'/\*\.\.\.\*/': '0'},
 	('docs/other/SeparateLengths.md', 2): {'.*get_length.*': ''},
 	('docs/other/Serialization.md', 1): {'/\*\.\.\.\*/': 'noarr::tuple_t<\'*\'>()', 'path/to/(src|dest)': '/dev/null', 'return 1': 'std::abort()'},

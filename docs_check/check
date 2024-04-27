@@ -4,11 +4,11 @@ my_dir="docs_check"
 
 echo
 
-cd "`dirname "$0"`/.."
+cd "$(dirname "$0")/.."
 echo "Repo root: $PWD"
 
-output=`mktemp`
-snipdir=`mktemp -d`
+output=$(mktemp)
+snipdir=$(mktemp -d)
 echo "Created snippets directory: $snipdir"
 trap "echo 'Deleting: $snipdir, $output'; rm -r '$snipdir' '$output'" EXIT
 

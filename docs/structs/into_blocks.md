@@ -124,7 +124,7 @@ The best order always depends on the algorithm and the structure. These examples
 The examples use the following definition:
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(12) ^ noarr::sized_vector<'i'>(8);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(12) ^ noarr::vector<'i'>(8);
 ```
 
 ### Default traversal
@@ -203,7 +203,7 @@ To split the computation between multiple CPUs/threads, you will usually use [`n
 This example will be about vectorization. Consider a the following example, where we naively sum the elements of an array:
 
 ```cpp
-auto input = noarr::make_bag(noarr::scalar<float>() ^ noarr::sized_vector<'i'>(num_elems), input_data);
+auto input = noarr::make_bag(noarr::scalar<float>() ^ noarr::vector<'i'>(num_elems), input_data);
 
 float sum = 0;
 
@@ -220,7 +220,7 @@ read input in blocks of the same size, and always add a whole block to the vecto
 // assuming avx512: 16 elems * 32 bits per elem = 512 bits (it is generally ok to overshoot)
 constexpr std::size_t block_size = 16;
 
-auto input = noarr::make_bag(noarr::scalar<float>() ^ noarr::sized_vector<'i'>(num_elems), input_data);
+auto input = noarr::make_bag(noarr::scalar<float>() ^ noarr::vector<'i'>(num_elems), input_data);
 
 auto sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', block_size>());
 

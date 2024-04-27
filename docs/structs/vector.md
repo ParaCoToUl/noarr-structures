@@ -24,7 +24,6 @@ The layout of a `vector` structure consists of several copies of the layout of `
 The whole structure has one dimension more than `T`, the new dimension has name `Dim`.
 The [index](../Glossary.md#index) in `Dim` is used to select one of the copies of the `T` layout.
 
-Neither the `vector` structure itself nor the protostructure created by `vector()` set the length of the new dimension - it must be [set externally](../BasicUsage.md#lengths).
-As an alternative, one can use [`noarr::sized_vector`](sized_vector.md), which is a shortcut for `noarr::vector` composed with [`noarr::set_length`](set_length.md).
+Neither the `vector` structure itself nor the protostructure created by `vector()` set the length of the new dimension - it must be [set externally](../BasicUsage.md#lengths) by applying `noarr::set_length` via the `^` operator. This can be shortened by using `noarr::vector<Dim>(length)`.
 
 The size of a vector is the sub-structure size multiplied by the vector length. The vector does not add any padding.

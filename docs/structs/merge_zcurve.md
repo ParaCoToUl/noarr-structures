@@ -51,7 +51,7 @@ Alternatively, you can use a tiled format, created using [`noarr::merge_blocks`]
 If the structure is known and it is a square (or (hyper-)cube) and its lengths are a power of two, the traversal can look like this:
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(8) ^ noarr::sized_vector<'i'>(8);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(8) ^ noarr::vector<'i'>(8);
 
 noarr::traverser(matrix).order(noarr::merge_zcurve<'i', 'j', 'z'>::maxlen_alignment<8, 8>()).for_each([&](auto state) {
 	// state has 'i' and 'j', can be used with `matrix` (or a bag of it)
@@ -67,7 +67,7 @@ noarr::traverser(matrix).order(noarr::merge_zcurve<'i', 'j', 'z'>::maxlen_alignm
 Consider the following structure (used in many other examples):
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(12) ^ noarr::sized_vector<'i'>(8);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(12) ^ noarr::vector<'i'>(8);
 ```
 
 Note that both its lengths are divisible by 4 (this is the largest such power of two).
@@ -105,7 +105,7 @@ Instead, split the structure [into blocks](into_blocks.md) and only use `merge_z
 leaving the element index (`DimMinor`) "untangled":
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(12) ^ noarr::sized_vector<'i'>(8);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(12) ^ noarr::vector<'i'>(8);
 
 noarr::traverser(matrix).order(noarr::into_blocks<'j', 'J', 'j'>(4) ^ noarr::merge_zcurve<'J', 'i', 'z'>::maxlen_alignment<8, 1>()).for_each([&](auto state) {
 	// ...

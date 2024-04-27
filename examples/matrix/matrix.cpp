@@ -21,7 +21,7 @@
 using matrix_rows = noarr::vector_t<'m', noarr::vector_t<'n', noarr::scalar<int>>>;
 using matrix_columns = noarr::vector_t<'n', noarr::vector_t<'m', noarr::scalar<int>>>;
 #if 0 // TODO z-curve
-using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::sized_vector<'a', noarr::scalar<int>>>;
+using matrix_zcurve = noarr::z_curve<'n', 'm', noarr::vector<'a', noarr::scalar<int>>>;
 #endif
 
 /**
@@ -241,7 +241,7 @@ void print_help_and_exit()
 
 /**
  * @brief Main function called from command line. It parses command line arguments and runs selected layout.
- * 
+ *
  * @param argc: command-line arguments count
  * @param argv: command-line arguments
  */
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 		matrix_demo(size, matrix_columns() ^ noarr::set_length<'n'>(size) ^ noarr::set_length<'m'>(size));
 #if 0 // TODO z-curve
 	else if (!strcmp(argv[1], "z_curve"))
-		matrix_demo(size, matrix_zcurve(noarr::sized_vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'n'>(size), noarr::helpers::z_curve_bottom<'m'>(size)));
+		matrix_demo(size, matrix_zcurve(noarr::vector<'a', noarr::scalar<int>>(noarr::scalar<int>(), size * size), noarr::helpers::z_curve_bottom<'n'>(size), noarr::helpers::z_curve_bottom<'m'>(size)));
 #endif
 	else
 		print_help_and_exit();

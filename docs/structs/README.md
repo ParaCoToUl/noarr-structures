@@ -2,8 +2,7 @@
 
 - [`scalar`](scalar.md): the simplest possible structure referring to a single value of a certain type
 - [`tuple`](tuple.md): introduces a static dimension with many substructures (similar to `std::tuple`)
-- [`vector`](vector.md): introduces a dynamic dimension of an unknown length (has to be specified ad-hoc)
-- [`sized_vector`](sized_vector.md): introduces a dynamic dimension of a known (dynamic/static) length (using `noarr::vector`)
+- [`vector`](vector.md): introduces a dynamic dimension of an unknown length (has to be specified ad-hoc) or a known (dynamic/static) length
 - [`array`](array.md): introduces a dynamic dimension of a known static length (using `noarr::vector`)
 - [`fix`](fix.md): fixes an index in a structure
 - [`set_length`](set_length.md): sets the length (number of indices) of a structure in the given dimension

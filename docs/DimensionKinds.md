@@ -40,10 +40,10 @@ In vector-like dimensions, the length is part of the structure, but it is not kn
 This is necessary for example when the number of elements depends on the program input.
 Any value can be used as an index for this dimension, be it a static compile-time constant or a dynamically computed value, assuming it is in the range.
 
-The simplest way to create a structure with such a dimension is [`noarr::sized_vector`](structs/sized_vector.md):
+The simplest way to create a structure with such a dimension is [`noarr::vector`](structs/vector.md):
 
 ```cpp
-auto structure = noarr::scalar<float>() ^ noarr::sized_vector<'x'>(42);
+auto structure = noarr::scalar<float>() ^ noarr::vector<'x'>(42);
 
 auto size = structure | noarr::get_size(); // returns 42*sizeof(float) as a dynamic value
 auto length = structure | noarr::get_length<'x'>(); // returns 42 as a dynamic value
@@ -68,7 +68,7 @@ Any value can be still used as an index.
 The previous example can be updated to an array-like by adding `lit<...>`:
 
 ```cpp
-auto structure = noarr::scalar<float>() ^ noarr::sized_vector<'x'>(lit<42>); // <- added lit here
+auto structure = noarr::scalar<float>() ^ noarr::vector<'x'>(lit<42>); // <- added lit here
 
 // different from vector-like
 auto size = structure | noarr::get_size(); // returns 42*sizeof(float) as a *static* value
@@ -84,7 +84,7 @@ Another way to create an array-like dimension is, as the name suggests, [`noarr:
 ```cpp
 auto structure = noarr::scalar<float>() ^ noarr::array<'x', 42>();
 
-// in this case, array will behave exactly the same as sized_vector(lit)
+// in this case, array will behave exactly the same as vector(lit)
 ```
 
 In the [signature](Signature.md), array-like dimensions are represented as `noarr::function_sig<Dim, noarr::static_arg_length<N>, T>`.
@@ -146,7 +146,7 @@ auto size = structure | noarr::get_size(state42); // returns 42*sizeof(float) as
 // ...
 ```
 
-Note that `noarr::sized_vector<Dim>(len)` used in the first two kinds is actually just a shortcut for `noarr::vector<Dim>() ^ noarr::set_length<Dim>(len)`.
+Note that `noarr::vector<Dim>(len)` used in the first two kinds is actually just a shortcut for `noarr::vector<Dim>() ^ noarr::set_length<Dim>(len)`.
 
 In the [signature](Signature.md), unknown length dimensions are represented as `noarr::function_sig<Dim, noarr::unknown_arg_length, T>`.
 [Traverser](Traverser.md) cannot be used until the length is set.

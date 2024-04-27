@@ -42,7 +42,7 @@ See the first section of [Dimension Kinds](../DimensionKinds.md) for the allowed
 Slicing can be used to limit the view of a structure:
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(12) ^ noarr::sized_vector<'i'>(8);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(12) ^ noarr::vector<'i'>(8);
 
 // get the submatrix consisting of cols with j in {2, 3, 4, 5, 6}
 auto submatrix1 = matrix ^ noarr::slice<'j'>(2, 5);
@@ -89,19 +89,19 @@ std::size_t num_cols_padded = (num_cols + alignment - 1) / alignment * alignment
 
 // i is row index, j is column index
 auto matrix = noarr::scalar<float>()
-	^ noarr::sized_vector<'j'>(num_cols_padded)
-	^ noarr::sized_vector<'i'>(num_rows)
+	^ noarr::vector<'j'>(num_cols_padded)
+	^ noarr::vector<'i'>(num_rows)
 	^ noarr::slice<'j'>(0, num_cols);
 ```
 
-Note that it is not necessary that `sized_vector<'i'>` comes before the slice. Slicing only sets the view, but the size is already set.
+Note that it is not necessary that `vector<'i'>` comes before the slice. Slicing only sets the view, but the size is already set.
 Therefore, the above example is equivalent to the following:
 
 ```cpp
 auto matrix = noarr::scalar<float>()
-	^ noarr::sized_vector<'j'>(num_cols_padded)
+	^ noarr::vector<'j'>(num_cols_padded)
 	^ noarr::slice<'j'>(0, num_cols)
-	^ noarr::sized_vector<'i'>(num_rows);
+	^ noarr::vector<'i'>(num_rows);
 ```
 
 We could even introduce a proto-structure for it:
@@ -109,12 +109,12 @@ We could even introduce a proto-structure for it:
 ```cpp
 template<char Dim>
 auto my_padded_vector(auto len, auto a) {
-	return noarr::sized_vector<Dim>((len + a - 1) / a * a) ^ noarr::slice<Dim>(lit<0>, len);
+	return noarr::vector<Dim>((len + a - 1) / a * a) ^ noarr::slice<Dim>(lit<0>, len);
 }
 
 auto matrix = noarr::scalar<float>()
 	^ my_padded_vector<'j'>(100, 16)
-	^ noarr::sized_vector<'i'>(42);
+	^ noarr::vector<'i'>(42);
 ```
 
 See also [incomplete blocks example in the `merge_blocks` documentation](merge_blocks.md#incomplete-blocks).

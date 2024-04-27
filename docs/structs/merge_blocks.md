@@ -51,8 +51,8 @@ std::size_t num_cols = 12;
 
 // i is row index, j is column index
 auto simple_matrix = noarr::scalar<float>()
-	^ noarr::sized_vector<'j'>(num_cols)
-	^ noarr::sized_vector<'i'>(num_rows);
+	^ noarr::vector<'j'>(num_cols)
+	^ noarr::vector<'i'>(num_rows);
 ```
 
 Like this, it will be stored row-by-row. But we might want it to be stored as vertical blocks of width 4.
@@ -61,9 +61,9 @@ That is 3 layers (block `'b'`, row `'i'`, elem `'e'`), so we need to start with 
 
 ```cpp
 auto blocked_matrix = noarr::scalar<float>()
-	^ noarr::sized_vector<'e'>(4)
-	^ noarr::sized_vector<'i'>(num_rows)
-	^ noarr::sized_vector<'b'>(num_cols / 4);
+	^ noarr::vector<'e'>(4)
+	^ noarr::vector<'i'>(num_rows)
+	^ noarr::vector<'b'>(num_cols / 4);
 ```
 
 But now, the structure will not have the interface we wanted. It requires its user to pass `'b'` and `'e'` instead of `'j'`.
@@ -88,9 +88,9 @@ std::size_t block_size = 4;
 std::size_t num_blocks = (num_cols + block_size - 1) / block_size; // this is ceiling(num_cols / block_size)
 
 auto matrix = noarr::scalar<float>()
-	^ noarr::sized_vector<'e'>(block_size)
-	^ noarr::sized_vector<'i'>(num_rows)
-	^ noarr::sized_vector<'b'>(num_blocks)
+	^ noarr::vector<'e'>(block_size)
+	^ noarr::vector<'i'>(num_rows)
+	^ noarr::vector<'b'>(num_blocks)
 	^ noarr::merge_blocks<'b', 'e', 'j'>()
 	^ noarr::slice<'j'>(0, num_cols);
 ```
@@ -111,11 +111,11 @@ std::size_t tile_cols = 4;
 
 auto tiled_matrix = noarr::scalar<float>()
 	// create a tile
-	^ noarr::sized_vector<'j'>(tile_cols)
-	^ noarr::sized_vector<'i'>(tile_rows)
+	^ noarr::vector<'j'>(tile_cols)
+	^ noarr::vector<'i'>(tile_rows)
 	// create the grid of tiles
-	^ noarr::sized_vector<'J'>(num_cols / tile_cols)
-	^ noarr::sized_vector<'I'>(num_rows / tile_rows)
+	^ noarr::vector<'J'>(num_cols / tile_cols)
+	^ noarr::vector<'I'>(num_rows / tile_rows)
 	// merge the tiles together
 	^ noarr::merge_blocks<'J', 'j', 'j'>()
 	^ noarr::merge_blocks<'I', 'i', 'i'>();

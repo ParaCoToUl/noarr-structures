@@ -11,7 +11,7 @@ using noarr::array = /*...*/;
 
 template<char Dim, std::size_t Len>
 constexpr proto noarr::array();
-// = noarr::sized_vector<Dim>(lit<Len>)
+// = noarr::vector<Dim>(lit<Len>)
 ```
 
 (`proto` is an unspecified [proto-structure](../Glossary.md#proto-structure))
@@ -19,8 +19,8 @@ constexpr proto noarr::array();
 
 ## Description
 
-`array` is a shortcut for [`noarr::sized_vector`](sized_vector.md) of [static](../Glossary.md#static-value) [length](../Glossary.md#length).
-Along with `sized_vector`, it is the easiest way to define a noarr structure.
+`array` is a shortcut for [`noarr::vector`](vector.md) of [static](../Glossary.md#static-value) [length](../Glossary.md#length).
+Along with `vector`, it is the easiest way to define a noarr structure.
 For more general tools (and more information about the underlying structures),
 see [`noarr::vector`](vector.md) and [Lengths section in Basic Usage](../BasicUsage.md#lengths).
 

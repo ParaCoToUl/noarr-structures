@@ -92,7 +92,7 @@ TEST_CASE("Split dynamic set length reused as major", "[blocks]") {
 TEST_CASE("Split dynamic remainder", "[blocks]") {
 	for(std::size_t xlen = 0; xlen < 20; xlen++) {
 		auto m = noarr::scalar<float>()
-			^ noarr::sized_vector<'x'>(xlen)
+			^ noarr::vector<'x'>(xlen)
 			^ noarr::into_blocks_dynamic<'x', 'b', 'a', '_'>(4);
 
 		std::size_t block_size = m | noarr::get_length<'a'>();

@@ -46,7 +46,7 @@ This can be used to split work among threads or processing units. [`noarr::cuda_
 In the following example, we split `all` into 4 disjoint parts covering the original structure:
 
 ```cpp
-auto all = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42);
+auto all = noarr::scalar<float>() ^ noarr::vector<'i'>(42);
 
 auto part0 = all ^ noarr::step(0, 4); // 0,  4,  8, ..., 36, 40
 auto part1 = all ^ noarr::step(1, 4); // 1,  5,  9, ..., 37, 41

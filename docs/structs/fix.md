@@ -35,7 +35,7 @@ passing it in [state](../State.md) or directly to a [function](../BasicUsage.md#
 `fix` can be used to select a [sub-structure](../Glossary.md#sub-structure) or generally any subset of elements that share the index in a particular dimension.
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(4) ^ noarr::sized_vector<'i'>(3);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(4) ^ noarr::vector<'i'>(3);
 
 auto row2 = matrix ^ noarr::fix<'i'>(2);
 auto col2 = matrix ^ noarr::fix<'j'>(2);

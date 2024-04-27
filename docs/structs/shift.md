@@ -41,7 +41,7 @@ See the first section of [Dimension Kinds](../DimensionKinds.md) for the allowed
 `noarr::shift` is similar to [`noarr::slice`](slice.md). For example, the following two are equivalent:
 
 ```cpp
-auto structure = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(42);
+auto structure = noarr::scalar<float>() ^ noarr::vector<'i'>(42);
 
 auto shifted = structure ^ noarr::shift<'i'>(10);
 auto sliced = structure ^ noarr::slice<'i'>(10, 32); // 32 is the remaining length, 42 - 10
@@ -64,7 +64,7 @@ assert(size == 42 * sizeof(float));
 It is possible to shift multiple dimensions at once:
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(12) ^ noarr::sized_vector<'i'>(8);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(12) ^ noarr::vector<'i'>(8);
 
 auto submatrix = matrix ^ noarr::shift<'j', 'i'>(3, 2);
 ```

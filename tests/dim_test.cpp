@@ -271,9 +271,9 @@ void compute_kernel(auto A, auto B, auto E) {
 TEST_CASE("into_blocks_dynamic bug use-case of dims", "[dim]") {
 	using namespace noarr;
 
-	auto E = noarr::make_bag(scalar<int>() ^ sized_vectors<'x', 'y'>(10, 10));
-	auto A = noarr::make_bag(scalar<int>() ^ sized_vectors<'x', 'z'>(10, 10));
-	auto B = noarr::make_bag(scalar<int>() ^ sized_vectors<'z', 'y'>(10, 10));
+	auto E = noarr::make_bag(scalar<int>() ^ vectors<'x', 'y'>(10, 10));
+	auto A = noarr::make_bag(scalar<int>() ^ vectors<'x', 'z'>(10, 10));
+	auto B = noarr::make_bag(scalar<int>() ^ vectors<'z', 'y'>(10, 10));
 
 	compute_kernel(A.get_ref(), B.get_ref(), E.get_ref());
 

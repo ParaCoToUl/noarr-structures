@@ -42,7 +42,7 @@ auto edges_aos = noarr::pack(noarr::scalar<int>(), noarr::scalar<int>(), noarr::
 It will be useful to extract the `array`:
 
 ```cpp
-auto a = noarr::array<'i', 1024>(); // or sized_vector if it should not be hardcoded
+auto a = noarr::array<'i', 1024>(); // or vector if it should not be hardcoded
 auto edges_aos = noarr::pack(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ noarr::tuple<'t'>() ^ a;
 ```
 

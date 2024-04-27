@@ -57,7 +57,7 @@ Like `vector`, [`set_length`](structs/set_length.md) is a [proto-structure](Glos
 However, it does not add any dimensions or elements, it just communicates to the underlying `vector` what it should use for its length.
 Note that the original structure is not modified in-place. Instead, a new structure is returned.
 
-You can also use [`sized_vector`](structs/sized_vector.md) or [`array`](structs/array.md), which are shortcuts for a plain `vector` combined with a `set_length`.
+You can also use [`array`](structs/array.md), which is a shortcut for a plain `vector` combined with a static `length`.
 On the other hand, it is possible [to not include](other/SeparateLengths.md) the length in the structure at all.
 
 Once the length is set, it cannot be updated using another `^ noarr::set_length`. On the other hand, it can be queried using `get_length`:
@@ -204,8 +204,8 @@ For example, the following two structures can be used interchangeably:
 
 ```cpp
 // i is row index, j is column index
-auto matrix_columns = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(nrows) ^ noarr::sized_vector<'j'>(ncols);
-auto matrix_rows = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(ncols) ^ noarr::sized_vector<'i'>(nrows);
+auto matrix_columns = noarr::scalar<float>() ^ noarr::vector<'i'>(nrows) ^ noarr::vector<'j'>(ncols);
+auto matrix_rows = noarr::scalar<float>() ^ noarr::vector<'j'>(ncols) ^ noarr::vector<'i'>(nrows);
 ```
 
 Algorithms that can work with one should be able to work with the other. However, noarr needs to know the structure at compile time (for performance).

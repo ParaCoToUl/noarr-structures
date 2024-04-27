@@ -24,13 +24,13 @@ constexpr auto vectors() noexcept {
 }
 
 template<IsDim auto Dim>
-constexpr auto sized_vector(auto length) noexcept {
+constexpr auto vector(auto length) noexcept {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
-template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
-constexpr auto sized_vectors(auto ...lengths) noexcept {
-	return (... ^ sized_vector<Dims>(lengths));
+template<auto ...Dims, class ...Lengths> requires IsDimPack<decltype(Dims)...> && (sizeof...(Dims) == sizeof...(Lengths))
+constexpr auto vectors(Lengths ...lengths) noexcept {
+	return (... ^ vector<Dims>(lengths));
 }
 
 template<IsDim auto Dim, std::size_t L>
@@ -38,7 +38,7 @@ struct array_proto {
 	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s ^ sized_vector<Dim>(lit<L>); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s ^ vector<Dim>(lit<L>); }
 };
 
 template<IsDim auto Dim, std::size_t L, class SubStruct>

@@ -53,7 +53,7 @@ Use `cuda_step` to traverse a structure using all threads of the specified coope
 For example, a CUDA grid executing the following code traverses a vector regardless of the kernel launch parameters (grid dim, block dim).
 
 ```cpp
-auto structure = noarr::scalar<float>() ^ noarr::sized_vector<'i'>(1024*1024);
+auto structure = noarr::scalar<float>() ^ noarr::vector<'i'>(1024*1024);
 
 noarr::traverser(structure).order(noarr::cuda_step_grid()).for_each([&](auto state) {
 	std::size_t off = structure | noarr::offset(state); // or use bag
@@ -76,7 +76,7 @@ When the structure has more dimensions, [`noarr::step`](step.md) chooses the out
 So does `noarr::cuda_step`, for which it is usually not the best choice. For example:
 
 ```cpp
-auto matrix = noarr::scalar<float>() ^ noarr::sized_vector<'j'>(1024) ^ noarr::sized_vector<'i'>(1024);
+auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(1024) ^ noarr::vector<'i'>(1024);
 
 noarr::traverser(matrix).order(noarr::cuda_step_block()).for_each([&](auto state) {
 	std::size_t off = matrix | noarr::offset(state); // or use bag

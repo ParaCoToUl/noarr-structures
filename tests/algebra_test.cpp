@@ -91,8 +91,8 @@ TEST_CASE("Composite tuple-tuple algebra", "[algebra]") {
 }
 
 TEST_CASE("Sized vector test", "[algebra shortcuts]") {
-	auto testee = scalar<int>() ^ sized_vector<'x'>(20) ^ sized_vector<'y'>(30);
-	auto testee2 = scalar<int>() ^ (sized_vector<'x'>(20) ^ sized_vector<'y'>(30));
+	auto testee = scalar<int>() ^ vector<'x'>(20) ^ vector<'y'>(30);
+	auto testee2 = scalar<int>() ^ (vector<'x'>(20) ^ vector<'y'>(30));
 
 	using reference_t = set_length_t<'y', vector_t<'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, std::size_t>;
 

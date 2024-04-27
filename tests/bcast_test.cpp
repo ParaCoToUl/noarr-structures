@@ -6,7 +6,7 @@
 #include <noarr/structures/structs/bcast.hpp>
 
 TEST_CASE("Broadcast offset and size", "[bcast]") {
-	auto sa = noarr::scalar<float>() ^ noarr::sized_vector<'x'>(100);
+	auto sa = noarr::scalar<float>() ^ noarr::vector<'x'>(100);
 	auto sb = sa ^ noarr::bcast<'y'>(150);
 	REQUIRE((sa | noarr::offset<'x'>(10)) == (sb | noarr::offset<'x', 'y'>(10, 15)));
 	REQUIRE((sa | noarr::get_size()) == (sb | noarr::get_size()));
@@ -15,7 +15,7 @@ TEST_CASE("Broadcast offset and size", "[bcast]") {
 }
 
 TEST_CASE("Broadcast traverser", "[bcast traverser]") {
-	auto sa = noarr::scalar<float>() ^ noarr::sized_vector<'x'>(10);
+	auto sa = noarr::scalar<float>() ^ noarr::vector<'x'>(10);
 	auto sb = sa ^ noarr::bcast<'y'>(15);
 
 	std::size_t x = 0, y = 0, total = 0;
@@ -32,7 +32,7 @@ TEST_CASE("Broadcast traverser", "[bcast traverser]") {
 }
 
 TEST_CASE("Broadcast traverser order", "[bcast traverser]") {
-	auto sa = noarr::scalar<float>() ^ noarr::sized_vector<'x'>(10);
+	auto sa = noarr::scalar<float>() ^ noarr::vector<'x'>(10);
 
 	std::size_t x = 0, y = 0, total = 0;
 	traverser(sa).order(noarr::bcast<'y'>(15)).for_each([&](auto state){
