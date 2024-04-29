@@ -192,22 +192,22 @@ concept IsBag = IsSpecialization<T, bag_t>;
 
 template<class Structure>
 constexpr bag_t<Structure, helpers::bag_policy<std::unique_ptr>> bag(Structure s, std::unique_ptr<char[]> &&ptr) noexcept {
-	return {s, std::move(ptr)};
+	return bag_t<Structure, helpers::bag_policy<std::unique_ptr>>(s, std::move(ptr));
 }
 
 template<class Structure>
 constexpr bag_t<Structure, helpers::bag_policy<std::unique_ptr>> bag(Structure s) {
-	return {s};
+	return bag_t<Structure, helpers::bag_policy<std::unique_ptr>>(s);
 }
 
 template<class Structure>
 constexpr bag_t<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>> bag(Structure s, void *ptr) noexcept {
-	return {s, ptr};
+	return bag_t<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>(s, ptr);
 }
 
 template<class Structure>
 constexpr bag_t<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>> bag(Structure s, const void *ptr) noexcept {
-	return {s, ptr};
+	return bag_t<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, ptr);
 }
 
 template<class Structure>
