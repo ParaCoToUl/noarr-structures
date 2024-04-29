@@ -19,6 +19,9 @@ TEST_CASE("Wrapper traverser", "[to_struct]") {
 	auto aw = make_bag(a, (char *)nullptr);
 	auto bw = make_bag(b, (char *)nullptr);
 
+	REQUIRE(std::is_same_v<decltype(aw), decltype(bag(a, (char *)nullptr))>);
+	REQUIRE(std::is_same_v<decltype(bw), decltype(bag(b, (char *)nullptr))>);
+
 	REQUIRE(std::is_empty_v<decltype(traverser(a, b))>);
 	REQUIRE(std::is_same_v<decltype(traverser(a, b)), decltype(traverser(aw, bw))>);
 }
@@ -51,6 +54,8 @@ TEST_CASE("Vector wrapper traverser", "[to_struct]") {
 
 	auto aw = noarr::make_bag(a, (char *)nullptr);
 	auto bw = noarr::make_bag(b, (char *)nullptr);
+	REQUIRE(std::is_same_v<decltype(aw), decltype(bag(a, (char *)nullptr))>);
+	REQUIRE(std::is_same_v<decltype(bw), decltype(bag(b, (char *)nullptr))>);
 
 	REQUIRE(eq(traverser(a, b), traverser(aw, bw)));
 }

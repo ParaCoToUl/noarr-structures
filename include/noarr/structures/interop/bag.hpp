@@ -191,13 +191,26 @@ template<class T>
 concept IsBag = IsSpecialization<T, bag>;
 
 template<class Structure>
-using unique_bag = bag<Structure, helpers::bag_policy<std::unique_ptr>>;
+bag(Structure, std::unique_ptr<char[]> &&) -> bag<Structure, helpers::bag_policy<std::unique_ptr>>;
+template<class Structure>
+bag(Structure) -> bag<Structure, helpers::bag_policy<std::unique_ptr>>;
 
 template<class Structure>
-using raw_bag = bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>;
+bag(Structure, void *) -> bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>;
+template<class Structure>
+bag(Structure, char *) -> bag<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>>;
 
 template<class Structure>
-using const_raw_bag = bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>;
+bag(Structure, const void *) -> bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>;
+template<class Structure>
+bag(Structure, const char *) -> bag<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>;
+
+template<class Structure>
+using unique_bag = decltype(bag(std::declval<Structure>(), std::declval<std::unique_ptr<char[]>>()));
+template<class Structure>
+using raw_bag = decltype(bag(std::declval<Structure>(), std::declval<void *>()));
+template<class Structure>
+using const_raw_bag = decltype(bag(std::declval<Structure>(), std::declval<const void *>()));
 
 /**
  * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr

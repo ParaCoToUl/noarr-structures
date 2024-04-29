@@ -18,8 +18,11 @@ TEST_CASE("Planner trivial", "[planner]") {
 	using u3t = union_t<at, bt, ct>;
 
 	auto a = make_bag(at());
+	REQUIRE(std::is_same_v<decltype(a), decltype(bag(at()))>);
 	auto b = make_bag(bt());
+	REQUIRE(std::is_same_v<decltype(b), decltype(bag(bt()))>);
 	auto c = make_bag(ct());
+	REQUIRE(std::is_same_v<decltype(c), decltype(bag(ct()))>);
 
 	u1t u1;
 	u2t u2;
