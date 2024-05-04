@@ -48,7 +48,7 @@ bar | noarr::offset<'x', 'y'>(5, 10);
 
 ## `noarr::bag`: flexible data structure
 
-The data structure `noarr::bag<Structure>` uses the standard c++ memory management to contain some data described by `Structure` (`Structure` usually consists of nested `noarr::array`s or `noarr::vector`s). Then the data are accessed by the method `at<Dimensions>(indices)` which takes the names of dimensions as type parameters and their corresponding indices as function parameters, for example: `at<'x', 'y'>(5, 10)` (this allows for layout-agnostic data accessing demonstrated in [examples/matrix](examples/matrix "matrix example"), the main part of the demonstration is described in the following snippets in a very simplified form).
+The data structure `noarr::bag<Structure>` uses the standard C++ memory management to contain some data described by `Structure` (`Structure` usually consists of nested `noarr::array`s or `noarr::vector`s). Then the data are accessed by the method `at<Dimensions>(indices)` which takes the names of dimensions as type parameters and their corresponding indices as function parameters, for example: `at<'x', 'y'>(5, 10)` (this allows for layout-agnostic data accessing demonstrated in [examples/matrix](examples/matrix "matrix example"), the main part of the demonstration is described in the following snippets in a very simplified form).
 
 The following snippet shows how we define a matrix structure and then we use `noarr::bag` to create a data structure called `matrix1` consisting of the matrix structure with certain dimensions.
 

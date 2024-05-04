@@ -28,6 +28,12 @@ constexpr auto vector(Length length) noexcept {
 	return vector<Dim>() ^ set_length<Dim>(length);
 }
 
+template<IsDim auto Dim, class Length>
+[[deprecated("Use vector instead")]]
+constexpr auto sized_vector(Length length) noexcept {
+	return vector<Dim>() ^ set_length<Dim>(length);
+}
+
 template<auto ...Dims, class ...Lengths> requires IsDimPack<decltype(Dims)...> && (sizeof...(Dims) == sizeof...(Lengths))
 constexpr auto vectors(Lengths ...lengths) noexcept {
 	return (... ^ vector<Dims>(lengths));
