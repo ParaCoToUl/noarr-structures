@@ -39,6 +39,12 @@ constexpr auto vectors(Lengths ...lengths) noexcept {
 	return (... ^ vector<Dims>(lengths));
 }
 
+template<auto ...Dims, class ...Lengths> requires IsDimPack<decltype(Dims)...> && (sizeof...(Dims) == sizeof...(Lengths))
+[[deprecated("Use vectors instead")]]
+constexpr auto sized_vectors(Lengths ...lengths) noexcept {
+	return (... ^ vector<Dims>(lengths));
+}
+
 template<IsDim auto Dim, std::size_t L>
 struct array_proto {
 	static constexpr bool proto_preserves_layout = false;
