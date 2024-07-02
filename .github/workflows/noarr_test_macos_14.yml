@@ -1,0 +1,58 @@
+name: Noarr test macos-14
+
+on:
+  push:
+    paths:
+    - 'include/**'
+    - 'tests/**'
+    - '.github/workflows/noarr_test_macos_14.yml'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-14]
+        BUILD_TYPE: [Debug, Release]
+        compiler: [clang++14, clang++15, g++-11, g++-12]
+        include:
+          - compiler: clang++14
+            install: brew update && brew install llvm@14
+            alias: $(brew --prefix llvm@14)/bin/clang++
+          - compiler: clang++15
+            install: brew update && brew install llvm@15
+            alias: $(brew --prefix llvm@15)/bin/clang++
+          - compiler: g++-11
+            install: brew update && brew install gcc@11
+            alias: g++-11
+          - compiler: g++-12
+            install: brew update && brew install gcc@12
+            alias: g++-12
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install compiler
+      shell: bash
+      run: ${{matrix.install}}
+
+    - name: Create Build Environment
+      shell: bash
+      working-directory: ${{github.workspace}}/tests
+      run: cmake -E make_directory build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{github.workspace}}/tests/build
+      run: cmake .. -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{matrix.alias}}
+
+    - name: Build
+      working-directory: ${{github.workspace}}/tests/build
+      shell: bash
+      run: cmake --build . --config ${{matrix.BUILD_TYPE}} -j
+
+    - name: Test
+      working-directory: ${{github.workspace}}/tests/build
+      shell: bash
+      run: ctest -V -C ${{matrix.BUILD_TYPE}}
