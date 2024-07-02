@@ -1,0 +1,57 @@
+name: Noarr test ubuntu-22.04
+
+on:
+  push:
+    paths:
+    - 'include/**'
+    - 'tests/**'
+    - '.github/workflows/noarr_test_ubuntu_22.yml'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        BUILD_TYPE: [Debug, Release]
+        compiler: [g++-10, g++-11, g++-12, clang++-13, clang++-14, clang++-15]
+        include:
+          - compiler: g++-10
+            install: sudo apt-get update && sudo apt-get install g++-10
+          - compiler: g++-11
+            install: sudo apt-get update && sudo apt-get install g++-11
+          - compiler: g++-12
+            install: sudo apt-get update && sudo apt-get install g++-12
+          - compiler: clang++-13
+            install: sudo apt-get update && sudo apt-get install clang-13
+          - compiler: clang++-14
+            install: sudo apt-get update && sudo apt-get install clang-14
+          - compiler: clang++-15
+            install: sudo apt-get update && sudo apt-get install clang-15
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install compiler
+      shell: bash
+      run: ${{matrix.install}}
+
+    - name: Create Build Environment
+      shell: bash
+      working-directory: ${{github.workspace}}/tests
+      run: cmake -E make_directory build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{github.workspace}}/tests/build
+      run: cmake .. -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+
+    - name: Build
+      working-directory: ${{github.workspace}}/tests/build
+      shell: bash
+      run: cmake --build . --config ${{matrix.BUILD_TYPE}} -j
+
+    - name: Test
+      working-directory: ${{github.workspace}}/tests/build
+      shell: bash
+      run: ctest -V -C ${{matrix.BUILD_TYPE}}
