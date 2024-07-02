@@ -34,7 +34,7 @@ struct bcast_t : strict_contain<T> {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");

@@ -370,7 +370,7 @@ template<class T>
 constexpr bool is_planner_v = is_planner<T>::value;
 
 template<class T>
-concept IsPlanner = is_planner_v<T>;
+concept IsPlanner = is_planner_v<std::remove_cvref_t<T>>;
 
 template<class ...Ts>
 constexpr planner_t<union_t<Ts...>, neutral_proto, planner_endings<>> planner(union_t<Ts...> u) noexcept { return planner_t<union_t<Ts...>, neutral_proto, planner_endings<>>(u, neutral_proto(), planner_endings<>()); }

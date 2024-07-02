@@ -81,7 +81,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(QDim == Dim) {
@@ -180,7 +180,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
 		if constexpr(QDim == Dim) {
@@ -272,7 +272,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
@@ -366,7 +366,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
@@ -466,7 +466,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
 	}

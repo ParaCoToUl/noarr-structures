@@ -37,7 +37,7 @@ struct value_param {
 	static constexpr auto value = V;
 };
 
-template<IsDim auto Dim>
+template<auto Dim> requires IsDim<decltype(Dim)>
 struct dim_param {
 	static constexpr auto value = Dim;
 };

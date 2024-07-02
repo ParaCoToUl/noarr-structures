@@ -77,7 +77,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
@@ -190,7 +190,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
@@ -318,7 +318,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
@@ -450,7 +450,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");

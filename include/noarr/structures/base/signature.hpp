@@ -41,7 +41,7 @@ struct arg_length_from<std::integral_constant<std::size_t, L>> { using type = st
 template<class T>
 using arg_length_from_t = typename helpers::arg_length_from<T>::type;
 
-template<IsDim auto Dim, class ArgLength, class RetSig>
+template<auto Dim, class ArgLength, class RetSig> requires IsDim<decltype(Dim)>
 struct function_sig {
 	static_assert(ArgLength::valid_arg_length);
 	function_sig() = delete;
@@ -61,15 +61,15 @@ public:
 	template<template<class Original> class Replacement, auto ...QDims> requires IsDimPack<decltype(QDims)...>
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
 
-	template<IsDim auto QDim>
+	template<auto QDim> requires IsDim<decltype(QDim)>
 	static constexpr bool all_accept = (Dim == QDim || RetSig::template all_accept<QDim>);
-	template<IsDim auto QDim>
+	template<auto QDim> requires IsDim<decltype(QDim)>
 	static constexpr bool any_accept = (Dim == QDim || RetSig::template any_accept<QDim>);
 
 	static constexpr bool dependent = false;
 };
 
-template<IsDim auto Dim, class ...RetSigs>
+template<auto Dim, class ...RetSigs> requires IsDim<decltype(Dim)>
 struct dep_function_sig {
 	dep_function_sig() = delete;
 
@@ -89,9 +89,9 @@ public:
 	template<template<class Original> class Replacement, auto ...QDims> requires IsDimPack<decltype(QDims)...>
 	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
 
-	template<IsDim auto QDim>
+	template<auto QDim> requires IsDim<decltype(QDim)>
 	static constexpr bool all_accept = (Dim == QDim || (RetSigs::template all_accept<QDim> && ...));
-	template<IsDim auto QDim>
+	template<auto QDim> requires IsDim<decltype(QDim)>
 	static constexpr bool any_accept = (Dim == QDim || (RetSigs::template any_accept<QDim> || ...));
 
 	static constexpr bool dependent = true;
@@ -104,17 +104,17 @@ struct scalar_sig {
 	template<template<class Original> class Replacement, auto ...QDims> requires IsDimPack<decltype(QDims)...>
 	using replace = scalar_sig;
 
-	template<IsDim auto QDim>
+	template<auto QDim> requires IsDim<decltype(QDim)>
 	static constexpr bool all_accept = false;
-	template<IsDim auto QDim>
+	template<auto QDim> requires IsDim<decltype(QDim)>
 	static constexpr bool any_accept = false;
 };
 
 template<class T>
 struct is_function_sig : std::false_type {};
-template<IsDim auto Dim, class ArgLength, class RetSig>
+template<auto Dim, class ArgLength, class RetSig> requires IsDim<decltype(Dim)>
 struct is_function_sig<function_sig<Dim, ArgLength, RetSig>> : std::true_type {};
-template<IsDim auto Dim, class ...RetSigs>
+template<auto Dim, class ...RetSigs> requires IsDim<decltype(Dim)>
 struct is_function_sig<dep_function_sig<Dim, RetSigs...>> : std::true_type {};
 
 template<class T>
@@ -136,9 +136,9 @@ concept IsGroundSig = is_ground_sig_v<T>;
 
 template<class T>
 struct is_signature : std::false_type {};
-template<IsDim auto Dim, class ArgLength, class RetSig>
+template<auto Dim, class ArgLength, class RetSig> requires IsDim<decltype(Dim)>
 struct is_signature<function_sig<Dim, ArgLength, RetSig>> : std::true_type {};
-template<IsDim auto Dim, class ...RetSigs>
+template<auto Dim, class ...RetSigs> requires IsDim<decltype(Dim)>
 struct is_signature<dep_function_sig<Dim, RetSigs...>> : std::true_type {};
 template<class ValueType>
 struct is_signature<scalar_sig<ValueType>> : std::true_type {};

@@ -185,7 +185,7 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state, is()));
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
@@ -210,7 +210,7 @@ struct merge_zcurve_proto {
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_zcurve_t<SpecialLevel, GeneralLevel, Dim, Struct, Dims...>(s); }
 };
 
-template<auto ...AllDims>
+template<auto ...AllDims> requires IsDimPack<decltype(AllDims)...>
 struct merge_zcurve {
 private:
 	using dims_pop = helpers::zc_dims_pop<dim_sequence<>, AllDims...>;
@@ -226,7 +226,7 @@ public:
 	}
 
 private:
-	template<int SpecialLevel, int GeneralLevel, IsDim auto Dim, auto ...Dims>
+	template<int SpecialLevel, int GeneralLevel, auto Dim, auto ...Dims> requires IsDim<decltype(Dim)> && (IsDim<decltype(Dims)> && ...)
 	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...> maxlen_alignment(dim_sequence<Dims...>) noexcept {
 		return {};
 	}

@@ -109,13 +109,13 @@ public:
 		}
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
-	template<class Sub>
-	constexpr void strict_state_at(IsState auto) const noexcept {
+	template<class Sub, IsState State>
+	constexpr void strict_state_at(State) const noexcept {
 		static_assert(always_false<cuda_striped_t>, "A cuda_striped_t cannot be used in this context");
 	}
 

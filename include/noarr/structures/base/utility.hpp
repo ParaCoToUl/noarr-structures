@@ -61,7 +61,7 @@ template<class T>
 static constexpr bool is_dim_v = is_dim<T>::value;
 
 template<class T>
-concept IsDim = is_dim_v<T>;
+concept IsDim = is_dim_v<std::remove_cvref_t<T>>;
 
 template<class ...Ts>
 concept IsDimPack = (... && IsDim<Ts>);
@@ -73,7 +73,7 @@ struct dim_sequence {
 
 	static constexpr size_type size = sizeof...(Dims);
 
-	template<IsDim auto Dim>
+	template<auto Dim> requires IsDim<decltype(Dim)>
 	static constexpr bool contains = (... || (Dim == Dims));
 };
 
@@ -87,24 +87,24 @@ template<class T>
 static constexpr bool is_dim_sequence_v = is_dim_sequence<T>::value;
 
 template<class T>
-concept IsDimSequence = is_dim_sequence_v<T>;
+concept IsDimSequence = is_dim_sequence_v<std::remove_cvref_t<T>>;
 
 template<class T>
 struct dim_sequence_contains;
 
 template<auto ...Dims>
 struct dim_sequence_contains<dim_sequence<Dims...>> {
-	template<IsDim auto Dim>
+	template<auto Dim> requires IsDim<decltype(Dim)>
 	static constexpr bool value = (... || (Dim == Dims));
 };
 
 struct dim_accepter {
-	template<IsDim auto Dim>
+	template<auto Dim> requires IsDim<decltype(Dim)>
 	static constexpr bool value = is_dim_v<decltype(Dim)>;
 };
 
 struct dim_identity_mapper {
-	template<IsDim auto Dim>
+	template<auto Dim> requires IsDim<decltype(Dim)>
 	static constexpr auto value = Dim;
 };
 
@@ -198,7 +198,7 @@ struct dim_tree_restrict_impl<dim_tree<v, Branch>, Set> {
 	using type = typename dim_tree_restrict_impl<Branch, Set>::type;
 };
 
-template<auto v, class ...Branches, class Set> requires (dim_sequence_contains<Set>::template value<v>)
+template<auto v, class ...Branches, class Set>
 struct dim_tree_restrict_impl<dim_tree<v, Branches...>, Set> {
 	using type = dim_tree<v, typename dim_tree_restrict_impl<Branches, Set>::type...>;
 };

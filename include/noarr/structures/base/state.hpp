@@ -11,7 +11,7 @@
 namespace noarr {
 
 template<typename T>
-concept IsTag = requires (T a) {
+concept IsTag = requires(T a) {
 	requires IsDimSequence<typename T::dims>;
 	{ T::template all_accept<dim_accepter> } -> std::convertible_to<bool>;
 	{ T::template any_accept<dim_accepter> } -> std::convertible_to<bool>;
@@ -22,7 +22,7 @@ template<class ...Ts>
 concept IsTagPack = (... && IsTag<Ts>);
 
 
-template<IsDim auto Dim>
+template<auto Dim> requires IsDim<decltype(Dim)>
 struct length_in {
 	using dims = dim_sequence<Dim>;
 
@@ -36,7 +36,7 @@ struct length_in {
 	using map = length_in<Fn::template value<Dim>>;
 };
 
-template<IsDim auto Dim>
+template<auto Dim> requires IsDim<decltype(Dim)>
 struct index_in {
 	using dims = dim_sequence<Dim>;
 
@@ -66,7 +66,7 @@ template<class T>
 static constexpr bool is_state_item_v = is_state_item<T>::value;
 
 template<class T>
-concept IsStateItem = is_state_item_v<T>;
+concept IsStateItem = is_state_item_v<std::remove_cvref_t<T>>;
 
 namespace helpers {
 
@@ -219,7 +219,7 @@ template<class T>
 constexpr bool is_state_v = is_state<T>::value;
 
 template<class T>
-concept IsState = is_state_v<T>;
+concept IsState = is_state_v<std::remove_cvref_t<T>>;
 
 template<class State, auto Dim>
 concept HasNotSetIndex = IsState<State> && !State::template contains<index_in<Dim>>;
@@ -250,7 +250,7 @@ constexpr auto convert_to_state(T &&t) noexcept {
 }
 
 template<class T>
-concept ToState = requires (T t) {
+concept ToState = requires(T t) {
 	{ convert_to_state(t) } -> IsState;
 };
 

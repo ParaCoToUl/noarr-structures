@@ -12,7 +12,7 @@
 
 namespace noarr {
 
-template<IsDim auto Dim>
+template<auto Dim> requires IsDim<decltype(Dim)>
 constexpr auto get_length(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
 	return structure.template length<Dim>(state);
 }; }
@@ -22,7 +22,7 @@ constexpr auto get_length(IsState auto state) noexcept { return [state](auto str
  *
  * @tparam Dim: the dimension name of the desired structure
  */
-template<IsDim auto Dim>
+template<auto Dim> requires IsDim<decltype(Dim)>
 constexpr auto get_length() noexcept { return get_length<Dim, state<>>(empty_state); }
 
 template<class SubStruct>

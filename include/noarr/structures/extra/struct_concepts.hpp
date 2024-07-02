@@ -10,7 +10,7 @@ namespace noarr {
 
 namespace helpers {
 
-template<class T, IsDim auto ...Dims>
+template<class T, auto ...Dims> requires IsDimPack<decltype(Dims)...>
 struct has_dims {
 	using struct_type = typename to_struct<T>::type;
 	using dim_tree = sig_dim_tree<typename struct_type::signature>;

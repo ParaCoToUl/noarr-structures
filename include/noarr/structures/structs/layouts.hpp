@@ -54,7 +54,7 @@ struct tuple_t : strict_contain<TS...> {
 		return size_inner(std::make_index_sequence<index>(), sub_stat) + offset_of<Sub>(sub_structure<index>(), sub_stat);
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(QDim == Dim) {
@@ -142,7 +142,7 @@ struct vector_t : strict_contain<T> {
 		}
 	}
 
-	template<IsDim auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>)
+	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
 	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
@@ -152,8 +152,8 @@ struct vector_t : strict_contain<T> {
 		}
 	}
 
-	template<class Sub>
-	constexpr void strict_state_at(IsState auto) const noexcept {
+	template<class Sub, IsState State>
+	constexpr void strict_state_at(State) const noexcept {
 		static_assert(value_always_false<Dim>, "A vector cannot be used in this context");
 	}
 };

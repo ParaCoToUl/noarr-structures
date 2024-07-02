@@ -9,7 +9,7 @@
 
 namespace noarr {
 
-template<IsDim auto Dim, class T, class IdxT>
+template<auto Dim, class T, class IdxT> requires IsDim<decltype(Dim)>
 struct fix_t : strict_contain<T, IdxT> {
 	using strict_contain<T, IdxT>::strict_contain;
 
@@ -52,19 +52,19 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	constexpr auto length(State state) const noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
-	template<class Sub>
-	constexpr auto strict_state_at(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<IsDim auto Dim, class IdxT>
+template<auto Dim, class IdxT> requires IsDim<decltype(Dim)>
 struct fix_proto : strict_contain<IdxT> {
 	using strict_contain<IdxT>::strict_contain;
 
@@ -88,7 +88,7 @@ constexpr auto fix(IdxT ...idx) noexcept {
 		return neutral_proto();
 }
 
-template<IsDim auto Dim, class T, class LenT>
+template<auto Dim, class T, class LenT> requires IsDim<decltype(Dim)>
 struct set_length_t : strict_contain<T, LenT> {
 	using strict_contain<T, LenT>::strict_contain;
 
@@ -129,18 +129,18 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
-	template<class Sub>
-	constexpr auto strict_state_at(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<IsDim auto Dim, class LenT>
+template<auto Dim, class LenT> requires IsDim<decltype(Dim)>
 struct set_length_proto : strict_contain<LenT> {
 	using strict_contain<LenT>::strict_contain;
 

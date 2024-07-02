@@ -99,12 +99,12 @@ private:
 		else
 			return find_first_match<Dim, I+1>();
 	}
-	template<IsDim auto Dim>
+	template<auto Dim> requires IsDim<decltype(Dim)>
 	static constexpr std::size_t first_match = decltype(std::declval<union_t<Structs...>>().template find_first_match<Dim, 0>())::value;
 
 public:
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	constexpr auto length(State state) const noexcept {
 		return strict_contain<Structs...>::template get<first_match<QDim>>().template length<QDim>(state);
 	}
 };
@@ -134,10 +134,10 @@ struct traverser_t : strict_contain<Struct, Order> {
 
 	template<auto ...Dims, class F> requires IsDimPack<decltype(Dims)...>
 	constexpr void for_each(F f) const {
-		for_sections<Dims...>([f](auto inner) constexpr { return f(inner.state()); });
+		for_sections<Dims...>([f](auto inner) constexpr { f(inner.state()); });
 	}
 
-	template<IsDim auto Dim, auto ...Dims, class F> requires IsDimPack<decltype(Dims)...>
+	template<auto Dim, auto ...Dims, class F> requires IsDim<decltype(Dim)> && IsDimPack<decltype(Dims)...>
 	constexpr void for_sections(F f) const {
 		using dim_tree = dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dim, Dims...>>;
 		static_assert((dim_tree_contains<Dim, dim_tree> && ... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
@@ -167,7 +167,7 @@ struct traverser_t : strict_contain<Struct, Order> {
 		return get_struct() ^ get_order();
 	}
 
-	template<IsDim auto Dim>
+	template<auto Dim> requires IsDim<decltype(Dim)>
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
 	constexpr auto begin() const noexcept; // defined in traverser_iter.hpp
@@ -179,9 +179,9 @@ private:
 		for_each_impl(Branch(), f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>()));
 		for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence<Is...>());
 	}
-	template<auto Dim, class F>
+	template<auto Dim, class F> requires IsDim<decltype(Dim)>
 	constexpr void for_each_impl_dep(F, auto, std::index_sequence<>) const {}
-	template<auto Dim, class ...Branches, class F, IsState State>
+	template<auto Dim, class ...Branches, class F, class State> requires IsState<State> && IsDim<decltype(Dim)>
 	constexpr void for_each_impl(dim_tree<Dim, Branches...>, F f, State state) const {
 		using dim_sig = sig_find_dim<Dim, State, typename decltype(top_struct())::signature>;
 		if constexpr(dim_sig::dependent) {
@@ -223,7 +223,7 @@ template<class T>
 constexpr bool is_traverser_v = is_traverser<T>::value;
 
 template<class T>
-concept IsTraverser = is_traverser_v<T>;
+concept IsTraverser = is_traverser_v<std::remove_cvref_t<T>>;
 
 template<IsTraverser T>
 [[nodiscard("returns a new traverser")]]

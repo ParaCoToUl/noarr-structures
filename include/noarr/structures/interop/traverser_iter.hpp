@@ -14,7 +14,7 @@
 
 namespace noarr {
 
-template<IsDim auto Dim, class Struct, class Order>
+template<auto Dim, class Struct, class Order> requires IsDim<decltype(Dim)>
 struct traverser_iterator_t : strict_contain<Struct, Order> {
 	using base = strict_contain<Struct, Order>;
 	std::size_t idx;
@@ -63,7 +63,7 @@ public:
 	friend constexpr this_t operator+(difference_type diff, const this_t &iter) noexcept { return iter + diff; }
 };
 
-template<IsDim auto Dim, class Struct, class Order>
+template<auto Dim, class Struct, class Order> requires IsDim<decltype(Dim)>
 struct traverser_range_t : strict_contain<Struct, Order> {
 	using base = strict_contain<Struct, Order>;
 	std::size_t begin_idx, end_idx;
@@ -120,7 +120,7 @@ template<class Sig>
 struct traviter_sig_top_dim {
 	static_assert(always_false<Sig>, "The top-level dimension (after applying order) must be dynamic in order to be convertible to a range");
 };
-template<IsDim auto Dim, class ArgLength, class RetSig>
+template<auto Dim, class ArgLength, class RetSig> requires IsDim<decltype(Dim)>
 struct traviter_sig_top_dim<function_sig<Dim, ArgLength, RetSig>> {
 	static constexpr auto dim = Dim;
 };
@@ -132,7 +132,7 @@ static constexpr auto traviter_top_dim = traviter_sig_top_dim<typename Struct::s
 
 // declared in traverser.hpp
 template<class Struct, class Order>
-template<IsDim auto Dim>
+template<auto Dim> requires IsDim<decltype(Dim)>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 	return traverser_range_t<Dim, Struct, Order>(*this, top_struct().template length<Dim>(empty_state));
 }

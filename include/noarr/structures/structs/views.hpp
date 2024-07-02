@@ -119,14 +119,14 @@ struct reorder_t : strict_contain<T> {
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	constexpr auto length(State state) const noexcept {
 		static_assert(complete || signature::template any_accept<QDim>, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().template length<QDim>(state);
 	}
 
-	template<class Sub>
-	constexpr auto strict_state_at(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), state);
 	}
 };
@@ -173,13 +173,13 @@ public:
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
 	}
 
-	template<class Sub>
-	constexpr auto strict_state_at(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), state);
 	}
 };
@@ -298,7 +298,7 @@ private:
 	struct assertion;
 	template<auto ...ExternalDims, auto ...InternalDims>
 	struct assertion<dim_sequence<ExternalDims...>, dim_sequence<InternalDims...>> {
-		template<IsDim auto Dim>
+		template<auto Dim> requires IsDim<decltype(Dim)>
 		static constexpr bool is_free = (!T::signature::template any_accept<Dim> || ... || (Dim == InternalDims)); // never used || used but renamed
 		static_assert((... && is_free<ExternalDims>), "The structure already has a dimension of a specified name. Usage: rename<Old1, New1, Old2, New2, ...>()");
 		// Note: in case a dimension is renamed to itself, is_free returns true. This is necessary to make the above assertion pass.
@@ -330,13 +330,13 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
-	constexpr auto length(IsState auto state) const noexcept {
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state(state));
 	}
 
-	template<class Sub>
-	constexpr auto strict_state_at(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

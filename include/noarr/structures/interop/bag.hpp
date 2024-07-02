@@ -145,12 +145,12 @@ public:
 	 *
 	 * @tparam Dim: the dimension name
 	 */
-	template<IsDim auto Dim>
+	template<auto Dim> requires IsDim<decltype(Dim)>
 	constexpr auto length() const noexcept {
 		return structure() | noarr::get_length<Dim>();
 	}
 
-	template<IsDim auto Dim, IsState State>
+	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
 	constexpr auto length(State state) const noexcept {
 		return structure() | noarr::get_length<Dim>(state);
 	}
@@ -163,7 +163,7 @@ public:
 		return structure() | noarr::get_size();
 	}
 
-	template<IsDim auto Dim, IsState State>
+	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
 	constexpr auto size(State state) const noexcept {
 		return structure() | noarr::get_size<Dim>(state);
 	}
