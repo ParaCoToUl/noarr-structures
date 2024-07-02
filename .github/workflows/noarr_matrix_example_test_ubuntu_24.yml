@@ -1,0 +1,57 @@
+name: Noarr matrix example test ubuntu-24.04
+
+on:
+  push:
+    paths:
+    - 'include/**'
+    - 'examples/matrix/**'
+    - '.github/workflows/noarr_matrix_example_test_ubuntu_24.yml'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+        BUILD_TYPE: [Debug]
+        compiler: [g++-12, g++-13, g++-14, clang++-16, clang++-17, clang++-18]
+        include:
+          - compiler: g++-12
+            install: sudo apt-get update && sudo apt-get install g++-12
+          - compiler: g++-13
+            install: sudo apt-get update && sudo apt-get install g++-13
+          - compiler: g++-14
+            install: sudo apt-get update && sudo apt-get install g++-14
+          - compiler: clang++-16
+            install: sudo apt-get update && sudo apt-get install clang-16
+          - compiler: clang++-17
+            install: sudo apt-get update && sudo apt-get install clang-17
+          - compiler: clang++-18
+            install: sudo apt-get update && sudo apt-get install clang-18
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install compiler
+      shell: bash
+      run: ${{matrix.install}}
+
+    - name: Create Build Environment
+      shell: bash
+      working-directory: ${{github.workspace}}/examples/matrix
+      run: cmake -E make_directory build
+
+    - name: Configure CMake
+      shell: bash
+      working-directory: ${{github.workspace}}/examples/matrix/build
+      run: cmake .. -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+
+    - name: Build
+      working-directory: ${{github.workspace}}/examples/matrix/build
+      shell: bash
+      run: cmake --build . --config ${{matrix.BUILD_TYPE}} -j
+
+    - name: Test
+      working-directory: ${{github.workspace}}/examples/matrix/build
+      shell: bash
+      run: ./matrix rows 10
