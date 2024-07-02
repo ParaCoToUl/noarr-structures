@@ -42,6 +42,11 @@ struct cuda_stripe_index {
 	using map = cuda_stripe_index;
 };
 
+template<class ValueType>
+constexpr auto cuda_stripe_idx(ValueType value) noexcept {
+	return empty_state.with<cuda_stripe_index>(value);
+}
+
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth, class T>
 struct cuda_striped_t : strict_contain<T> {
 	static_assert(IsStruct<ElemType>, "The element type of cuda_striped must be a noarr structure.");
