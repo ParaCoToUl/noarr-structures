@@ -16,6 +16,8 @@
 
 namespace noarr {
 
+namespace helpers {
+
 template <class Ending>
 struct is_activated_impl;
 
@@ -24,6 +26,8 @@ using is_activated = is_activated_impl<std::remove_cvref_t<Ending>>;
 
 template <class Ending>
 constexpr bool is_activated_v = is_activated<Ending>::value;
+
+} // namespace helpers
 
 template<class Sig, class F>
 struct planner_ending_elem_t : flexible_contain<F> {
@@ -65,7 +69,7 @@ private:
 };
 
 template<class Sig, class F>
-struct is_activated_impl<planner_ending_elem_t<Sig, F>> : std::integral_constant<bool, planner_ending_elem_t<Sig, F>::activated> {};
+struct helpers::is_activated_impl<planner_ending_elem_t<Sig, F>> : std::integral_constant<bool, planner_ending_elem_t<Sig, F>::activated> {};
 
 template<class Sig, class F>
 struct planner_ending_t : flexible_contain<F> {
@@ -92,7 +96,7 @@ struct planner_ending_t : flexible_contain<F> {
 };
 
 template<class Sig, class F>
-struct is_activated_impl<planner_ending_t<Sig, F>> : std::integral_constant<bool, planner_ending_t<Sig, F>::activated> {};
+struct helpers::is_activated_impl<planner_ending_t<Sig, F>> : std::integral_constant<bool, planner_ending_t<Sig, F>::activated> {};
 
 template<class ...Endings>
 struct planner_endings;
@@ -105,7 +109,7 @@ constexpr auto make_planner_endings(flexible_contain<Endings...>) noexcept;
 
 template<class ...Endings>
 struct planner_endings : flexible_contain<Endings...> {
-	static constexpr std::size_t activated_count = (0 + ... + (is_activated_v<Endings> ? 1 : 0));
+	static constexpr std::size_t activated_count = (0 + ... + (helpers::is_activated_v<Endings> ? 1 : 0));
 	static_assert(activated_count <= 1, "ambiguous activation of planner endings");
 	static constexpr bool activated = activated_count == 1;
 
@@ -128,32 +132,32 @@ struct planner_endings : flexible_contain<Endings...> {
 
 	[[nodiscard]]
 	static constexpr auto get_next_ending(auto order, auto ending) noexcept {
-		if constexpr (is_activated_v<decltype(ending.order(order))>)
+		if constexpr (helpers::is_activated_v<decltype(ending.order(order))>)
 			return helpers::contain<>();
 		else
 			return helpers::contain(ending);
 	}
 
 	[[nodiscard]]
-	constexpr auto get_next(auto order) const noexcept requires is_activated_v<decltype(this->order(order))> {
+	constexpr auto get_next(auto order) const noexcept requires helpers::is_activated_v<decltype(this->order(order))> {
 		return get_next(order, std::index_sequence_for<Endings...>());
 	}
 
 	template <std::size_t ...Is>
 	[[nodiscard]]
-	constexpr auto get_next(auto order, std::integer_sequence<std::size_t, Is...>) const noexcept requires is_activated_v<decltype(this->order(order))> {
+	constexpr auto get_next(auto order, std::integer_sequence<std::size_t, Is...>) const noexcept requires helpers::is_activated_v<decltype(this->order(order))> {
 		return make_planner_endings(contain_cat(get_next_ending(order, this->template get<Is>())...));
 	}
 
 	[[nodiscard]]
-	static consteval std::size_t activated_index() noexcept requires activated {
+	static constexpr std::size_t activated_index() noexcept requires activated {
 		return activated_index(std::index_sequence_for<Endings...>());
 	}
 
 	template <std::size_t ...Is>
 	[[nodiscard]]
-	static consteval std::size_t activated_index(std::integer_sequence<std::size_t, Is...>) noexcept requires activated {
-		return (0 + ... + (is_activated_v<decltype(std::declval<planner_endings>().flexible_contain<Endings...>::template get<Is>())> ? Is : 0));
+	static constexpr std::size_t activated_index(std::integer_sequence<std::size_t, Is...>) noexcept requires activated {
+		return (0 + ... + (helpers::is_activated_v<decltype(std::declval<planner_endings>().template get<Is>())> ? Is : 0));
 	}
 
 	[[nodiscard]]
@@ -168,13 +172,14 @@ struct planner_endings : flexible_contain<Endings...> {
 	}
 
 	template<class Planner>
-	constexpr void operator()(const Planner &planner) const requires is_activated_v<decltype(this->order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))> {
-		this->template get<decltype(std::declval<planner_endings>().order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))::activated_index()>()(planner.pop_endings());
+	constexpr void operator()(const Planner &planner) const requires helpers::is_activated_v<decltype(this->order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))))> {
+		using transformed = decltype(order(fix(state_at<typename Planner::union_struct>(planner.top_struct(), empty_state))));
+		this->template get<transformed::activated_index()>()(planner.pop_endings());
 	}
 };
 
 template<class ...Endings>
-struct is_activated_impl<planner_endings<Endings...>> : std::integral_constant<bool, planner_endings<Endings...>::activated> {};
+struct helpers::is_activated_impl<planner_endings<Endings...>> : std::integral_constant<bool, planner_endings<Endings...>::activated> {};
 
 template<class ...Endings>
 planner_endings(Endings &&...) -> planner_endings<std::remove_cvref_t<Endings>...>;
@@ -220,7 +225,7 @@ struct planner_sections_t : flexible_contain<F> {
 };
 
 template<class Sig, class F>
-struct is_activated_impl<planner_sections_t<Sig, F>> : std::integral_constant<bool, planner_sections_t<Sig, F>::activated> {};
+struct helpers::is_activated_impl<planner_sections_t<Sig, F>> : std::integral_constant<bool, planner_sections_t<Sig, F>::activated> {};
 
 template<class Union, class Order_, class Ending_>
 constexpr auto make_planner(Union &&union_struct, Order_ &&order, Ending_ &&ending) noexcept {
@@ -324,7 +329,7 @@ private:
 	constexpr void for_each_impl_dep(F, auto, std::index_sequence<>) const {}
 	template<auto Dim, class ...Branches, IsState State>
 	constexpr void for_each_impl(dim_tree<Dim, Branches...>, State state) const {
-		if constexpr (is_activated_v<decltype(get_ending().order(fix(state_at<union_struct>(top_struct(), state))))>) {
+		if constexpr (helpers::is_activated_v<decltype(get_ending().order(fix(state_at<union_struct>(top_struct(), state))))>) {
 			get_ending()(order(fix(state)));
 		} else {
 			using dim_sig = sig_find_dim<Dim, State, typename decltype(top_struct())::signature>;
@@ -339,7 +344,7 @@ private:
 	}
 	template<IsState State>
 	constexpr void for_each_impl(dim_sequence<>, State state) const {
-		static_assert(is_activated_v<decltype(get_ending().order(fix(state_at<union_struct>(top_struct(), state))))>);
+		static_assert(helpers::is_activated_v<decltype(get_ending().order(fix(state_at<union_struct>(top_struct(), state))))>);
 		get_ending()(order(fix(state)));
 	}
 };
