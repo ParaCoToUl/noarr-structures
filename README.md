@@ -1,12 +1,16 @@
 # Noarr Structures
 
 ## Noarr tests <!-- Exclude this line from linear documentation -->
+CLANG
+The following tests cover compilers GCC 10-14, Clang 13-18, and MSVC 17
 
 [![Noarr docs check ubuntu-latest](../../actions/workflows/noarr_docs_check.yml/badge.svg)](../../actions/workflows/noarr_docs_check.yml)
 
-[![Noarr test ubuntu-latest](../../actions/workflows/noarr_test_ubuntul.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntul.yml)
+[![Noarr test ubuntu-22.04](../../actions/workflows/noarr_test_ubuntu_22.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntu_22.yml) [![Noarr test ubuntu-24.04](../../actions/workflows/noarr_test_ubuntu_24.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntu_24.yml)
 
 [![Noarr test windows-latest](../../actions/workflows/noarr_test_winl.yml/badge.svg)](../../actions/workflows/noarr_test_winl.yml)
+
+[![Noarr test macos-14](../../actions/workflows/noarr_test_macos_14.yml/badge.svg)](../../actions/workflows/noarr_test_macos_14.yml)
 
 ## Introduction
 
@@ -98,7 +102,7 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 ### Matrix example tests  <!-- Exclude this line from linear documentation -->
 
-[![Noarr matrix example test ubuntu-latest](../../actions/workflows/noarr_matrix_example_test_ubuntul.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_ubuntul.yml)
+[![Noarr matrix example test ubuntu-22](../../actions/workflows/noarr_matrix_example_test_ubuntu_22.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_ubuntu_22.yml) [![Noarr matrix example test ubuntu-24](../../actions/workflows/noarr_matrix_example_test_ubuntu_24.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_ubuntu_24.yml)
 
 [![Noarr matrix example test windows-latest](../../actions/workflows/noarr_matrix_example_test_winl.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_winl.yml)
 
