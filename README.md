@@ -1,7 +1,7 @@
 # Noarr Structures
 
 ## Noarr tests <!-- Exclude this line from linear documentation -->
-CLANG
+
 The following tests cover compilers GCC 10-14, Clang 13-18, and MSVC 17
 
 [![Noarr docs check ubuntu-latest](../../actions/workflows/noarr_docs_check.yml/badge.svg)](../../actions/workflows/noarr_docs_check.yml)
