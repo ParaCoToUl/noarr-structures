@@ -1,4 +1,4 @@
-name: Noarr test macos-14
+name: macOS-14
 
 on:
   push:

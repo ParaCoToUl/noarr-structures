@@ -1,6 +1,7 @@
 /**
  * @file compile_test.cpp
- * @brief This file contains the code snippets from the root README.md ensuring they are correct
+ * @brief This file contains the code snippets from the root README.
+ * @details The code snippets are extended with checks to ensure the code compiles and runs as expected.
  *
  */
 
@@ -9,94 +10,77 @@
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>
 
+namespace {
+	constexpr std::size_t ROWS = 10;
+	constexpr std::size_t COLS = 20;
+} // namespace
 
-TEST_CASE("Main example compile test", "[Main example compile test]") {
-	// the following two structures both describe a two-dimensional continuous array (matrix)
 
-	// describes a layout of 20x30 two-dimensional array
-	noarr::array_t<'x', 20, noarr::array_t<'y', 30, noarr::scalar<int>>> foo;
+TEST_CASE("Examples for Noarr Structures", "[compile test]") {
+	const auto row_major_matrix = noarr::scalar<int>() ^
+	                              noarr::array<'r', ROWS>() ^
+	                              noarr::array<'c', COLS>();
 
-	// describes a similar logical layout with switched dimensions in the physical layout
-	noarr::array_t<'y', 30, noarr::array_t<'x', 20, noarr::scalar<int>>> bar;
+	const auto col_major_matrix = noarr::scalar<int>() ^
+	                              noarr::array<'c', COLS>() ^
+	                              noarr::array<'r', ROWS>();
 
-	// getting the offset of the value at (x = 5; y = 10):
-	foo | noarr::offset<'x', 'y'>(5, 10);
-	bar | noarr::offset<'x', 'y'>(5, 10);
 
-	// arguments definition
-	int WIDTH = 10;
-	int HEIGHT = 10;
+	const auto matrix = noarr::bag(row_major_matrix);
+	const std::size_t row = 2, col = 3;
 
-	// defines the structure of the matrix, rows are the 'x' dimension and columns are the 'y' dimension
-	// physically, the layout is an contiguous array of rows
-	auto matrix_structure = noarr::vector_t<'y', noarr::vector_t<'x', noarr::scalar<int>>>();
+	int& value = matrix[noarr::idx<'r', 'c'>(row, col)];
+	value = 42;
 
-	// defining size of the matrix
-	auto sized_matrix_structure = matrix_structure ^ noarr::set_length<'x'>(WIDTH) ^ noarr::set_length<'y'>(HEIGHT);
+	const auto offset = (matrix | noarr::offset(noarr::idx<'r', 'c'>(row, col))) / sizeof(int);
 
-	// data allocation
-	auto matrix = noarr::make_bag(sized_matrix_structure);
+	REQUIRE(offset == &value - (int*)matrix.data());
 
-	for (std::size_t i = 0; i < matrix.length<'x'>(); i++)
-		for (std::size_t j = i; j < matrix.length<'y'>(); j++)
-			std::swap(matrix.at<'x', 'y'>(i, j), matrix.at<'x', 'y'>(j, i));
+	{
+		auto matrix2 = noarr::bag(col_major_matrix, matrix.data());
+		// equivalent row and col
+		const std::size_t row = offset / COLS, col = offset % COLS;
+
+		const int& value = matrix2[noarr::idx<'r', 'c'>(row, col)];
+
+		REQUIRE(value == 42);
+	}
 }
 
+#include <noarr/traversers.hpp>
 
-// function which does some logic templated by different structures
-template<typename Structure>
-void matrix_demo(int size) {
-	noarr::make_bag(Structure() ^ noarr::set_length<'x'>(size) ^ noarr::set_length<'y'>(size));
-}
+TEST_CASE("Examples for Noarr Traversers", "[compile tests]") {
+	const auto row_major_matrix = noarr::scalar<int>() ^
+	                              noarr::array<'r', ROWS>() ^
+	                              noarr::array<'c', COLS>();
 
-TEST_CASE("Example compile test", "[Example compile test]") {
-	auto my_structure = noarr::vector_t<'i', noarr::scalar<float>>();
-	auto my_structure_of_ten = my_structure ^ noarr::set_length<'i'>(10);
+	const auto matrix = noarr::bag(row_major_matrix);
 
-	// we will create a bag
-	auto bag = noarr::make_bag(my_structure_of_ten);
+	const auto traverser = noarr::traverser(matrix);
 
-	// get the reference (we will get 5-th element)
-	float& value_ref = bag.structure() | noarr::get_at<'i'>(bag.data(), 5);
+	std::size_t iteration = 0;
 
-	// now use the reference to access the value
-	value_ref = 42;
+	traverser | [&](const auto idx) {
+		const auto [row, col] = noarr::get_indices<'r', 'c'>(idx);
+		matrix[idx] = col * ROWS + row;
 
-	bag.at<'i'>(5) = 42;
+		REQUIRE(iteration == col * ROWS + row);
+		iteration++;
+	};
 
-	// layout declaration
-	using matrix_rows = noarr::vector_t<'y', noarr::vector_t<'x', noarr::scalar<int>>>;
-	using matrix_columns = noarr::vector_t<'x', noarr::vector_t<'y', noarr::scalar<int>>>;
+	{
+		const auto traverser = noarr::traverser(matrix) ^ noarr::hoist<'r', 'c'>();
 
-	// arguments definition
-	std::string layout = "rows";
-	int size = 42;
+		iteration = 0;
 
-	// we select the layout in runtime
-	if (layout == "rows")
-		matrix_demo<matrix_rows>(size);
-	else if (layout == "columns")
-		matrix_demo<matrix_columns>(size);
+		traverser | [&](const auto idx) {
+			const auto [row, col] = noarr::get_indices<'r', 'c'>(idx);
 
-	auto my_vector = noarr::vector_t<'i', noarr::scalar<float>>();
-	auto my_array = noarr::array_t<'i', 10, noarr::scalar<float>>();
+			const int value = matrix[idx];
 
-	auto t = noarr::tuple_t<'t', noarr::scalar<int>, noarr::scalar<float>>();
-	auto t2 = noarr::tuple_t<'t', noarr::array_t<'x', 10, noarr::scalar<float>>, noarr::vector_t<'x', noarr::scalar<int>>>();
-	auto t3 = noarr::tuple_t<'t', noarr::array_t<'y', 20000, noarr::vector_t<'x', noarr::scalar<float>>>, noarr::vector_t<'x', noarr::array_t<'y', 20, noarr::scalar<int>>>>();
-
-	// to remove warnings:
-	my_vector = {};
-	my_array = {};
-	t = {};
-	t2 = {};
-	t3 = {};
-
-	// tuple declaration
-	auto tuple = noarr::tuple_t<'t', noarr::array_t<'x', 10, noarr::scalar<float>>, noarr::array_t<'x', 20, noarr::scalar<int>>>();
-	// we will create a bag
-	auto tuple_bag = noarr::make_bag(tuple);
-	// we index tuple like this
-	float& value = tuple_bag.at<'t', 'x'>(noarr::lit<0>, 1);
-	value = 0.f;
+			REQUIRE(value == int(col * ROWS + row));
+			REQUIRE(iteration == row * COLS + col);
+			iteration++;
+		};
+	}
 }

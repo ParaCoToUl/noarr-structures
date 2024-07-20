@@ -1,4 +1,4 @@
-name: Noarr docs check ubuntu-latest
+name: Docs check
 
 on:
   push:

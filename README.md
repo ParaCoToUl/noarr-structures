@@ -1,104 +1,124 @@
+[![Ubuntu-22.04](../../actions/workflows/noarr_test_ubuntu_22.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntu_22.yml) [![Ubuntu-24.04](../../actions/workflows/noarr_test_ubuntu_24.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntu_24.yml) [![Windows-latest](../../actions/workflows/noarr_test_winl.yml/badge.svg)](../../actions/workflows/noarr_test_winl.yml) [![macOS-14](../../actions/workflows/noarr_test_macos_14.yml/badge.svg)](../../actions/workflows/noarr_test_macos_14.yml)
+
+> GCC 10-14, Clang 13-18, and MSVC 17 on Ubuntu, macOS, and Windows GitHub runners.
+
+[![Docs check](../../actions/workflows/noarr_docs_check.yml/badge.svg)](../../actions/workflows/noarr_docs_check.yml)
+
+
 # Noarr Structures
 
-## Noarr tests <!-- Exclude this line from linear documentation -->
-
-The following tests cover compilers GCC 10-14, Clang 13-18, and MSVC 17
-
-[![Noarr docs check ubuntu-latest](../../actions/workflows/noarr_docs_check.yml/badge.svg)](../../actions/workflows/noarr_docs_check.yml)
-
-[![Noarr test ubuntu-22.04](../../actions/workflows/noarr_test_ubuntu_22.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntu_22.yml) [![Noarr test ubuntu-24.04](../../actions/workflows/noarr_test_ubuntu_24.yml/badge.svg)](../../actions/workflows/noarr_test_ubuntu_24.yml)
-
-[![Noarr test windows-latest](../../actions/workflows/noarr_test_winl.yml/badge.svg)](../../actions/workflows/noarr_test_winl.yml)
-
-[![Noarr test macos-14](../../actions/workflows/noarr_test_macos_14.yml/badge.svg)](../../actions/workflows/noarr_test_macos_14.yml)
-
-## Introduction
-
-Noarr Structures is a header-only library that facilitates the creation of many data structures and provides a layout-agnostic way of accessing the values stored in them.
+Noarr Structures is a header-only library that facilitates the creation of many data structures and provides a layout-agnostic way of accessing stored values.
 
 It is free software and distributed using the MIT [license](LICENSE).
 
-The library provides its low-level parts, *structures* and *functions*, as simple and easy-to-use building blocks, that can be used alongside some memory management to easily create data structures that provide layout-agnostic access, and nigh-interplatform type checking and serialization.
+The library consists of two main parts
 
-If you are not interested in creating a data structure yourself, you can use `noarr::bag` which uses the standard c++ memory management. (see: *`noarr::bag`: flexible data structure*)
+1. Data layout modeling (Noarr Structures)
+2. Flexible traversal abstraction and parallelization (Noarr Traversers)
 
-## Data layout modeling
+For more details, see the [documentation](docs/README.md).
 
-This section contains the low-level building blocks the library consists of, these are in the background in the higher-level concepts like `noarr::bag` which is a simple data structure described in the next section.
+## Data layout modeling (Noarr Structures)
 
-The main feature of the library are *structures* which describe a layout of the data, they do not contain the data themselves which makes them a good tool for creating such data structures with any memory management specifics.
+The library provides a flexible way of defining data structure layouts from simple building blocks. The resulting structures then offer a layout-agnostic way of accessing the data.
 
-These structures are then combined with *functions* and together they create an expressive and flexible system capable of describing a vast amount of layouts and offering various ways of using them to access data.
 
-The following example demonstrates the layout-agnostic method of accessing the values using structures and functions defined in the library:
+### Building blocks
 
-```cpp
-// the following two structures both describe a two-dimensional 
-	// continuous array (matrix)
-
-// describes a layout of 20x30 two-dimensional array
-noarr::array_t<'x', 20, noarr::array_t<'y', 30, 
-	noarr::scalar<int>>> foo;
-
-// describes a similar logical layout with switched dimensions 
-	// in the physical layout
-noarr::array_t<'y', 30, noarr::array_t<'x', 20, 
-	noarr::scalar<int>>> bar;
-
-// getting the offset of the value at (x = 5; y = 10):
-foo | noarr::offset<'x', 'y'>(5, 10);
-bar | noarr::offset<'x', 'y'>(5, 10);
-```
-
-## `noarr::bag`: flexible data structure
-
-The data structure `noarr::bag<Structure>` uses the standard C++ memory management to contain some data described by `Structure` (`Structure` usually consists of nested `noarr::array`s or `noarr::vector`s). Then the data are accessed by the method `at<Dimensions>(indices)` which takes the names of dimensions as type parameters and their corresponding indices as function parameters, for example: `at<'x', 'y'>(5, 10)` (this allows for layout-agnostic data accessing demonstrated in [examples/matrix](examples/matrix "matrix example"), the main part of the demonstration is described in the following snippets in a very simplified form).
-
-The following snippet shows how we define a matrix structure and then we use `noarr::bag` to create a data structure called `matrix1` consisting of the matrix structure with certain dimensions.
+The following code snippet demonstrates defining a two-dimensional matrix layout using the library:
 
 ```cpp
+auto row_major_matrix = noarr::scalar<int>() ^
+                        noarr::array<'r', ROWS>() ^
+                        noarr::array<'c', COLS>();
 
-// defines the structure of the matrix, rows are the 'x' dimension 
-	// and columns are the 'y' dimension
-// physically, the layout is an contiguous array of rows
-noarr::vector<'y', noarr::vector<'x', 
-	noarr::scalar<int>>> matrix_structure;
-
-// defining size of the matrix
-auto sized_matrix_structure = matrix_structure 
-	| noarr::set_length<'x'>(WIDTH) 
-	| noarr::set_length<'y'>(HEIGHT);
-
-// data allocation
-auto matrix = noarr::bag(sized_matrix_structure);
+auto col_major_matrix = noarr::scalar<int>() ^
+                        noarr::array<'c', COLS>() ^
+                        noarr::array<'r', ROWS>();
 ```
 
-The following snippet then shows how we would transpose the values of the matrix using the `at` method:
+The `^` operator combines the building blocks into a single structure. The `noarr::scalar<int>()` represents a layout of a single integer. The layout is then extended in two dimensions using `noarr::array`.
+
+We can then pair the layout with data to create a complete data structure:
 
 ```cpp
-for (std::size_t i = 0; i < matrix.get_length<'x'>(); i++)
-	for (std::size_t j = i; j < matrix.get_length<'y'>(); j++)
-		std::swap(
-			matrix.at<'x', 'y'>(i, j), 
-			matrix.at<'x', 'y'>(j, i));
+auto matrix = noarr::bag(row_major_matrix);
+
+// `matrix.data()` and `matrix.structure()` return the data and the layout
 ```
 
-In this snippet, the actual physical layout of the matrix is not relevant to the way it is accessed. If the data were stored, for example, in a (contiguous) array of columns, it could still be accessed the same way. This contrasts with traditional C/C++ data structures.
+
+### Layout-agnostic data access
+
+We can access the raw data in the matrix using a `noarr::idx` object in the familiar `[]` syntax:
+
+```cpp
+matrix[noarr::idx<'r', 'c'>(row, column)] = value;
+```
+
+If we define a matrix with a different layout, the same access code will work and will automatically adjust to the new layout:
+
+```cpp
+auto matrix = noarr::bag(col_major_matrix);
+matrix[noarr::idx<'r', 'c'>(row, column)] = value;
+```
+
+
+## Flexible traversal abstraction and parallelization (Noarr Traversers)
+
+The library provides a way to traverse data structures in a flexible way. The traversers can be used to perform operations on the data in a layout-agnostic way.
+
+The following code snippet demonstrates how to create a traverser that iterates over the values in a matrix in a default order for the given layout:
+
+```cpp
+// prepare the traverser
+auto traverser = noarr::traverser(matrix);
+
+// use the traverser to iterate over the values
+traverser | [&](auto idx) {
+    matrix[idx] = 0; // set the value to 0
+};
+```
+
+If we want to iterate over the values in a different order, we can simply modify the traverser:
+
+```cpp
+// prepare the traverser to iterate in a specific order
+// - iterate over the rows in the outer loop and columns in the inner
+auto traverser = noarr::traverser(matrix) ^ noarr::hoist<'r', 'c'>();
+
+// use the traverser to iterate over the values
+// - the code does not need to change
+traverser | [&](auto idx) {
+    matrix[idx] = 0; // set the value to 0
+};
+```
+
 
 ## Using the library
 
-Noarr Structures is a header-only library, so only its include path needs to be added. The include path should point to the `/include` folder of this repository.
+Noarr Structures is a header-only library - to use it, simply include one of the following headers in your project:
+
+```cpp
+#include <noarr/structures_extended.hpp>
+// or (to include the traversers as well)
+#include <noarr/traversers.hpp>
+```
+
+To use the library in your project, you need to include the `include` directory in your project's include directories. If you are using CMake, you can do this by adding the following line to your `CMakeLists.txt` file:
 
 ```cmake
 # the CMake line that adds the include directory
 target_include_directories(<my-app> PUBLIC <cloned-repo-path>/include)
 ```
 
-The library requires C++ 20.
+The library requires C++20 or later and supports `-fno-exceptions` and `-fno-rtti` flags.
+
 
 ## Examples
 
 Examples can be found at [examples/matrix](examples/matrix "matrix example").
+
 
 ### Matrix example tests  <!-- Exclude this line from linear documentation -->
 
@@ -106,13 +126,15 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 [![Noarr matrix example test windows-latest](../../actions/workflows/noarr_matrix_example_test_winl.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_winl.yml)
 
+
 ## Running tests
 
-Make sure you are in the root folder. In the terminal (Linux bash, Windows Cygwin, or Gitbash), run the following commands:
+To ensure the library works properly on your system, you can run the tests provided in the `tests` directory (using CMake).
 
 ```sh
-# unless you are already in the `tests` directory:
-#  enter the `tests` directory
+# from the root of the repository:
+
+# enter the `tests` directory
 cd tests
 
 # create the `build` directory
@@ -122,13 +144,13 @@ cmake -E make_directory build
 cd build
 
 # configure the build environment
-cmake ..
+cmake .. -DCMAKE_BUILD_TYPE=Debug
 
 # build the `test-runner` executable according to the configuration
-cmake --build .
+cmake --build . --config Debug
 
-# NOTE: `cmake --build . -j<NUMBER_OF_THREADS>` might be significantly faster
+# NOTE: adding `-j<NUMBER_OF_THREADS>` might speed up the build process 
 
-# run the test executable
-./test-runner
+# run the tests
+ctest -C Debug -V
 ```
