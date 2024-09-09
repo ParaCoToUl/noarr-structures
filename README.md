@@ -115,6 +115,44 @@ target_include_directories(<my-app> PUBLIC <cloned-repo-path>/include)
 The library requires C++20 or later and supports `-fno-exceptions` and `-fno-rtti` flags.
 
 
+## Publications
+
+The latest publication related to the library:
+
+```bibtex
+@article{klepl2024abstractions,
+  title={Abstractions for C++ code optimizations in parallel high-performance applications},
+  author={Klepl, Ji{\v{r}}{\'\i} and {\v{S}}melko, Adam and Rozsypal, Luk{\'a}{\v{s}} and Kruli{\v{s}}, Martin},
+  journal={Parallel Computing},
+  pages={103096},
+  year={2024},
+  publisher={Elsevier}
+}
+```
+
+Previous publications related to the library:
+
+```bibtex
+@inproceedings{klepl2024pure,
+  title={Pure C++ Approach to Optimized Parallel Traversal of Regular Data Structures},
+  author={Klepl, Ji{\v{r}}{\'\i} and {\v{S}}melko, Adam and Rozsypal, Luk{\'a}{\v{s}} and Kruli{\v{s}}, Martin},
+  booktitle={Proceedings of the 15th International Workshop on Programming Models and Applications for Multicores and Manycores},
+  pages={42--51},
+  year={2024},
+  organization={Association for Computing Machinery}
+}
+
+@inproceedings{vsmelko2022astute,
+  title={Astute Approach to Handling Memory Layouts of Regular Data Structures},
+  author={{\v{S}}melko, Adam and Kruli{\v{s}}, Martin and Kratochv{\'\i}l, Miroslav and Klepl, Ji{\v{r}}{\'\i} and Mayer, Ji{\v{r}}{\'\i} and {\v{S}}im{\uu}nek, Petr},
+  booktitle={International Conference on Algorithms and Architectures for Parallel Processing},
+  pages={507--528},
+  year={2022},
+  organization={Springer}
+}
+```
+
+
 ## Examples
 
 Examples can be found at [examples/matrix](examples/matrix "matrix example").
