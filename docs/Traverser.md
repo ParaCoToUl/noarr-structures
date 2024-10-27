@@ -568,9 +568,10 @@ __global__ void matmul(T trav, A a, B b, C c) {
 	c[trav.state()] = result;
 }
 
+// a_data, b_data, c_data are pointers to memory accessible from the GPU device
 auto a = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 3000>() ^ noarr::array<'j', 4000>(), a_data);
 auto b = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 4000>() ^ noarr::array<'k', 5000>(), b_data);
-auto c = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 3000>() ^ noarr::array<'k', 5000>());
+auto c = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 3000>() ^ noarr::array<'k', 5000>(), c_data);
 
 auto block_size = noarr::lit<8>;
 auto blk_order = noarr::into_blocks<'i', 'I', 'i'>(block_size) ^ noarr::into_blocks<'k', 'K', 'k'>(block_size);
@@ -598,9 +599,10 @@ __global__ void matmul(T trav, A a, B b, C c) {
 	});
 }
 
+// a_data, b_data, c_data are pointers to memory accessible from the GPU device
 auto a = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 3500>() ^ noarr::array<'j', 4500>(), a_data);
 auto b = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 4500>() ^ noarr::array<'k', 5500>(), b_data);
-auto c = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 3500>() ^ noarr::array<'k', 5500>());
+auto c = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 3500>() ^ noarr::array<'k', 5500>(), c_data);
 
 auto block_size = noarr::lit<8>;
 auto blk_order = noarr::into_blocks_dynamic<'i', 'I', 'i', 'r'>(block_size) ^ noarr::into_blocks_dynamic<'k', 'K', 'k', 's'>(block_size);
