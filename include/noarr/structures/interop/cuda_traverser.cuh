@@ -102,7 +102,9 @@ struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<Dims
 	using base::get_struct;
 	using base::get_order;
 
-	using get_fixes = decltype((... ^ helpers::cuda_fix_pair_proto<DimsB, DimsT, CudaDimsB, CudaDimsT>()));
+	static constexpr auto get_fixes() {
+		return (... ^ helpers::cuda_fix_pair_proto<DimsB, DimsT, CudaDimsB, CudaDimsT>());
+	}
 
 	constexpr dim3 grid_dim() const noexcept {
 		const auto full = this->top_struct();
