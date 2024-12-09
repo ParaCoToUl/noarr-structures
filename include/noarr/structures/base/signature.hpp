@@ -59,7 +59,7 @@ private:
 	struct replace_inner<false, Replacement, QDims...> { using type = function_sig<Dim, ArgLength, typename RetSig::template replace<Replacement, QDims...>>; };
 public:
 	template<template<class Original> class Replacement, auto ...QDims> requires IsDimPack<decltype(QDims)...>
-	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
+	using replace = typename replace_inner<(... || (QDims == Dim)), Replacement, QDims...>::type;
 
 	template<auto QDim> requires IsDim<decltype(QDim)>
 	static constexpr bool all_accept = (Dim == QDim || RetSig::template all_accept<QDim>);
@@ -87,12 +87,12 @@ private:
 	struct replace_inner<false, Replacement, QDims...> { using type = dep_function_sig<Dim, typename RetSigs::template replace<Replacement, QDims...>...>; };
 public:
 	template<template<class Original> class Replacement, auto ...QDims> requires IsDimPack<decltype(QDims)...>
-	using replace = typename replace_inner<((QDims == Dim) || ...), Replacement, QDims...>::type;
+	using replace = typename replace_inner<(... || (QDims == Dim)), Replacement, QDims...>::type;
 
 	template<auto QDim> requires IsDim<decltype(QDim)>
-	static constexpr bool all_accept = (Dim == QDim || (RetSigs::template all_accept<QDim> && ...));
+	static constexpr bool all_accept = Dim == QDim || (... && RetSigs::template all_accept<QDim>);
 	template<auto QDim> requires IsDim<decltype(QDim)>
-	static constexpr bool any_accept = (Dim == QDim || (RetSigs::template any_accept<QDim> || ...));
+	static constexpr bool any_accept = Dim == QDim || (... || RetSigs::template any_accept<QDim>);
 
 	static constexpr bool dependent = true;
 };

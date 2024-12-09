@@ -14,35 +14,22 @@ struct dim {
 
 	constexpr dim() noexcept = default;
 
-	template<auto Tag2> requires (std::same_as<decltype(Tag), decltype(Tag2)>)
+	template<auto Tag2> requires std::same_as<decltype(Tag), decltype(Tag2)>
 	constexpr bool operator==(const dim<Tag2> &) const noexcept {
 		return Tag == Tag2;
 	}
 
-	template<auto Tag2> requires (!std::same_as<decltype(Tag), decltype(Tag2)>)
+	template<auto Tag2>
 	constexpr bool operator==(const dim<Tag2> &) const noexcept {
 		return false;
-	}
-
-	template<auto Tag2>
-	constexpr bool operator!=(const dim<Tag2> &) const noexcept {
-		return !(*this == dim<Tag2>{});
 	}
 
 	friend constexpr bool operator==(char, const dim &) noexcept {
 		return false;
 	}
 
-	friend constexpr bool operator!=(char, const dim &) noexcept {
-		return true;
-	}
-
 	friend constexpr bool operator==(const dim &, char) noexcept {
 		return false;
-	}
-
-	friend constexpr bool operator!=(const dim &, char) noexcept {
-		return true;
 	}
 };
 

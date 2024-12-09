@@ -34,7 +34,7 @@ struct tuple_t : strict_contain<TS...> {
 	constexpr tuple_t() noexcept = default;
 	explicit constexpr tuple_t(TS ...ss) noexcept requires (sizeof...(TS) > 0) : base(ss...) {}
 
-	static_assert(!(TS::signature::template any_accept<Dim> || ...), "Dimension name already used");
+	static_assert(!(... || TS::signature::template any_accept<Dim>), "Dimension name already used");
 	using signature = dep_function_sig<Dim, typename TS::signature...>;
 
 	template<IsState State>
@@ -97,7 +97,7 @@ constexpr auto tuple() noexcept {
 /**
  * @brief unsized vector ready to be resized to the desired size, this vector does not have size yet
  *
- * @tparam Dim: the dimmension name added by the vector
+ * @tparam Dim: the dimension name added by the vector
  * @tparam T: type of the substructure the vector contains
  */
 template<IsDim auto Dim, class T>

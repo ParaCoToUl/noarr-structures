@@ -51,8 +51,8 @@ public:
 	constexpr this_t &operator-=(difference_type diff) noexcept { idx -= diff; return *this; }
 	constexpr this_t &operator++() noexcept { idx++; return *this; }
 	constexpr this_t &operator--() noexcept { idx--; return *this; }
-	this_t operator++(int) noexcept { const auto copy = *this; idx++; return copy; }
-	this_t operator--(int) noexcept { const auto copy = *this; idx--; return copy; }
+	constexpr this_t operator++(int) noexcept { const auto copy = *this; idx++; return copy; }
+	constexpr this_t operator--(int) noexcept { const auto copy = *this; idx--; return copy; }
 
 	constexpr bool operator==(const this_t &other) const noexcept { return idx == other.idx; }
 	constexpr auto operator<=>(const this_t &other) const noexcept { return idx <=> other.idx; }

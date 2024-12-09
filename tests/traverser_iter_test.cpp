@@ -1,5 +1,9 @@
 #include <noarr_test/macros.hpp>
 
+#include <iterator>
+#include <concepts>
+#include <ranges>
+
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/extra/traverser.hpp>
 #include <noarr/structures/interop/traverser_iter.hpp>
@@ -176,8 +180,28 @@ TEST_CASE("Traverser iter for for", "[traverser iter]") {
 
 	auto t = noarr::traverser(s());
 
+	// check if the iterators are random access
+	static_assert(std::random_access_iterator<decltype(t.begin())>);
+	static_assert(std::random_access_iterator<decltype(t.end())>);
+
+	// check if the traverser models the random access range concept
+	static_assert(std::ranges::range<decltype(t)>);
+
+	if constexpr (std::ranges::range<decltype(t)>) {
+		static_assert(std::ranges::random_access_range<decltype(t)>);
+	}
+
 	std::size_t x = 0;
 	for(auto t_x : t) {
+		static_assert(std::random_access_iterator<decltype(t_x.begin())>);
+		static_assert(std::random_access_iterator<decltype(t_x.end())>);
+
+		static_assert(std::ranges::range<decltype(t_x)>);
+
+		if constexpr (std::ranges::range<decltype(t_x)>) {
+			static_assert(std::ranges::random_access_range<decltype(t_x)>);
+		}
+
 		std::size_t y = 0;
 		for(auto t_x_y : t_x) {
 			std::size_t z = 0;

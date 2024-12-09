@@ -226,7 +226,7 @@ public:
 	}
 
 private:
-	template<int SpecialLevel, int GeneralLevel, auto Dim, auto ...Dims> requires IsDim<decltype(Dim)> && (IsDim<decltype(Dims)> && ...)
+	template<int SpecialLevel, int GeneralLevel, auto Dim, auto ...Dims> requires (IsDim<decltype(Dim)> && ... && IsDim<decltype(Dims)>)
 	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...> maxlen_alignment(dim_sequence<Dims...>) noexcept {
 		return {};
 	}

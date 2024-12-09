@@ -301,7 +301,7 @@ constexpr auto operator&(state<StateItemsA...> state_a, [[maybe_unused]] state<S
 }
 
 template<class ...StateItems>
-constexpr state<StateItems...> operator+([[maybe_unused]] state<StateItems...> state_a) noexcept {
+constexpr state<StateItems...> operator+(state<StateItems...> state_a) noexcept {
 	return state_a;
 }
 
@@ -314,7 +314,7 @@ constexpr state<StateItems...> operator-([[maybe_unused]] state<StateItems...> s
 template<class ...StateItems>
 constexpr state<StateItems...> operator+(state<StateItems...> state_a, state<StateItems...> state_b) noexcept {
 	using namespace noarr::constexpr_arithmetic;
-	return state<StateItems...>(state_a.template get<typename StateItems::tag>() + state_b.template get<typename StateItems::tag>()...);
+	return state<StateItems...>((state_a.template get<typename StateItems::tag>() + state_b.template get<typename StateItems::tag>())...);
 }
 
 template<class ...StateItems>
@@ -386,11 +386,6 @@ constexpr bool operator==([[maybe_unused]] state<StateItemsA...> state_a, [[mayb
 	} else {
 		return false;
 	}
-}
-
-template<class ...StateItemsA, class ...StateItemsB>
-constexpr bool operator!=(state<StateItemsA...> state_a, state<StateItemsB...> state_b) noexcept {
-	return !(state_a == state_b);
 }
 
 template<class ...StateItemsA, class ...StateItemsB>
