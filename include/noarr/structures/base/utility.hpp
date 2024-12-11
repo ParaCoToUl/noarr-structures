@@ -324,8 +324,20 @@ using make_const = std::integral_constant<std::size_t, N>;
 template<std::size_t A, std::size_t B>
 constexpr make_const<A + B> operator+(make_const<A>, make_const<B>) noexcept { return {}; }
 
+template<std::integral T>
+constexpr T operator+(make_const<0>, T t) noexcept { return t; }
+
+template<std::integral T>
+constexpr T operator+(T t, make_const<0>) noexcept { return t; }
+
 template<std::size_t A, std::size_t B>
 constexpr make_const<A - B> operator-(make_const<A>, make_const<B>) noexcept { return {}; }
+
+template<std::integral T>
+constexpr T operator-(make_const<0>, T t) noexcept { return -t; }
+
+template<std::integral T>
+constexpr T operator-(T t, make_const<0>) noexcept { return t; }
 
 template<std::size_t A, std::size_t B>
 constexpr make_const<A * B> operator*(make_const<A>, make_const<B>) noexcept { return {}; }
@@ -339,8 +351,14 @@ constexpr make_const<0> operator*(T, make_const<0>) noexcept { return {}; }
 template<std::size_t A, std::size_t B>
 constexpr make_const<A / B> operator/(make_const<A>, make_const<B>) noexcept { return {}; }
 
+template<std::integral T>
+constexpr make_const<0> operator/(make_const<0>, T) noexcept { return {}; }
+
 template<std::size_t A, std::size_t B>
 constexpr make_const<A % B> operator%(make_const<A>, make_const<B>) noexcept { return {}; }
+
+template<std::integral T>
+constexpr make_const<0> operator%(make_const<0>, T) noexcept { return {}; }
 
 } // namespace constexpr_arithmetic
 
