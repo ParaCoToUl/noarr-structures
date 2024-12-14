@@ -167,39 +167,45 @@ struct state : strict_contain<typename StateItems::value_type...> {
 	template<class Tag> requires IsTag<Tag>
 	static constexpr auto index_of = helpers::state_index_of<Tag, StateItems...>::result;
 
-	template<class Tag> requires IsTag<Tag>
-	static constexpr bool contains = index_of<Tag>.present;
+	template<class ...Tags> requires IsTagPack<Tags...>
+	static constexpr bool contains = (... && index_of<Tags>.present);
 
 	static constexpr bool is_empty = sizeof...(StateItems) == 0;
 
 	using items_pack = helpers::state_items_pack<StateItems...>;
 
 	template<class Tag> requires IsTag<Tag> && contains<Tag>
+	[[nodiscard]]
 	constexpr auto get() const noexcept {
 		return base::template get<index_of<Tag>.value>();
 	}
 
 	template<class ...KeptStateItems>
-	constexpr state<KeptStateItems...> items_restrict(helpers::state_items_pack<KeptStateItems...> = {}) const noexcept {
+	[[nodiscard]]
+	constexpr state<KeptStateItems...> items_restrict([[maybe_unused]] helpers::state_items_pack<KeptStateItems...> kept = {}) const noexcept {
 		return state<KeptStateItems...>(get<typename KeptStateItems::tag>()...);
 	}
 
 	template<class ...NewTags, class ...NewValueTypes, class ...KeptStateItems> requires IsTagPack<NewTags...>
-	constexpr state<KeptStateItems..., state_item<NewTags, NewValueTypes>...> items_restrict_add(helpers::state_items_pack<KeptStateItems...>, NewValueTypes ...new_values) const noexcept {
+	[[nodiscard]]
+	constexpr state<KeptStateItems..., state_item<NewTags, NewValueTypes>...> items_restrict_add([[maybe_unused]] helpers::state_items_pack<KeptStateItems...> kept, NewValueTypes ...new_values) const noexcept {
 		return state<KeptStateItems..., state_item<NewTags, NewValueTypes>...>(get<typename KeptStateItems::tag>()..., new_values...);
 	}
 
 	template<class ...Tags> requires IsTagPack<Tags...>
+	[[nodiscard]]
 	constexpr auto remove() const noexcept {
 		return items_restrict(typename helpers::state_remove_items<items_pack, Tags...>::result());
 	}
 
 	template<class Pred>
+	[[nodiscard]]
 	constexpr auto filter() const noexcept {
 		return items_restrict(typename helpers::state_filter_items<items_pack, Pred>::result());
 	}
 
 	template<class ...Tags, class ...ValueTypes> requires IsTagPack<Tags...>
+	[[nodiscard]]
 	constexpr auto with(ValueTypes ...values) const noexcept {
 		return items_restrict_add<Tags...>(typename helpers::state_remove_items<items_pack, Tags...>::result(), values...);
 	}
@@ -275,7 +281,7 @@ constexpr std::size_t supported_diff_index_type(std::ptrdiff_t);
 template<std::size_t Value>
 constexpr std::integral_constant<std::size_t, Value> supported_diff_index_type(std::integral_constant<std::size_t, Value>);
 template<std::ptrdiff_t Value>
-constexpr std::integral_constant<std::size_t, (std::size_t) Value> supported_diff_index_type(std::integral_constant<std::ptrdiff_t, Value>);
+constexpr std::integral_constant<std::size_t, static_cast<std::size_t>(Value)> supported_diff_index_type(std::integral_constant<std::ptrdiff_t, Value>);
 
 } // namespace helpers
 
@@ -381,7 +387,7 @@ constexpr auto operator-(state<StateItemsA...> state_a, state<StateItemsB...> st
 
 template<class ...StateItemsA, class ...StateItemsB>
 constexpr bool operator==([[maybe_unused]] state<StateItemsA...> state_a, [[maybe_unused]] state<StateItemsB...> state_b) noexcept {
-	if constexpr ((... && state<StateItemsB...>::template contains<typename StateItemsA::tag>) && (... && state<StateItemsA...>::template contains<typename StateItemsB::tag>)) {
+	if constexpr (state<StateItemsB...>::template contains<typename StateItemsA::tag...> && state<StateItemsA...>::template contains<typename StateItemsB::tag...>) {
 		return (... && (state_a.template get<typename StateItemsA::tag>() == state_b.template get<typename StateItemsA::tag>()));
 	} else {
 		return false;

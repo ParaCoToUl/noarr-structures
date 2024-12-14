@@ -23,6 +23,7 @@ struct into_blocks_t : strict_contain<T> {
 		dim_param<DimMinor>,
 		structure_param<T>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for both components of a dimension");
@@ -40,11 +41,12 @@ public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
-		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>;
-		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
+		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
+		if constexpr(State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
 			const auto major_length = state.template get<length_in<DimMajor>>();
 			const auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
@@ -68,16 +70,19 @@ public:
 		}
 	}
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
@@ -101,6 +106,7 @@ public:
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -111,6 +117,7 @@ struct into_blocks_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_t<Dim, DimMajor, DimMinor, Struct>(s); }
 };
 
@@ -131,6 +138,7 @@ struct into_blocks_dynamic_t : strict_contain<T> {
 		dim_param<DimIsPresent>,
 		structure_param<T>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for two components of a dimension");
@@ -152,12 +160,13 @@ public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<DimIsPresent>>, "This dimension cannot be resized");
 		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
-		constexpr bool have_indices = State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>> && State::template contains<index_in<DimIsPresent>>;
-		if constexpr(State::template contains<length_in<DimMajor>> && State::template contains<length_in<DimMinor>>) {
+		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsPresent>>;
+		if constexpr(State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
 			const auto major_length = state.template get<length_in<DimMajor>>();
 			const auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
@@ -181,16 +190,19 @@ public:
 		}
 	}
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
@@ -224,6 +236,7 @@ public:
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -234,6 +247,7 @@ struct into_blocks_dynamic_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, Struct>(s); }
 };
 
@@ -255,7 +269,10 @@ struct into_blocks_static_t : strict_contain<T, MinorLenT> {
 		structure_param<T>,
 		type_param<MinorLenT>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+
+	[[nodiscard]]
 	constexpr MinorLenT minor_length() const noexcept { return this->template get<1>(); }
 
 	static_assert(DimIsBorder != DimMajor, "Cannot use the same name for multiple components of a dimension");
@@ -289,13 +306,14 @@ public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
 		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>();
-		if constexpr(State::template contains<index_in<DimIsBorder>> && State::template contains<index_in<DimMajor>> && State::template contains<index_in<DimMinor>>) {
+		if constexpr(State::template contains<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>) {
 			const auto minor_index = state.template get<index_in<DimMinor>>();
 			if constexpr(is_body<State>()) {
 				const auto major_index = state.template get<index_in<DimMajor>>();
@@ -309,16 +327,19 @@ public:
 		}
 	}
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
@@ -344,12 +365,14 @@ public:
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 
 private:
 	template<IsState State>
+	[[nodiscard]]
 	static constexpr bool is_body() noexcept {
 		static_assert(State::template contains<index_in<DimIsBorder>>, "Index has not been set");
 		constexpr auto is_border = state_get_t<State, index_in<DimIsBorder>>::value;
@@ -365,6 +388,7 @@ struct into_blocks_static_proto : strict_contain<MinorLenT> {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, Struct, MinorLenT>(s, this->get()); }
 };
 
@@ -384,6 +408,7 @@ struct merge_blocks_t : strict_contain<T> {
 		dim_param<Dim>,
 		structure_param<T>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	static_assert(DimMajor != DimMinor, "Cannot merge a dimension with itself");
@@ -418,6 +443,7 @@ public:
 	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		const auto clean_state = state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
@@ -441,16 +467,19 @@ public:
 		}
 	}
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
@@ -466,6 +495,7 @@ public:
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -476,6 +506,7 @@ struct merge_blocks_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_blocks_t<DimMajor, DimMinor, Dim, Struct>(s); }
 };
 

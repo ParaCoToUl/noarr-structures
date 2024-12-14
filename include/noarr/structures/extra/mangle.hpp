@@ -51,11 +51,11 @@ struct mangle_integral;
 
 template<class T, char ...Acc, T V> requires (V >= 10)
 struct mangle_integral<T, V, std::integer_sequence<char, Acc...>>
-	: mangle_integral<T, V / 10, std::integer_sequence<char, (char)(V % 10) + '0', Acc...>> {};
+	: mangle_integral<T, V / 10, std::integer_sequence<char, static_cast<char>(V % 10) + '0', Acc...>> {};
 
 template<class T, char ...Acc, T V> requires (V < 10 && V >= 0)
 struct mangle_integral<T, V, std::integer_sequence<char, Acc...>> {
-	using type = std::integer_sequence<char, (char)(V % 10) + '0', Acc...>;
+	using type = std::integer_sequence<char, static_cast<char>(V % 10) + '0', Acc...>;
 };
 
 template<class T, T V> requires (std::is_integral_v<T>)
@@ -138,21 +138,23 @@ struct mangle_expr_helpers {
 	static inline std::index_sequence_for<Ts...> get_contain_indices(const flexible_contain<Ts...> &) noexcept; // undefined, use in decltype
 
 	template<class String, class T, std::size_t ...Indices>
-	static constexpr void append_items(String &out, const T &t, std::index_sequence<Indices...>) {
+	static constexpr void append_items(String &out, const T &t, [[maybe_unused]] std::index_sequence<Indices...> is) {
 		(..., (append(out, t.template get<Indices>()), out.push_back(',')));
 	}
 
 	template<class String, class U>
 	static constexpr void append_int(String &out, bool neg, U u) {
 		constexpr auto maxsz = sizeof(U) * 3 + 1; // at most 3 digits per byte + sign
-		char buff[maxsz], *ptr = buff + maxsz;
+		char buff[maxsz];
+		char *ptr = buff + maxsz;
 		std::size_t sz = 0;
 		do {
 			*--ptr = '0' + u % 10;
 			sz++;
 		} while(u /= 10);
-		if(neg)
+		if(neg) {
 			*--ptr = '-';
+		}
 		out.append(ptr, sz);
 	}
 
@@ -171,10 +173,11 @@ struct mangle_expr_helpers {
 		out.append(type_str::c_str, type_str::length);
 		out.push_back('{');
 		if constexpr(std::is_signed_v<T>) {
-			if (t == std::numeric_limits<T>::min())
+			if (t == std::numeric_limits<T>::min()) {
 				append_int(out, true, std::make_unsigned_t<T>(t));
-			else
+			} else {
 				append_int(out, (t < 0), std::make_unsigned_t<T>(t < 0 ? -t : t));
+			}
 		} else {
 			append_int(out, false, t);
 		}
@@ -182,7 +185,7 @@ struct mangle_expr_helpers {
 	}
 
 	template<class String, std::size_t L>
-	static constexpr void append(String &out, const std::integral_constant<std::size_t, L>) {
+	static constexpr void append(String &out, [[maybe_unused]] const std::integral_constant<std::size_t, L> l) {
 		out.append("lit<", 4);
 		append_int(out, false, L);
 		out.append(">", 1);

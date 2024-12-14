@@ -9,6 +9,17 @@
 
 using namespace noarr;
 
+template<typename T1, typename T2>
+constexpr static bool eq(const T1 &, const T2 &) { return false; }
+template<typename T>
+constexpr static bool eq(const T &t1, const T &t2) {
+	if constexpr (std::is_empty_v<T>) {
+		return true;
+	} else {
+		return !std::memcmp(&t1, &t2, sizeof(T));
+	}
+}
+
 TEST_CASE("Wrapper traverser", "[to_struct]") {
 	using at = noarr::array_t<'x', 2, noarr::array_t<'y', 3, noarr::scalar<int>>>;
 	using bt = noarr::array_t<'y', 3, noarr::array_t<'z', 4, noarr::scalar<int>>>;
@@ -24,6 +35,8 @@ TEST_CASE("Wrapper traverser", "[to_struct]") {
 
 	REQUIRE(std::is_empty_v<decltype(traverser(a, b))>);
 	REQUIRE(std::is_same_v<decltype(traverser(a, b)), decltype(traverser(aw, bw))>);
+
+	REQUIRE(eq(traverser(a, b), traverser(aw, bw)));
 }
 
 TEST_CASE("Bag traverser", "[to_struct]") {
@@ -38,12 +51,9 @@ TEST_CASE("Bag traverser", "[to_struct]") {
 
 	REQUIRE(std::is_empty_v<decltype(traverser(a, b))>);
 	REQUIRE(std::is_same_v<decltype(traverser(a, b)), decltype(traverser(aw, bw))>);
-}
 
-template<typename T1, typename T2>
-static bool eq(const T1 &, const T2 &) { return false; }
-template<typename T>
-static bool eq(const T &t1, const T &t2) { return !std::memcmp(&t1, &t2, sizeof(T)); }
+	REQUIRE(eq(traverser(a, b), traverser(aw, bw)));
+}
 
 TEST_CASE("Vector wrapper traverser", "[to_struct]") {
 	using at = noarr::vector_t<'x', noarr::vector_t<'y', noarr::scalar<int>>>;

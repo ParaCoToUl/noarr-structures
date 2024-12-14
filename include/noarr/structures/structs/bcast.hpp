@@ -19,22 +19,28 @@ struct bcast_t : strict_contain<T> {
 	constexpr bcast_t() noexcept = default;
 	explicit constexpr bcast_t(T sub_structure) noexcept : strict_contain<T>(sub_structure) {}
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
+
+	[[nodiscard]]
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>, length_in<Dim>>(); }
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
 	using signature = function_sig<Dim, unknown_arg_length, typename T::signature>;
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, IsState State> requires (HasSetIndex<State, Dim>)
+	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
@@ -45,6 +51,7 @@ struct bcast_t : strict_contain<T> {
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -55,6 +62,7 @@ struct bcast_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return bcast_t<Dim, Struct>(s); }
 };
 

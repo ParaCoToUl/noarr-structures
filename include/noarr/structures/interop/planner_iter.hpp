@@ -63,22 +63,37 @@ private:
 public:
 	[[deprecated("The default iterator for planners is not well-definable")]] explicit constexpr planner_iterator_t() noexcept : base(construct_base()), idx() {}
 
+	[[nodiscard]]
 	constexpr difference_type operator-(const this_t &other) const noexcept { return idx - other.idx; }
+
+	[[nodiscard]]
 	constexpr this_t operator+(difference_type diff) const noexcept { return this_t(*this, idx + diff); }
+
+	[[nodiscard]]
 	constexpr this_t operator-(difference_type diff) const noexcept { return this_t(*this, idx - diff); }
+
 	constexpr this_t &operator+=(difference_type diff) noexcept { idx += diff; return *this; }
 	constexpr this_t &operator-=(difference_type diff) noexcept { idx -= diff; return *this; }
+
 	constexpr this_t &operator++() noexcept { idx++; return *this; }
 	constexpr this_t &operator--() noexcept { idx--; return *this; }
-	this_t operator++(int) noexcept { const auto copy = *this; idx++; return copy; }
-	this_t operator--(int) noexcept { const auto copy = *this; idx--; return copy; }
 
+	constexpr this_t operator++(int) noexcept { const auto copy = *this; idx++; return copy; }
+	constexpr this_t operator--(int) noexcept { const auto copy = *this; idx--; return copy; }
+
+	[[nodiscard]]
 	constexpr bool operator==(const this_t &other) const noexcept { return idx == other.idx; }
+
+	[[nodiscard]]
 	constexpr auto operator<=>(const this_t &other) const noexcept { return idx <=> other.idx; }
 
+	[[nodiscard]]
 	constexpr value_type operator*() const noexcept { return value_type(get_union(), get_order() ^ fix<Dim>(idx), get_ending()); }
+
+	[[nodiscard]]
 	constexpr value_type operator[](difference_type i) const noexcept { return value_type(get_union(), get_order() ^ fix<Dim>(idx + i), get_ending()); }
 
+	[[nodiscard]]
 	friend constexpr this_t operator+(difference_type diff, const this_t &iter) noexcept { return iter + diff; }
 };
 
@@ -108,9 +123,10 @@ struct planner_range_t<Dim, union_t<Structs...>, Order, Ending> : flexible_conta
 	[[nodiscard]]
 	constexpr auto get_struct() const noexcept { return get_union().template get<I>(); }
 
-	constexpr planner_range_t(const planner_t<union_t<Structs...>, Order, Ending> &planner, std::size_t length) : base((const base &)planner), begin_idx(0), end_idx(length) {}
+	constexpr planner_range_t(const planner_t<union_t<Structs...>, Order, Ending> &planner, std::size_t length) : base(static_cast<const base &>(planner)), begin_idx(0), end_idx(length) {}
 
 	template<class NewOrder>
+	[[nodiscard("Returns a new planner")]]
 	constexpr auto order(NewOrder new_order) const noexcept {
 		// equivalent to as_planner().order(new_order)
 		const auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
@@ -123,13 +139,17 @@ struct planner_range_t<Dim, union_t<Structs...>, Order, Ending> : flexible_conta
 		return as_planner().for_each(f);
 	}
 
+	[[nodiscard]]
 	constexpr auto as_planner() const noexcept {
 		const auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
 		return planner_t<union_t<Structs...>, decltype(get_order() ^ slice_order), Ending>(get_union(), get_order() ^ slice_order, get_ending());
 	}
 
 	// empty() and is_divisible() are required by TBB, but it could also be useful to call them directly, so they are implemented here
+	[[nodiscard]]
 	constexpr bool empty() const noexcept { return end_idx == begin_idx; }
+
+	[[nodiscard]]
 	constexpr bool is_divisible() const noexcept { return end_idx - begin_idx > 1; }
 
 	using iterator = planner_iterator_t<Dim, union_t<Structs...>, Order, Ending>;
@@ -140,11 +160,22 @@ struct planner_range_t<Dim, union_t<Structs...>, Order, Ending> : flexible_conta
 	using difference_type = typename iterator::difference_type;
 	using size_type = std::size_t;
 
+	[[nodiscard]]
 	constexpr iterator begin() const noexcept { return iterator(*this, begin_idx); }
+
+	[[nodiscard]]
 	constexpr iterator end() const noexcept { return iterator(*this, end_idx); }
+
+	[[nodiscard]]
 	constexpr const_iterator cbegin() const noexcept { return begin(); }
+
+	[[nodiscard]]
 	constexpr const_iterator cend() const noexcept { return end(); }
+
+	[[nodiscard]]
 	constexpr size_type size() const noexcept { return end_idx - begin_idx; }
+
+	[[nodiscard]]
 	constexpr value_type operator[](size_type i) const noexcept { return value_type(get_union(), get_order() ^ fix<Dim>(begin_idx + i), get_ending()); }
 };
 

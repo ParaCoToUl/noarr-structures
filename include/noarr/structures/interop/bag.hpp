@@ -21,7 +21,7 @@ template<template<class...> class container>
 struct bag_policy {
 	using type = container<char>;
 
-	static constexpr auto construct(std::size_t size) {
+	static constexpr type construct(std::size_t size) {
 		return container<char>(size);
 	}
 
@@ -46,10 +46,12 @@ template<>
 struct bag_policy<std::unique_ptr> {
 	using type = std::unique_ptr<char[]>;
 
-	static auto construct(std::size_t size) {
+	[[nodiscard]]
+	static type construct(std::size_t size) {
 		return std::make_unique<char[]>(size);
 	}
 
+	[[nodiscard]]
 	static void *get(const std::unique_ptr<char[]> &ptr) noexcept {
 		return ptr.get();
 	}
@@ -60,6 +62,7 @@ struct bag_policy<bag_raw_pointer_tag> {
 	using type = void *;
 
 	template<class Ptr>
+	[[nodiscard]]
 	static constexpr Ptr get(Ptr ptr) noexcept {
 		return ptr;
 	}
@@ -69,6 +72,7 @@ template<>
 struct bag_policy<bag_const_raw_pointer_tag> {
 	using type = const void *;
 
+	[[nodiscard]]
 	static constexpr const void *get(const void *ptr) noexcept {
 		return ptr;
 	}
@@ -102,11 +106,13 @@ public:
 	/**
 	 * @brief return the wrapped structure which describes the `data` blob
 	 */
+	[[nodiscard]]
 	constexpr auto structure() const noexcept { return base::template get<0>(); }
 
 	/**
 	 * @brief returns the underlying data blob
 	 */
+	[[nodiscard]]
 	constexpr auto data() const noexcept { return BagPolicy::get(base::template get<1>()); }
 
 	/**
@@ -116,6 +122,7 @@ public:
 	 * @param ts: the dimension values
 	 */
 	template<auto ...Dims, class ...Ts> requires IsDimPack<decltype(Dims)...>
+	[[nodiscard]]
 	constexpr decltype(auto) at(Ts ...ts) const noexcept {
 		return structure() | noarr::get_at<Dims...>(data(), ts...);
 	}
@@ -125,6 +132,7 @@ public:
 	 *
 	 * @param ts: the dimension values
 	 */
+	 [[nodiscard]]
 	constexpr decltype(auto) operator[](ToState auto state) const noexcept {
 		return structure() | noarr::get_at(data(), convert_to_state(state));
 	}
@@ -136,6 +144,7 @@ public:
 	 * @param ts: the dimension values
 	 */
 	template<auto ...Dims, class ...Ts> requires IsDimPack<decltype(Dims)...>
+	[[nodiscard]]
 	constexpr auto offset(Ts ...ts) const noexcept {
 		return structure() | noarr::offset<Dims...>(ts...);
 	}
@@ -146,11 +155,13 @@ public:
 	 * @tparam Dim: the dimension name
 	 */
 	template<auto Dim> requires IsDim<decltype(Dim)>
+	[[nodiscard]]
 	constexpr auto length() const noexcept {
 		return structure() | noarr::get_length<Dim>();
 	}
 
 	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return structure() | noarr::get_length<Dim>(state);
 	}
@@ -159,11 +170,13 @@ public:
 	 * @brief gets the size of the data described by the `structure`
 	 *
 	 */
+	[[nodiscard]]
 	constexpr auto size() const noexcept {
 		return structure() | noarr::get_size();
 	}
 
 	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
+	[[nodiscard]]
 	constexpr auto size(State state) const noexcept {
 		return structure() | noarr::get_size<Dim>(state);
 	}
@@ -172,6 +185,7 @@ public:
 	 * @brief wraps the data pointer in a new bag with the raw pointer policy. If the current bag owns the data,
 	 * it continues owning them, while the returned raw bag should be considered a non-owning reference.
 	 */
+	[[nodiscard]]
 	constexpr auto get_ref() const noexcept;
 
 	template<IsProtoStruct ProtoStruct> requires (ProtoStruct::proto_preserves_layout)

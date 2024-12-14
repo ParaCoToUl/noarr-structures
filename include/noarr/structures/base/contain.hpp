@@ -27,11 +27,13 @@ struct contain_impl<T, TS...> {
 	explicit constexpr contain_impl(T_ &&t, TS_ &&...ts) noexcept : t_(std::forward<T_>(t)), ts_(std::forward<TS_>(ts)...) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
+	[[nodiscard]]
 	constexpr decltype(auto) get() const noexcept {
-		if constexpr(I == 0)
+		if constexpr(I == 0) {
 			return t_.template get<0>();
-		else
+		} else {
 			return ts_.template get<I - 1>();
+		}
 	}
 
 private:
@@ -43,14 +45,16 @@ private:
 template<class T, class... TS> requires (!std::is_empty_v<T> && std::is_empty_v<contain_impl<TS...>>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
 	template<class T_, class ...TS_> requires (sizeof...(TS) == sizeof...(TS_))
-	explicit constexpr contain_impl(T_ &&t, const TS_ &...) noexcept : t_(std::forward<T_>(t)) {}
+	explicit constexpr contain_impl(T_ &&t, [[maybe_unused]] const TS_ &...ts) noexcept : t_(std::forward<T_>(t)) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
+	[[nodiscard]]
 	constexpr decltype(auto) get() const noexcept {
-		if constexpr(I == 0)
+		if constexpr(I == 0) {
 			return t_.template get<0>();
-		else
+		} else {
 			return contain_impl<TS...>::template get<I - 1>();
+		}
 	}
 
 private:
@@ -62,14 +66,16 @@ template<class T, class... TS> requires (std::is_empty_v<T>)
 struct contain_impl<T, TS...> : private contain_impl<TS...> {
 	constexpr contain_impl() noexcept = default;
 	template<class T_, class ...TS_> requires (sizeof...(TS) == sizeof...(TS_))
-	explicit constexpr contain_impl(const T_ &, TS_ &&...ts) noexcept : contain_impl<TS...>(std::forward<TS_>(ts)...) {}
+	explicit constexpr contain_impl([[maybe_unused]] const T_ &t, TS_ &&...ts) noexcept : contain_impl<TS...>(std::forward<TS_>(ts)...) {}
 
 	template<std::size_t I> requires (I < 1 + sizeof...(TS))
+	[[nodiscard]]
 	constexpr decltype(auto) get() const noexcept {
-		if constexpr(I == 0)
+		if constexpr(I == 0) {
 			return T();
-		else
+		} else {
 			return contain_impl<TS...>::template get<I - 1>();
+		}
 	}
 };
 
@@ -78,9 +84,10 @@ template<class T> requires (std::is_empty_v<T>)
 struct contain_impl<T> {
 	constexpr contain_impl() noexcept = default;
 	template<class T_> requires (!std::is_base_of_v<contain_impl, std::remove_cvref_t<T_>>)
-	explicit constexpr contain_impl(const T_ &) noexcept {}
+	explicit constexpr contain_impl([[maybe_unused]] const T_ &t) noexcept {}
 
 	template<std::size_t I = 0> requires (I == 0)
+	[[nodiscard]]
 	constexpr decltype(auto) get() const noexcept {
 		return T();
 	}
@@ -94,6 +101,7 @@ struct contain_impl<T> {
 	explicit constexpr contain_impl(T_ &&t) noexcept : t_(std::forward<T_>(t)) {}
 
 	template<std::size_t I = 0> requires (I == 0)
+	[[nodiscard]]
 	constexpr const T &get() const noexcept {
 		return t_;
 	}
@@ -128,7 +136,7 @@ constexpr auto contain_cat(const contain<TS1...> &c1, const contain<TS2...> &c2,
 }
 
 template<class... TS1, std::size_t... Idxs1, class... TS2, std::size_t... Idxs2, class... Contains>
-constexpr auto contain_cat(const contain<TS1...> &c1, std::index_sequence<Idxs1...>, const contain<TS2...> &c2, std::index_sequence<Idxs2...>, Contains &&...contains) noexcept {
+constexpr auto contain_cat(const contain<TS1...> &c1, [[maybe_unused]] std::index_sequence<Idxs1...> idxs1, const contain<TS2...> &c2, [[maybe_unused]] std::index_sequence<Idxs2...> idxs2, Contains &&...contains) noexcept {
 	return contain_cat(contain(c1.template get<Idxs1>()..., c2.template get<Idxs2>()...), std::forward<Contains>(contains)...);
 }
 

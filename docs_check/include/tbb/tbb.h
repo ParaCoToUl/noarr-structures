@@ -6,7 +6,7 @@ struct split {};
 
 template<class R, class F>
 inline void parallel_for(const R &range, const F &f) {
-	range.is_divisible();
+	static_cast<void>(range.is_divisible());
 	f(range);
 }
 

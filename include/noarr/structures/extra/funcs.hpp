@@ -54,13 +54,13 @@ constexpr auto get_size() noexcept { return get_size(empty_state); }
 namespace helpers {
 
 template<class T>
-constexpr auto sub_ptr(void *ptr, std::size_t off) noexcept { return (T*) ((char*) ptr + off); }
+constexpr auto sub_ptr(void *ptr, std::size_t off) noexcept { return reinterpret_cast<T*>(reinterpret_cast<char*>(ptr) + off); }
 template<class T>
-constexpr auto sub_ptr(const void *ptr, std::size_t off) noexcept { return (const T*) ((const char*) ptr + off); }
+constexpr auto sub_ptr(const void *ptr, std::size_t off) noexcept { return reinterpret_cast<const T*>(reinterpret_cast<const char*>(ptr) + off); }
 template<class T>
-constexpr auto sub_ptr(volatile void *ptr, std::size_t off) noexcept { return (volatile T*) ((volatile char*) ptr + off); }
+constexpr auto sub_ptr(volatile void *ptr, std::size_t off) noexcept { return reinterpret_cast<volatile T*>(reinterpret_cast<volatile char*>(ptr) + off); }
 template<class T>
-constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { return (const volatile T*) ((const volatile char*) ptr + off); }
+constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept { return reinterpret_cast<const volatile T*>(reinterpret_cast<const volatile char*>(ptr) + off); }
 
 } // namespace helpers
 

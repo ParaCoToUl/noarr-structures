@@ -15,20 +15,20 @@ struct dim {
 	constexpr dim() noexcept = default;
 
 	template<auto Tag2> requires std::same_as<decltype(Tag), decltype(Tag2)>
-	constexpr bool operator==(const dim<Tag2> &) const noexcept {
+	constexpr bool operator==([[maybe_unused]] const dim<Tag2> &other) const noexcept {
 		return Tag == Tag2;
 	}
 
 	template<auto Tag2>
-	constexpr bool operator==(const dim<Tag2> &) const noexcept {
+	constexpr bool operator==([[maybe_unused]] const dim<Tag2> &other) const noexcept {
 		return false;
 	}
 
-	friend constexpr bool operator==(char, const dim &) noexcept {
+	friend constexpr bool operator==([[maybe_unused]] char l, [[maybe_unused]] const dim &r) noexcept {
 		return false;
 	}
 
-	friend constexpr bool operator==(const dim &, char) noexcept {
+	friend constexpr bool operator==([[maybe_unused]] const dim &l, [[maybe_unused]] char r) noexcept {
 		return false;
 	}
 };
@@ -276,6 +276,7 @@ struct some {
 	T value;
 
 	template<class F>
+	[[nodiscard]]
 	constexpr auto and_then(const F &f) const noexcept -> some<decltype(f(value))> {
 		return {f(value)};
 	}
@@ -285,7 +286,8 @@ struct none {
 	static constexpr bool present = false;
 
 	template<class F>
-	constexpr none and_then(const F &) const noexcept {
+	[[nodiscard]]
+	constexpr none and_then([[maybe_unused]] const F &f) const noexcept {
 		return {};
 	}
 };
@@ -322,43 +324,43 @@ template<std::size_t N>
 using make_const = std::integral_constant<std::size_t, N>;
 
 template<std::size_t A, std::size_t B>
-constexpr make_const<A + B> operator+(make_const<A>, make_const<B>) noexcept { return {}; }
+constexpr make_const<A + B> operator+([[maybe_unused]] make_const<A> a, [[maybe_unused]] make_const<B> b) noexcept { return {}; }
 
 template<std::integral T>
-constexpr T operator+(make_const<0>, T t) noexcept { return t; }
+constexpr T operator+([[maybe_unused]] make_const<0> z, T t) noexcept { return t; }
 
 template<std::integral T>
-constexpr T operator+(T t, make_const<0>) noexcept { return t; }
+constexpr T operator+(T t, [[maybe_unused]] make_const<0> z) noexcept { return t; }
 
 template<std::size_t A, std::size_t B>
-constexpr make_const<A - B> operator-(make_const<A>, make_const<B>) noexcept { return {}; }
+constexpr make_const<A - B> operator-([[maybe_unused]] make_const<A> a, [[maybe_unused]] make_const<B> b) noexcept { return {}; }
 
 template<std::integral T>
-constexpr T operator-(make_const<0>, T t) noexcept { return -t; }
+constexpr T operator-([[maybe_unused]] make_const<0> z, T t) noexcept { return -t; }
 
 template<std::integral T>
-constexpr T operator-(T t, make_const<0>) noexcept { return t; }
+constexpr T operator-(T t, [[maybe_unused]] make_const<0> z) noexcept { return t; }
 
 template<std::size_t A, std::size_t B>
-constexpr make_const<A * B> operator*(make_const<A>, make_const<B>) noexcept { return {}; }
+constexpr make_const<A * B> operator*([[maybe_unused]] make_const<A> a, [[maybe_unused]] make_const<B> b) noexcept { return {}; }
 
 template<std::integral T>
-constexpr make_const<0> operator*(make_const<0>, T) noexcept { return {}; }
+constexpr make_const<0> operator*([[maybe_unused]] make_const<0> z, [[maybe_unused]] T t) noexcept { return {}; }
 
 template<std::integral T>
-constexpr make_const<0> operator*(T, make_const<0>) noexcept { return {}; }
+constexpr make_const<0> operator*([[maybe_unused]] T t, [[maybe_unused]] make_const<0> z) noexcept { return {}; }
 
 template<std::size_t A, std::size_t B>
-constexpr make_const<A / B> operator/(make_const<A>, make_const<B>) noexcept { return {}; }
+constexpr make_const<A / B> operator/([[maybe_unused]] make_const<A> a, [[maybe_unused]] make_const<B> b) noexcept { return {}; }
 
 template<std::integral T>
-constexpr make_const<0> operator/(make_const<0>, T) noexcept { return {}; }
+constexpr make_const<0> operator/([[maybe_unused]] make_const<0> z, [[maybe_unused]] T t) noexcept { return {}; }
 
 template<std::size_t A, std::size_t B>
-constexpr make_const<A % B> operator%(make_const<A>, make_const<B>) noexcept { return {}; }
+constexpr make_const<A % B> operator%([[maybe_unused]] make_const<A> a, [[maybe_unused]] make_const<B> b) noexcept { return {}; }
 
 template<std::integral T>
-constexpr make_const<0> operator%(make_const<0>, T) noexcept { return {}; }
+constexpr make_const<0> operator%([[maybe_unused]] make_const<0> z, [[maybe_unused]] T t) noexcept { return {}; }
 
 } // namespace constexpr_arithmetic
 

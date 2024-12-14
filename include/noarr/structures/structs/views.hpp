@@ -103,29 +103,34 @@ struct reorder_t : strict_contain<T> {
 		structure_param<T>,
 		dim_param<Dims>...>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	using signature = reassemble_sig<typename T::signature, Dims...>;
 	static constexpr bool complete = reassemble_is_complete<signature>;
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().size(state);
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		static_assert(complete, "Some dimensions were omitted during reordering, cannot use the structure");
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		static_assert(complete || signature::template any_accept<QDim>, "Some dimensions were omitted during reordering, cannot use the structure");
 		return sub_structure().template length<QDim>(state);
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), state);
 	}
@@ -136,6 +141,7 @@ struct reorder_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reorder_t<Struct, Dims...>(s); }
 };
 
@@ -151,6 +157,7 @@ struct hoist_t : strict_contain<T> {
 		dim_param<Dim>,
 		structure_param<T>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 private:
@@ -164,21 +171,25 @@ private:
 public:
 	using signature = function_sig<Dim, typename hoisted::arg_length, typename T::signature::template replace<dim_replacement, Dim>>;
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(state);
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), state);
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), state);
 	}
@@ -189,6 +200,7 @@ struct hoist_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return hoist_t<Dim, Struct>(s); }
 };
 
@@ -265,7 +277,8 @@ struct rename_state {
 	using type = state<state_item<typename StateItem::tag::template map<rename_dim_map<From, To>>, typename StateItem::value_type>...>;
 
 	template<class ...StateItem>
-	static constexpr type<StateItem...> convert([[maybe_unused]] state<StateItem...> s) noexcept {
+	[[nodiscard]]
+	static constexpr auto convert([[maybe_unused]] state<StateItem...> s) noexcept {
 		return type<StateItem...>(s.template get<typename StateItem::tag>()...);
 	}
 };
@@ -291,6 +304,7 @@ public:
 		structure_param<T>,
 		dim_param<DimPairs>...>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 private:
@@ -317,25 +331,30 @@ public:
 	static_assert(assertion<>::success);
 	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
+	[[nodiscard]]
 	constexpr auto sub_state(IsState auto state) const noexcept {
 		return rename_state::convert(state.template filter<filter>());
 	}
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -346,6 +365,7 @@ struct rename_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return rename_t<Struct, DimPairs...>(s); }
 };
 

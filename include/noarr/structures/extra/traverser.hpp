@@ -12,6 +12,7 @@
 #include "../base/utility.hpp"
 #include "../extra/sig_utils.hpp"
 #include "../extra/to_struct.hpp"
+#include "../structs/setters.hpp"
 
 namespace noarr {
 
@@ -32,7 +33,6 @@ struct sig_union2<Sig1, function_sig<Dim, ArgLength, RetSig>> {
 };
 template<class Sig1, IsDim auto Dim, class ...RetSigs>
 struct sig_union2<Sig1, dep_function_sig<Dim, RetSigs...>> {
-	// TODO
 	static_assert(value_always_false<Dim>, "Unsupported");
 };
 template<class Sig1, class ValueType>
@@ -88,22 +88,26 @@ struct union_t : strict_contain<Structs...> {
 	using signature = typename helpers::sig_union<typename to_struct<Structs>::type::signature...>::type;
 
 	template<std::size_t Index>
+	[[nodiscard("returns a copy of the underlying struct")]]
 	constexpr auto sub_structure() const noexcept { return this->template get<Index>(); }
 
 private:
 	template<auto Dim, std::size_t I>
+	[[nodiscard("returns the index of the first struct that accepts the dimension")]]
 	constexpr auto find_first_match() const noexcept {
 		using sub_sig = typename to_struct<decltype(sub_structure<I>())>::type::signature;
-		if constexpr(sub_sig::template any_accept<Dim>)
+		if constexpr(sub_sig::template any_accept<Dim>) {
 			return std::integral_constant<std::size_t, I>();
-		else
+		} else {
 			return find_first_match<Dim, I+1>();
+		}
 	}
 	template<auto Dim> requires IsDim<decltype(Dim)>
 	static constexpr std::size_t first_match = decltype(std::declval<union_t<Structs...>>().template find_first_match<Dim, 0>())::value;
 
 public:
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard("returns the length of the first struct that accepts the dimension")]]
 	constexpr auto length(State state) const noexcept {
 		return strict_contain<Structs...>::template get<first_match<QDim>>().template length<QDim>(state);
 	}
@@ -113,9 +117,6 @@ template<class ...Ts, class U = union_t<Ts...>>
 constexpr U make_union(const Ts &...s) noexcept {
 	return U(s...);
 }
-
-template<auto ...Dims, class ...IdxT> requires (sizeof...(Dims) == sizeof...(IdxT)) && IsDimPack<decltype(Dims)...>
-constexpr auto fix(IdxT...) noexcept; // defined in setters.hpp
 
 template<class Struct, class Order>
 struct traverser_t : strict_contain<Struct, Order> {
@@ -168,36 +169,47 @@ struct traverser_t : strict_contain<Struct, Order> {
 	}
 
 	template<auto Dim> requires IsDim<decltype(Dim)>
+	[[nodiscard]]
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
+
+	[[nodiscard]]
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
+
+	[[nodiscard]]
 	constexpr auto begin() const noexcept; // defined in traverser_iter.hpp
+
+	[[nodiscard]]
 	constexpr auto end() const noexcept; // defined in traverser_iter.hpp
 
 private:
 	template<auto Dim, class Branch, class ...Branches, class F, std::size_t I, std::size_t ...Is>
-	constexpr void for_each_impl_dep(F f, auto state, std::index_sequence<I, Is...>) const {
+	constexpr void for_each_impl_dep(F f, auto state, [[maybe_unused]] std::index_sequence<I, Is...> is) const {
 		for_each_impl(Branch(), f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>()));
 		for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence<Is...>());
 	}
+
+	// the bottom case
 	template<auto Dim, class F> requires IsDim<decltype(Dim)>
-	constexpr void for_each_impl_dep(F, auto, std::index_sequence<>) const {}
+	constexpr void for_each_impl_dep([[maybe_unused]] F f, [[maybe_unused]] auto state, [[maybe_unused]] std::index_sequence<> is) const {}
+
 	template<auto Dim, class ...Branches, class F, class State> requires IsState<State> && IsDim<decltype(Dim)>
-	constexpr void for_each_impl(dim_tree<Dim, Branches...>, F f, State state) const {
+	constexpr void for_each_impl([[maybe_unused]] dim_tree<Dim, Branches...> dt, F f, State state) const {
 		using dim_sig = sig_find_dim<Dim, State, typename decltype(top_struct())::signature>;
 		if constexpr(dim_sig::dependent) {
 			for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence_for<Branches...>());
 		} else {
 			std::size_t len = top_struct().template length<Dim>(state);
-			for(std::size_t i = 0; i < len; i++)
+			for(std::size_t i = 0; i < len; i++) {
 				for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(i));
+			}
 		}
 	}
 	template<class F, class StateItem, class ...StateItems>
-	constexpr void for_each_impl(dim_sequence<>, F f, noarr::state<StateItem, StateItems...> state) const {
+	constexpr void for_each_impl([[maybe_unused]] dim_sequence<> ds, F f, noarr::state<StateItem, StateItems...> state) const {
 		f(order(fix(state)));
 	}
 	template<class F>
-	constexpr void for_each_impl(dim_sequence<>, F f, noarr::state<>) const {
+	constexpr void for_each_impl([[maybe_unused]] dim_sequence<> ds, F f, [[maybe_unused]] noarr::state<> state) const {
 		f(*this);
 	}
 };
@@ -240,44 +252,29 @@ struct to_state<T> {
 namespace helpers {
 
 template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
-struct for_each_t : public F {
-	using F::F;
-	template<class F_, auto ...Dims_> requires (... && IsDim<decltype(Dims_)>)
-	constexpr for_each_t(F_ &&f) noexcept : F(std::forward<F_>(f)) {}
-	using F::operator();
-};
+struct for_each_t : public F {};
 
 template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
-struct for_dims_t : public F {
-	using F::F;
-	template<class F_, auto ...Dims_> requires (... && IsDim<decltype(Dims_)>)
-	constexpr for_dims_t(F_ &&f) noexcept : F(std::forward<F_>(f)) {}
-	using F::operator();
-};
+struct for_dims_t : public F {};
 
 template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
-struct for_sections_t : public F {
-	using F::F;
-	template<class F_, auto ...Dims_> requires (... && IsDim<decltype(Dims_)>)
-	constexpr for_sections_t(F_ &&f) noexcept : F(std::forward<F_>(f)) {}
-	using F::operator();
-};
+struct for_sections_t : public F {};
 
 } // namespace helpers
 
 template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
 constexpr auto for_each(F &&f) noexcept {
-	return helpers::for_each_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
+	return helpers::for_each_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
 
 template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
 constexpr auto for_dims(F &&f) noexcept {
-	return helpers::for_dims_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
+	return helpers::for_dims_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
 
 template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
 constexpr auto for_sections(F &&f) noexcept {
-	return helpers::for_sections_t<std::remove_cvref_t<F>, Dims...>(std::forward<F>(f));
+	return helpers::for_sections_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
 
 template<IsTraverser T>

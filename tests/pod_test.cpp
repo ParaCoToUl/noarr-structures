@@ -6,12 +6,7 @@
 using namespace noarr;
 
 TEST_CASE("Simplicity", "[low-lvl]") {
-	SECTION("array is simple")
-		REQUIRE(noarr_test::is_simple<array_t<'x', 100, scalar<int>>>);
-
-	SECTION("vector is simple")
-		REQUIRE(noarr_test::is_simple<vector_t<'x', scalar<int>>>);
-
-	SECTION("tuple is simple")
-		REQUIRE(noarr_test::is_simple<tuple_t<'t', scalar<int>, vector_t<'x', scalar<int>>, array_t<'y', 100, scalar<int>>>>);
+	REQUIRE(noarr_test::is_simple<array_t<'x', 100, scalar<int>>>);
+	REQUIRE(noarr_test::is_simple<vector_t<'x', scalar<int>>>);
+	REQUIRE(noarr_test::is_simple<tuple_t<'t', scalar<int>, vector_t<'x', scalar<int>>, array_t<'y', 100, scalar<int>>>>);
 }

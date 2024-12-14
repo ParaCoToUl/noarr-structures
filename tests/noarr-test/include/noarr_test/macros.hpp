@@ -65,7 +65,7 @@ bool test_case_failed = false;
 #define TEST_CASE(...) \
 	static void CONCATENATE(test_case_function_, __LINE__)(); \
 	namespace { \
-	const struct CONCATENATE(test_case_struct_, __LINE__) { \
+	[[maybe_unused]] const struct CONCATENATE(test_case_struct_, __LINE__) { \
 		CONCATENATE(test_case_struct_, __LINE__)() { \
 			noarr_test::test_case_failed = false; \
 			try { CONCATENATE(test_case_function_, __LINE__)(); } \

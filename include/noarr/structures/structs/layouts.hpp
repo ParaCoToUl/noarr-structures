@@ -28,7 +28,9 @@ struct tuple_t : strict_contain<TS...> {
 		structure_param<TS>...>;
 
 	template<std::size_t Index>
+	[[nodiscard]]
 	constexpr auto sub_structure() const noexcept { return this->template get<Index>(); }
+	[[nodiscard]]
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>>(); }
 
 	constexpr tuple_t() noexcept = default;
@@ -38,23 +40,26 @@ struct tuple_t : strict_contain<TS...> {
 	using signature = dep_function_sig<Dim, typename TS::signature...>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto size(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		return size_inner(is, sub_state(state));
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
-		static_assert(state_get_t<State, index_in<Dim>>::value || true, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
+		static_assert(((void)state_get_t<State, index_in<Dim>>::value, true), "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
 		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 		const auto sub_stat = sub_state(state);
 		return size_inner(std::make_index_sequence<index>(), sub_stat) + offset_of<Sub>(sub_structure<index>(), sub_stat);
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(QDim == Dim) {
@@ -67,7 +72,7 @@ struct tuple_t : strict_contain<TS...> {
 	}
 
 	template<class Sub>
-	constexpr void strict_state_at(IsState auto) const noexcept {
+	constexpr void strict_state_at([[maybe_unused]] IsState auto state) const noexcept {
 		static_assert(value_always_false<Dim>, "A tuple cannot be used in this context");
 	}
 
@@ -75,7 +80,8 @@ private:
 	static constexpr std::index_sequence_for<TS...> is = {};
 
 	template<std::size_t ...IS>
-	constexpr auto size_inner(std::index_sequence<IS...>, [[maybe_unused]] IsState auto sub_state) const noexcept {
+	[[nodiscard]]
+	constexpr auto size_inner([[maybe_unused]] std::index_sequence<IS...> is, [[maybe_unused]] IsState auto sub_state) const noexcept {
 		using namespace constexpr_arithmetic;
 		return (make_const<0>() + ... + sub_structure<IS>().size(sub_state));
 	}
@@ -86,6 +92,7 @@ struct tuple_proto {
 	static constexpr bool proto_preserves_layout = false;
 
 	template<class ...Structs>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Structs ...s) const noexcept { return tuple_t<Dim, Structs...>(s...); }
 };
 
@@ -110,13 +117,16 @@ struct vector_t : strict_contain<T> {
 	constexpr vector_t() noexcept = default;
 	explicit constexpr vector_t(T sub_structure) noexcept : strict_contain<T>(sub_structure) {}
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
+	[[nodiscard]]
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<index_in<Dim>, length_in<Dim>>(); }
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
 	using signature = function_sig<Dim, unknown_arg_length, typename T::signature>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto size(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
@@ -125,9 +135,11 @@ struct vector_t : strict_contain<T> {
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(State::template contains<index_in<Dim>>, "All indices must be set");
+		static_assert(State::template contains<length_in<Dim>>, "Length must be set");
 		if constexpr(!std::is_same_v<decltype(state.template get<length_in<Dim>>()), std::integral_constant<std::size_t, 1>>) {
 			// offset = index * elem_size + offset_within_elem
 			const auto index = state.template get<index_in<Dim>>();
@@ -143,6 +155,7 @@ struct vector_t : strict_contain<T> {
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		if constexpr(QDim == Dim) {
 			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
@@ -153,7 +166,7 @@ struct vector_t : strict_contain<T> {
 	}
 
 	template<class Sub, IsState State>
-	constexpr void strict_state_at(State) const noexcept {
+	constexpr void strict_state_at([[maybe_unused]] State state) const noexcept {
 		static_assert(value_always_false<Dim>, "A vector cannot be used in this context");
 	}
 };
@@ -163,6 +176,7 @@ struct vector_proto {
 	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return vector_t<Dim, Struct>(s); }
 };
 

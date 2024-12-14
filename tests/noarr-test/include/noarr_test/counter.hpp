@@ -32,6 +32,6 @@ inline void assertion_passed() {
 
 struct requirement_failed : std::exception {};
 
-}
+} // namespace noarr_test
 
 #endif // NOARR_TEST_COUNTER_HPP

@@ -23,7 +23,10 @@ struct shift_t : strict_contain<T, StartT> {
 		structure_param<T>,
 		type_param<StartT>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+
+	[[nodiscard]]
 	constexpr StartT start() const noexcept { return this->template get<1>(); }
 
 private:
@@ -42,7 +45,7 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(StartT::value || true, "Cannot shift a tuple dimension dynamically");
+		static_assert(((void)StartT::value, true), "Cannot shift a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t len = sizeof...(RetSigs) - start;
 
@@ -57,31 +60,38 @@ public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		const auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
-		if constexpr(State::template contains<index_in<Dim>>)
-			if constexpr(State::template contains<length_in<Dim>>)
+		if constexpr(State::template contains<index_in<Dim>>) {
+			if constexpr(State::template contains<length_in<Dim>>) {
 				return tmp_state.template with<index_in<Dim>, length_in<Dim>>(state.template get<index_in<Dim>>() + start(), state.template get<length_in<Dim>>() + start());
-			else
+			} else {
 				return tmp_state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
-		else
-			if constexpr(State::template contains<length_in<Dim>>)
+			}
+		} else {
+			if constexpr(State::template contains<length_in<Dim>>) {
 				return tmp_state.template with<length_in<Dim>>(state.template get<length_in<Dim>>() + start());
-			else
+			} else {
 				return tmp_state;
+			}
+		}
 	}
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(QDim == Dim) {
@@ -96,6 +106,7 @@ public:
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -108,6 +119,7 @@ struct shift_proto : strict_contain<StartT> {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return shift_t<Dim, Struct, StartT>(s, this->get()); }
 };
 
@@ -134,8 +146,13 @@ struct slice_t : strict_contain<T, StartT, LenT> {
 		type_param<StartT>,
 		type_param<LenT>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+
+	[[nodiscard]]
 	constexpr StartT start() const noexcept { return this->template get<1>(); }
+
+	[[nodiscard]]
 	constexpr LenT len() const noexcept { return this->template get<2>(); }
 
 private:
@@ -146,8 +163,8 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(StartT::value || true, "Cannot slice a tuple dimension dynamically");
-		static_assert(LenT::value || true, "Cannot slice a tuple dimension dynamically");
+		static_assert(((void)StartT::value, true), "Cannot slice a tuple dimension dynamically");
+		static_assert(((void)LenT::value, true), "Cannot slice a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t len = LenT::value;
 
@@ -160,27 +177,34 @@ private:
 	};
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<Dim>>)
+		if constexpr(State::template contains<index_in<Dim>>) {
 			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
-		else
+		} else {
 			return state;
+		}
 	}
+
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto size(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
 		if constexpr(QDim == Dim) {
@@ -191,6 +215,7 @@ public:
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
 		return state_at<Sub>(sub_structure(), sub_state(state));
@@ -204,6 +229,7 @@ struct slice_proto : strict_contain<StartT, LenT> {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return slice_t<Dim, Struct, StartT, LenT>(s, this->template get<0>(), this->template get<1>()); }
 };
 
@@ -224,8 +250,13 @@ struct span_t : strict_contain<T, StartT, EndT> {
 		type_param<StartT>,
 		type_param<EndT>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+
+	[[nodiscard]]
 	constexpr StartT start() const noexcept { return this->template get<1>(); }
+
+	[[nodiscard]]
 	constexpr EndT end() const noexcept { return this->template get<2>(); }
 
 private:
@@ -236,8 +267,8 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(StartT::value || true, "Cannot span a tuple dimension dynamically");
-		static_assert(EndT::value || true, "Cannot span a tuple dimension dynamically");
+		static_assert(((void)StartT::value, true), "Cannot span a tuple dimension dynamically");
+		static_assert(((void)EndT::value, true), "Cannot span a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t end = EndT::value;
 
@@ -252,27 +283,32 @@ public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<Dim>>)
+		if constexpr(State::template contains<index_in<Dim>>) {
 			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start());
-		else
+		} else {
 			return state;
+		}
 	}
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto size(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
@@ -284,6 +320,7 @@ public:
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set span length");
 		return state_at<Sub>(sub_structure(), sub_state(state));
@@ -297,6 +334,7 @@ struct span_proto : strict_contain<StartT, EndT> {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return span_t<Dim, Struct, StartT, EndT>(s, this->template get<0>(), this->template get<1>()); }
 };
 
@@ -317,8 +355,13 @@ struct step_t : strict_contain<T, StartT, StrideT> {
 		type_param<StartT>,
 		type_param<StrideT>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+
+	[[nodiscard]]
 	constexpr StartT start() const noexcept { return this->template get<1>(); }
+
+	[[nodiscard]]
 	constexpr StrideT stride() const noexcept { return this->template get<2>(); }
 
 private:
@@ -329,8 +372,8 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(StartT::value || true, "Cannot slice a tuple dimension dynamically");
-		static_assert(StrideT::value || true, "Cannot slice a tuple dimension dynamically");
+		static_assert(((void)StartT::value, true), "Cannot slice a tuple dimension dynamically");
+		static_assert(((void)StrideT::value, true), "Cannot slice a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t stride = StrideT::value;
 		static constexpr std::size_t sub_length = sizeof...(RetSigs);
@@ -346,27 +389,32 @@ public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<Dim>>)
+		if constexpr(State::template contains<index_in<Dim>>) {
 			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride() + start());
-		else
+		} else {
 			return state;
+		}
 	}
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto size(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
@@ -379,6 +427,7 @@ public:
 	}
 
 	template<class Sub, IsState State>
+	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length after step");
 		return state_at<Sub>(sub_structure(), sub_state(state));
@@ -392,6 +441,7 @@ struct step_proto : strict_contain<StartT, StrideT> {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return step_t<Dim, Struct, StartT, StrideT>(s, this->template get<0>(), this->template get<1>()); }
 };
 
@@ -405,6 +455,7 @@ struct auto_step_proto : strict_contain<StartT, StrideT> {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
 		static_assert(!Struct::signature::dependent, "Add a dimension name as the first parameter to step, or use a structure with a dynamic topmost dimension");
 		constexpr auto dim = Struct::signature::dim;
@@ -424,6 +475,7 @@ struct reverse_t : strict_contain<T> {
 		dim_param<Dim>,
 		structure_param<T>>;
 
+	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 private:
@@ -447,6 +499,7 @@ public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
+	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr(State::template contains<index_in<Dim>>) {
@@ -457,21 +510,25 @@ public:
 		}
 	}
 
+	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	constexpr auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -482,6 +539,7 @@ struct reverse_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return reverse_t<Dim, Struct>(s); }
 };
 

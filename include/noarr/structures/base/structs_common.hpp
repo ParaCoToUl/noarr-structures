@@ -102,30 +102,26 @@ concept IsProtoStruct = std::same_as<decltype(T::proto_preserves_layout), const 
 namespace helpers {
 
 template<class F, bool PreservesLayout>
-struct make_proto_impl {
+struct make_proto_impl : F {
 	static constexpr bool proto_preserves_layout = PreservesLayout;
 
-	F f_;
-
-	explicit constexpr make_proto_impl(F f) noexcept : f_(f) {}
-
-
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return f_(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept { return (*this)(s); }
+
 };
 
 template<class ...Structs, class ProtoStruct, std::size_t ...Indices> requires IsProtoStruct<ProtoStruct>
-constexpr auto pass_pack(pack<Structs...> s, ProtoStruct p, std::index_sequence<Indices...>) noexcept {
+constexpr auto pass_pack(pack<Structs...> s, ProtoStruct p, [[maybe_unused]] std::index_sequence<Indices...> is) noexcept {
 	return p.instantiate_and_construct(s.template get<Indices>()...);
 }
 
 template<class Arg, class ...Args, std::size_t ...Indices>
-constexpr auto pass_pack(Arg s, pack<Args...> p, std::index_sequence<Indices...>) noexcept {
+constexpr auto pass_pack(Arg s, pack<Args...> p, [[maybe_unused]] std::index_sequence<Indices...> is) noexcept {
 	return pack(s ^ p.template get<Indices>()...);
 }
 
 template<class ...Structs, class Arg, std::size_t ...Indices>
-constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, std::index_sequence<Indices...>) noexcept {
+constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, [[maybe_unused]] std::index_sequence<Indices...> is) noexcept {
 	return pack(s.template get<Indices>() ^ p...);
 }
 
@@ -135,6 +131,7 @@ template<class T>
 concept IsStructOrProtoStruct = IsStruct<T> || IsProtoStruct<T>;
 
 template<bool PreservesLayout = false, class F>
+[[nodiscard("Constructs a new proto-structure")]]
 constexpr auto make_proto(F f) noexcept {
 	return helpers::make_proto_impl<F, PreservesLayout>(f);
 }
@@ -167,6 +164,7 @@ struct neutral_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard("Constructs a new proto-structure")]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s; }
 };
 
@@ -184,11 +182,13 @@ struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : flexible_co
 	static constexpr bool proto_preserves_layout = (OuterProtoStruct::proto_preserves_layout && ... && InnerProtoStructs::proto_preserves_layout);
 
 	template<class Struct>
+	[[nodiscard("Constructs a new proto-structure")]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
 		return s ^ this->template get<0>() ^ this->template get<1>();
 	}
 
 	template<class ...Structs> requires (sizeof...(Structs) != 1)
+	[[nodiscard("Constructs a new proto-structure")]]
 	constexpr auto instantiate_and_construct(Structs ...s) const noexcept {
 		return pack(s...) ^ this->template get<0>() ^ this->template get<1>();
 	}

@@ -50,6 +50,7 @@ struct array_proto {
 	static constexpr bool proto_preserves_layout = false;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s ^ vector<Dim>() ^ set_length<Dim>(lit<L>); }
 };
 
@@ -188,12 +189,12 @@ constexpr auto symmetric_spans(Struct structure, Offsets ...offsets) noexcept {
 namespace helpers {
 
 template<IsDim auto Dim, class IdxT>
-constexpr auto state_construct_fix(state_item<index_in<Dim>, IdxT>, IsState auto state) noexcept {
+constexpr auto state_construct_fix([[maybe_unused]] state_item<index_in<Dim>, IdxT> idx, IsState auto state) noexcept {
 	return fix<Dim>(state);
 }
 
 template<class StateItem>
-constexpr auto state_construct_fix(StateItem, IsState auto) noexcept {
+constexpr auto state_construct_fix([[maybe_unused]] StateItem idx, [[maybe_unused]] IsState auto state) noexcept {
 	return neutral_proto();
 }
 
