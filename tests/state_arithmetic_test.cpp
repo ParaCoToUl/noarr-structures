@@ -1,8 +1,8 @@
 #include <noarr_test/macros.hpp>
+#include <noarr_test/defs.hpp>
 
 #include <noarr/structures.hpp>
 #include <noarr/structures/extra/shortcuts.hpp>
-#include "noarr_test_defs.hpp"
 
 TEST_CASE("State ordering - one dimension", "[state]") {
 	STATIC_REQUIRE(noarr::idx<'x'>(10) < noarr::idx<'x'>(20));
@@ -148,46 +148,46 @@ TEST_CASE("State arithmetic - trivial", "[state]") {
 	constexpr auto s3 = noarr::idx<'x', 'y'>(0, 0);
 	constexpr auto s4 = noarr::empty_state;
 
-	STATIC_REQUIRE(std::is_same_v<decltype(s1), decltype(s2)>);
+	REQUIRE(noarr_test::equal_data(s1, s2));
 
 	STATIC_REQUIRE(s1 == s2);
 
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s2)>, std::remove_cvref_t<decltype(s2 + s3)>>);
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s1)>, std::remove_cvref_t<decltype(s1 + s4)>>);
+	REQUIRE(noarr_test::equal_data(s2, s2 + s3));
+	REQUIRE(noarr_test::equal_data(s1, s1 + s4));
 
 	STATIC_REQUIRE(s2 == s2 + s3);
 	STATIC_REQUIRE(s1 == s1 + s4);
 
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s3)>, std::remove_cvref_t<decltype(s1 - s1)>>);
+	REQUIRE(noarr_test::equal_data(s3, s1 - s1));
 
 	STATIC_REQUIRE(s3 == s1 - s1);
 
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s4)>, std::remove_cvref_t<decltype(s4 + s4)>>);
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s4)>, std::remove_cvref_t<decltype(s4 - s4)>>);
+	REQUIRE(noarr_test::equal_data(s4, s4 + s4));
+	REQUIRE(noarr_test::equal_data(s4, s4 - s4));
 
 	STATIC_REQUIRE(s4 == s4 + s4);
 	STATIC_REQUIRE(s4 == s4 - s4);
 
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s4)>, std::remove_cvref_t<decltype(+s4)>>);
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s4)>, std::remove_cvref_t<decltype(-s4)>>);
+	REQUIRE(noarr_test::equal_data(s4, +s4));
+	REQUIRE(noarr_test::equal_data(s4, -s4));
 
 	STATIC_REQUIRE(s4 == +s4);
 	STATIC_REQUIRE(s4 == -s4);
 
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s3)>, std::remove_cvref_t<decltype(s3 + s3)>>);
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s3)>, std::remove_cvref_t<decltype(s3 - s3)>>);
+	REQUIRE(noarr_test::equal_data(s3, s3 + s3));
+	REQUIRE(noarr_test::equal_data(s3, s3 - s3));
 
 	STATIC_REQUIRE(s3 == s3 + s3);
 	STATIC_REQUIRE(s3 == s3 - s3);
 
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s3)>, std::remove_cvref_t<decltype(+s3)>>);
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(s3)>, std::remove_cvref_t<decltype(-s3)>>);
+	REQUIRE(noarr_test::equal_data(s3, +s3));
+	REQUIRE(noarr_test::equal_data(s3, -s3));
 
 	STATIC_REQUIRE(s3 == +s3);
 	STATIC_REQUIRE(s3 == -s3);
 
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(+s2)>, std::remove_cvref_t<decltype(s2)>>);
-	STATIC_REQUIRE(std::is_same_v<std::remove_cvref_t<decltype(-s2)>, std::remove_cvref_t<decltype(s3 - s2)>>);
+	REQUIRE(noarr_test::equal_data(+s2, s2));
+	REQUIRE(noarr_test::equal_data(-s2, s3 - s2));
 
 	STATIC_REQUIRE(+s2 == s2);
 	STATIC_REQUIRE(-s2 == s3 - s2);

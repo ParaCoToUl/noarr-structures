@@ -14,11 +14,7 @@
 
 namespace noarr_test {
 
-namespace {
-
-bool test_case_failed = false;
-
-}
+static bool test_case_failed = false;
 
 }
 
@@ -53,14 +49,6 @@ bool test_case_failed = false;
 	} else { \
 		noarr_test::assertion_passed(); \
 	} while (false)
-
-#define SECTION(...) \
-	if (struct CONCATENATE(test_case_section_, __LINE__) { \
-		~CONCATENATE(test_case_section_, __LINE__)() { \
-			if (noarr_test::test_case_failed) \
-				std::cerr << __FILE__ ":" TO_STRING(__LINE__) ": message: in SECTION(" #__VA_ARGS__ ")\n"; \
-		} \
-	} CONCATENATE(test_case_section_instance_, __LINE__); false) ; else
 
 #define TEST_CASE(...) \
 	static void CONCATENATE(test_case_function_, __LINE__)(); \

@@ -22,7 +22,7 @@ TEST_CASE("Simple use-case of dims", "[dim]") {
 	auto structure = array_t<x, 10, array_t<y, 20, scalar<int>>>();
 
 	// can appear in signatures
-	REQUIRE(std::is_same_v<typename decltype(structure)::signature, typename array_t<x, 10, array_t<y, 20, scalar<int>>>::signature>);
+	STATIC_REQUIRE(std::is_same_v<typename decltype(structure)::signature, typename array_t<x, 10, array_t<y, 20, scalar<int>>>::signature>);
 
 	// can appear in offsets
 	REQUIRE((structure | offset<x, y>(3, 5)) == (structure | offset<x, y>(3, 5)));

@@ -1,7 +1,7 @@
 #include <noarr_test/macros.hpp>
+#include <noarr_test/defs.hpp>
 
 #include <noarr/structures_extended.hpp>
-#include "noarr_test_defs.hpp"
 
 using namespace noarr;
 

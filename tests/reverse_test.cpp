@@ -50,10 +50,10 @@ TEST_CASE("Reverse tuple", "[reverse]") {
 	struct item2 { float field2; };
 	auto s = noarr::pack(noarr::scalar<item0>(), noarr::scalar<item1>(), noarr::scalar<item2>()) ^ noarr::tuple<'x'>();
 	auto r = s ^ noarr::reverse<'x'>();
-	auto q = noarr::pack(noarr::scalar<item2>(), noarr::scalar<item1>(), noarr::scalar<item0>()) ^ noarr::tuple<'x'>();
+	using q = decltype(noarr::pack(noarr::scalar<item2>(), noarr::scalar<item1>(), noarr::scalar<item0>()) ^ noarr::tuple<'x'>());
 
 	REQUIRE(!(std::is_same_v<decltype(r)::signature, decltype(s)::signature>));
-	REQUIRE((std::is_same_v<decltype(r)::signature, decltype(q)::signature>));
+	REQUIRE((std::is_same_v<decltype(r)::signature, q::signature>));
 	REQUIRE((s | noarr::offset<'x'>(lit<0>)).value == (r | noarr::offset<'x'>(lit<2>)).value);
 	REQUIRE((s | noarr::offset<'x'>(lit<1>)).value == (r | noarr::offset<'x'>(lit<1>)).value);
 	REQUIRE((s | noarr::offset<'x'>(lit<2>)).value == (r | noarr::offset<'x'>(lit<0>)).value);

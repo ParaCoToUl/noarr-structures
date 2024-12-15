@@ -35,9 +35,9 @@ TEST_CASE("Traverser trivial", "[traverser]") {
 	REQUIRE(u3.length<'y'>(state<>()) == 30);
 	REQUIRE(u3.length<'z'>(state<>()) == 40);
 
-	REQUIRE(std::is_same_v<u1t::signature, at::signature>);
-	REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
-	REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u1t::signature, at::signature>);
+	STATIC_REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
 
 	int i = 0;
 
@@ -98,9 +98,9 @@ TEST_CASE("Traverser ordered", "[traverser]") {
 	REQUIRE(u3.length<'y'>(state<>()) == 30);
 	REQUIRE(u3.length<'z'>(state<>()) == 40);
 
-	REQUIRE(std::is_same_v<u1t::signature, at::signature>);
-	REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
-	REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u1t::signature, at::signature>);
+	STATIC_REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
 
 	int i = 0;
 
@@ -179,9 +179,9 @@ TEST_CASE("Traverser ordered renamed", "[traverser]") {
 	REQUIRE(u3.length<'y'>(state<>()) == 30);
 	REQUIRE(u3.length<'z'>(state<>()) == 40);
 
-	REQUIRE(std::is_same_v<u1t::signature, at::signature>);
-	REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
-	REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u1t::signature, at::signature>);
+	STATIC_REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
 
 	int i = 0;
 
@@ -363,9 +363,9 @@ TEST_CASE("Traverser sections", "[traverser]") {
 	REQUIRE(u3.length<'y'>(state<>()) == 30);
 	REQUIRE(u3.length<'z'>(state<>()) == 40);
 
-	REQUIRE(std::is_same_v<u1t::signature, at::signature>);
-	REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
-	REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u1t::signature, at::signature>);
+	STATIC_REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
 
 	int i = 0;
 	int iters = 0;

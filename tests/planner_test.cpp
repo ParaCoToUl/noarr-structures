@@ -18,11 +18,11 @@ TEST_CASE("Planner trivial", "[planner]") {
 	using u3t = union_t<at, bt, ct>;
 
 	auto a = make_bag(at());
-	REQUIRE(std::is_same_v<decltype(a), decltype(bag(at()))>);
+	STATIC_REQUIRE(std::is_same_v<decltype(a), decltype(bag(at()))>);
 	auto b = make_bag(bt());
-	REQUIRE(std::is_same_v<decltype(b), decltype(bag(bt()))>);
+	STATIC_REQUIRE(std::is_same_v<decltype(b), decltype(bag(bt()))>);
 	auto c = make_bag(ct());
-	REQUIRE(std::is_same_v<decltype(c), decltype(bag(ct()))>);
+	STATIC_REQUIRE(std::is_same_v<decltype(c), decltype(bag(ct()))>);
 
 	u1t u1;
 	u2t u2;
@@ -39,9 +39,9 @@ TEST_CASE("Planner trivial", "[planner]") {
 	REQUIRE(u3.length<'y'>(state<>()) == 30);
 	REQUIRE(u3.length<'z'>(state<>()) == 40);
 
-	REQUIRE(std::is_same_v<u1t::signature, at::signature>);
-	REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
-	REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u1t::signature, at::signature>);
+	STATIC_REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
 
 	int i = 0;
 
@@ -145,9 +145,9 @@ TEST_CASE("Planner trivial functional", "[planner]") {
 	REQUIRE(u3.length<'y'>(state<>()) == 30);
 	REQUIRE(u3.length<'z'>(state<>()) == 40);
 
-	REQUIRE(std::is_same_v<u1t::signature, at::signature>);
-	REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
-	REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u1t::signature, at::signature>);
+	STATIC_REQUIRE(std::is_same_v<u2t::signature, xt::signature>);
+	STATIC_REQUIRE(std::is_same_v<u3t::signature, xt::signature>);
 
 	int i = 0;
 

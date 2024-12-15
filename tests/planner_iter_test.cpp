@@ -1,4 +1,5 @@
 #include <noarr_test/macros.hpp>
+#include <noarr_test/defs.hpp>
 
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>
@@ -97,8 +98,8 @@ TEST_CASE("Planner iter arithmetics", "[planner iter]") {
 }
 
 TEST_CASE("Planner iter type traits", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
-	using iter_t = noarr::planner_iterator_t<'x', noarr::union_t<decltype(bag.get_ref())>, noarr::neutral_proto, noarr::planner_endings<>>;
+	using bag = decltype(make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr).get_ref());
+	using iter_t = noarr::planner_iterator_t<'x', noarr::union_t<bag>, noarr::neutral_proto, noarr::planner_endings<>>;
 
 	// iterator should only contain the structure (empty), pointer and index
 	STATIC_REQUIRE(sizeof(iter_t) == sizeof(std::size_t) + sizeof(const void*));
@@ -200,10 +201,10 @@ TEST_CASE("Planner trivial iteration", "[planner iter]") {
 
 	std::size_t x = 0, y = 0;
 	for (auto col : p) {
-		STATIC_REQUIRE(std::is_same_v<decltype(col), decltype(p ^ fix<'x'>(0))>);
+		REQUIRE(noarr_test::equal_data(col, p ^ fix<'x'>(x)));
 		REQUIRE(noarr::get_index<'x'>(col) == x++);
 		for (auto cell : col) {
-			STATIC_REQUIRE(std::is_same_v<decltype(cell), decltype(col ^ fix<'y'>(0))>);
+			REQUIRE(noarr_test::equal_data(cell, col ^ fix<'y'>(y)));
 			REQUIRE(noarr::get_index<'y'>(cell) == y++);
 		}
 		y = 0;
@@ -216,10 +217,10 @@ TEST_CASE("Planner iteration with hoist", "[planner iter]") {
 
 	std::size_t x = 0, y = 0;
 	for (auto col : p) {
-		STATIC_REQUIRE(std::is_same_v<decltype(col), decltype(p ^ fix<'y'>(0))>);
+		REQUIRE(noarr_test::equal_data(col, p ^ fix<'y'>(y)));
 		REQUIRE(noarr::get_index<'y'>(col.state()) == y++);
 		for (auto cell : col) {
-			STATIC_REQUIRE(std::is_same_v<decltype(cell), decltype(col ^ fix<'x'>(0))>);
+			REQUIRE(noarr_test::equal_data(cell, col ^ fix<'x'>(x)));
 			REQUIRE(noarr::get_index<'x'>(cell.state()) == x++);
 		}
 		x = 0;

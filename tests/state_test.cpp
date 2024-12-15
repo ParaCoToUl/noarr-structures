@@ -1,8 +1,8 @@
 #include <noarr_test/macros.hpp>
+#include <noarr_test/defs.hpp>
 
 #include <noarr/structures.hpp>
 #include <noarr/structures/extra/shortcuts.hpp>
-#include "noarr_test_defs.hpp"
 
 TEST_CASE("State shortcuts", "[state]") {
 	auto s1 = noarr::make_state<noarr::length_in<'x'>, noarr::length_in<'y'>>(10, 20);
@@ -10,8 +10,8 @@ TEST_CASE("State shortcuts", "[state]") {
 	STATIC_REQUIRE(sizeof(s1) == 2*sizeof(std::size_t));
 	STATIC_REQUIRE(noarr_test::type_is_simple(s1));
 
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'x'>>, std::size_t>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'y'>>, std::size_t>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'x'>>, std::size_t>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'y'>>, std::size_t>);
 
 	REQUIRE(s1.get<noarr::length_in<'x'>>() == 10);
 	REQUIRE(s1.get<noarr::length_in<'y'>>() == 20);
@@ -21,10 +21,10 @@ TEST_CASE("State shortcuts", "[state]") {
 	STATIC_REQUIRE(sizeof(s2) == 4*sizeof(std::size_t));
 	STATIC_REQUIRE(noarr_test::type_is_simple(s2));
 
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'x'>>, std::size_t>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'y'>>, std::size_t>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'x'>>, std::size_t>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'y'>>, std::size_t>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'x'>>, std::size_t>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'y'>>, std::size_t>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'x'>>, std::size_t>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'y'>>, std::size_t>);
 
 	REQUIRE(s2.get<noarr::length_in<'x'>>() == 10);
 	REQUIRE(s2.get<noarr::length_in<'y'>>() == 20);
@@ -45,8 +45,8 @@ TEST_CASE("State shortcuts lit", "[state]") {
 	STATIC_REQUIRE(std::is_empty_v<decltype(s1)>);
 	STATIC_REQUIRE(noarr_test::type_is_simple(s1));
 
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'x'>>, std::integral_constant<std::size_t, 10>>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'y'>>, std::integral_constant<std::size_t, 20>>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'x'>>, std::integral_constant<std::size_t, 10>>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s1), noarr::length_in<'y'>>, std::integral_constant<std::size_t, 20>>);
 
 	STATIC_REQUIRE((s1.get<noarr::length_in<'x'>>()).value == 10);
 	STATIC_REQUIRE((s1.get<noarr::length_in<'y'>>()).value == 20);
@@ -56,10 +56,10 @@ TEST_CASE("State shortcuts lit", "[state]") {
 	STATIC_REQUIRE(sizeof(s2) == 1);
 	STATIC_REQUIRE(noarr_test::type_is_simple(s2));
 
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'x'>>, std::integral_constant<std::size_t, 10>>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'y'>>, std::integral_constant<std::size_t, 20>>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'x'>>, std::integral_constant<std::size_t, 05>>);
-	REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'y'>>, std::integral_constant<std::size_t, 15>>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'x'>>, std::integral_constant<std::size_t, 10>>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::length_in<'y'>>, std::integral_constant<std::size_t, 20>>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'x'>>, std::integral_constant<std::size_t, 05>>);
+	STATIC_REQUIRE(std::is_same_v<noarr::state_get_t<decltype(s2), noarr::index_in<'y'>>, std::integral_constant<std::size_t, 15>>);
 
 	STATIC_REQUIRE((s2.get<noarr::length_in<'x'>>()).value == 10);
 	STATIC_REQUIRE((s2.get<noarr::length_in<'y'>>()).value == 20);
