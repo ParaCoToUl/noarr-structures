@@ -13,6 +13,8 @@ struct to_struct;
 template<IsStruct T>
 struct to_struct<T> {
 	using type = std::remove_cvref_t<T>;
+
+	[[nodiscard]]
 	static constexpr type convert(T t) noexcept { return t; }
 };
 

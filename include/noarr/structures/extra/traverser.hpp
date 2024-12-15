@@ -246,6 +246,8 @@ constexpr auto operator^(const T &t, IsProtoStruct auto order) noexcept {
 template<IsTraverser T>
 struct to_state<T> {
 	using type = std::remove_cvref_t<decltype(std::declval<T>().state())>;
+
+	[[nodiscard]]
 	static constexpr type convert(const T &t) noexcept { return t.state(); }
 };
 

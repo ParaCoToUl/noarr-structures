@@ -21,14 +21,17 @@ template<template<class...> class container>
 struct bag_policy {
 	using type = container<char>;
 
+	[[nodiscard]]
 	static constexpr type construct(std::size_t size) {
 		return container<char>(size);
 	}
 
+	[[nodiscard]]
 	static constexpr char *get(container<char> &_container) noexcept {
 		return _container.data();
 	}
 
+	[[nodiscard]]
 	static constexpr const char *get(const container<char> &_container) noexcept {
 		return _container.data();
 	}
@@ -52,7 +55,7 @@ struct bag_policy<std::unique_ptr> {
 	}
 
 	[[nodiscard]]
-	static void *get(const std::unique_ptr<char[]> &ptr) noexcept {
+	static void *get(const type &ptr) noexcept {
 		return ptr.get();
 	}
 };
@@ -100,7 +103,7 @@ public:
 	explicit constexpr bag_t(Structure s, const typename BagPolicy::type &data) : base(s, data)
 	{ }
 
-	explicit constexpr bag_t(Structure s, BagPolicy policy) : base(policy.construct(s), s | noarr::get_size())
+	explicit constexpr bag_t(Structure s, BagPolicy policy) : base(s, policy.construct(s | noarr::get_size()))
 	{ }
 
 	/**

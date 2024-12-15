@@ -247,6 +247,8 @@ struct to_state;
 template<IsState T>
 struct to_state<T> {
 	using type = std::remove_cvref_t<T>;
+
+	[[nodiscard]]
 	static constexpr type convert(T t) noexcept { return t; }
 };
 

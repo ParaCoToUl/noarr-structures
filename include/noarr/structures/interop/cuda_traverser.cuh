@@ -48,26 +48,31 @@ private:
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
+	[[nodiscard]]
 	static __device__ inline auto sub_state(IsState auto state) noexcept {
 		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(CudaDim::idx());
 	}
 
+	[[nodiscard]]
 	__device__ inline std::size_t size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	__device__ inline std::size_t strict_offset_of(IsState auto state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<IsDim auto QDim>
+	[[nodiscard]]
 	__device__ inline std::size_t length(IsState auto state) const noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
 	template<class Sub>
+	[[nodiscard]]
 	__device__ inline auto strict_state_at(IsState auto state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -80,6 +85,7 @@ struct cuda_fix_pair_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
+	[[nodiscard]]
 	constexpr auto instantiate_and_construct(Struct s) const noexcept {
 		using fixt = cuda_fix_t<DimT, Struct, CudaDimT>;
 		using fixb = cuda_fix_t<DimB, fixt, CudaDimB>;
@@ -102,34 +108,38 @@ struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<Dims
 	using base::get_struct;
 	using base::get_order;
 
+	[[nodiscard]]
 	static constexpr auto get_fixes() {
 		return (... ^ helpers::cuda_fix_pair_proto<DimsB, DimsT, CudaDimsB, CudaDimsT>());
 	}
 
+	[[nodiscard]]
 	constexpr dim3 grid_dim() const noexcept {
 		const auto full = this->top_struct();
 		return {(uint)full.template length<DimsB>(empty_state)...};
 	}
 
+	[[nodiscard]]
 	constexpr dim3 block_dim() const noexcept {
 		const auto full = this->top_struct();
 		return {(uint)full.template length<DimsT>(empty_state)...};
 	}
 
+	[[nodiscard]]
 	explicit constexpr operator bool() const noexcept {
 		const auto full = this->top_struct();
 		return (... && full.template length<DimsT>(empty_state)) && (... && full.template length<DimsB>(empty_state));
 	}
 
+	[[nodiscard]]
 	constexpr auto inner() const noexcept
 		-> traverser_t<Struct, decltype(get_order() ^ get_fixes())> {
 		return traverser_t<Struct, decltype(get_order() ^ get_fixes())>(get_struct(), get_order() ^ get_fixes());
 	}
 
-
 #ifdef __CUDACC__
 	template<class ...Values>
-	constexpr auto simple_run(void kernel(traverser_t<Struct, decltype(std::declval<base>().get_order() ^ get_fixes())>, Values...), uint shm_size, Values ...values) const noexcept {
+	constexpr void simple_run(void kernel(traverser_t<Struct, decltype(std::declval<base>().get_order() ^ get_fixes())>, Values...), uint shm_size, Values ...values) const noexcept {
 		kernel<<<grid_dim(), block_dim(), shm_size>>>(inner(), values...);
 	}
 #endif

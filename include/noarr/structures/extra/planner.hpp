@@ -387,6 +387,8 @@ constexpr auto operator^(const P &p, IsProtoStruct auto order) noexcept {
 template<IsPlanner P>
 struct to_state<P> {
 	using type = std::remove_cvref_t<decltype(std::declval<P>().state())>;
+
+	[[nodiscard]]
 	static constexpr type convert(const P &p) noexcept { return p.state(); }
 };
 
