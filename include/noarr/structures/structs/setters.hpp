@@ -52,6 +52,11 @@ public:
 		return sub_structure().size(sub_state(state));
 	}
 
+	[[nodiscard]]
+	constexpr auto align(IsState auto state) const noexcept {
+		return sub_structure().align(sub_state(state));
+	}
+
 	template<class Sub>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(IsState auto state) const noexcept {
@@ -136,6 +141,11 @@ public:
 	[[nodiscard]]
 	constexpr auto size(IsState auto state) const noexcept {
 		return sub_structure().size(sub_state(state));
+	}
+
+	[[nodiscard]]
+	constexpr auto align(IsState auto state) const noexcept {
+		return sub_structure().align(sub_state(state));
 	}
 
 	template<class Sub>

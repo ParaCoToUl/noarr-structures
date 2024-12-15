@@ -58,6 +58,11 @@ public:
 		return sub_structure().size(sub_state(state));
 	}
 
+	[[nodiscard]]
+	constexpr auto align(IsState auto state) const noexcept {
+		return sub_structure().align(sub_state(state));
+	}
+
 	template<class Sub>
 	[[nodiscard]]
 	__device__ inline std::size_t strict_offset_of(IsState auto state) const noexcept {

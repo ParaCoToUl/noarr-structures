@@ -29,6 +29,10 @@ struct scalar : strict_contain<> {
 		return constexpr_arithmetic::make_const<sizeof(T)>();
 	}
 
+	static constexpr auto align([[maybe_unused]] IsState auto state = empty_state) noexcept {
+		return constexpr_arithmetic::make_const<alignof(T)>();
+	}
+
 	template<class Sub>
 	static constexpr void strict_offset_of([[maybe_unused]] IsState auto state = empty_state) noexcept {
 		static_assert(always_false<Sub>, "Substructure was not found");

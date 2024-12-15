@@ -2,6 +2,8 @@
 #define NOARR_STRUCTURES_LAYOUTS_HPP
 
 #include <cstddef>
+
+#include <algorithm>
 #include <type_traits>
 #include <utility>
 
@@ -46,6 +48,13 @@ struct tuple_t : strict_contain<TS...> {
 		return size_inner(is, sub_state(state));
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
+		return align_inner(is, sub_state(state));
+	}
+
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {
@@ -82,8 +91,33 @@ private:
 	template<std::size_t ...IS>
 	[[nodiscard]]
 	constexpr auto size_inner([[maybe_unused]] std::index_sequence<IS...> is, [[maybe_unused]] IsState auto sub_state) const noexcept {
+		return size_inner(std::index_sequence<IS...>(), constexpr_arithmetic::make_const<0>(), sub_state);
+	}
+
+	template<std::size_t I, std::size_t ...IS>
+	[[nodiscard]]
+	constexpr auto size_inner([[maybe_unused]] std::index_sequence<I, IS...> is, auto start, [[maybe_unused]] IsState auto sub_state) const noexcept {
 		using namespace constexpr_arithmetic;
-		return (make_const<0>() + ... + sub_structure<IS>().size(sub_state));
+		const auto alignment = sub_structure<I>().align(sub_state);
+		const auto safe_start = (start + alignment - make_const<1>()) / alignment * alignment;
+		return size_inner(std::index_sequence<IS...>(), safe_start + sub_structure<I>().size(sub_state), sub_state);
+	}
+
+	[[nodiscard]]
+	constexpr auto size_inner([[maybe_unused]] std::index_sequence<> is, auto start, [[maybe_unused]] IsState auto sub_state) const noexcept {
+		return start;
+	}
+
+	template<std::size_t I, std::size_t ...IS>
+	[[nodiscard]]
+	constexpr auto align_inner([[maybe_unused]] std::index_sequence<I, IS...> is, [[maybe_unused]] IsState auto sub_state) const noexcept {
+		return std::max(sub_structure<I>().align(sub_state), align_inner(std::index_sequence<IS...>(), sub_state));
+	}
+
+	template<std::size_t I>
+	[[nodiscard]]
+	constexpr auto align_inner([[maybe_unused]] std::index_sequence<I> is, [[maybe_unused]] IsState auto sub_state) const noexcept {
+		return sub_structure<I>().align(sub_state);
 	}
 };
 
@@ -132,6 +166,12 @@ struct vector_t : strict_contain<T> {
 		static_assert(State::template contains<length_in<Dim>>, "Unknown vector length");
 		const auto len = state.template get<length_in<Dim>>();
 		return len * sub_structure().size(sub_state(state));
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
+		return sub_structure().align(sub_state(state));
 	}
 
 	template<class Sub, IsState State>

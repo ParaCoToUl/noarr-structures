@@ -33,6 +33,11 @@ struct bcast_t : strict_contain<T> {
 		return sub_structure().size(sub_state(state));
 	}
 
+	[[nodiscard]]
+	constexpr auto align(IsState auto state) const noexcept {
+		return sub_structure().align(sub_state(state));
+	}
+
 	template<class Sub, IsState State> requires (HasSetIndex<State, Dim>)
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept {

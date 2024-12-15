@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_CUDA_STRIPED_HPP
 #define NOARR_STRUCTURES_CUDA_STRIPED_HPP
 
+#include <algorithm>
+
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"
 #include "../base/state.hpp"
@@ -93,6 +95,12 @@ public:
 		const auto stripe_len = (sub_elements + make_const<stripe_width_elems - 1>()) / make_const<stripe_width_elems>();
 		// total size = stripe length (i.e. total length) * total width
 		return stripe_len * make_const<total_width>();
+	}
+
+	[[nodiscard]]
+	constexpr auto align(IsState auto state) const noexcept {
+		using namespace constexpr_arithmetic;
+		return std::max(sub_structure().align(sub_state(state), make_const<BankWidth>()));
 	}
 
 	template<class Sub>
