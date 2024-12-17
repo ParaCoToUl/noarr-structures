@@ -9,20 +9,13 @@
 
 namespace noarr {
 
-struct unknown_arg_length {
-	static constexpr bool valid_arg_length = true;
-	static constexpr bool is_known = false;
-	static constexpr bool is_static = false;
-};
 struct dynamic_arg_length {
 	static constexpr bool valid_arg_length = true;
-	static constexpr bool is_known = true;
 	static constexpr bool is_static = false;
 };
 template<std::size_t L>
 struct static_arg_length {
 	static constexpr bool valid_arg_length = true;
-	static constexpr bool is_known = true;
 	static constexpr bool is_static = true;
 	static constexpr std::size_t value = L;
 };

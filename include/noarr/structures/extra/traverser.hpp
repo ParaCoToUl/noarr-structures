@@ -92,25 +92,35 @@ struct union_t : strict_contain<Structs...> {
 	[[nodiscard("returns a copy of the underlying struct")]]
 	constexpr auto sub_structure() const noexcept { return this->template get<Index>(); }
 
+	template<std::size_t Index>
+	using sub_structure_t = std::remove_cvref_t<decltype(std::declval<base>().template get<Index>())>;
+
 private:
 	template<auto Dim, std::size_t I>
 	[[nodiscard("returns the index of the first struct that accepts the dimension")]]
-	constexpr auto find_first_match() const noexcept {
-		using sub_sig = typename to_struct<decltype(sub_structure<I>())>::type::signature;
+	static constexpr auto find_first_match() noexcept {
+		using sub_sig = typename to_struct<std::remove_cvref_t<decltype(std::declval<base>().template get<I>())>>::type::signature;
 		if constexpr(sub_sig::template any_accept<Dim>) {
 			return std::integral_constant<std::size_t, I>();
-		} else {
+		} else if constexpr(I < sizeof...(Structs) - 1) {
 			return find_first_match<Dim, I+1>();
 		}
 	}
 	template<auto Dim> requires IsDim<decltype(Dim)>
-	static constexpr std::size_t first_match = decltype(std::declval<union_t<Structs...>>().template find_first_match<Dim, 0>())::value;
+	using first_match = decltype(find_first_match<Dim, 0>());
 
 public:
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto Dim, IsState State> requires IsDim<decltype(Dim)> && requires { first_match<Dim>::value; }
+	[[nodiscard]]
+	static constexpr bool has_length() noexcept {
+		return sub_structure_t<first_match<Dim>::value>::template has_length<Dim, State>();
+	}
+
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)> && requires { first_match<QDim>::value; }
 	[[nodiscard("returns the length of the first struct that accepts the dimension")]]
 	constexpr auto length(State state) const noexcept {
-		return base::template get<first_match<QDim>>().template length<QDim>(state);
+		// return base::template get<first_match<QDim>::value>().template length<QDim>(state);
+		return sub_structure<first_match<QDim>::value>().template length<QDim>(state);
 	}
 };
 

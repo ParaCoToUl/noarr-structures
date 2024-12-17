@@ -42,7 +42,6 @@ private:
 	template<class Original>
 	struct dim_replacement {
 		static_assert(!Original::dependent, "Tuple index must be set statically");
-		static_assert(Original::arg_length::is_known, "Index cannot be fixed until its length is set");
 		using type = typename Original::ret_sig;
 	};
 public:
@@ -53,32 +52,66 @@ public:
 		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(CudaDim::idx());
 	}
 
+	using sub_structure_t = T;
+	template<IsState State>
+	using sub_state_t = decltype(sub_state(std::declval<State>()));
+
+	template<IsState State>
 	[[nodiscard]]
-	__device__ inline std::size_t size(IsState auto state) const noexcept {
+	static constexpr auto has_size() noexcept {
+		return sub_structure_t::template has_size<sub_state_t<State>>();
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	__device__ inline std::size_t size(State state) const noexcept
+	requires(has_size<State>()) {
 		return sub_structure().size(sub_state(state));
 	}
 
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto align(IsState auto state) const noexcept {
+	constexpr auto align(State state) const noexcept
+	requires (has_size<State>()) {
 		return sub_structure().align(sub_state(state));
 	}
 
-	template<class Sub>
+	template<class Sub, IsState State>
 	[[nodiscard]]
-	__device__ inline std::size_t strict_offset_of(IsState auto state) const noexcept {
+	static constexpr bool has_strict_offset_of() noexcept {
+		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	__device__ inline std::size_t strict_offset_of(State state) const noexcept
+	requires (has_offset_of<Sub, cuda_fix_t, State>()) {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<IsDim auto QDim>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	__device__ inline std::size_t length(IsState auto state) const noexcept {
+	static constexpr bool has_length() noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
+		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+	}
+
+	template<IsDim auto QDim, IsState State>
+	[[nodiscard]]
+	__device__ inline std::size_t length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
-	template<class Sub>
+	template<class Sub, IsState State>
 	[[nodiscard]]
-	__device__ inline auto strict_state_at(IsState auto state) const noexcept {
+	static constexpr bool has_strict_state_at() noexcept {
+		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	__device__ inline auto strict_state_at(State state) const noexcept
+	requires (has_state_at<Sub, cuda_fix_t, State>()) {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

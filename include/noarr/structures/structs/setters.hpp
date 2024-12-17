@@ -30,7 +30,6 @@ private:
 	struct dim_replacement;
 	template<class ArgLength, class RetSig>
 	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> {
-		static_assert(ArgLength::is_known, "Index cannot be fixed until its length is set");
 		using type = RetSig;
 	};
 	template<class ...RetSigs>
@@ -39,40 +38,83 @@ private:
 		static_assert(((void)IdxT::value, true), "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
 		using type = typename original::template ret_sig<IdxT::value>;
 	};
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto sub_state_impl(State state, IdxT idx) noexcept {
+		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(idx);
+	}
+
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto sub_state(IsState auto state) const noexcept {
-		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(idx());
+	constexpr auto sub_state(State state) const noexcept {
+		return sub_state_impl(state, idx());
 	}
 
+	using sub_structure_t = T;
+	template<IsState State>
+	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<IdxT>()));
+
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto size(IsState auto state) const noexcept {
+	static constexpr bool has_size() noexcept {
+		return sub_structure_t::template has_size<sub_state_t<State>>();
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept
+	requires (has_size<State>()) {
 		return sub_structure().size(sub_state(state));
 	}
 
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto align(IsState auto state) const noexcept {
+	constexpr auto align(State state) const noexcept
+	requires (has_size<State>()) {
 		return sub_structure().align(sub_state(state));
 	}
 
-	template<class Sub>
+	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+	static constexpr bool has_strict_offset_of() noexcept {
+		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept
+	requires (has_offset_of<Sub, fix_t, State>()) {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	constexpr auto length(State state) const noexcept {
+	static constexpr bool has_length() noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
+		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+	}
+
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept
+	requires (has_length<QDim, State>()) {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
+	static constexpr bool has_strict_state_at() noexcept {
+		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept
+	requires (has_state_at<Sub, fix_t, State>()) {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -123,46 +165,88 @@ private:
 	struct dim_replacement;
 	template<class ArgLength, class RetSig>
 	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> {
-		static_assert(!ArgLength::is_known, "The length in this dimension is already set");
 		using type = function_sig<Dim, arg_length_from_t<LenT>, RetSig>;
 	};
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		static_assert(value_always_false<Dim>, "Cannot set tuple length");
 	};
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto sub_state_impl(State state, LenT len) noexcept {
+		return state.template with<length_in<Dim>>(len);
+	}
+
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto sub_state(IsState auto state) const noexcept {
-		return state.template with<length_in<Dim>>(len());
+	constexpr auto sub_state(State state) const noexcept {
+		return sub_state_impl(state, len());
 	}
 
+	using sub_structure_t = T;
+	template<IsState State>
+	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<LenT>()));
+
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto size(IsState auto state) const noexcept {
+	static constexpr bool has_size() noexcept {
+		return sub_structure_t::template has_size<sub_state_t<State>>();
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept
+	requires (has_size<State>()) {
 		return sub_structure().size(sub_state(state));
 	}
 
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto align(IsState auto state) const noexcept {
+	constexpr auto align(State state) const noexcept
+	requires (has_size<State>()) {
 		return sub_structure().align(sub_state(state));
 	}
 
-	template<class Sub>
+	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+	static constexpr bool has_strict_offset_of() noexcept {
+		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept
+	requires (has_offset_of<Sub, set_length_t, State>()) {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	constexpr auto length(State state) const noexcept {
+	static constexpr bool has_length() noexcept {
+		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+	}
+
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept
+	requires (has_length<QDim, State>()) {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
+	static constexpr bool has_strict_state_at() noexcept {
+		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept
+	requires (has_state_at<Sub, set_length_t, State>()) {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

@@ -148,5 +148,5 @@ auto size = structure | noarr::get_size(state42); // returns 42*sizeof(float) as
 
 Note that `noarr::vector<Dim>(len)` used in the first two kinds is actually just a shortcut for `noarr::vector<Dim>() ^ noarr::set_length<Dim>(len)`.
 
-In the [signature](Signature.md), unknown length dimensions are represented as `noarr::function_sig<Dim, noarr::unknown_arg_length, T>`.
+In the [signature](Signature.md), unknown length dimensions are represented as `noarr::function_sig<Dim, noarr::dynamic_arg_length, T>`.
 [Traverser](Traverser.md) cannot be used until the length is set.

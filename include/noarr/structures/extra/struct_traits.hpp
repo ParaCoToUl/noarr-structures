@@ -33,7 +33,7 @@ struct sig_is_cube : std::false_type {
 template<class ValueType>
 struct sig_is_cube<scalar_sig<ValueType>> : std::true_type {};
 template<IsDim auto Dim, class ArgLength, class RetSig>
-struct sig_is_cube<function_sig<Dim, ArgLength, RetSig>> : std::integral_constant<bool, ArgLength::is_known && sig_is_cube<RetSig>()> {};
+struct sig_is_cube<function_sig<Dim, ArgLength, RetSig>> : std::integral_constant<bool, sig_is_cube<RetSig>::value> {};
 
 /**
  * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all dynamic)
@@ -41,7 +41,12 @@ struct sig_is_cube<function_sig<Dim, ArgLength, RetSig>> : std::integral_constan
  * @tparam T: the structure
  */
 template<class T>
-struct is_cube : sig_is_cube<typename T::signature> {};
+struct is_cube {
+	static constexpr bool value = sig_is_cube<typename T::signature>::value && requires {
+		T::template has_size<state<>>();
+		typename std::enable_if_t<T::template has_size<state<>>()>;
+	};
+};
 
 
 

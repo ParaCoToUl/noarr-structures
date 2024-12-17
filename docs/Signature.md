@@ -40,15 +40,13 @@ This kind of structure is the most common. It also includes the array example fr
 
 The signature of such structures is in the form `noarr::function_sig<Dim, ArgLength, RetSig>` where
 - `Dim` is a dimension name (`char`)
-- `ArgLength` is one of `noarr::unknown_arg_length`, `noarr::dynamic_arg_length`, `noarr::static_arg_length<...>` (see below)
+- `ArgLength` is `noarr::dynamic_arg_length` or `noarr::static_arg_length<...>` (see below)
 - `RetSig` is another signature type
 
 A structure that has a signature like this accepts an index in dimension `Dim` and otherwise behaves the same as a structure with signature `RetSig`.
 This is the recursive step: if `RetSig` is N-dimensional signature (i.e. it takes N arguments), then the whole `noarr::function_sig<Dim, ArgLength, RetSig>` is (N+1)-dimensional.
 
 The `ArgLength` further specifies the [length](Glossary.md#length) in dimension `Dim`.
-- `noarr::unknown_arg_length` means the length in the dimension has not been set or computed.
-  When it is necessary for size and index calculation, you will need to either pass `length_in<Dim>` in the [state](State.md) or [set the length](structs/set_length.md) in the structure.
 - `noarr::dynamic_arg_length` means the length is either set to a value that is not a compile-time constant, or it is calculated dynamically from some other dimension.
   In the latter case, it may be necessary to set some other parameters before the length in this dimension may be queried (see [`noarr::into_blocks`](structs/into_blocks.md) for an example).
   In either case, the length cannot be set or passed from outside: any attempt to do so (e.g. `length_in<Dim>` in the state) will be ignored.
@@ -83,8 +81,8 @@ struct foo;
 template<char Dim, class ArgLength, class RetSig>
 struct foo<noarr::function_sig<Dim, ArgLength, RetSig>> {
 	// Inspect Dim, ArgLength, and RetSig:
-	static constexpr bool xxx = ArgLength::is_known; // true for false for dynamic_arg_length and static_arg_length, false for unknown_arg_length
-	static constexpr bool yyy = ArgLength::is_static; // true for false for static_arg_length, false for dynamic_arg_length and unknown_arg_length
+	static constexpr bool xxx = ArgLength::is_known; // true for false for dynamic_arg_length and static_arg_length, false for dynamic_arg_length
+	static constexpr bool yyy = ArgLength::is_static; // true for false for static_arg_length, false for dynamic_arg_length and dynamic_arg_length
 	static constexpr bool zzz = ArgLength::value; // beware! only valid if ::is_static, i.e. if ArgLength is static_arg_length<N> (::value is the N)
 	using example_recursion = foo<RetSig>;
 };
@@ -145,7 +143,7 @@ Just a variant of the above is [`noarr::vector`](structs/vector.md), which does 
 ```cpp
 // using elem from above
 auto vec1D = elem ^ noarr::vector<'x'>();
-using vec1D_sig = noarr::function_sig<'x', noarr::unknown_arg_length, elem_sig>; // unknown_arg_length instead of static_arg_length
+using vec1D_sig = noarr::function_sig<'x', noarr::dynamic_arg_length, elem_sig>; // dynamic_arg_length instead of static_arg_length
 ```
 
 ### Modifying dimensions
@@ -183,7 +181,7 @@ using arr2D_sig = noarr::function_sig<'y', noarr::static_arg_length<54>,
 auto blocked = arr2D ^ noarr::into_blocks<'x', 'u', 'v'>(); // removes x, adds u and v
 using blocked_sig = noarr::function_sig<'y', noarr::static_arg_length<54>,
                      noarr::function_sig<'u', noarr::dynamic_arg_length, // u is dynamic, its length is computed from the lengths of x/v
-                      noarr::function_sig<'v', noarr::unknown_arg_length, // v is unknown, its length must be set externally
+                      noarr::function_sig<'v', noarr::dynamic_arg_length, // v is unknown, its length must be set externally
                        noarr::scalar_sig<float> > > >;
 ```
 
@@ -289,7 +287,7 @@ struct replacement<noarr::scalar_sig<ValueType>> { /*...*/ }; // no dimension na
 Among other, a signature describes the items that the structure expects to receive in the [state](State.md) and their types.
 
 Roughly speaking, the state should contain an `noarr::index_in<Dim>` for each dimension mentioned in the signature.
-It should also contain a `noarr::length_in<Dim>` for each dimension that has `ArgLength = noarr::unknown_arg_length`.
+It should also contain a `noarr::length_in<Dim>` for each dimension that has `ArgLength = noarr::dynamic_arg_length`.
 It should not contain any `noarr::length_in<Dim>` for dimensions of `noarr::dynamic_arg_length` and `noarr::static_arg_length`.
 In some cases, these items can be omitted.
 For example, indices are not needed when computing the size, or when computing an index in an unrelated branch of tuple.

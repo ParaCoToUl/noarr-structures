@@ -24,28 +24,58 @@ struct scalar : strict_contain<> {
 
 	using signature = scalar_sig<T>;
 
+	template<IsState State>
 	[[nodiscard]]
-	static constexpr auto size([[maybe_unused]] IsState auto state = empty_state) noexcept {
+	static constexpr bool has_size() noexcept {
+		return true;
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto size([[maybe_unused]] State state = empty_state) noexcept\
+	requires (has_size<State>()) {
 		return constexpr_arithmetic::make_const<sizeof(T)>();
 	}
 
-	static constexpr auto align([[maybe_unused]] IsState auto state = empty_state) noexcept {
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto align([[maybe_unused]] State state = empty_state) noexcept
+	requires (has_size<State>()) {
 		return constexpr_arithmetic::make_const<alignof(T)>();
 	}
 
-	template<class Sub>
-	static constexpr void strict_offset_of([[maybe_unused]] IsState auto state = empty_state) noexcept {
-		static_assert(always_false<Sub>, "Substructure was not found");
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	static constexpr bool has_strict_offset_of() noexcept {
+		return false;
 	}
 
-	template<IsDim auto QDim>
-	static constexpr void length([[maybe_unused]] IsState auto state = empty_state) noexcept {
-		static_assert(value_always_false<QDim>, "Index in this dimension is not accepted by any substructure");
+
+	template<class Sub, IsState State>
+	static constexpr void strict_offset_of([[maybe_unused]] State state = empty_state) noexcept
+	requires (has_offset_of<Sub, scalar, State>()) {
 	}
 
-	template<class Sub>
-	static constexpr void strict_state_at([[maybe_unused]] IsState auto state = empty_state) noexcept {
-		static_assert(always_false<scalar<T>>, "A scalar cannot be used in this context");
+	template<auto QDim, IsState State>
+	[[nodiscard]]
+	static constexpr bool has_length() noexcept {
+		return false;
+	}
+
+	template<IsDim auto QDim, IsState State>
+	static constexpr void length([[maybe_unused]] State state = empty_state) noexcept
+	requires (has_length<QDim, State>()) {
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	static constexpr bool has_strict_state_at() noexcept {
+		return false;
+	}
+
+	template<class Sub, IsState State>
+	static constexpr void strict_state_at([[maybe_unused]] State state = empty_state) noexcept
+	requires (has_state_at<Sub, scalar, State>()) {
 	}
 };
 

@@ -112,11 +112,15 @@ public:
 	[[nodiscard]]
 	constexpr auto structure() const noexcept { return base::template get<0>(); }
 
+	using structure_t = Structure;
+
 	/**
 	 * @brief returns the underlying data blob
 	 */
 	[[nodiscard]]
 	constexpr auto data() const noexcept { return BagPolicy::get(base::template get<1>()); }
+
+	using data_t = typename BagPolicy::type;
 
 	/**
 	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
@@ -152,6 +156,12 @@ public:
 		return structure() | noarr::offset<Dims...>(ts...);
 	}
 
+	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
+	[[nodiscard]]
+	static constexpr bool has_length() noexcept {
+		return structure_t::template has_length<Dim, State>();
+	}
+
 	/**
 	 * @brief gets the length (number of indices) of a dimension in the `structure`
 	 *
@@ -159,14 +169,22 @@ public:
 	 */
 	template<auto Dim> requires IsDim<decltype(Dim)>
 	[[nodiscard]]
-	constexpr auto length() const noexcept {
+	constexpr auto length() const noexcept
+	requires (has_length<Dim, decltype(empty_state)>()) {
 		return structure() | noarr::get_length<Dim>();
 	}
 
 	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
 	[[nodiscard]]
-	constexpr auto length(State state) const noexcept {
+	constexpr auto length(State state) const noexcept
+	requires (has_length<Dim, State>()) {
 		return structure() | noarr::get_length<Dim>(state);
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr bool has_size() noexcept {
+		return structure_t::template has_size<State>();
 	}
 
 	/**
@@ -174,13 +192,15 @@ public:
 	 *
 	 */
 	[[nodiscard]]
-	constexpr auto size() const noexcept {
+	constexpr auto size() const noexcept
+	requires (has_size<state<>>()) {
 		return structure() | noarr::get_size();
 	}
 
 	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
 	[[nodiscard]]
-	constexpr auto size(State state) const noexcept {
+	constexpr auto size(State state) const noexcept
+	requires (has_size<State>()) {
 		return structure() | noarr::get_size<Dim>(state);
 	}
 

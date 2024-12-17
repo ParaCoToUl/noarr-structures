@@ -64,7 +64,7 @@ struct cuda_striped_t : strict_contain<T> {
 		structure_param<T>>;
 
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
-	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<cuda_stripe_index>(); }
+	static constexpr auto sub_state(IsState auto state) noexcept { return state.template remove<cuda_stripe_index>(); }
 
 private:
 	static constexpr std::size_t elem_size = decltype(std::declval<ElemType>().size(state<>()))::value;
@@ -84,7 +84,20 @@ public:
 
 	using signature = typename T::signature;
 
-	constexpr auto size(IsState auto state) const noexcept {
+	using sub_structure_t = T;
+	template<IsState State>
+	using sub_state_t = decltype(sub_state(std::declval<State>()));
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto has_size() noexcept {
+		return sub_structure_t::template has_size<sub_state_t<State>>();
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept
+	requires (has_size<State>()) {
 		using namespace constexpr_arithmetic;
 		// substructure size
 		const auto sub_size = sub_structure().size(sub_state(state));
@@ -96,14 +109,24 @@ public:
 		return stripe_len * make_const<total_width>();
 	}
 
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto align(IsState auto state) const noexcept {
+	constexpr auto align(State state) const noexcept
+	requires (has_size<State>()) {
 		using namespace constexpr_arithmetic;
 		return std::max(sub_structure().align(sub_state(state), make_const<BankWidth>()));
 	}
 
-	template<class Sub>
-	constexpr auto strict_offset_of(IsState auto state) const noexcept {
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	static constexpr bool has_strict_offset_of() noexcept {
+		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept
+	requires (has_offset_of<Sub, cuda_striped_t, State>()) {
 		using namespace constexpr_arithmetic;
 		const auto sub_offset = offset_of<Sub>(sub_structure(), sub_state(state));
 		const auto offset_major = sub_offset / make_const<stripe_width>();
@@ -117,12 +140,27 @@ public:
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
-	constexpr auto length(State state) const noexcept {
+	[[nodiscard]]
+	static constexpr bool has_length() noexcept {
+		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+	}
+
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept
+	requires (has_length<QDim, State>()) {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
-	constexpr void strict_state_at(State) const noexcept {
+	[[nodiscard]]
+	static constexpr bool has_strict_state_at() noexcept {
+		return false;
+	}
+
+	template<class Sub, IsState State>
+	constexpr void strict_state_at(State) const noexcept
+	requires (state_at<Sub, cuda_striped_t, State>()) {
 		static_assert(always_false<cuda_striped_t>, "A cuda_striped_t cannot be used in this context");
 	}
 

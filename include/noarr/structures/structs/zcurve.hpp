@@ -135,7 +135,6 @@ private:
 		template<class Original>
 		struct replacement {
 			static_assert(!Original::dependent, "Cannot merge a tuple index");
-			static_assert(Original::arg_length::is_known, "The dimension lengths must be set before merging");
 
 			static constexpr std::size_t remaining = Remaining - 1U;
 			using arg_len_acc = typename helpers::zc_merged_len<ArgLenAcc, typename Original::arg_length>::type;
@@ -148,7 +147,6 @@ private:
 		template<class Original>
 		struct replacement {
 			static_assert(!Original::dependent, "Cannot merge a tuple index");
-			static_assert(Original::arg_length::is_known, "The dimension lengths must be set before merging");
 
 			using merged_len = typename helpers::zc_merged_len<ArgLenAcc, typename Original::arg_length>::type;
 
@@ -156,60 +154,107 @@ private:
 		};
 	};
 	using outer_dim_replacer = dim_replacer<sizeof...(Dims), static_arg_length<1U>>;
-public:
-	using signature = typename T::signature::template replace<outer_dim_replacer::template replacement, Dims...>;
-
-	using is = std::make_index_sequence<sizeof...(Dims)>;
 
 	template<std::size_t ...DimsI, class State> requires (sizeof...(DimsI) == sizeof...(Dims) && IsState<State>)
 	[[nodiscard]]
-	constexpr auto sub_state(State state, [[maybe_unused]] std::index_sequence<DimsI...> is) const noexcept {
+	static constexpr auto sub_state_impl(State state, T sub_structure, [[maybe_unused]] std::index_sequence<DimsI...> is) noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		const auto clean_state = state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
 		if constexpr(State::template contains<index_in<Dim>>) {
 			const std::size_t index = state.template get<index_in<Dim>>();
 			const auto index_general = index >> SpecialLevel*sizeof...(Dims);
 			const auto index_special = index & ((1U << SpecialLevel*sizeof...(Dims)) - 1U);
-			const auto indices = helpers::zc_general<GeneralLevel-SpecialLevel>(index_general, (sub_structure().template length<Dims>(clean_state) >> SpecialLevel)...);
+			const auto indices = helpers::zc_general<GeneralLevel-SpecialLevel>(index_general, (sub_structure.template length<Dims>(clean_state) >> SpecialLevel)...);
 			return clean_state.template with<index_in<Dims>...>(((std::get<DimsI>(indices) << SpecialLevel) + helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
 		} else {
 			return clean_state;
 		}
 	}
 
+public:
+	using signature = typename T::signature::template replace<outer_dim_replacer::template replacement, Dims...>;
+
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto size(IsState auto state) const noexcept {
-		return sub_structure().size(sub_state(state, is()));
+	constexpr auto sub_state(State state) const noexcept {
+		return sub_state_impl(state, sub_structure(), std::make_index_sequence<sizeof...(Dims)>());
 	}
 
+	using sub_structure_t = T;
+	template<IsState State>
+	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<T>(), std::make_index_sequence<sizeof...(Dims)>()));
+
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto align(IsState auto state) const noexcept {
-		return sub_structure().align(sub_state(state, is()));
+	static constexpr bool has_size() noexcept {
+		return sub_structure_t::template has_size<sub_state_t<State>>();
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept
+	requires (has_size<State>()) {
+		return sub_structure().size(sub_state(state));
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept
+	requires (has_size<State>()) {
+		return sub_structure().align(sub_state(state));
 	}
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
-		static_assert(State::template contains<index_in<Dim>>, "Index has not been set");
-		return offset_of<Sub>(sub_structure(), sub_state(state, is()));
+	static constexpr bool has_strict_offset_of() noexcept {
+		if constexpr(State::template contains<index_in<Dim>>) {
+			return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
+		} else {
+			return false;
+		}
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept
+	requires (has_offset_of<Sub, merge_zcurve_t, State>()) {
+		return offset_of<Sub>(sub_structure(), sub_state(state));
+	}
+
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	[[nodiscard]]
+	static constexpr bool has_length() noexcept {
+		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+		if constexpr(QDim == Dim) {
+			return (... && sub_structure_t::template has_length<Dims, sub_state_t<State>>());
+		} else {
+			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+		}
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
-		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
 		if constexpr(QDim == Dim) {
-			return (... * sub_structure().template length<Dims>(sub_state(state, is())));
+			return (... * sub_structure().template length<Dims>(sub_state(state)));
 		} else {
-			return sub_structure().template length<QDim>(sub_state(state, is()));
+			return sub_structure().template length<QDim>(sub_state(state));
 		}
 	}
 
-	template<class Sub>
+	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_state_at(IsState auto state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state, is()));
+	static constexpr bool has_strict_state_at() noexcept {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
+	}
+
+	template<class Sub, IsState State>
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept
+	requires (has_state_at<Sub, merge_zcurve_t, State>()) {
+		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 

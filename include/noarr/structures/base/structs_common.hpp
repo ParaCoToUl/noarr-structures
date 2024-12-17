@@ -42,12 +42,24 @@ struct dim_param {
 	static constexpr auto value = Dim;
 };
 
+template<class StructInner, class StructOuter, IsState State>
+constexpr bool has_offset_of() noexcept {
+	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+		return true;
+	} else {
+		return StructOuter::template has_strict_offset_of<StructInner, State>();
+	}
+}
+
 template<class StructInner, class StructOuter>
 constexpr auto offset_of(StructOuter structure, IsState auto state) noexcept {
 	if constexpr(std::is_same_v<StructInner, StructOuter>) {
 		return constexpr_arithmetic::make_const<0>();
 	} else {
-		return structure.template strict_offset_of<StructInner>(state);
+		static_assert(has_offset_of<StructInner, StructOuter, decltype(state)>());
+		if constexpr(has_offset_of<StructInner, StructOuter, decltype(state)>()) {
+			return structure.template strict_offset_of<StructInner>(state);
+		}
 	}
 }
 
@@ -57,6 +69,15 @@ constexpr auto state_at(StructOuter structure, IsState auto state) noexcept {
 		return state;
 	} else {
 		return structure.template strict_state_at<StructInner>(state);
+	}
+}
+
+template<class StructInner, class StructOuter, IsState State>
+constexpr bool has_state_at() noexcept {
+	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+		return true;
+	} else {
+		return StructOuter::template has_strict_state_at<StructInner, State>();
 	}
 }
 
