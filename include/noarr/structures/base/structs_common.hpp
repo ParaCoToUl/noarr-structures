@@ -64,7 +64,6 @@ template<class ...Args>
 struct pack : flexible_contain<Args...> {
 	using flexible_contain<Args...>::flexible_contain;
 
-	explicit constexpr pack() noexcept = default;
 	explicit constexpr pack(Args ...args) noexcept : flexible_contain<Args...>(args...) {}
 };
 
@@ -175,9 +174,6 @@ template<class ...InnerProtoStructs, class OuterProtoStruct>
 struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : flexible_contain<pack<InnerProtoStructs...>, OuterProtoStruct> {
 	using base = flexible_contain<pack<InnerProtoStructs...>, OuterProtoStruct>;
 	using base::base;
-
-	explicit constexpr compose_proto() noexcept = default;
-	explicit constexpr compose_proto(pack<InnerProtoStructs...> i, OuterProtoStruct o) noexcept : base(i, o) {}
 
 	static constexpr bool proto_preserves_layout = (OuterProtoStruct::proto_preserves_layout && ... && InnerProtoStructs::proto_preserves_layout);
 

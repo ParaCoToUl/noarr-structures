@@ -16,11 +16,11 @@ namespace noarr {
  */
 template<class T>
 struct scalar : strict_contain<> {
+	using strict_contain<>::strict_contain;
+
 	static constexpr char name[] = "scalar";
 	using params = struct_params<
 		type_param<T>>;
-
-	constexpr scalar() noexcept = default;
 
 	using signature = scalar_sig<T>;
 

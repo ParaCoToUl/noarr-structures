@@ -154,12 +154,6 @@ public:
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<class Sub>
-	[[nodiscard]]
-	constexpr auto strict_state_at(IsState auto state, std::size_t offset) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state), offset);
-	}
-
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {

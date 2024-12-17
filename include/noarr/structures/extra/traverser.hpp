@@ -82,7 +82,8 @@ using union_filter_accepted_t = typename union_filter_accepted<typename Struct::
 
 template<class ...Structs>
 struct union_t : strict_contain<Structs...> {
-	using strict_contain<Structs...>::strict_contain;
+	using base = strict_contain<Structs...>;
+	using base::base;
 
 	using is = std::index_sequence_for<Structs...>;
 	using signature = typename helpers::sig_union<typename to_struct<Structs>::type::signature...>::type;
@@ -109,7 +110,7 @@ public:
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard("returns the length of the first struct that accepts the dimension")]]
 	constexpr auto length(State state) const noexcept {
-		return strict_contain<Structs...>::template get<first_match<QDim>>().template length<QDim>(state);
+		return base::template get<first_match<QDim>>().template length<QDim>(state);
 	}
 };
 

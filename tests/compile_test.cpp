@@ -34,7 +34,7 @@ TEST_CASE("Examples for Noarr Structures", "[compile test]") {
 
 	const auto offset = (matrix | noarr::offset(noarr::idx<'r', 'c'>(row, col))) / sizeof(int);
 
-	REQUIRE(offset == &value - (int*)matrix.data());
+	REQUIRE(static_cast<std::ptrdiff_t>(offset) == &value - (int*)matrix.data());
 
 	{
 		auto matrix2 = noarr::bag(col_major_matrix, matrix.data());

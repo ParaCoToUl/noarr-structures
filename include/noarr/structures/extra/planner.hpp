@@ -244,11 +244,6 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 
 	static constexpr std::size_t num_structs = sizeof...(Structs);
 
-	template<class Union, class Order_, class Ending_>
-	[[nodiscard]]
-	constexpr planner_t(Union &&union_struct, Order_ &&order, Ending_ &&ending)
-		: base(std::forward<Union>(union_struct), std::forward<Order_>(order), std::forward<Ending_>(ending)) {}
-
 	[[nodiscard]]
 	constexpr union_struct get_union() const noexcept { return base::template get<0>(); }
 

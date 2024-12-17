@@ -51,6 +51,8 @@ constexpr auto cuda_stripe_idx(ValueType value) noexcept {
 
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth, class T>
 struct cuda_striped_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
+
 	static_assert(IsStruct<ElemType>, "The element type of cuda_striped must be a noarr structure.");
 
 	static constexpr char name[] = "cuda_striped_t";
@@ -60,9 +62,6 @@ struct cuda_striped_t : strict_contain<T> {
 		value_param<BankCount>,
 		value_param<BankWidth>,
 		structure_param<T>>;
-
-	constexpr cuda_striped_t() noexcept = default;
-	explicit constexpr cuda_striped_t(T sub_structure) noexcept : strict_contain<T>(sub_structure) {}
 
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
 	constexpr auto sub_state(IsState auto state) const noexcept { return state.template remove<cuda_stripe_index>(); }

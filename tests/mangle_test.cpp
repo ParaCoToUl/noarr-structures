@@ -33,7 +33,7 @@ TEST_CASE("Mangle expr", "[mangle]") {
 	std::string expected = "set_length_t<'y',vector_t<'y',set_length_t<'x',vector_t<'x',scalar<int32_t>>,std::integral_constant<"+sn+",42>>>,"+sn+">{vector_t<'y',set_length_t<'x',vector_t<'x',scalar<int32_t>>,std::integral_constant<"+sn+",42>>>{set_length_t<'x',vector_t<'x',scalar<int32_t>>,std::integral_constant<"+sn+",42>>{vector_t<'x',scalar<int32_t>>{scalar<int32_t>{},},lit<42>,},},"+sn+"{24},}";
 	std::string actual = noarr::mangle_expr<std::string>(structure);
 
-	auto structure_pretty = noarr::array_t<'x', 42, noarr::scalar<int>>() ^ noarr::vector<'y'>() ^ noarr::set_length<'y'>(24);
+	[[maybe_unused]] auto structure_pretty = noarr::array_t<'x', 42, noarr::scalar<int>>() ^ noarr::vector<'y'>() ^ noarr::set_length<'y'>(24);
 	static_assert(std::is_same_v<decltype(structure), decltype(structure_pretty)>, "Test sanity check");
 
 	REQUIRE(expected == actual);

@@ -11,13 +11,12 @@ namespace noarr {
 
 template<IsDim auto Dim, class T>
 struct bcast_t : strict_contain<T> {
+	using strict_contain<T>::strict_contain;
+
 	static constexpr char name[] = "bcast_t";
 	using params = struct_params<
 		dim_param<Dim>,
 		structure_param<T>>;
-
-	constexpr bcast_t() noexcept = default;
-	explicit constexpr bcast_t(T sub_structure) noexcept : strict_contain<T>(sub_structure) {}
 
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
