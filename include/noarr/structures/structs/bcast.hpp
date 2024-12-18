@@ -35,8 +35,7 @@ struct bcast_t : strict_contain<T> {
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr bool has_size() noexcept {
-		return State::template contains<length_in<Dim>> &&
-			sub_structure_t::template has_size<sub_state_t<State>>();
+		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
 	template<IsState State>
@@ -56,14 +55,10 @@ struct bcast_t : strict_contain<T> {
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		if constexpr(State::template contains<index_in<Dim>, length_in<Dim>>) {
-			return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-		} else {
-			return false;
-		}
+		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State> requires (HasSetIndex<State, Dim>)
+	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, bcast_t, State>()) {
@@ -85,7 +80,6 @@ struct bcast_t : strict_contain<T> {
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>()) {
 		if constexpr(QDim == Dim) {
-			static_assert(State::template contains<length_in<Dim>>, "This length has not been set yet");
 			return state.template get<length_in<Dim>>();
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));

@@ -101,7 +101,6 @@ struct tuple_t : strict_contain<TS...> {
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 			return sub_structure_t<index>::template has_length<QDim, sub_state_t<State>>();
 		} else {
-			static_assert(State::template contains<index_in<Dim>>, "Tuple indices must be set");
 			return false;
 		}
 	}

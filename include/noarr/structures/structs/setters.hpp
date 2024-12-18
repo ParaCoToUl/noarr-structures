@@ -94,8 +94,11 @@ public:
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
-		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+		if constexpr(QDim == Dim) {
+			return false;
+		} else {
+			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+		}
 	}
 
 	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
@@ -221,6 +224,7 @@ public:
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, set_length_t, State>()) {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length of a dimension twice");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -234,6 +238,7 @@ public:
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>()) {
+		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length of a dimension twice");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 

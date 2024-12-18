@@ -12,10 +12,23 @@
 
 namespace noarr {
 
+template<auto Dim, class State> requires IsDim<decltype(Dim)> && IsState<State>
+constexpr auto has_length() noexcept { return [](auto structure) constexpr noexcept {
+	return structure.template has_length<Dim, State>();
+}; }
+
 template<auto Dim> requires IsDim<decltype(Dim)>
 constexpr auto get_length(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
 	return structure.template length<Dim>(state);
 }; }
+
+/**
+ * @brief checks if a structure can be indexed in the dimension specified by the dimension name
+ *
+ * @tparam Dim: the dimension name of the desired structure
+ */
+template<auto Dim> requires IsDim<decltype(Dim)>
+constexpr auto has_length() noexcept { return has_length<Dim, state<>>(); }
 
 /**
  * @brief returns the number of indices in the structure specified by the dimension name
@@ -25,10 +38,27 @@ constexpr auto get_length(IsState auto state) noexcept { return [state](auto str
 template<auto Dim> requires IsDim<decltype(Dim)>
 constexpr auto get_length() noexcept { return get_length<Dim, state<>>(empty_state); }
 
+template<class SubStruct, IsState State>
+constexpr auto has_offset() noexcept { return []<class Struct>([[maybe_unused]] Struct structure) constexpr noexcept {
+	return has_offset_of<SubStruct, Struct, State>();
+}; }
+
 template<class SubStruct>
 constexpr auto offset(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
 	return offset_of<SubStruct>(structure, state);
 }; }
+
+template<IsState State>
+constexpr auto has_offset() noexcept { return []<class Struct>([[maybe_unused]] Struct structure) constexpr noexcept {
+	if constexpr(requires { scalar<scalar_t<Struct, State>>(); }) {
+		using type = scalar_t<Struct, State>;
+		return has_offset_of<scalar<type>, Struct, State>();
+	} else {
+		return false;
+	}
+}; }
+
+constexpr auto has_offset() noexcept { return has_offset<state<>>(); }
 
 template<class SubStruct, auto ...Dims, class ...Idxs> requires IsDimPack<decltype(Dims)...>
 constexpr auto offset(Idxs ...idxs) noexcept { return offset<SubStruct>(empty_state.with<index_in<Dims>...>(idxs...)); }
@@ -42,9 +72,19 @@ constexpr auto offset(State state) noexcept { return [state]<class Struct>(Struc
 template<auto ...Dims, class ...Idxs> requires IsDimPack<decltype(Dims)...>
 constexpr auto offset(Idxs ...idxs) noexcept { return offset(empty_state.with<index_in<Dims>...>(idxs...)); }
 
+template<IsState State>
+constexpr auto has_size() noexcept { return [](auto structure) constexpr noexcept {
+	return structure.template has_size<State>();
+}; }
+
 constexpr auto get_size(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {
 	return structure.size(state);
 }; }
+
+/**
+ * @brief checks if a structure has a size
+ */
+constexpr auto has_size() noexcept { return has_size<state<>>(); }
 
 /**
  * @brief returns the size (in bytes) of the structure

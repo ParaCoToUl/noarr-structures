@@ -44,40 +44,45 @@ struct dim_param {
 
 template<class StructInner, class StructOuter, IsState State>
 constexpr bool has_offset_of() noexcept {
-	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+	using struct_inner_t = std::remove_cvref_t<StructInner>;
+	using struct_outer_t = std::remove_cvref_t<StructOuter>;
+	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return true;
 	} else {
-		return StructOuter::template has_strict_offset_of<StructInner, State>();
+		return struct_outer_t::template has_strict_offset_of<struct_inner_t, State>();
 	}
 }
 
 template<class StructInner, class StructOuter>
 constexpr auto offset_of(StructOuter structure, IsState auto state) noexcept {
-	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+	using struct_inner_t = std::remove_cvref_t<StructInner>;
+	using struct_outer_t = std::remove_cvref_t<StructOuter>;
+	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return constexpr_arithmetic::make_const<0>();
 	} else {
-		static_assert(has_offset_of<StructInner, StructOuter, decltype(state)>());
-		if constexpr(has_offset_of<StructInner, StructOuter, decltype(state)>()) {
-			return structure.template strict_offset_of<StructInner>(state);
-		}
+		return structure.template strict_offset_of<struct_inner_t>(state);
 	}
 }
 
 template<class StructInner, class StructOuter>
 constexpr auto state_at(StructOuter structure, IsState auto state) noexcept {
-	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+	using struct_inner_t = std::remove_cvref_t<StructInner>;
+	using struct_outer_t = std::remove_cvref_t<StructOuter>;
+	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return state;
 	} else {
-		return structure.template strict_state_at<StructInner>(state);
+		return structure.template strict_state_at<struct_inner_t>(state);
 	}
 }
 
 template<class StructInner, class StructOuter, IsState State>
 constexpr bool has_state_at() noexcept {
-	if constexpr(std::is_same_v<StructInner, StructOuter>) {
+	using struct_inner_t = std::remove_cvref_t<StructInner>;
+	using struct_outer_t = std::remove_cvref_t<StructOuter>;
+	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return true;
 	} else {
-		return StructOuter::template has_strict_state_at<StructInner, State>();
+		return struct_outer_t::template has_strict_state_at<struct_inner_t, State>();
 	}
 }
 
