@@ -278,7 +278,7 @@ struct vector_t : strict_contain<T> {
 		}
 	}
 
-	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>()) {

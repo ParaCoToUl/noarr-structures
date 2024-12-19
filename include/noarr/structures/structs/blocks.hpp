@@ -83,6 +83,9 @@ private:
 		}
 	}
 
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
+
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
@@ -95,8 +98,6 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<T>()));
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -139,7 +140,9 @@ public:
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		if constexpr(QDim == DimMinor) {
-			if constexpr(State::template contains<length_in<DimMinor>>) {
+			if constexpr(State::template contains<index_in<DimMinor>>) {
+				return false;
+			} else if constexpr(State::template contains<length_in<DimMinor>>) {
 				static_assert(!State::template contains<length_in<DimMajor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the minor dimension");
 				return true;
 			} else if constexpr(State::template contains<length_in<DimMajor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
@@ -148,7 +151,9 @@ public:
 				return false;
 			}
 		} else if constexpr(QDim == DimMajor) {
-			if constexpr(State::template contains<length_in<DimMajor>>) {
+			if constexpr(State::template contains<index_in<DimMajor>>) {
+				return false;
+			} else if constexpr(State::template contains<length_in<DimMajor>>) {
 				static_assert(!State::template contains<length_in<DimMinor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the major dimension");
 				return true;
 			} else if constexpr(State::template contains<length_in<DimMinor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
@@ -248,8 +253,6 @@ private:
 		using ispresent_length = dynamic_arg_length;
 		using type = function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, function_sig<DimIsPresent, ispresent_length, typename Original::ret_sig>>>;
 	};
-public:
-	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
 	[[nodiscard]]
@@ -260,9 +263,9 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr auto sub_state(State state) noexcept {
+	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
 		using namespace constexpr_arithmetic;
-		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsPresent>>;
+		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
 		if constexpr(State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
 			const auto major_length = state.template get<length_in<DimMajor>>();
 			const auto minor_length = state.template get<length_in<DimMinor>>();
@@ -274,11 +277,22 @@ public:
 				return clean_state(state).template with<length_in<Dim>>(major_length*minor_length);
 			}
 		} else if constexpr(State::template contains<length_in<DimMinor>>) {
-			const auto minor_length = state.template get<length_in<DimMinor>>();
 			if constexpr(have_indices) {
+				const auto minor_length = state.template get<length_in<DimMinor>>();
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
 				return clean_state(state).template with<index_in<Dim>>(major_index*minor_length + minor_index);
+			} else {
+				return clean_state(state);
+			}
+		} else if constexpr(State::template contains<length_in<DimMajor>>) {
+			if constexpr(have_indices) {
+				const auto cs = clean_state(state);
+				const auto major_length = state.template get<length_in<DimMajor>>();
+				const auto minor_length = (sub_structure.template length<Dim>(cs) + major_length - make_const<1>()) / major_length;
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
+				return cs.template with<index_in<Dim>>(major_index*minor_length + minor_index);
 			} else {
 				return clean_state(state);
 			}
@@ -287,11 +301,21 @@ public:
 		}
 	}
 
-	using sub_structure_t = T;
-	template<IsState State>
-	using sub_state_t = decltype(sub_state(std::declval<State>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
+
+public:
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto sub_state(State state) const noexcept {
+		return sub_state_impl(state, sub_structure());
+	}
+
+	using sub_structure_t = T;
+	template<IsState State>
+	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<T>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -318,10 +342,8 @@ public:
 	static constexpr bool has_strict_offset_of() noexcept {
 		if constexpr (!State::template contains<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsPresent>>) {
 			return false;
-		} else if constexpr(State::template contains<length_in<DimMinor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
-			return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 		} else {
-			return false; // TODO: check if this is correct
+			return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 		}
 	}
 
@@ -335,21 +357,45 @@ public:
 	template<auto QDim, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		// static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimIsPresent) {
-			return State::template contains<length_in<DimMinor>, index_in<DimMajor>, index_in<DimMinor>>; // TODO: check if this is correct
-		} else if constexpr(QDim == DimMinor) {
-			return State::template contains<length_in<DimMinor>>;
-		} else if constexpr(QDim == DimMajor) {
-			if constexpr(State::template contains<length_in<DimMajor>>) {
-				return true;
-			} else if constexpr(State::template contains<length_in<DimMinor>>) {
-				return sub_structure_t::template has_length<Dim, sub_state_t<State>>();
+			if constexpr(!State::template contains<index_in<DimMajor>, index_in<DimMinor>>) {
+				return false;
 			} else {
-				return false; // TODO: check if this is correct
+				if constexpr(!State::template contains<length_in<DimMinor>> && !State::template contains<length_in<DimMajor>>) {
+					return false;
+				} else if constexpr(State::template contains<length_in<DimMinor>> && State::template contains<length_in<DimMajor>>) {
+					static_assert(!sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the minor dimension");
+					return true;
+				} else {
+					return sub_structure_t::template has_length<Dim, sub_state_t<State>>();
+				}
 			}
+		} else if constexpr(QDim == DimMinor) {
+			if constexpr(State::template contains<index_in<DimMinor>>) {
+				return false;
+			} else if constexpr(State::template contains<length_in<DimMinor>>) {
+				static_assert(!State::template contains<length_in<DimMajor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the minor dimension");
+				return true;
+			} else if constexpr(State::template contains<length_in<DimMajor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if constexpr(QDim == DimMajor) {
+			if constexpr(State::template contains<index_in<DimMajor>>) {
+				return false;
+			} else if constexpr(State::template contains<length_in<DimMajor>>) {
+				static_assert(!State::template contains<length_in<DimMinor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the major dimension");
+				return true;
+			} else if constexpr(State::template contains<length_in<DimMinor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if constexpr(QDim == Dim) {
+			return false;
 		} else {
-			return sub_structure_t::template has_length<QDim, sub_state_t<State>>(); // TODO: check if this is correct
+			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}
 	}
 
@@ -358,28 +404,40 @@ public:
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>()) {
 		using namespace constexpr_arithmetic;
-		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
 		if constexpr(QDim == DimIsPresent) {
-			const auto major_index = state.template get<index_in<DimMajor>>();
-			const auto minor_index = state.template get<index_in<DimMinor>>();
-			const auto minor_length = state.template get<length_in<DimMinor>>();
-			const auto full_length = sub_structure().template length<Dim>(sub_state(state));
-			const auto full_index = major_index * minor_length + minor_index;
-			return std::size_t(full_index < full_length);
+			if constexpr(State::template contains<length_in<DimMinor>>) {
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
+				const auto minor_length = state.template get<length_in<DimMinor>>();
+				const auto full_length = sub_structure().template length<Dim>(sub_state(state));
+				const auto full_index = major_index * minor_length + minor_index;
+				return std::size_t(full_index < full_length);
+			} else {
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
+				const auto major_length = state.template get<length_in<DimMajor>>();
+				const auto full_length = sub_structure().template length<Dim>(sub_state(state));
+				const auto minor_length = (full_length + major_length - make_const<1>()) / major_length;
+				const auto full_index = major_index * minor_length + minor_index;
+				return std::size_t(full_index < full_length);
+			}
 		} else if constexpr(QDim == DimMinor) {
-			return state.template get<length_in<DimMinor>>();
+			if constexpr(State::template contains<length_in<DimMinor>>) {
+				return state.template get<length_in<DimMinor>>();
+			} else {
+				const auto major_length = state.template get<length_in<DimMajor>>();
+				const auto full_length = sub_structure().template length<Dim>(clean_state(state));
+				return (full_length + major_length - make_const<1>()) / major_length;
+			}
 		} else if constexpr(QDim == DimMajor) {
 			if constexpr(State::template contains<length_in<DimMajor>>) {
 				return state.template get<length_in<DimMajor>>();
-			} else if constexpr(State::template contains<length_in<DimMinor>>) {
+			} else {
 				const auto minor_length = state.template get<length_in<DimMinor>>();
 				const auto full_length = sub_structure().template length<Dim>(sub_state(state));
 				return (full_length + minor_length - make_const<1>()) / minor_length;
-			} else {
-				static_assert(value_always_false<QDim>, "Length has not been set (and cannot be computed from the total size because block size has also not been set)");
 			}
 		} else {
-			static_assert(QDim != Dim, "Index in this dimension is overriden by a substructure");
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
 	}
@@ -457,8 +515,6 @@ private:
 		using border_type = function_sig<DimMajor, static_arg_length<1>, function_sig<DimMinor, typename dm::rem, typename Original::ret_sig>>;
 		using type = dep_function_sig<DimIsBorder, body_type, border_type>;
 	};
-public:
-	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	template<IsState State>
 	[[nodiscard]]
@@ -469,7 +525,6 @@ public:
 		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>();
 	}
 
-private:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto sub_state_impl(State state, T sub_structure, MinorLenT minor_length) noexcept {
@@ -489,7 +544,12 @@ private:
 		}
 	}
 
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
+
 public:
+	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
@@ -499,8 +559,6 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<sub_structure_t>(), std::declval<MinorLenT>()));
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	static constexpr bool has_size() noexcept {
@@ -662,8 +720,6 @@ private:
 
 		using type = typename Original::ret_sig::template replace<inner_dim_replacement, DimMinor, DimMajor>;
 	};
-public:
-	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
 
 	template<IsState State>
 	[[nodiscard]]
@@ -671,7 +727,6 @@ public:
 		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
 	}
 
-private:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
@@ -697,7 +752,12 @@ private:
 		}
 	}
 
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
+
 public:
+	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
+
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
@@ -707,8 +767,6 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<sub_structure_t>()));
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	static constexpr bool has_size() noexcept {
