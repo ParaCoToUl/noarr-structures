@@ -135,7 +135,7 @@ public:
 		}
 	}
 
-	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
@@ -294,7 +294,7 @@ public:
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
-	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>()) {
@@ -445,7 +445,7 @@ public:
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
-	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>()) {
@@ -597,7 +597,7 @@ public:
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
-	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>()) {
@@ -753,7 +753,7 @@ public:
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
-	template<auto QDim, IsState State> requires (QDim != Dim || HasNotSetIndex<State, QDim>) && IsDim<decltype(QDim)>
+	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
