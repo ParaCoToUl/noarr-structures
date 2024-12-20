@@ -35,7 +35,7 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(((void)IdxT::value, true), "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
+		static_assert(requires { IdxT::value; }, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
 		using type = typename original::template ret_sig<IdxT::value>;
 	};
 

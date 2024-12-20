@@ -72,7 +72,7 @@ struct tuple_t : strict_contain<TS...> {
 	static constexpr bool has_strict_offset_of() noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr(State::template contains<index_in<Dim>>) {
-			static_assert(((void)state_get_t<State, index_in<Dim>>::value, true), "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
+			static_assert(requires{ state_get_t<State, index_in<Dim>>::value; }, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 			return has_offset_of<Sub, sub_structure_t<index>, sub_state_t<State>>();
 		} else {

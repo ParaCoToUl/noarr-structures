@@ -90,7 +90,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr auto has_size() noexcept {
+	static constexpr bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 

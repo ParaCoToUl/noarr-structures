@@ -13,8 +13,8 @@
 namespace noarr {
 
 template<auto Dim, class State> requires IsDim<decltype(Dim)> && IsState<State>
-constexpr auto has_length() noexcept { return [](auto structure) constexpr noexcept {
-	return structure.template has_length<Dim, State>();
+constexpr auto has_length() noexcept { return []<class Struct>([[maybe_unused]] Struct structure) constexpr noexcept {
+	return Struct::template has_length<Dim, State>();
 }; }
 
 template<auto Dim> requires IsDim<decltype(Dim)>
@@ -73,8 +73,8 @@ template<auto ...Dims, class ...Idxs> requires IsDimPack<decltype(Dims)...>
 constexpr auto offset(Idxs ...idxs) noexcept { return offset(empty_state.with<index_in<Dims>...>(idxs...)); }
 
 template<IsState State>
-constexpr auto has_size() noexcept { return [](auto structure) constexpr noexcept {
-	return structure.template has_size<State>();
+constexpr auto has_size() noexcept { return []<class Struct>([[maybe_unused]] Struct structure) constexpr noexcept {
+	return Struct::template has_size<State>();
 }; }
 
 constexpr auto get_size(IsState auto state) noexcept { return [state](auto structure) constexpr noexcept {

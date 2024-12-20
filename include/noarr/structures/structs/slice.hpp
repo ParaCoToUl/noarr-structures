@@ -43,7 +43,7 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(((void)StartT::value, true), "Cannot shift a tuple dimension dynamically");
+		static_assert(requires{ StartT::value; }, "Cannot shift a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t len = sizeof...(RetSigs) - start;
 
@@ -156,10 +156,10 @@ public:
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub>
+	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_state_at(IsState auto state) const noexcept
-	requires (has_state_at<Sub, shift_t, decltype(state)>()) {
+	constexpr auto strict_state_at(State state) const noexcept
+	requires (has_state_at<Sub, shift_t, State>()) {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -215,8 +215,8 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(((void)StartT::value, true), "Cannot slice a tuple dimension dynamically");
-		static_assert(((void)LenT::value, true), "Cannot slice a tuple dimension dynamically");
+		static_assert(requires{ StartT::value; }, "Cannot slice a tuple dimension dynamically");
+		static_assert(requires{ LenT::value; }, "Cannot slice a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t len = LenT::value;
 
@@ -366,8 +366,8 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(((void)StartT::value, true), "Cannot span a tuple dimension dynamically");
-		static_assert(((void)EndT::value, true), "Cannot span a tuple dimension dynamically");
+		static_assert(requires{ StartT::value; }, "Cannot span a tuple dimension dynamically");
+		static_assert(requires{ EndT::value; }, "Cannot span a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t end = EndT::value;
 
@@ -517,8 +517,8 @@ private:
 	template<class ...RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(((void)StartT::value, true), "Cannot slice a tuple dimension dynamically");
-		static_assert(((void)StrideT::value, true), "Cannot slice a tuple dimension dynamically");
+		static_assert(requires{ StartT::value; }, "Cannot slice a tuple dimension dynamically");
+		static_assert(requires{ StrideT::value; }, "Cannot slice a tuple dimension dynamically");
 		static constexpr std::size_t start = StartT::value;
 		static constexpr std::size_t stride = StrideT::value;
 		static constexpr std::size_t sub_length = sizeof...(RetSigs);
@@ -765,10 +765,10 @@ public:
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub>
+	template<class Sub, IsState State>
 	[[nodiscard]]
-	constexpr auto strict_state_at(IsState auto state) const noexcept
-	requires (has_strict_state_at<Sub, decltype(state)>()) {
+	constexpr auto strict_state_at(State state) const noexcept
+	requires (has_state_at<Sub, reverse_t, State>()) {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
