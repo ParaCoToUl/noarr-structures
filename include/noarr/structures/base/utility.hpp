@@ -62,6 +62,12 @@ struct dim_sequence {
 
 	template<auto Dim> requires IsDim<decltype(Dim)>
 	static constexpr bool contains = (... || (Dim == Dims));
+
+	template<auto Dim> requires IsDim<decltype(Dim)>
+	using push_back = dim_sequence<Dims..., Dim>;
+
+	template<auto Dim> requires IsDim<decltype(Dim)>
+	using push_front = dim_sequence<Dim, Dims...>;
 };
 
 template<class T>
@@ -162,6 +168,9 @@ struct dim_sequence_restrict_impl<dim_sequence<>, Set> {
 template<auto v, class ...Branches>
 struct dim_tree {
 	static constexpr auto root_value = v;
+
+	template<std::size_t I> requires (I < sizeof...(Branches))
+	using branch = std::tuple_element_t<I, std::tuple<Branches...>>;
 };
 
 template<auto v, class Tree>
