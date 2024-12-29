@@ -84,7 +84,7 @@ constexpr auto lengths_like(Struct structure) noexcept {
 
 template<IsDim auto Dim, class Struct>
 constexpr auto vector_like(Struct structure, IsState auto state) noexcept {
-	return (vector<Dim>() ^ length_like<Dim>(structure, state));
+	return vector<Dim>() ^ length_like<Dim>(structure, state);
 }
 
 template<IsDim auto Dim, class Struct>
@@ -92,14 +92,29 @@ constexpr auto vector_like(Struct structure) noexcept {
 	return vector_like<Dim>(structure, empty_state);
 }
 
-template<auto ...Dims, class Struct> requires IsDimPack<decltype(Dims)...>
+template<auto Dim, auto ...Dims, class Struct> requires IsDimPack<decltype(Dim), decltype(Dims)...>
 constexpr auto vectors_like(Struct structure, IsState auto state) noexcept {
-	return (... ^ (vector_like<Dims>(structure, state)));
+	return (vector_like<Dim>(structure, state) ^ ... ^ vector_like<Dims>(structure, state));
 }
 
-template<auto ...Dims, class Struct> requires IsDimPack<decltype(Dims)...>
+template<auto Dim, auto ...Dims, class Struct> requires IsDimPack<decltype(Dim), decltype(Dims)...>
 constexpr auto vectors_like(Struct structure) noexcept {
-	return vectors_like<Dims...>(structure, empty_state);
+	return vectors_like<Dim, Dims...>(structure, empty_state);
+}
+
+template<class Struct>
+constexpr auto vectors_like(Struct structure, IsState auto state) noexcept {
+	using signature = typename to_struct<Struct>::type::signature;
+	using dim_seq = sig_dim_seq<signature>;
+
+	return [structure, state]<auto ...Dims>(dim_sequence<Dims...>) noexcept {
+		return vectors_like<Dims...>(structure, state);
+	}(dim_seq());
+}
+
+template<class Struct>
+constexpr auto vectors_like(Struct structure) noexcept {
+	return vectors_like<Struct>(structure, empty_state);
 }
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor = Dim>

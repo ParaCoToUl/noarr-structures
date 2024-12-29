@@ -29,6 +29,9 @@ TEST_CASE("Likes", "[shortcut]") {
 	// reconstruct sb from scalar:
 	REQUIRE(noarr_test::equal_data(sb, scalar ^ noarr::vectors_like<'x', 'y'>(sb)));
 
+	// reconstruct sb from scalar:
+	REQUIRE(noarr_test::equal_data(sb, scalar ^ noarr::vectors_like(sb)));
+
 	// reconstruct sb from sb_:
 	auto re_sb = sb_ ^ noarr::lengths_like<'x', 'y'>(sb);
 	STATIC_REQUIRE(std::is_same_v<decltype(sb)::signature, decltype(re_sb)::signature>);
@@ -63,6 +66,9 @@ TEST_CASE("Likes with state", "[shortcut]") {
 
 	// reconstruct sb from scalar:
 	REQUIRE(noarr_test::equal_data(sb, scalar ^ noarr::vectors_like<'x', 'y'>(vector, state)));
+
+	// reconstruct sb from scalar:
+	REQUIRE(noarr_test::equal_data(sb, scalar ^ noarr::vectors_like(vector, state)));
 
 	// reconstruct sb from sb_:
 	auto re_sb = sb_ ^ noarr::lengths_like<'x', 'y'>(vector, state);
