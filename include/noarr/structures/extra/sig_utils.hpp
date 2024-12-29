@@ -56,6 +56,33 @@ struct sig_dim_tree_impl<scalar_sig<ValueType>> {
 	using type = dim_sequence<>;
 };
 
+template<class Signature>
+struct sig_dim_seq_impl;
+
+template<auto Dim, class ArgLength, class RetSig> requires IsDim<decltype(Dim)>
+struct sig_dim_seq_impl<function_sig<Dim, ArgLength, RetSig>> {
+	using ret_type = typename sig_dim_seq_impl<RetSig>::type;
+	using type = typename ret_type::template push_back<Dim>;
+};
+
+template<auto Dim, class RetSigs> requires IsDim<decltype(Dim)>
+struct sig_dim_seq_impl<dep_function_sig<Dim, RetSigs>> {
+	using ret_type = typename sig_dim_seq_impl<RetSigs>::type;
+	using type = typename ret_type::template push_back<Dim>;
+};
+
+template<auto Dim, class RetSig, class ...RetSigs> requires IsDim<decltype(Dim)>
+struct sig_dim_seq_impl<dep_function_sig<Dim, RetSig, RetSigs...>> {
+	static_assert(always_false<sig_dim_seq_impl>, "Dependent function signatures are not supported for this operation");
+	using ret_type = typename sig_dim_seq_impl<RetSig>::type;
+	using type = typename ret_type::template push_back<Dim>;
+};
+
+template<class ValueType>
+struct sig_dim_seq_impl<scalar_sig<ValueType>> {
+	using type = dim_sequence<>;
+};
+
 } // namespace helpers
 
 template<auto QDim, IsState State, class Signature> requires IsDim<decltype(QDim)>
@@ -63,6 +90,9 @@ using sig_find_dim = typename helpers::sig_find_dim_impl<QDim, State, Signature>
 
 template<class Signature>
 using sig_dim_tree = typename helpers::sig_dim_tree_impl<Signature>::type;
+
+template<class Signature>
+using sig_dim_seq = typename helpers::sig_dim_seq_impl<Signature>::type;
 
 } // namespace noarr
 
