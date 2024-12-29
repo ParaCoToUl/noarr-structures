@@ -87,7 +87,7 @@ struct dim_sequence_contains<dim_sequence<Dims...>> {
 
 struct dim_accepter {
 	template<auto Dim> requires IsDim<decltype(Dim)>
-	static constexpr bool value = is_dim_v<decltype(Dim)>;
+	static constexpr bool value = true;
 };
 
 struct dim_identity_mapper {

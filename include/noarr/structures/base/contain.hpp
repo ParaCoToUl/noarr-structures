@@ -174,13 +174,17 @@ constexpr auto contain_cat(TS &&...ts) noexcept {
 
 } // namespace noarr
 
+namespace std {
+
 template<std::size_t I, class... TS>
-struct std::tuple_element<I, noarr::helpers::contain<TS...>> {
+struct tuple_element<I, noarr::helpers::contain<TS...>> {
 	using type = decltype(std::declval<noarr::helpers::contain<TS...>>().template get<I>());
 };
 
 template<class... TS>
-struct std::tuple_size<noarr::helpers::contain<TS...>>
+struct tuple_size<noarr::helpers::contain<TS...>>
 	: std::integral_constant<std::size_t, sizeof...(TS)> { };
+
+} // namespace std
 
 #endif // NOARR_STRUCTURES_CONTAIN_HPP
