@@ -209,7 +209,7 @@ private:
 		if constexpr(dim_sig::dependent) {
 			for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence_for<Branches...>());
 		} else {
-			std::size_t len = top_struct().template length<Dim>(state);
+			const std::size_t len = top_struct().template length<Dim>(state);
 			for(std::size_t i = 0; i < len; i++) {
 				for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(i));
 			}

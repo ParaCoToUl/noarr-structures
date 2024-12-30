@@ -173,9 +173,9 @@ public:
 	}
 
 	static __device__ inline helpers::simple_cg_t current_stripe_cg() noexcept {
-		std::size_t stripe_index = threadIdx.x % NumStripes;
-		std::size_t num_threads_in_stripe = (blockDim.x + NumStripes - stripe_index - 1) / NumStripes;
-		std::size_t thread_rank_in_stripe = threadIdx.x / NumStripes;
+		const std::size_t stripe_index = threadIdx.x % NumStripes;
+		const std::size_t num_threads_in_stripe = (blockDim.x + NumStripes - stripe_index - 1) / NumStripes;
+		const std::size_t thread_rank_in_stripe = threadIdx.x / NumStripes;
 		return helpers::simple_cg_t{thread_rank_in_stripe, num_threads_in_stripe};
 	}
 
@@ -188,7 +188,7 @@ private:
 			const auto offset_of_stripe = state.template get<cuda_stripe_index>() * make_const<stripe_padded_width>();
 			return offset_of_period + offset_of_stripe;
 		} else {
-			std::size_t offset_of_stripe = (threadIdx.x % NumStripes) * stripe_padded_width;
+			const std::size_t offset_of_stripe = (threadIdx.x % NumStripes) * stripe_padded_width;
 			return offset_of_period + offset_of_stripe;
 		}
 	}
