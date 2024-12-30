@@ -102,8 +102,8 @@ constexpr auto vectors_like(Struct structure) noexcept {
 	return vectors_like<Dim, Dims...>(structure, empty_state);
 }
 
-template<class Struct>
-constexpr auto vectors_like(Struct structure, IsState auto state) noexcept {
+template<class Struct, class State> requires IsState<State>
+constexpr auto vectors_like(Struct structure, State state) noexcept {
 	using signature = typename to_struct<Struct>::type::signature;
 	using dim_seq = sig_dim_seq<signature>;
 
