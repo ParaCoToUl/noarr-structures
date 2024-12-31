@@ -110,6 +110,27 @@ using sig_dim_tree = typename helpers::sig_dim_tree_impl<Signature>::type;
 template<class Signature>
 using sig_dim_seq = typename helpers::sig_dim_seq_impl<Signature>::type;
 
+template<class OriginalSig>
+struct sig_remove_first {
+	using type = typename OriginalSig::ret_sig;
+};
+
+template<auto Dim, class ArgLength, class RetSig>
+struct sig_remove_first<function_sig<Dim, ArgLength, RetSig>> {
+	using type = RetSig;
+};
+
+template<auto Dim, class RetSigs>
+struct sig_remove_first<dep_function_sig<Dim, RetSigs>> {
+	using type = RetSigs;
+};
+
+template<auto Dim, class RetSig, class ...RetSigs>
+struct sig_remove_first<dep_function_sig<Dim, RetSig, RetSigs...>> {
+	static_assert(always_false<sig_remove_first>, "Dependent function signatures are not supported for this operation");
+	using type = RetSig;
+};
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_SIG_UTILS_HPP

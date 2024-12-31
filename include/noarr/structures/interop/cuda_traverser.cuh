@@ -52,15 +52,7 @@ struct cuda_fix_t : strict_contain<T> {
 
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
-private:
-	template<class Original>
-	struct dim_replacement {
-		static_assert(!Original::dependent, "Tuple index must be set statically");
-		using type = typename Original::ret_sig;
-	};
-
-public:
-	using signature = typename T::signature::template replace<dim_replacement, Dim>;
+	using signature = typename T::signature::template replace<sig_remove_first, Dim>;
 
 	[[nodiscard]]
 	static __device__ inline auto sub_state(IsState auto state) noexcept {
