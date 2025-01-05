@@ -144,9 +144,9 @@ struct mangle_expr_helpers {
 
 	template<class String, class U>
 	static constexpr void append_int(String &out, bool neg, U u) {
-		constexpr auto maxsz = sizeof(U) * 3 + 1; // at most 3 digits per byte + sign
-		char buff[maxsz];
-		char *ptr = buff + maxsz;
+		constexpr auto max_size = sizeof(U) * 3 + 1; // at most 3 digits per byte + sign
+		char buff[max_size];
+		char *ptr = buff + max_size;
 		std::size_t sz = 0;
 		do {
 			*--ptr = '0' + u % 10;

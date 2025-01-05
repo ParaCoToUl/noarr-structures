@@ -3,7 +3,6 @@
 
 #include <algorithm>
 #include <execution>
-#include <utility>
 
 #include "../interop/traverser_iter.hpp"
 #include "../interop/planner_iter.hpp"

@@ -1,9 +1,9 @@
 #ifndef NOARR_TEST_COUNTER_HPP
 #define NOARR_TEST_COUNTER_HPP
 
-namespace noarr_test {
-
 #include <exception>
+
+namespace noarr_test {
 
 struct test_counter_t {
 	static inline int test_failure = 0;

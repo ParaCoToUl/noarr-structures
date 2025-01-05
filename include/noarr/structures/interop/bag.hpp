@@ -8,7 +8,6 @@
 
 #include "../base/contain.hpp"
 #include "../base/state.hpp"
-#include "../extra/struct_traits.hpp"
 #include "../extra/to_struct.hpp"
 #include "../extra/funcs.hpp"
 

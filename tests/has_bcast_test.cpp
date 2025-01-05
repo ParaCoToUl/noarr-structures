@@ -1,9 +1,6 @@
 #include <noarr_test/macros.hpp>
 #include <noarr_test/defs.hpp>
 
-#include <cstddef>
-#include <type_traits>
-
 #include <noarr/structures_extended.hpp>
 
 using namespace noarr;

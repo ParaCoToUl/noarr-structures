@@ -1,10 +1,8 @@
 #ifndef NOARR_TEST_DEFS_HPP
 #define NOARR_TEST_DEFS_HPP
 
-#include <bit>
 #include <cstring>
 #include <type_traits>
-#include <utility>
 
 namespace noarr_test {
 

@@ -175,7 +175,7 @@ struct matrix
 	const int& at(std::size_t x_, std::size_t y_) const { return ary[x_ + y_ * x]; }
 };
 
-matrix get_clasic_matrix(std::size_t x, std::size_t y)
+matrix get_classic_matrix(std::size_t x, std::size_t y)
 {
 	const std::size_t length = x * y;
 	std::vector<int> ary;
@@ -208,7 +208,7 @@ matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 	std::size_t x_size = matrix1.template length<'x'>();
 	std::size_t y_size = matrix1.template length<'y'>();
 
-	matrix m = get_clasic_matrix(x_size, y_size);
+	matrix m = get_classic_matrix(x_size, y_size);
 
 	for (std::size_t i = 0; i < x_size; i++)
 		for (std::size_t j = 0; j < y_size; j++)
@@ -218,7 +218,7 @@ matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 }
 
 template<typename Matrix1>
-void clasic_matrix_to_noarr(matrix& m1, Matrix1& matrix1)
+void classic_matrix_to_noarr(matrix& m1, Matrix1& matrix1)
 {
 	std::size_t x_size = matrix1.template length<'x'>();
 	std::size_t y_size = matrix1.template length<'y'>();
@@ -228,7 +228,7 @@ void clasic_matrix_to_noarr(matrix& m1, Matrix1& matrix1)
 			matrix1.template at<'x', 'y'>(i, j) = m1.at(i, j);
 }
 
-void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
+void classic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 {
 	std::size_t x1_size = m1.x;
 	std::size_t y1_size = m1.y;
@@ -260,12 +260,12 @@ void clasic_matrix_multiply(matrix& m1, matrix& m2, matrix& m3)
 	}
 }
 
-TEST_CASE("Small matrix multimplication Rows", "[Small matrix multimplication Rows]")
+TEST_CASE("Small matrix multiplication Rows", "[Small matrix multiplication Rows]")
 {
 	matrix_simple_multiply_template_test_runtime(MatrixDataLayout::Rows, 10);
 }
 
-TEST_CASE("Small matrix multimplication Columns", "[Small matrix multimplication Columns]")
+TEST_CASE("Small matrix multiplication Columns", "[Small matrix multiplication Columns]")
 {
 	matrix_simple_multiply_template_test_runtime(MatrixDataLayout::Columns, 10);
 }

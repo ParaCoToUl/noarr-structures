@@ -1,7 +1,7 @@
 #include <noarr_test/macros.hpp>
 
-#include <iterator>
 #include <concepts>
+#include <iterator>
 #include <ranges>
 
 #include <noarr/structures_extended.hpp>

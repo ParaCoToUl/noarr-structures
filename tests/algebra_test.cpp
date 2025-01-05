@@ -44,7 +44,7 @@ TEST_CASE("Simple tuple algebra", "[algebra]") {
 	REQUIRE(noarr_test::equal_data(testee2, reference2));
 }
 
-TEST_CASE("Algebra preseves bitwise xor", "[algebra]") {
+TEST_CASE("Algebra preserves bitwise xor", "[algebra]") {
 	auto num = 3U ^ 12U;
 
 	REQUIRE(num == 15U);
