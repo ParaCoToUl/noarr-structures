@@ -420,9 +420,10 @@ public:
 	static_assert(assertion<>::success);
 	using signature = typename helpers::rename_sig<internal, external, typename T::signature>::type;
 
+	template<IsState State>
 	[[nodiscard]]
-	static constexpr auto sub_state(IsState auto state) noexcept {
-		return rename_state::convert(state.template filter<filter>());
+	static constexpr auto sub_state(State state) noexcept {
+		return rename_state::convert(state.items_restrict(typename helpers::state_filter_items<typename State::items_pack, filter>::result()));
 	}
 
 	using sub_structure_t = T;

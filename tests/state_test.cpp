@@ -31,6 +31,10 @@ TEST_CASE("State shortcuts", "[state]") {
 	REQUIRE(s2.get<noarr::index_in<'x'>>() == 05);
 	REQUIRE(s2.get<noarr::index_in<'y'>>() == 15);
 
+	CHECK(s2 != noarr::idx<'x', 'y'>(05, 15)); // sanity check for the following REQUIRE
+	REQUIRE(noarr::filter_indices<'x', 'y'>(s2) == noarr::idx<'x', 'y'>(05, 15));
+	REQUIRE(noarr::filter_indices<'y', 'x'>(s2) == noarr::idx<'x', 'y'>(05, 15)); // order doesn't matter
+
 	auto [s2x, s2y] = noarr::get_indices<'x', 'y'>(s2);
 
 	REQUIRE(noarr::get_index<'x'>(s2) == 05);

@@ -198,10 +198,18 @@ struct state : strict_contain<typename StateItems::value_type...> {
 		return items_restrict(typename helpers::state_remove_items<items_pack, Tags...>::result());
 	}
 
-	template<class Pred>
+private:
+		template<class ...Tags>
+		struct filter_predicate {
+			template<class Tag>
+			static constexpr bool value = (... || std::is_same_v<Tag, Tags>);
+		};
+
+public:
+	template<class ...Tags> requires IsTagPack<Tags...>
 	[[nodiscard]]
 	constexpr auto filter() const noexcept {
-		return items_restrict(typename helpers::state_filter_items<items_pack, Pred>::result());
+		return items_restrict(typename helpers::state_filter_items<items_pack, filter_predicate<Tags...>>::result());
 	}
 
 	template<class ...Tags, class ...ValueTypes> requires IsTagPack<Tags...>

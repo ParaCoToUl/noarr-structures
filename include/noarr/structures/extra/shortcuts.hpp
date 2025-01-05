@@ -159,6 +159,11 @@ constexpr auto get_indices(ToState auto state) noexcept {
 	return std::make_tuple(convert_to_state(state).template get<index_in<Dims>>()...);
 }
 
+template<auto ...Dims> requires IsDimPack<decltype(Dims)...>
+constexpr auto filter_indices(ToState auto state) noexcept {
+	return convert_to_state(state).template filter<index_in<Dims>...>();
+}
+
 template<auto ...Dims, class ...ValueType> requires IsDimPack<decltype(Dims)...>
 constexpr auto idx(ValueType ...value) noexcept {
 	return state<state_item<index_in<Dims>, good_index_t<ValueType>>...>(value...);
