@@ -7,14 +7,31 @@ namespace noarr {
 
 namespace helpers {
 
-struct cuda_block_x  { static __device__ inline auto idx() noexcept { return blockIdx.x; } };
-struct cuda_block_y  { static __device__ inline auto idx() noexcept { return blockIdx.y; } };
-struct cuda_block_z  { static __device__ inline auto idx() noexcept { return blockIdx.z; } };
-struct cuda_thread_x { static __device__ inline auto idx() noexcept { return threadIdx.x; } };
-struct cuda_thread_y { static __device__ inline auto idx() noexcept { return threadIdx.y; } };
-struct cuda_thread_z { static __device__ inline auto idx() noexcept { return threadIdx.z; } };
+struct cuda_block_x {
+	static __device__ inline auto idx() noexcept { return blockIdx.x; }
+};
 
-template<class ...CudaDims>
+struct cuda_block_y {
+	static __device__ inline auto idx() noexcept { return blockIdx.y; }
+};
+
+struct cuda_block_z {
+	static __device__ inline auto idx() noexcept { return blockIdx.z; }
+};
+
+struct cuda_thread_x {
+	static __device__ inline auto idx() noexcept { return threadIdx.x; }
+};
+
+struct cuda_thread_y {
+	static __device__ inline auto idx() noexcept { return threadIdx.y; }
+};
+
+struct cuda_thread_z {
+	static __device__ inline auto idx() noexcept { return threadIdx.z; }
+};
+
+template<class... CudaDims>
 struct cuda_dims_pack;
 
 using cuda_bx = cuda_dims_pack<cuda_block_x>;
@@ -31,10 +48,7 @@ struct cuda_fix_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "cuda_fix_t";
-	using params = struct_params<
-		dim_param<Dim>,
-		structure_param<T>,
-		type_param<CudaDim>>;
+	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<CudaDim>>;
 
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
@@ -44,6 +58,7 @@ private:
 		static_assert(!Original::dependent, "Tuple index must be set statically");
 		using type = typename Original::ret_sig;
 	};
+
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
@@ -65,14 +80,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	__device__ inline std::size_t size(State state) const noexcept
-	requires(has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -85,11 +102,13 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	__device__ inline std::size_t strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, cuda_fix_t, State>()) {
+	requires (has_offset_of<Sub, cuda_fix_t, State>())
+	{
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
@@ -111,7 +130,8 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	__device__ inline auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, cuda_fix_t, State>()) {
+	requires (has_state_at<Sub, cuda_fix_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -136,15 +156,17 @@ struct cuda_fix_pair_proto {
 template<class Struct, class Order, class DimsB, class DimsT, class CudaDimsB, class CudaDimsT>
 struct cuda_traverser_t;
 
-template<auto ...DimsB, auto ...DimsT, class ...CudaDimsB, class ...CudaDimsT, class Struct, class Order>
-struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<DimsT...>, helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>> : traverser_t<Struct, Order> {
+template<auto... DimsB, auto... DimsT, class... CudaDimsB, class... CudaDimsT, class Struct, class Order>
+struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<DimsT...>,
+                        helpers::cuda_dims_pack<CudaDimsB...>, helpers::cuda_dims_pack<CudaDimsT...>>
+	: traverser_t<Struct, Order> {
 	using base = traverser_t<Struct, Order>;
 	using base::base;
 
 	explicit constexpr cuda_traverser_t(traverser_t<Struct, Order> t) noexcept : base(t) {}
 
-	using base::get_struct;
 	using base::get_order;
+	using base::get_struct;
 
 	[[nodiscard]]
 	static constexpr auto get_fixes() {
@@ -170,14 +192,15 @@ struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<Dims
 	}
 
 	[[nodiscard]]
-	constexpr auto inner() const noexcept
-		-> traverser_t<Struct, decltype(get_order() ^ get_fixes())> {
+	constexpr auto inner() const noexcept -> traverser_t<Struct, decltype(get_order() ^ get_fixes())> {
 		return traverser_t<Struct, decltype(get_order() ^ get_fixes())>(get_struct(), get_order() ^ get_fixes());
 	}
 
 #ifdef __CUDACC__
-	template<class ...Values>
-	constexpr void simple_run(void kernel(traverser_t<Struct, decltype(std::declval<base>().get_order() ^ get_fixes())>, Values...), uint shm_size, Values ...values) const noexcept {
+	template<class... Values>
+	constexpr void simple_run(void kernel(traverser_t<Struct, decltype(std::declval<base>().get_order() ^ get_fixes())>,
+	                                      Values...),
+	                          uint shm_size, Values... values) const noexcept {
 		kernel<<<grid_dim(), block_dim(), shm_size>>>(inner(), values...);
 	}
 #endif
@@ -195,12 +218,15 @@ constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
 
 template<IsDim auto DimBX, IsDim auto DimTX, IsDim auto DimBY, IsDim auto DimTY, class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
-	return cuda_traverser<dim_sequence<DimBX, DimBY>, dim_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(t);
+	return cuda_traverser<dim_sequence<DimBX, DimBY>, dim_sequence<DimTX, DimTY>, helpers::cuda_bxy, helpers::cuda_txy>(
+		t);
 }
 
-template<IsDim auto DimBX, IsDim auto DimTX, IsDim auto DimBY, IsDim auto DimTY, IsDim auto DimBZ, IsDim auto DimTZ, class Struct, class Order>
+template<IsDim auto DimBX, IsDim auto DimTX, IsDim auto DimBY, IsDim auto DimTY, IsDim auto DimBZ, IsDim auto DimTZ,
+         class Struct, class Order>
 constexpr auto cuda_threads(traverser_t<Struct, Order> t) noexcept {
-	return cuda_traverser<dim_sequence<DimBX, DimBY, DimBZ>, dim_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz, helpers::cuda_txyz>(t);
+	return cuda_traverser<dim_sequence<DimBX, DimBY, DimBZ>, dim_sequence<DimTX, DimTY, DimTZ>, helpers::cuda_bxyz,
+	                      helpers::cuda_txyz>(t);
 }
 
 } // namespace noarr

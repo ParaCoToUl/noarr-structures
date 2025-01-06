@@ -6,9 +6,9 @@
 #include <utility>
 
 #include "contain.hpp"
-#include "utility.hpp"
 #include "signature.hpp"
 #include "state.hpp"
+#include "utility.hpp"
 
 namespace noarr {
 
@@ -17,7 +17,7 @@ namespace noarr {
  *
  * @tparam Params: template parameters of the structure
  */
-template<class ...Params>
+template<class... Params>
 struct struct_params : flexible_contain<Params...> {
 	using flexible_contain<Params...>::flexible_contain;
 };
@@ -37,7 +37,8 @@ struct value_param {
 	static constexpr auto value = V;
 };
 
-template<auto Dim> requires IsDim<decltype(Dim)>
+template<auto Dim>
+requires IsDim<decltype(Dim)>
 struct dim_param {
 	static constexpr auto value = Dim;
 };
@@ -46,7 +47,7 @@ template<class StructInner, class StructOuter, IsState State>
 constexpr bool has_offset_of() noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
-	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
+	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return true;
 	} else {
 		return struct_outer_t::template has_strict_offset_of<struct_inner_t, State>();
@@ -57,7 +58,7 @@ template<class StructInner, class StructOuter>
 constexpr auto offset_of(StructOuter structure, IsState auto state) noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
-	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
+	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return constexpr_arithmetic::make_const<0>();
 	} else {
 		return structure.template strict_offset_of<struct_inner_t>(state);
@@ -68,7 +69,7 @@ template<class StructInner, class StructOuter>
 constexpr auto state_at(StructOuter structure, IsState auto state) noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
-	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
+	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return state;
 	} else {
 		return structure.template strict_state_at<struct_inner_t>(state);
@@ -79,22 +80,22 @@ template<class StructInner, class StructOuter, IsState State>
 constexpr bool has_state_at() noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
-	if constexpr(std::is_same_v<struct_inner_t, struct_outer_t>) {
+	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return true;
 	} else {
 		return struct_outer_t::template has_strict_state_at<struct_inner_t, State>();
 	}
 }
 
-template<class ...Args>
+template<class... Args>
 struct pack : flexible_contain<Args...> {
 	using flexible_contain<Args...>::flexible_contain;
 
-	explicit constexpr pack(Args ...args) noexcept : flexible_contain<Args...>(args...) {}
+	explicit constexpr pack(Args... args) noexcept : flexible_contain<Args...>(args...) {}
 };
 
 // this is for the consistency of packs of packs
-template<class ...Args>
+template<class... Args>
 pack(pack<Args...>) -> pack<pack<Args...>>;
 
 template<class ProtoStruct>
@@ -102,6 +103,7 @@ struct to_each : ProtoStruct {
 	using ProtoStruct::ProtoStruct;
 
 	explicit constexpr to_each() noexcept = default;
+
 	explicit constexpr to_each(ProtoStruct p) noexcept : ProtoStruct(p) {}
 };
 
@@ -131,22 +133,24 @@ struct make_proto_impl : F {
 	static constexpr bool proto_preserves_layout = PreservesLayout;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return (*this)(s); }
-
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return (*this)(s);
+	}
 };
 
-template<class ...Structs, class ProtoStruct, std::size_t ...Indices> requires IsProtoStruct<ProtoStruct>
-constexpr auto pass_pack(pack<Structs...> s, ProtoStruct p, [[maybe_unused]] std::index_sequence<Indices...> is) noexcept {
+template<class... Structs, class ProtoStruct, std::size_t... Indices>
+requires IsProtoStruct<ProtoStruct>
+constexpr auto pass_pack(pack<Structs...> s, ProtoStruct p, std::index_sequence<Indices...> /*unused*/) noexcept {
 	return p.instantiate_and_construct(s.template get<Indices>()...);
 }
 
-template<class Arg, class ...Args, std::size_t ...Indices>
-constexpr auto pass_pack(Arg s, pack<Args...> p, [[maybe_unused]] std::index_sequence<Indices...> is) noexcept {
+template<class Arg, class... Args, std::size_t... Indices>
+constexpr auto pass_pack(Arg s, pack<Args...> p, std::index_sequence<Indices...> /*unused*/) noexcept {
 	return pack(s ^ p.template get<Indices>()...);
 }
 
-template<class ...Structs, class Arg, std::size_t ...Indices>
-constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, [[maybe_unused]] std::index_sequence<Indices...> is) noexcept {
+template<class... Structs, class Arg, std::size_t... Indices>
+constexpr auto pass_pack(pack<Structs...> s, to_each<Arg> p, std::index_sequence<Indices...> /*unused*/) noexcept {
 	return pack(s.template get<Indices>() ^ p...);
 }
 
@@ -161,27 +165,30 @@ constexpr auto make_proto(F f) noexcept {
 	return helpers::make_proto_impl<F, PreservesLayout>(f);
 }
 
-template<class Struct, class ProtoStruct> requires (IsStruct<Struct> && IsProtoStruct<ProtoStruct>)
+template<class Struct, class ProtoStruct>
+requires (IsStruct<Struct> && IsProtoStruct<ProtoStruct>)
 [[nodiscard("Constructs a new structure")]]
-constexpr auto operator ^(Struct s, ProtoStruct p) noexcept {
+constexpr auto operator^(Struct s, ProtoStruct p) noexcept {
 	return p.instantiate_and_construct(s);
 }
 
-template<class ...Structs, class ProtoStruct> requires (IsProtoStruct<ProtoStruct> && ... && IsStruct<Structs>)
+template<class... Structs, class ProtoStruct>
+requires (IsProtoStruct<ProtoStruct> && ... && IsStruct<Structs>)
 [[nodiscard("Constructs a new structure")]]
-constexpr auto operator ^(pack<Structs...> s, ProtoStruct p) noexcept {
+constexpr auto operator^(pack<Structs...> s, ProtoStruct p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
 
-template<class Arg, class ...Args>
+template<class Arg, class... Args>
 [[nodiscard("Constructs a new pack of structures")]]
-constexpr auto operator ^(Arg s, pack<Args...> p) noexcept {
+constexpr auto operator^(Arg s, pack<Args...> p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Args)>());
 }
 
-template<class ...Structs, class Arg> requires (... && IsStruct<Structs>)
+template<class... Structs, class Arg>
+requires (... && IsStruct<Structs>)
 [[nodiscard("Constructs a new pack of structures")]]
-constexpr auto operator ^(pack<Structs...> s, to_each<Arg> p) noexcept {
+constexpr auto operator^(pack<Structs...> s, to_each<Arg> p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
 
@@ -190,18 +197,22 @@ struct neutral_proto {
 
 	template<class Struct>
 	[[nodiscard("Constructs a new proto-structure")]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return s; }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return s;
+	}
 };
 
 template<class InnerProtoStructPack, class OuterProtoStruct>
 struct compose_proto;
 
-template<class ...InnerProtoStructs, class OuterProtoStruct>
-struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : flexible_contain<pack<InnerProtoStructs...>, OuterProtoStruct> {
+template<class... InnerProtoStructs, class OuterProtoStruct>
+struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct>
+	: flexible_contain<pack<InnerProtoStructs...>, OuterProtoStruct> {
 	using base = flexible_contain<pack<InnerProtoStructs...>, OuterProtoStruct>;
 	using base::base;
 
-	static constexpr bool proto_preserves_layout = (OuterProtoStruct::proto_preserves_layout && ... && InnerProtoStructs::proto_preserves_layout);
+	static constexpr bool proto_preserves_layout =
+		(OuterProtoStruct::proto_preserves_layout && ... && InnerProtoStructs::proto_preserves_layout);
 
 	template<class Struct>
 	[[nodiscard("Constructs a new proto-structure")]]
@@ -209,22 +220,27 @@ struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> : flexible_co
 		return s ^ this->template get<0>() ^ this->template get<1>();
 	}
 
-	template<class ...Structs> requires (sizeof...(Structs) != 1)
+	template<class... Structs>
+	requires (sizeof...(Structs) != 1)
 	[[nodiscard("Constructs a new proto-structure")]]
-	constexpr auto instantiate_and_construct(Structs ...s) const noexcept {
+	constexpr auto instantiate_and_construct(Structs... s) const noexcept {
 		return pack(s...) ^ this->template get<0>() ^ this->template get<1>();
 	}
 };
 
-template<class InnerProtoStruct, class OuterProtoStruct> requires (IsProtoStruct<InnerProtoStruct> && IsProtoStruct<OuterProtoStruct>)
+template<class InnerProtoStruct, class OuterProtoStruct>
+requires (IsProtoStruct<InnerProtoStruct> && IsProtoStruct<OuterProtoStruct>)
 [[nodiscard("Constructs a new proto-structure")]]
-constexpr compose_proto<pack<InnerProtoStruct>, OuterProtoStruct> operator ^(InnerProtoStruct i, OuterProtoStruct o) noexcept {
+constexpr compose_proto<pack<InnerProtoStruct>, OuterProtoStruct> operator^(InnerProtoStruct i,
+                                                                            OuterProtoStruct o) noexcept {
 	return compose_proto<pack<InnerProtoStruct>, OuterProtoStruct>(pack(i), o);
 }
 
-template<class ...InnerProtoStructs, class OuterProtoStruct> requires (IsProtoStruct<OuterProtoStruct> && ... && IsProtoStruct<InnerProtoStructs>)
+template<class... InnerProtoStructs, class OuterProtoStruct>
+requires (IsProtoStruct<OuterProtoStruct> && ... && IsProtoStruct<InnerProtoStructs>)
 [[nodiscard("Constructs a new proto-structure")]]
-constexpr compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> operator ^(pack<InnerProtoStructs...> i, OuterProtoStruct o) noexcept {
+constexpr compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct> operator^(pack<InnerProtoStructs...> i,
+                                                                                OuterProtoStruct o) noexcept {
 	return compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct>(i, o);
 }
 

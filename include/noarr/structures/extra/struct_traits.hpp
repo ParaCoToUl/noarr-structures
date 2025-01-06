@@ -13,6 +13,7 @@ template<class T>
 struct sig_is_point : std::false_type {
 	static_assert(is_signature_v<T>, "sig_is_point is only applicable to struct signatures");
 };
+
 template<class ValueType>
 struct sig_is_point<scalar_sig<ValueType>> : std::true_type {};
 
@@ -24,19 +25,20 @@ struct sig_is_point<scalar_sig<ValueType>> : std::true_type {};
 template<class T>
 struct is_point : sig_is_point<typename T::signature> {};
 
-
-
 template<class T>
 struct sig_is_cube : std::false_type {
 	static_assert(is_signature_v<T>, "sig_is_cube is only applicable to struct signatures");
 };
+
 template<class ValueType>
 struct sig_is_cube<scalar_sig<ValueType>> : std::true_type {};
+
 template<IsDim auto Dim, class ArgLength, class RetSig>
 struct sig_is_cube<function_sig<Dim, ArgLength, RetSig>> : std::integral_constant<bool, sig_is_cube<RetSig>::value> {};
 
 /**
- * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all dynamic)
+ * @brief returns whether a structure is a cube (its dimension and dimension of its substructures, recursively, are all
+ * dynamic)
  *
  * @tparam T: the structure
  */
@@ -48,19 +50,25 @@ struct is_cube {
 	};
 };
 
-
-
 template<class T, IsState State>
 struct sig_get_scalar;
+
 template<IsDim auto Dim, class ArgLength, class RetSig, IsState State>
 struct sig_get_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 	using type = typename sig_get_scalar<RetSig, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
-template<IsDim auto Dim, class ...RetSigs, IsState State> requires (State::template contains<index_in<Dim>>)
+
+template<IsDim auto Dim, class... RetSigs, IsState State>
+requires (State::template contains<index_in<Dim>>)
 struct sig_get_scalar<dep_function_sig<Dim, RetSigs...>, State> {
-	static_assert(requires{ state_get_t<State, index_in<Dim>>::value; }, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
-	using type = typename sig_get_scalar<typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>, state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
+	static_assert(
+		requires { state_get_t<State, index_in<Dim>>::value; },
+		"Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
+	using type = typename sig_get_scalar<
+		typename dep_function_sig<Dim, RetSigs...>::template ret_sig<state_get_t<State, index_in<Dim>>::value>,
+		state_remove_t<State, index_in<Dim>, length_in<Dim>>>::type;
 };
+
 template<class ValueType, IsState State>
 struct sig_get_scalar<scalar_sig<ValueType>, State> {
 	using type = ValueType;

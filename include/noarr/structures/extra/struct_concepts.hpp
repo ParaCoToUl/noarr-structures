@@ -2,14 +2,15 @@
 #define NOARR_STRUCTURES_STRUCT_CONCEPTS_HPP
 
 #include "../base/utility.hpp"
-#include "../extra/to_struct.hpp"
 #include "../extra/sig_utils.hpp"
+#include "../extra/to_struct.hpp"
 
 namespace noarr {
 
 namespace helpers {
 
-template<class T, auto ...Dims> requires IsDimPack<decltype(Dims)...>
+template<class T, auto... Dims>
+requires IsDimPack<decltype(Dims)...>
 struct has_dims {
 	using struct_type = typename to_struct<T>::type;
 	using dim_tree = sig_dim_tree<typename struct_type::signature>;
@@ -20,10 +21,9 @@ struct has_dims {
 
 } // namespace helpers
 
-template<class T, auto ...Dims>
-concept HasDims = IsDimPack<decltype(Dims)...> && requires(T) {
-	typename to_struct<T>::type;
-} && helpers::has_dims<T, Dims...>::value;
+template<class T, auto... Dims>
+concept HasDims = IsDimPack<decltype(Dims)...> && requires(T) { typename to_struct<T>::type; } &&
+                  helpers::has_dims<T, Dims...>::value;
 
 } // namespace noarr
 

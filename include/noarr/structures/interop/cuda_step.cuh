@@ -37,13 +37,9 @@ __device__ inline auto cuda_step() noexcept {
 	return step(CG::thread_rank(), CG::num_threads());
 }
 
-__device__ inline auto cuda_step_block() noexcept {
-	return cuda_step<::cooperative_groups::thread_block>();
-}
+__device__ inline auto cuda_step_block() noexcept { return cuda_step<::cooperative_groups::thread_block>(); }
 
-__device__ inline auto cuda_step_grid() noexcept {
-	return cuda_step<::cooperative_groups::grid_group>();
-}
+__device__ inline auto cuda_step_grid() noexcept { return cuda_step<::cooperative_groups::grid_group>(); }
 
 } // namespace noarr
 

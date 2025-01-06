@@ -14,7 +14,7 @@ namespace noarr {
 template<class CharPack>
 struct char_seq_to_str;
 
-template<char ...C>
+template<char... C>
 struct char_seq_to_str<std::integer_sequence<char, C...>> {
 	static constexpr char c_str[] = {C..., '\0'};
 	static constexpr std::size_t length = sizeof...(C);
@@ -33,7 +33,8 @@ struct mangle_desc;
  * @tparam T: the structure
  */
 template<class T>
-using mangle = typename helpers::mangle_desc<T::name, std::make_index_sequence<sizeof(T::name) - 1>, typename T::params>::type;
+using mangle =
+	typename helpers::mangle_desc<T::name, std::make_index_sequence<sizeof(T::name) - 1>, typename T::params>::type;
 
 template<class T>
 using mangle_to_str = char_seq_to_str<mangle<T>>;
@@ -49,18 +50,20 @@ using mangle_value = typename mangle_value_impl<T, V>::type;
 template<class T, T V, class Acc = std::integer_sequence<char>>
 struct mangle_integral;
 
-template<class T, char ...Acc, T V> requires (V >= 10)
+template<class T, char... Acc, T V>
+requires (V >= 10)
 struct mangle_integral<T, V, std::integer_sequence<char, Acc...>>
 	: mangle_integral<T, V / 10, std::integer_sequence<char, static_cast<char>(V % 10) + '0', Acc...>> {};
 
-template<class T, char ...Acc, T V> requires (V < 10 && V >= 0)
+template<class T, char... Acc, T V>
+requires (V < 10 && V >= 0)
 struct mangle_integral<T, V, std::integer_sequence<char, Acc...>> {
 	using type = std::integer_sequence<char, static_cast<char>(V % 10) + '0', Acc...>;
 };
 
-template<class T, T V> requires (std::is_integral_v<T>)
-struct mangle_value_impl<T, V>
-	: mangle_integral<T, V> {};
+template<class T, T V>
+requires (std::is_integral_v<T>)
+struct mangle_value_impl<T, V> : mangle_integral<T, V> {};
 
 /**
  * @brief returns a textual representation of a scalar type using `std::integer_sequence<char, ...>`
@@ -70,14 +73,18 @@ struct mangle_value_impl<T, V>
 template<class T>
 struct scalar_name;
 
-template<class T> requires (std::is_integral_v<T> && std::is_signed_v<T>)
+template<class T>
+requires (std::is_integral_v<T> && std::is_signed_v<T>)
 struct scalar_name<T> {
-	using type = integer_sequence_concat<std::integer_sequence<char, 'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, std::integer_sequence<char, '_', 't'>>;
+	using type = integer_sequence_concat<std::integer_sequence<char, 'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>,
+	                                     std::integer_sequence<char, '_', 't'>>;
 };
 
-template<class T> requires (std::is_integral_v<T> && std::is_unsigned_v<T>)
+template<class T>
+requires (std::is_integral_v<T> && std::is_unsigned_v<T>)
 struct scalar_name<T> {
-	using type = integer_sequence_concat<std::integer_sequence<char, 'u', 'i', 'n', 't'>, mangle_value<int, 8 * sizeof(T)>, std::integer_sequence<char, '_', 't'>>;
+	using type = integer_sequence_concat<std::integer_sequence<char, 'u', 'i', 'n', 't'>,
+	                                     mangle_value<int, 8 * sizeof(T)>, std::integer_sequence<char, '_', 't'>>;
 };
 
 template<>
@@ -97,12 +104,17 @@ struct scalar_name<long double> {
 
 template<std::size_t L>
 struct scalar_name<std::integral_constant<std::size_t, L>> {
-	using type = integer_sequence_concat<std::integer_sequence<char, 's', 't', 'd', ':', ':', 'i', 'n', 't', 'e', 'g', 'r', 'a', 'l', '_', 'c', 'o', 'n', 's', 't', 'a', 'n', 't', '<'>, typename scalar_name<std::size_t>::type, std::integer_sequence<char, ','>, mangle_value<int, L>, std::integer_sequence<char, '>'>>;
+	using type =
+		integer_sequence_concat<std::integer_sequence<char, 's', 't', 'd', ':', ':', 'i', 'n', 't', 'e', 'g', 'r', 'a',
+	                                                  'l', '_', 'c', 'o', 'n', 's', 't', 'a', 'n', 't', '<'>,
+	                            typename scalar_name<std::size_t>::type, std::integer_sequence<char, ','>,
+	                            mangle_value<int, L>, std::integer_sequence<char, '>'>>;
 };
 
 template<std::size_t L>
 struct scalar_name<lit_t<L>> {
-	using type = integer_sequence_concat<std::integer_sequence<char, 'l', 'i', 't', '_', 't', '<'>, mangle_value<int, L>, std::integer_sequence<char, '>'>>;
+	using type = integer_sequence_concat<std::integer_sequence<char, 'l', 'i', 't', '_', 't', '<'>,
+	                                     mangle_value<int, L>, std::integer_sequence<char, '>'>>;
 };
 
 /**
@@ -114,18 +126,27 @@ template<class T>
 struct mangle_param;
 
 template<class T>
-struct mangle_param<structure_param<T>> { using type = integer_sequence_concat<mangle<T>>; };
+struct mangle_param<structure_param<T>> {
+	using type = integer_sequence_concat<mangle<T>>;
+};
 
 template<class T>
-struct mangle_param<type_param<T>> { using type = integer_sequence_concat<typename scalar_name<T>::type>; };
+struct mangle_param<type_param<T>> {
+	using type = integer_sequence_concat<typename scalar_name<T>::type>;
+};
 
 template<auto V>
-struct mangle_param<value_param<V>> { using type = integer_sequence_concat<std::integer_sequence<char, '('>, typename scalar_name<decltype(V)>::type, std::integer_sequence<char, ')'>, mangle_value<decltype(V), V>>; };
+struct mangle_param<value_param<V>> {
+	using type = integer_sequence_concat<std::integer_sequence<char, '('>, typename scalar_name<decltype(V)>::type,
+	                                     std::integer_sequence<char, ')'>, mangle_value<decltype(V), V>>;
+};
 
 template<char Dim>
-struct mangle_param<dim_param<Dim>> { using type = integer_sequence_concat<std::integer_sequence<char, '\'', Dim, '\''>>; };
+struct mangle_param<dim_param<Dim>> {
+	using type = integer_sequence_concat<std::integer_sequence<char, '\'', Dim, '\''>>;
+};
 
-template<const char Name[], std::size_t ...Indices, class ...Params>
+template<const char Name[], std::size_t... Indices, class... Params>
 struct mangle_desc<Name, std::index_sequence<Indices...>, struct_params<Params...>> {
 	using type = integer_sequence_concat<
 		std::integer_sequence<char, Name[Indices]..., '<'>,
@@ -134,11 +155,12 @@ struct mangle_desc<Name, std::index_sequence<Indices...>, struct_params<Params..
 };
 
 struct mangle_expr_helpers {
-	template<class ...Ts>
-	static inline std::index_sequence_for<Ts...> get_contain_indices(const flexible_contain<Ts...> &) noexcept; // undefined, use in decltype
+	template<class... Ts>
+	static inline std::index_sequence_for<Ts...>
+	get_contain_indices(const flexible_contain<Ts...> &) noexcept; // undefined, use in decltype
 
-	template<class String, class T, std::size_t ...Indices>
-	static constexpr void append_items(String &out, const T &t, [[maybe_unused]] std::index_sequence<Indices...> is) {
+	template<class String, class T, std::size_t... Indices>
+	static constexpr void append_items(String &out, const T &t, std::index_sequence<Indices...> /*unused*/) {
 		(..., (append(out, t.template get<Indices>()), out.push_back(',')));
 	}
 
@@ -151,14 +173,15 @@ struct mangle_expr_helpers {
 		do {
 			*--ptr = '0' + u % 10;
 			sz++;
-		} while(u /= 10);
-		if(neg) {
+		} while (u /= 10);
+		if (neg) {
 			*--ptr = '-';
 		}
 		out.append(ptr, sz);
 	}
 
-	template<class String, class T, class Indices = decltype(get_contain_indices(std::declval<T>()))> // Indices also used for SFINAE
+	template<class String, class T,
+	         class Indices = decltype(get_contain_indices(std::declval<T>()))> // Indices also used for SFINAE
 	static constexpr void append(String &out, const T &t) {
 		using type_str = mangle_to_str<T>;
 		out.append(type_str::c_str, type_str::length);
@@ -167,12 +190,13 @@ struct mangle_expr_helpers {
 		out.push_back('}');
 	}
 
-	template<class String, class T> requires (std::is_integral_v<T>)
+	template<class String, class T>
+	requires (std::is_integral_v<T>)
 	static constexpr void append(String &out, const T &t) {
 		using type_str = char_seq_to_str<typename scalar_name<T>::type>;
 		out.append(type_str::c_str, type_str::length);
 		out.push_back('{');
-		if constexpr(std::is_signed_v<T>) {
+		if constexpr (std::is_signed_v<T>) {
 			if (t == std::numeric_limits<T>::min()) {
 				append_int(out, true, std::make_unsigned_t<T>(t));
 			} else {
@@ -185,7 +209,7 @@ struct mangle_expr_helpers {
 	}
 
 	template<class String, std::size_t L>
-	static constexpr void append(String &out, [[maybe_unused]] const std::integral_constant<std::size_t, L> l) {
+	static constexpr void append(String &out, std::integral_constant<std::size_t, L> /*unused*/) {
 		out.append("lit<", 4);
 		append_int(out, false, L);
 		out.append(">", 1);

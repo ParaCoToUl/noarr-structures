@@ -14,7 +14,8 @@
 
 namespace noarr {
 
-template<auto Dim, class Struct, class Order> requires IsDim<decltype(Dim)>
+template<auto Dim, class Struct, class Order>
+requires IsDim<decltype(Dim)>
 struct traverser_iterator_t : strict_contain<Struct, Order> {
 	using base = strict_contain<Struct, Order>;
 	std::size_t idx;
@@ -25,10 +26,14 @@ struct traverser_iterator_t : strict_contain<Struct, Order> {
 	using order_with_fix = decltype(std::declval<Order>() ^ fix<Dim>(std::declval<std::size_t>()));
 
 	[[nodiscard]]
-	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
+	constexpr auto get_struct() const noexcept {
+		return this->template get<0>();
+	}
 
 	[[nodiscard]]
-	constexpr auto get_order() const noexcept { return this->template get<1>(); }
+	constexpr auto get_order() const noexcept {
+		return this->template get<1>();
+	}
 
 	using difference_type = std::ptrdiff_t;
 	using value_type = traverser_t<Struct, order_with_fix>;
@@ -37,7 +42,8 @@ struct traverser_iterator_t : strict_contain<Struct, Order> {
 
 	// random_access_iterator must be default constructible, although it does not make sense even for STL iterators.
 	// Additionally, it cannot be implemented generally for any Struct.
-	// This code should satisfy the trait/concept, but fail at compile-time if actually used in potentially-evaluated context.
+	// This code should satisfy the trait/concept, but fail at compile-time if actually used in potentially-evaluated
+	// context.
 private:
 	static constexpr const base &construct_base() noexcept {
 		static_assert(always_false<this_t>, "Cannot use the default constructor of traverser iterator");
@@ -45,65 +51,113 @@ private:
 	}
 
 public:
-	[[deprecated("The default iterator for traversers is not well-definable")]] explicit constexpr traverser_iterator_t() noexcept : base(construct_base()), idx() {}
+	[[deprecated("The default iterator for traversers is not well-definable")]]
+	explicit constexpr traverser_iterator_t() noexcept
+		: base(construct_base()), idx() {}
 
 	[[nodiscard]]
-	constexpr difference_type operator-(const this_t &other) const noexcept { return idx - other.idx; }
+	constexpr difference_type operator-(const this_t &other) const noexcept {
+		return idx - other.idx;
+	}
 
 	[[nodiscard]]
-	constexpr this_t operator+(difference_type diff) const noexcept { return this_t(*this, idx + diff); }
+	constexpr this_t operator+(difference_type diff) const noexcept {
+		return this_t(*this, idx + diff);
+	}
 
 	[[nodiscard]]
-	constexpr this_t operator-(difference_type diff) const noexcept { return this_t(*this, idx - diff); }
+	constexpr this_t operator-(difference_type diff) const noexcept {
+		return this_t(*this, idx - diff);
+	}
 
-	constexpr this_t &operator+=(difference_type diff) noexcept { idx += diff; return *this; }
-	constexpr this_t &operator-=(difference_type diff) noexcept { idx -= diff; return *this; }
+	constexpr this_t &operator+=(difference_type diff) noexcept {
+		idx += diff;
+		return *this;
+	}
 
-	constexpr this_t &operator++() noexcept { idx++; return *this; }
-	constexpr this_t &operator--() noexcept { idx--; return *this; }
+	constexpr this_t &operator-=(difference_type diff) noexcept {
+		idx -= diff;
+		return *this;
+	}
 
-	constexpr this_t operator++(int) noexcept { const auto copy = *this; idx++; return copy; }
-	constexpr this_t operator--(int) noexcept { const auto copy = *this; idx--; return copy; }
+	constexpr this_t &operator++() noexcept {
+		idx++;
+		return *this;
+	}
+
+	constexpr this_t &operator--() noexcept {
+		idx--;
+		return *this;
+	}
+
+	constexpr this_t operator++(int) noexcept {
+		const auto copy = *this;
+		idx++;
+		return copy;
+	}
+
+	constexpr this_t operator--(int) noexcept {
+		const auto copy = *this;
+		idx--;
+		return copy;
+	}
 
 	[[nodiscard]]
-	constexpr bool operator==(const this_t &other) const noexcept { return idx == other.idx; }
+	constexpr bool operator==(const this_t &other) const noexcept {
+		return idx == other.idx;
+	}
 
 	[[nodiscard]]
-	constexpr auto operator<=>(const this_t &other) const noexcept { return idx <=> other.idx; }
+	constexpr auto operator<=>(const this_t &other) const noexcept {
+		return idx <=> other.idx;
+	}
 
 	[[nodiscard]]
-	constexpr value_type operator*() const noexcept { return value_type(get_struct(), get_order() ^ fix<Dim>(idx)); }
+	constexpr value_type operator*() const noexcept {
+		return value_type(get_struct(), get_order() ^ fix<Dim>(idx));
+	}
 
 	[[nodiscard]]
-	constexpr value_type operator[](difference_type i) const noexcept { return value_type(get_struct(), get_order() ^ fix<Dim>(idx + i)); }
+	constexpr value_type operator[](difference_type i) const noexcept {
+		return value_type(get_struct(), get_order() ^ fix<Dim>(idx + i));
+	}
 
 	[[nodiscard]]
-	friend constexpr this_t operator+(difference_type diff, const this_t &iter) noexcept { return iter + diff; }
+	friend constexpr this_t operator+(difference_type diff, const this_t &iter) noexcept {
+		return iter + diff;
+	}
 };
 
-template<auto Dim, class Struct, class Order> requires IsDim<decltype(Dim)>
+template<auto Dim, class Struct, class Order>
+requires IsDim<decltype(Dim)>
 struct traverser_range_t : strict_contain<Struct, Order> {
 	using base = strict_contain<Struct, Order>;
 	std::size_t begin_idx, end_idx;
 
-	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length) : base(static_cast<const base &>(traverser)), begin_idx(0), end_idx(length) {}
+	constexpr traverser_range_t(const traverser_t<Struct, Order> &traverser, std::size_t length)
+		: base(static_cast<const base &>(traverser)), begin_idx(0), end_idx(length) {}
 
 	// TBB splitting constructor
 	template<class Split>
 	constexpr traverser_range_t(traverser_range_t &, Split) noexcept; // defined in tbb_traverser.hpp
 
 	[[nodiscard]]
-	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
+	constexpr auto get_struct() const noexcept {
+		return this->template get<0>();
+	}
 
 	[[nodiscard]]
-	constexpr auto get_order() const noexcept { return this->template get<1>(); }
+	constexpr auto get_order() const noexcept {
+		return this->template get<1>();
+	}
 
 	template<class NewOrder>
 	[[nodiscard]]
 	constexpr auto order(NewOrder new_order) const noexcept {
 		// equivalent to as_traverser().order(new_order)
 		const auto slice_order = slice<Dim>(begin_idx, end_idx - begin_idx);
-		return traverser_t<Struct, decltype(get_order() ^ slice_order ^ new_order)>(get_struct(), get_order() ^ slice_order ^ new_order);
+		return traverser_t<Struct, decltype(get_order() ^ slice_order ^ new_order)>(
+			get_struct(), get_order() ^ slice_order ^ new_order);
 	}
 
 	template<class F>
@@ -117,12 +171,17 @@ struct traverser_range_t : strict_contain<Struct, Order> {
 		return traverser_t<Struct, decltype(get_order() ^ slice_order)>(get_struct(), get_order() ^ slice_order);
 	}
 
-	// empty() and is_divisible() are required by TBB, but it could also be useful to call them directly, so they are implemented here
+	// empty() and is_divisible() are required by TBB, but it could also be useful to call them directly, so they are
+	// implemented here
 	[[nodiscard]]
-	constexpr bool empty() const noexcept { return end_idx == begin_idx; }
+	constexpr bool empty() const noexcept {
+		return end_idx == begin_idx;
+	}
 
 	[[nodiscard]]
-	constexpr bool is_divisible() const noexcept { return end_idx - begin_idx > 1; }
+	constexpr bool is_divisible() const noexcept {
+		return end_idx - begin_idx > 1;
+	}
 
 	using iterator = traverser_iterator_t<Dim, Struct, Order>;
 	using const_iterator = iterator;
@@ -133,31 +192,47 @@ struct traverser_range_t : strict_contain<Struct, Order> {
 	using size_type = std::size_t;
 
 	[[nodiscard]]
-	constexpr iterator begin() const noexcept { return iterator(*this, begin_idx); }
+	constexpr iterator begin() const noexcept {
+		return iterator(*this, begin_idx);
+	}
 
 	[[nodiscard]]
-	constexpr iterator end() const noexcept { return iterator(*this, end_idx); }
+	constexpr iterator end() const noexcept {
+		return iterator(*this, end_idx);
+	}
 
 	[[nodiscard]]
-	constexpr const_iterator cbegin() const noexcept { return const_iterator(*this, begin_idx); }
+	constexpr const_iterator cbegin() const noexcept {
+		return const_iterator(*this, begin_idx);
+	}
 
 	[[nodiscard]]
-	constexpr const_iterator cend() const noexcept { return const_iterator(*this, end_idx); }
+	constexpr const_iterator cend() const noexcept {
+		return const_iterator(*this, end_idx);
+	}
 
 	[[nodiscard]]
-	constexpr size_type size() const noexcept { return end_idx - begin_idx; }
+	constexpr size_type size() const noexcept {
+		return end_idx - begin_idx;
+	}
 
 	[[nodiscard]]
-	constexpr value_type operator[](size_type i) const noexcept { return value_type(get_struct(), get_order() ^ fix<Dim>(begin_idx + i)); }
+	constexpr value_type operator[](size_type i) const noexcept {
+		return value_type(get_struct(), get_order() ^ fix<Dim>(begin_idx + i));
+	}
 };
 
 namespace helpers {
 
 template<class Sig>
 struct traviter_sig_top_dim {
-	static_assert(always_false<Sig>, "The top-level dimension (after applying order) must be dynamic in order to be convertible to a range");
+	static_assert(
+		always_false<Sig>,
+		"The top-level dimension (after applying order) must be dynamic in order to be convertible to a range");
 };
-template<auto Dim, class ArgLength, class RetSig> requires IsDim<decltype(Dim)>
+
+template<auto Dim, class ArgLength, class RetSig>
+requires IsDim<decltype(Dim)>
 struct traviter_sig_top_dim<function_sig<Dim, ArgLength, RetSig>> {
 	static constexpr auto dim = Dim;
 };
@@ -169,7 +244,8 @@ static constexpr auto traviter_top_dim = traviter_sig_top_dim<typename Struct::s
 
 // declared in traverser.hpp
 template<class Struct, class Order>
-template<auto Dim> requires IsDim<decltype(Dim)>
+template<auto Dim>
+requires IsDim<decltype(Dim)>
 constexpr auto traverser_t<Struct, Order>::range() const noexcept {
 	return traverser_range_t<Dim, Struct, Order>(*this, top_struct().template length<Dim>(empty_state));
 }

@@ -15,7 +15,9 @@ struct to_struct<T> {
 	using type = std::remove_cvref_t<T>;
 
 	[[nodiscard]]
-	static constexpr type convert(T t) noexcept { return t; }
+	static constexpr type convert(T t) noexcept {
+		return t;
+	}
 };
 
 template<class T>

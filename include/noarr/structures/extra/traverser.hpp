@@ -20,32 +20,44 @@ namespace helpers {
 
 template<class Sig1, class Sig2>
 struct sig_union2;
+
 template<class Sig1, IsDim auto Dim, class ArgLength, class RetSig>
 struct sig_union2<Sig1, function_sig<Dim, ArgLength, RetSig>> {
 	using ret = typename sig_union2<Sig1, RetSig>::type;
 	template<bool = Sig1::template any_accept<Dim>, class = void>
 	struct ty;
+
 	template<class Useless>
-	struct ty<true, Useless> { using pe = ret; }; // TODO ArgLength union
+	struct ty<true, Useless> {
+		using pe = ret;
+	}; // TODO ArgLength union
+
 	template<class Useless>
-	struct ty<false, Useless> { using pe = function_sig<Dim, ArgLength, ret>; };
+	struct ty<false, Useless> {
+		using pe = function_sig<Dim, ArgLength, ret>;
+	};
+
 	using type = typename ty<>::pe;
 };
-template<class Sig1, IsDim auto Dim, class ...RetSigs>
+
+template<class Sig1, IsDim auto Dim, class... RetSigs>
 struct sig_union2<Sig1, dep_function_sig<Dim, RetSigs...>> {
 	static_assert(value_always_false<Dim>, "Unsupported");
 };
+
 template<class Sig1, class ValueType>
 struct sig_union2<Sig1, scalar_sig<ValueType>> {
 	using type = Sig1;
 };
 
-template<class ...Sigs>
+template<class... Sigs>
 struct sig_union;
-template<class Sig1, class Sig2, class ...Sigs>
+
+template<class Sig1, class Sig2, class... Sigs>
 struct sig_union<Sig1, Sig2, Sigs...> {
 	using type = typename sig_union<typename sig_union2<Sig1, Sig2>::type, Sigs...>::type;
 };
+
 template<class Sig>
 struct sig_union<Sig> {
 	using type = Sig;
@@ -53,26 +65,35 @@ struct sig_union<Sig> {
 
 template<class Signature, IsState State>
 struct union_filter_accepted;
-template<class Signature, class HeadStateItem, class ...TailStateItems>
+
+template<class Signature, class HeadStateItem, class... TailStateItems>
 struct union_filter_accepted<Signature, state<HeadStateItem, TailStateItems...>> {
 	using tail = typename union_filter_accepted<Signature, state<TailStateItems...>>::template res<>::ult;
+
 	template<class = HeadStateItem>
 	struct res {
 		using ult = tail;
 	};
-	template<IsDim auto Dim, class ValueType> requires (Signature::template any_accept<Dim>)
+
+	template<IsDim auto Dim, class ValueType>
+	requires (Signature::template any_accept<Dim>)
 	struct res<state_item<index_in<Dim>, ValueType>> {
 		using ult = typename tail::template prepend<HeadStateItem>;
 	};
-	template<IsDim auto Dim, class ValueType> requires (Signature::template any_accept<Dim>)
+
+	template<IsDim auto Dim, class ValueType>
+	requires (Signature::template any_accept<Dim>)
 	struct res<state_item<length_in<Dim>, ValueType>> {
 		using ult = typename tail::template prepend<HeadStateItem>;
 	};
 };
+
 template<class Signature>
 struct union_filter_accepted<Signature, state<>> {
 	template<class = void>
-	struct res { using ult = state_items_pack<>; };
+	struct res {
+		using ult = state_items_pack<>;
+	};
 };
 
 template<class Struct, IsState State>
@@ -80,7 +101,7 @@ using union_filter_accepted_t = typename union_filter_accepted<typename Struct::
 
 } // namespace helpers
 
-template<class ...Structs>
+template<class... Structs>
 struct union_t : strict_contain<Structs...> {
 	using base = strict_contain<Structs...>;
 	using base::base;
@@ -90,7 +111,9 @@ struct union_t : strict_contain<Structs...> {
 
 	template<std::size_t Index>
 	[[nodiscard("returns a copy of the underlying struct")]]
-	constexpr auto sub_structure() const noexcept { return this->template get<Index>(); }
+	constexpr auto sub_structure() const noexcept {
+		return this->template get<Index>();
+	}
 
 	template<std::size_t Index>
 	using sub_structure_t = std::remove_cvref_t<decltype(std::declval<base>().template get<Index>())>;
@@ -99,24 +122,28 @@ private:
 	template<auto Dim, std::size_t I>
 	[[nodiscard("returns the index of the first struct that accepts the dimension")]]
 	static constexpr auto find_first_match() noexcept {
-		using sub_sig = typename to_struct<std::remove_cvref_t<decltype(std::declval<base>().template get<I>())>>::type::signature;
-		if constexpr(sub_sig::template any_accept<Dim>) {
+		using sub_sig = typename to_struct<sub_structure_t<I>>::type::signature;
+		if constexpr (sub_sig::template any_accept<Dim>) {
 			return std::integral_constant<std::size_t, I>();
-		} else if constexpr(I < sizeof...(Structs) - 1) {
-			return find_first_match<Dim, I+1>();
+		} else if constexpr (I < sizeof...(Structs) - 1) {
+			return find_first_match<Dim, I + 1>();
 		}
 	}
-	template<auto Dim> requires IsDim<decltype(Dim)>
+
+	template<auto Dim>
+	requires IsDim<decltype(Dim)>
 	using first_match = decltype(find_first_match<Dim, 0>());
 
 public:
-	template<auto Dim, IsState State> requires IsDim<decltype(Dim)> && requires { first_match<Dim>::value; }
+	template<auto Dim, IsState State>
+	requires IsDim<decltype(Dim)> && requires { first_match<Dim>::value; }
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		return sub_structure_t<first_match<Dim>::value>::template has_length<Dim, State>();
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)> && requires { first_match<QDim>::value; }
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)> && requires { first_match<QDim>::value; }
 	[[nodiscard("returns the length of the first struct that accepts the dimension")]]
 	constexpr auto length(State state) const noexcept {
 		// return base::template get<first_match<QDim>::value>().template length<QDim>(state);
@@ -124,7 +151,7 @@ public:
 	}
 };
 
-template<class ...Ts, class U = union_t<Ts...>>
+template<class... Ts, class U = union_t<Ts...>>
 constexpr U make_union(const Ts &...s) noexcept {
 	return U(s...);
 }
@@ -134,25 +161,33 @@ struct traverser_t : strict_contain<Struct, Order> {
 	using strict_contain<Struct, Order>::strict_contain;
 
 	[[nodiscard("returns a copy of the underlying struct")]]
-	constexpr auto get_struct() const noexcept { return this->template get<0>(); }
+	constexpr auto get_struct() const noexcept {
+		return this->template get<0>();
+	}
 
 	[[nodiscard("returns a copy of the underlying order")]]
-	constexpr auto get_order() const noexcept { return this->template get<1>(); }
+	constexpr auto get_order() const noexcept {
+		return this->template get<1>();
+	}
 
 	[[nodiscard("returns a new traverser")]]
 	constexpr auto order(IsProtoStruct auto new_order) const noexcept {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
 	}
 
-	template<auto ...Dims, class F> requires IsDimPack<decltype(Dims)...>
+	template<auto... Dims, class F>
+	requires IsDimPack<decltype(Dims)...>
 	constexpr void for_each(F f) const {
 		for_sections<Dims...>([f](auto inner) constexpr { f(inner.state()); });
 	}
 
-	template<auto Dim, auto ...Dims, class F> requires IsDim<decltype(Dim)> && IsDimPack<decltype(Dims)...>
+	template<auto Dim, auto... Dims, class F>
+	requires IsDim<decltype(Dim)> && IsDimPack<decltype(Dims)...>
 	constexpr void for_sections(F f) const {
-		using dim_tree = dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dim, Dims...>>;
-		static_assert((dim_tree_contains<Dim, dim_tree> && ... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
+		using dim_tree =
+			dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dim, Dims...>>;
+		static_assert((dim_tree_contains<Dim, dim_tree> && ... && dim_tree_contains<Dims, dim_tree>),
+		              "Requested dimensions are not present");
 		for_each_impl(dim_tree(), f, empty_state);
 	}
 
@@ -162,9 +197,11 @@ struct traverser_t : strict_contain<Struct, Order> {
 		for_each_impl(dim_tree(), f, empty_state);
 	}
 
-	template<auto ...Dims, class F> requires IsDimPack<decltype(Dims)...>
+	template<auto... Dims, class F>
+	requires IsDimPack<decltype(Dims)...>
 	constexpr void for_dims(F f) const {
-		using dim_tree = dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dims...>>;
+		using dim_tree =
+			dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dims...>>;
 		static_assert((... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
 		for_each_impl(dim_tree_from_sequence<dim_sequence<Dims...>>(), f, empty_state);
 	}
@@ -179,7 +216,8 @@ struct traverser_t : strict_contain<Struct, Order> {
 		return get_struct() ^ get_order();
 	}
 
-	template<auto Dim> requires IsDim<decltype(Dim)>
+	template<auto Dim>
+	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
 	constexpr auto range() const noexcept; // defined in traverser_iter.hpp
 
@@ -193,45 +231,52 @@ struct traverser_t : strict_contain<Struct, Order> {
 	constexpr auto end() const noexcept; // defined in traverser_iter.hpp
 
 private:
-	template<auto Dim, class Branch, class ...Branches, class F, std::size_t I, std::size_t ...Is>
-	constexpr void for_each_impl_dep(F f, auto state, [[maybe_unused]] std::index_sequence<I, Is...> is) const {
+	template<auto Dim, class Branch, class... Branches, class F, std::size_t I, std::size_t... Is>
+	constexpr void for_each_impl_dep(F f, auto state, std::index_sequence<I, Is...> /*is*/) const {
 		for_each_impl(Branch(), f, state.template with<index_in<Dim>>(std::integral_constant<std::size_t, I>()));
 		for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence<Is...>());
 	}
 
 	// the bottom case
-	template<auto Dim, class F> requires IsDim<decltype(Dim)>
-	constexpr void for_each_impl_dep([[maybe_unused]] F f, [[maybe_unused]] auto state, [[maybe_unused]] std::index_sequence<> is) const {}
+	template<auto Dim, class F>
+	requires IsDim<decltype(Dim)>
+	constexpr void for_each_impl_dep(F /*f*/, auto /*state*/, std::index_sequence<> /*is*/) const {}
 
-	template<auto Dim, class ...Branches, class F, class State> requires IsState<State> && IsDim<decltype(Dim)>
-	constexpr void for_each_impl([[maybe_unused]] dim_tree<Dim, Branches...> dt, F f, State state) const {
+	template<auto Dim, class... Branches, class F, class State>
+	requires IsState<State> && IsDim<decltype(Dim)>
+	constexpr void for_each_impl(dim_tree<Dim, Branches...> /*dt*/, F f, State state) const {
 		using dim_sig = sig_find_dim<Dim, State, typename decltype(top_struct())::signature>;
-		if constexpr(dim_sig::dependent) {
+		if constexpr (dim_sig::dependent) {
 			for_each_impl_dep<Dim, Branches...>(f, state, std::index_sequence_for<Branches...>());
 		} else {
 			const std::size_t len = top_struct().template length<Dim>(state);
-			for(std::size_t i = 0; i < len; i++) {
+			for (std::size_t i = 0; i < len; i++) {
 				for_each_impl(Branches()..., f, state.template with<index_in<Dim>>(i));
 			}
 		}
 	}
-	template<class F, class StateItem, class ...StateItems>
-	constexpr void for_each_impl([[maybe_unused]] dim_sequence<> ds, F f, noarr::state<StateItem, StateItems...> state) const {
+
+	template<class F, class StateItem, class... StateItems>
+	constexpr void for_each_impl(dim_sequence<> /*ds*/, F f, noarr::state<StateItem, StateItems...> state) const {
 		f(order(fix(state)));
 	}
+
 	template<class F>
-	constexpr void for_each_impl([[maybe_unused]] dim_sequence<> ds, F f, [[maybe_unused]] noarr::state<> state) const {
+	constexpr void for_each_impl(dim_sequence<> /*ds*/, F f, noarr::state<> /*state*/) const {
 		f(*this);
 	}
 };
 
-template<class ...Ts>
+template<class... Ts>
 constexpr auto traverser(const Ts &...s) noexcept
-	-> traverser_t<union_t<typename to_struct<Ts>::type...>, neutral_proto>
-{ return traverser(make_union(to_struct<Ts>::convert(s)...)); }
+	-> traverser_t<union_t<typename to_struct<Ts>::type...>, neutral_proto> {
+	return traverser(make_union(to_struct<Ts>::convert(s)...));
+}
 
-template<class ...Ts>
-constexpr auto traverser(union_t<Ts...> u) noexcept { return traverser_t<union_t<Ts...>, neutral_proto>(u, neutral_proto()); }
+template<class... Ts>
+constexpr auto traverser(union_t<Ts...> u) noexcept {
+	return traverser_t<union_t<Ts...>, neutral_proto>(u, neutral_proto());
+}
 
 template<class T>
 struct is_traverser : std::false_type {};
@@ -259,33 +304,41 @@ struct to_state<T> {
 	using type = std::remove_cvref_t<decltype(std::declval<T>().state())>;
 
 	[[nodiscard]]
-	static constexpr type convert(const T &t) noexcept { return t.state(); }
+	static constexpr type convert(const T &t) noexcept {
+		return t.state();
+	}
 };
 
 namespace helpers {
 
-template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+template<class F, auto... Dims>
+requires (... && IsDim<decltype(Dims)>)
 struct for_each_t : public F {};
 
-template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+template<class F, auto... Dims>
+requires (... && IsDim<decltype(Dims)>)
 struct for_dims_t : public F {};
 
-template<class F, auto ...Dims> requires (... && IsDim<decltype(Dims)>)
+template<class F, auto... Dims>
+requires (... && IsDim<decltype(Dims)>)
 struct for_sections_t : public F {};
 
 } // namespace helpers
 
-template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
+template<auto... Dims, class F>
+requires (... && IsDim<decltype(Dims)>)
 constexpr auto for_each(F &&f) noexcept {
 	return helpers::for_each_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
 
-template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
+template<auto... Dims, class F>
+requires (... && IsDim<decltype(Dims)>)
 constexpr auto for_dims(F &&f) noexcept {
 	return helpers::for_dims_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
 
-template<auto ...Dims, class F> requires (... && IsDim<decltype(Dims)>)
+template<auto... Dims, class F>
+requires (... && IsDim<decltype(Dims)>)
 constexpr auto for_sections(F &&f) noexcept {
 	return helpers::for_sections_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
@@ -295,18 +348,21 @@ constexpr auto operator|(const T &t, auto f) -> decltype(t.for_each(f)) {
 	return t.for_each(f);
 }
 
-template<IsTraverser T, auto ...Dims, class F>
-constexpr auto operator|(const T &t, const helpers::for_each_t<F, Dims...> &f) -> decltype(t.template for_each<Dims...>(f)) {
+template<IsTraverser T, auto... Dims, class F>
+constexpr auto operator|(const T &t, const helpers::for_each_t<F, Dims...> &f)
+	-> decltype(t.template for_each<Dims...>(f)) {
 	return t.template for_each<Dims...>(f);
 }
 
-template<IsTraverser T, auto ...Dims, class F>
-constexpr auto operator|(const T &t, const helpers::for_dims_t<F, Dims...> &f) -> decltype(t.template for_dims<Dims...>(f)) {
+template<IsTraverser T, auto... Dims, class F>
+constexpr auto operator|(const T &t, const helpers::for_dims_t<F, Dims...> &f)
+	-> decltype(t.template for_dims<Dims...>(f)) {
 	return t.template for_dims<Dims...>(f);
 }
 
-template<IsTraverser T, auto ...Dims, class F>
-constexpr auto operator|(const T &t, const helpers::for_sections_t<F, Dims...> &f) -> decltype(t.template for_sections<Dims...>(f)) {
+template<IsTraverser T, auto... Dims, class F>
+constexpr auto operator|(const T &t, const helpers::for_sections_t<F, Dims...> &f)
+	-> decltype(t.template for_sections<Dims...>(f)) {
 	return t.template for_sections<Dims...>(f);
 }
 

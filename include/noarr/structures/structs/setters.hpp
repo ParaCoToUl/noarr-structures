@@ -9,33 +9,39 @@
 
 namespace noarr {
 
-template<auto Dim, class T, class IdxT> requires IsDim<decltype(Dim)>
+template<auto Dim, class T, class IdxT>
+requires IsDim<decltype(Dim)>
 struct fix_t : strict_contain<T, IdxT> {
 	using strict_contain<T, IdxT>::strict_contain;
 
 	static constexpr char name[] = "fix_t";
-	using params = struct_params<
-		dim_param<Dim>,
-		structure_param<T>,
-		type_param<IdxT>>;
+	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<IdxT>>;
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr T sub_structure() const noexcept {
+		return this->template get<0>();
+	}
 
 	[[nodiscard]]
-	constexpr IdxT idx() const noexcept { return this->template get<1>(); }
+	constexpr IdxT idx() const noexcept {
+		return this->template get<1>();
+	}
 
 private:
 	template<class Original>
 	struct dim_replacement;
+
 	template<class ArgLength, class RetSig>
 	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> {
 		using type = RetSig;
 	};
-	template<class ...RetSigs>
+
+	template<class... RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		using original = dep_function_sig<Dim, RetSigs...>;
-		static_assert(requires { IdxT::value; }, "Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
+		static_assert(
+			requires { IdxT::value; },
+			"Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
 		using type = typename original::template ret_sig<IdxT::value>;
 	};
 
@@ -67,14 +73,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -87,24 +95,28 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, fix_t, State>()) {
+	requires (has_offset_of<Sub, fix_t, State>())
+	{
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		if constexpr(QDim == Dim) {
+		if constexpr (QDim == Dim) {
 			return false;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<QDim, State>()) {
+	requires (has_length<QDim, State>())
+	{
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
@@ -117,12 +129,14 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, fix_t, State>()) {
+	requires (has_state_at<Sub, fix_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<auto Dim, class IdxT> requires IsDim<decltype(Dim)>
+template<auto Dim, class IdxT>
+requires IsDim<decltype(Dim)>
 struct fix_proto : strict_contain<IdxT> {
 	using strict_contain<IdxT>::strict_contain;
 
@@ -130,7 +144,9 @@ struct fix_proto : strict_contain<IdxT> {
 
 	template<class Struct>
 	[[nodiscard]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return fix_t<Dim, Struct, IdxT>(s, this->get()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return fix_t<Dim, Struct, IdxT>(s, this->get());
+	}
 };
 
 /**
@@ -139,8 +155,9 @@ struct fix_proto : strict_contain<IdxT> {
  * @tparam Dims: the dimension names
  * @param ts: parameters for fixing the indices
  */
-template<auto ...Dims, class ...IdxT> requires (sizeof...(Dims) == sizeof...(IdxT)) && IsDimPack<decltype(Dims)...>
-constexpr auto fix(IdxT ...idx) noexcept {
+template<auto... Dims, class... IdxT>
+requires (sizeof...(Dims) == sizeof...(IdxT)) && IsDimPack<decltype(Dims)...>
+constexpr auto fix(IdxT... idx) noexcept {
 	if constexpr (sizeof...(Dims) > 0) {
 		return (... ^ fix_proto<Dims, good_index_t<IdxT>>(idx));
 	} else {
@@ -148,29 +165,34 @@ constexpr auto fix(IdxT ...idx) noexcept {
 	}
 }
 
-template<auto Dim, class T, class LenT> requires IsDim<decltype(Dim)>
+template<auto Dim, class T, class LenT>
+requires IsDim<decltype(Dim)>
 struct set_length_t : strict_contain<T, LenT> {
 	using strict_contain<T, LenT>::strict_contain;
 
 	static constexpr char name[] = "set_length_t";
-	using params = struct_params<
-		dim_param<Dim>,
-		structure_param<T>,
-		type_param<LenT>>;
+	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<LenT>>;
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr T sub_structure() const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
-	constexpr LenT len() const noexcept { return this->template get<1>(); }
+	constexpr LenT len() const noexcept {
+		return this->template get<1>();
+	}
 
 private:
 	template<class Original>
 	struct dim_replacement;
+
 	template<class ArgLength, class RetSig>
 	struct dim_replacement<function_sig<Dim, ArgLength, RetSig>> {
 		using type = function_sig<Dim, arg_length_from_t<LenT>, RetSig>;
 	};
-	template<class ...RetSigs>
+
+	template<class... RetSigs>
 	struct dim_replacement<dep_function_sig<Dim, RetSigs...>> {
 		static_assert(value_always_false<Dim>, "Cannot set tuple length");
 	};
@@ -203,14 +225,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -223,21 +247,25 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, set_length_t, State>()) {
+	requires (has_offset_of<Sub, set_length_t, State>())
+	{
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length of a dimension twice");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<QDim, State>()) {
+	requires (has_length<QDim, State>())
+	{
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length of a dimension twice");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
@@ -251,12 +279,14 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, set_length_t, State>()) {
+	requires (has_state_at<Sub, set_length_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<auto Dim, class LenT> requires IsDim<decltype(Dim)>
+template<auto Dim, class LenT>
+requires IsDim<decltype(Dim)>
 struct set_length_proto : strict_contain<LenT> {
 	using strict_contain<LenT>::strict_contain;
 
@@ -264,7 +294,9 @@ struct set_length_proto : strict_contain<LenT> {
 
 	template<class Struct>
 	[[nodiscard]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return set_length_t<Dim, Struct, LenT>(s, this->get()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return set_length_t<Dim, Struct, LenT>(s, this->get());
+	}
 };
 
 /**
@@ -273,11 +305,16 @@ struct set_length_proto : strict_contain<LenT> {
  * @tparam Dim: the dimension name of the transformed structure
  * @param length: the desired length
  */
-template<auto ...Dims, class ...LenT> requires IsDimPack<decltype(Dims)...>
-constexpr auto set_length(LenT ...len) noexcept { return (... ^ set_length_proto<Dims, good_index_t<LenT>>(len)); }
+template<auto... Dims, class... LenT>
+requires IsDimPack<decltype(Dims)...>
+constexpr auto set_length(LenT... len) noexcept {
+	return (... ^ set_length_proto<Dims, good_index_t<LenT>>(len));
+}
 
 template<>
-constexpr auto set_length<>() noexcept { return neutral_proto(); }
+constexpr auto set_length<>() noexcept {
+	return neutral_proto();
+}
 
 } // namespace noarr
 

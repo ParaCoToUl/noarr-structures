@@ -19,8 +19,7 @@ struct scalar : strict_contain<> {
 	using strict_contain<>::strict_contain;
 
 	static constexpr char name[] = "scalar";
-	using params = struct_params<
-		type_param<T>>;
+	using params = struct_params<type_param<T>>;
 
 	using signature = scalar_sig<T>;
 
@@ -32,15 +31,17 @@ struct scalar : strict_contain<> {
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr auto size([[maybe_unused]] State state = empty_state) noexcept\
-	requires (has_size<State>()) {
+	static constexpr auto size(State /*unused*/ = empty_state) noexcept
+	requires (has_size<State>())
+	{
 		return constexpr_arithmetic::make_const<sizeof(T)>();
 	}
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr auto align([[maybe_unused]] State state = empty_state) noexcept
-	requires (has_size<State>()) {
+	static constexpr auto align(State /*unused*/ = empty_state) noexcept
+	requires (has_size<State>())
+	{
 		return constexpr_arithmetic::make_const<alignof(T)>();
 	}
 
@@ -50,11 +51,10 @@ struct scalar : strict_contain<> {
 		return false;
 	}
 
-
 	template<class Sub, IsState State>
-	static constexpr void strict_offset_of([[maybe_unused]] State state = empty_state) noexcept
-	requires (has_offset_of<Sub, scalar, State>()) {
-	}
+	static constexpr void strict_offset_of(State /*unused*/ = empty_state) noexcept
+	requires (has_offset_of<Sub, scalar, State>())
+	{}
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
@@ -63,9 +63,9 @@ struct scalar : strict_contain<> {
 	}
 
 	template<IsDim auto QDim, IsState State>
-	static constexpr void length([[maybe_unused]] State state = empty_state) noexcept
-	requires (has_length<QDim, State>()) {
-	}
+	static constexpr void length(State /*unused*/ = empty_state) noexcept
+	requires (has_length<QDim, State>())
+	{}
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
@@ -74,9 +74,9 @@ struct scalar : strict_contain<> {
 	}
 
 	template<class Sub, IsState State>
-	static constexpr void strict_state_at([[maybe_unused]] State state = empty_state) noexcept
-	requires (has_state_at<Sub, scalar, State>()) {
-	}
+	static constexpr void strict_state_at(State /*unused*/ = empty_state) noexcept
+	requires (has_state_at<Sub, scalar, State>())
+	{}
 };
 
 } // namespace noarr

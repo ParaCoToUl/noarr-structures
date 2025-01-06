@@ -17,30 +17,33 @@ struct into_blocks_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "into_blocks_t";
-	using params = struct_params<
-		dim_param<Dim>,
-		dim_param<DimMajor>,
-		dim_param<DimMinor>,
-		structure_param<T>>;
+	using params = struct_params<dim_param<Dim>, dim_param<DimMajor>, dim_param<DimMinor>, structure_param<T>>;
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->get(); }
+	constexpr T sub_structure() const noexcept {
+		return this->get();
+	}
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for both components of a dimension");
-	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>, "Dimension of this name already exists");
-	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>, "Dimension of this name already exists");
+	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>,
+	              "Dimension of this name already exists");
+	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>,
+	              "Dimension of this name already exists");
+
 private:
 	template<class Original>
 	struct dim_replacement {
 		static_assert(!Original::dependent, "Cannot split a tuple index into blocks");
 		using major_length = dynamic_arg_length;
 		using minor_length = dynamic_arg_length;
-		using type = function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, typename Original::ret_sig>>;
+		using type =
+			function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, typename Original::ret_sig>>;
 	};
 
 	template<IsState State>
 	static constexpr auto clean_state(State state) noexcept {
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>>();
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>,
+		                             length_in<DimMajor>, length_in<DimMinor>>();
 	}
 
 	template<IsState State>
@@ -48,33 +51,34 @@ private:
 	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
 		using namespace constexpr_arithmetic;
 		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
-		if constexpr(State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
+		if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
 			const auto major_length = state.template get<length_in<DimMajor>>();
 			const auto minor_length = state.template get<length_in<DimMinor>>();
-			if constexpr(have_indices) {
+			if constexpr (have_indices) {
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(major_length*minor_length, major_index*minor_length + minor_index);
+				return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(
+					major_length * minor_length, major_index * minor_length + minor_index);
 			} else {
-				return clean_state(state).template with<length_in<Dim>>(major_length*minor_length);
+				return clean_state(state).template with<length_in<Dim>>(major_length * minor_length);
 			}
-		} else if constexpr(State::template contains<length_in<DimMinor>>) {
-			if constexpr(have_indices) {
+		} else if constexpr (State::template contains<length_in<DimMinor>>) {
+			if constexpr (have_indices) {
 				const auto minor_length = state.template get<length_in<DimMinor>>();
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<index_in<Dim>>(major_index*minor_length + minor_index);
+				return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
 			} else {
 				return clean_state(state);
 			}
-		} else if constexpr(State::template contains<length_in<DimMajor>>) {
-			if constexpr(have_indices) {
+		} else if constexpr (State::template contains<length_in<DimMajor>>) {
+			if constexpr (have_indices) {
 				const auto cs = clean_state(state);
 				const auto major_length = state.template get<length_in<DimMajor>>();
 				const auto minor_length = sub_structure.template length<Dim>(cs) / major_length;
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return cs.template with<index_in<Dim>>(major_index*minor_length + minor_index);
+				return cs.template with<index_in<Dim>>(major_index * minor_length + minor_index);
 			} else {
 				return clean_state(state);
 			}
@@ -108,14 +112,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -132,58 +138,68 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, into_blocks_t, State>()) {
+	requires (has_offset_of<Sub, into_blocks_t, State>())
+	{
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		if constexpr(QDim == DimMinor) {
-			if constexpr(State::template contains<index_in<DimMinor>>) {
+		if constexpr (QDim == DimMinor) {
+			if constexpr (State::template contains<index_in<DimMinor>>) {
 				return false;
-			} else if constexpr(State::template contains<length_in<DimMinor>>) {
-				static_assert(!State::template contains<length_in<DimMajor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the minor dimension");
+			} else if constexpr (State::template contains<length_in<DimMinor>>) {
+				static_assert(!State::template contains<length_in<DimMajor>> ||
+				                  !sub_structure_t::template has_length<Dim, clean_state_t<State>>(),
+				              "Two different ways to determine the length of the minor dimension");
 				return true;
-			} else if constexpr(State::template contains<length_in<DimMajor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
-				return true;
-			} else {
-				return false;
-			}
-		} else if constexpr(QDim == DimMajor) {
-			if constexpr(State::template contains<index_in<DimMajor>>) {
-				return false;
-			} else if constexpr(State::template contains<length_in<DimMajor>>) {
-				static_assert(!State::template contains<length_in<DimMinor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the major dimension");
-				return true;
-			} else if constexpr(State::template contains<length_in<DimMinor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
+			} else if constexpr (State::template contains<length_in<DimMajor>> &&
+			                     sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
 				return true;
 			} else {
 				return false;
 			}
-		} else if constexpr(QDim == Dim) {
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (State::template contains<index_in<DimMajor>>) {
+				return false;
+			} else if constexpr (State::template contains<length_in<DimMajor>>) {
+				static_assert(!State::template contains<length_in<DimMinor>> ||
+				                  !sub_structure_t::template has_length<Dim, clean_state_t<State>>(),
+				              "Two different ways to determine the length of the major dimension");
+				return true;
+			} else if constexpr (State::template contains<length_in<DimMinor>> &&
+			                     sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == Dim) {
 			return false;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<QDim, State>()) {
+	requires (has_length<QDim, State>())
+	{
 		using namespace constexpr_arithmetic;
-		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
-		if constexpr(QDim == DimMinor) {
-			if constexpr(State::template contains<length_in<DimMinor>>) {
+		static_assert(!State::template contains<index_in<QDim>>,
+		              "This dimension is already fixed, it cannot be used from outside");
+		if constexpr (QDim == DimMinor) {
+			if constexpr (State::template contains<length_in<DimMinor>>) {
 				return state.template get<length_in<DimMinor>>();
 			} else {
 				const auto major_length = state.template get<length_in<DimMajor>>();
 				const auto full_length = sub_structure().template length<Dim>(clean_state(state));
 				return full_length / major_length;
 			}
-		} else if constexpr(QDim == DimMajor) {
-			if constexpr(State::template contains<length_in<DimMajor>>) {
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (State::template contains<length_in<DimMajor>>) {
 				return state.template get<length_in<DimMajor>>();
 			} else {
 				const auto minor_length = state.template get<length_in<DimMinor>>();
@@ -204,7 +220,8 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, into_blocks_t, State>()) {
+	requires (has_state_at<Sub, into_blocks_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -215,7 +232,9 @@ struct into_blocks_proto {
 
 	template<class Struct>
 	[[nodiscard]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_t<Dim, DimMajor, DimMinor, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return into_blocks_t<Dim, DimMajor, DimMinor, Struct>(s);
+	}
 };
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor = Dim>
@@ -228,22 +247,24 @@ struct into_blocks_dynamic_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "into_blocks_dynamic_t";
-	using params = struct_params<
-		dim_param<Dim>,
-		dim_param<DimMajor>,
-		dim_param<DimMinor>,
-		dim_param<DimIsPresent>,
-		structure_param<T>>;
+	using params = struct_params<dim_param<Dim>, dim_param<DimMajor>, dim_param<DimMinor>, dim_param<DimIsPresent>,
+	                             structure_param<T>>;
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->get(); }
+	constexpr T sub_structure() const noexcept {
+		return this->get();
+	}
 
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for two components of a dimension");
 	static_assert(DimMinor != DimIsPresent, "Cannot use the same name for two components of a dimension");
 	static_assert(DimIsPresent != DimMajor, "Cannot use the same name for two components of a dimension");
-	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>, "Dimension of this name already exists");
-	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>, "Dimension of this name already exists");
-	static_assert(DimIsPresent == Dim || !T::signature::template any_accept<DimIsPresent>, "Dimension of this name already exists");
+	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>,
+	              "Dimension of this name already exists");
+	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>,
+	              "Dimension of this name already exists");
+	static_assert(DimIsPresent == Dim || !T::signature::template any_accept<DimIsPresent>,
+	              "Dimension of this name already exists");
+
 private:
 	template<class Original>
 	struct dim_replacement {
@@ -251,14 +272,18 @@ private:
 		using major_length = dynamic_arg_length;
 		using minor_length = dynamic_arg_length;
 		using ispresent_length = dynamic_arg_length;
-		using type = function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, function_sig<DimIsPresent, ispresent_length, typename Original::ret_sig>>>;
+		using type =
+			function_sig<DimMajor, major_length,
+		                 function_sig<DimMinor, minor_length,
+		                              function_sig<DimIsPresent, ispresent_length, typename Original::ret_sig>>>;
 	};
 
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto clean_state(State state) noexcept {
 		static_assert(!State::template contains<length_in<DimIsPresent>>, "This dimension cannot be resized");
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>,
+		                             length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
 	}
 
 	template<IsState State>
@@ -266,33 +291,35 @@ private:
 	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
 		using namespace constexpr_arithmetic;
 		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
-		if constexpr(State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
+		if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
 			const auto major_length = state.template get<length_in<DimMajor>>();
 			const auto minor_length = state.template get<length_in<DimMinor>>();
-			if constexpr(have_indices) {
+			if constexpr (have_indices) {
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(major_length*minor_length, major_index*minor_length + minor_index);
+				return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(
+					major_length * minor_length, major_index * minor_length + minor_index);
 			} else {
-				return clean_state(state).template with<length_in<Dim>>(major_length*minor_length);
+				return clean_state(state).template with<length_in<Dim>>(major_length * minor_length);
 			}
-		} else if constexpr(State::template contains<length_in<DimMinor>>) {
-			if constexpr(have_indices) {
+		} else if constexpr (State::template contains<length_in<DimMinor>>) {
+			if constexpr (have_indices) {
 				const auto minor_length = state.template get<length_in<DimMinor>>();
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<index_in<Dim>>(major_index*minor_length + minor_index);
+				return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
 			} else {
 				return clean_state(state);
 			}
-		} else if constexpr(State::template contains<length_in<DimMajor>>) {
-			if constexpr(have_indices) {
+		} else if constexpr (State::template contains<length_in<DimMajor>>) {
+			if constexpr (have_indices) {
 				const auto cs = clean_state(state);
 				const auto major_length = state.template get<length_in<DimMajor>>();
-				const auto minor_length = (sub_structure.template length<Dim>(cs) + major_length - make_const<1>()) / major_length;
+				const auto minor_length =
+					(sub_structure.template length<Dim>(cs) + major_length - make_const<1>()) / major_length;
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return cs.template with<index_in<Dim>>(major_index*minor_length + minor_index);
+				return cs.template with<index_in<Dim>>(major_index * minor_length + minor_index);
 			} else {
 				return clean_state(state);
 			}
@@ -326,14 +353,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -350,62 +379,74 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, into_blocks_dynamic_t, State>()) {
+	requires (has_offset_of<Sub, into_blocks_dynamic_t, State>())
+	{
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		if constexpr(QDim == DimIsPresent) {
-			if constexpr(!State::template contains<index_in<DimMajor>, index_in<DimMinor>>) {
+		if constexpr (QDim == DimIsPresent) {
+			if constexpr (!State::template contains<index_in<DimMajor>, index_in<DimMinor>>) {
 				return false;
 			} else {
-				if constexpr(!State::template contains<length_in<DimMinor>> && !State::template contains<length_in<DimMajor>>) {
+				if constexpr (!State::template contains<length_in<DimMinor>> &&
+				              !State::template contains<length_in<DimMajor>>) {
 					return false;
-				} else if constexpr(State::template contains<length_in<DimMinor>> && State::template contains<length_in<DimMajor>>) {
-					static_assert(!sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the minor dimension");
+				} else if constexpr (State::template contains<length_in<DimMinor>> &&
+				                     State::template contains<length_in<DimMajor>>) {
+					static_assert(!sub_structure_t::template has_length<Dim, clean_state_t<State>>(),
+					              "Two different ways to determine the length of the minor dimension");
 					return true;
 				} else {
 					return sub_structure_t::template has_length<Dim, sub_state_t<State>>();
 				}
 			}
-		} else if constexpr(QDim == DimMinor) {
-			if constexpr(State::template contains<index_in<DimMinor>>) {
+		} else if constexpr (QDim == DimMinor) {
+			if constexpr (State::template contains<index_in<DimMinor>>) {
 				return false;
-			} else if constexpr(State::template contains<length_in<DimMinor>>) {
-				static_assert(!State::template contains<length_in<DimMajor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the minor dimension");
+			} else if constexpr (State::template contains<length_in<DimMinor>>) {
+				static_assert(!State::template contains<length_in<DimMajor>> ||
+				                  !sub_structure_t::template has_length<Dim, clean_state_t<State>>(),
+				              "Two different ways to determine the length of the minor dimension");
 				return true;
-			} else if constexpr(State::template contains<length_in<DimMajor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
-				return true;
-			} else {
-				return false;
-			}
-		} else if constexpr(QDim == DimMajor) {
-			if constexpr(State::template contains<index_in<DimMajor>>) {
-				return false;
-			} else if constexpr(State::template contains<length_in<DimMajor>>) {
-				static_assert(!State::template contains<length_in<DimMinor>> || !sub_structure_t::template has_length<Dim, clean_state_t<State>>(), "Two different ways to determine the length of the major dimension");
-				return true;
-			} else if constexpr(State::template contains<length_in<DimMinor>> && sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
+			} else if constexpr (State::template contains<length_in<DimMajor>> &&
+			                     sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
 				return true;
 			} else {
 				return false;
 			}
-		} else if constexpr(QDim == Dim) {
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (State::template contains<index_in<DimMajor>>) {
+				return false;
+			} else if constexpr (State::template contains<length_in<DimMajor>>) {
+				static_assert(!State::template contains<length_in<DimMinor>> ||
+				                  !sub_structure_t::template has_length<Dim, clean_state_t<State>>(),
+				              "Two different ways to determine the length of the major dimension");
+				return true;
+			} else if constexpr (State::template contains<length_in<DimMinor>> &&
+			                     sub_structure_t::template has_length<Dim, sub_state_t<State>>()) {
+				return true;
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == Dim) {
 			return false;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<QDim, State>()) {
+	requires (has_length<QDim, State>())
+	{
 		using namespace constexpr_arithmetic;
-		if constexpr(QDim == DimIsPresent) {
-			if constexpr(State::template contains<length_in<DimMinor>>) {
+		if constexpr (QDim == DimIsPresent) {
+			if constexpr (State::template contains<length_in<DimMinor>>) {
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
 				const auto minor_length = state.template get<length_in<DimMinor>>();
@@ -421,16 +462,16 @@ public:
 				const auto full_index = major_index * minor_length + minor_index;
 				return std::size_t(full_index < full_length);
 			}
-		} else if constexpr(QDim == DimMinor) {
-			if constexpr(State::template contains<length_in<DimMinor>>) {
+		} else if constexpr (QDim == DimMinor) {
+			if constexpr (State::template contains<length_in<DimMinor>>) {
 				return state.template get<length_in<DimMinor>>();
 			} else {
 				const auto major_length = state.template get<length_in<DimMajor>>();
 				const auto full_length = sub_structure().template length<Dim>(clean_state(state));
 				return (full_length + major_length - make_const<1>()) / major_length;
 			}
-		} else if constexpr(QDim == DimMajor) {
-			if constexpr(State::template contains<length_in<DimMajor>>) {
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (State::template contains<length_in<DimMajor>>) {
 				return state.template get<length_in<DimMajor>>();
 			} else {
 				const auto minor_length = state.template get<length_in<DimMinor>>();
@@ -451,7 +492,8 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, into_blocks_dynamic_t, State>()) {
+	requires (has_state_at<Sub, into_blocks_dynamic_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -462,7 +504,9 @@ struct into_blocks_dynamic_proto {
 
 	template<class Struct>
 	[[nodiscard]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, Struct>(s);
+	}
 };
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent>
@@ -475,44 +519,52 @@ struct into_blocks_static_t : strict_contain<T, MinorLenT> {
 	using strict_contain<T, MinorLenT>::strict_contain;
 
 	static constexpr char name[] = "into_blocks_static_t";
-	using params = struct_params<
-		dim_param<Dim>,
-		dim_param<DimIsBorder>,
-		dim_param<DimMajor>,
-		dim_param<DimMinor>,
-		structure_param<T>,
-		type_param<MinorLenT>>;
+	using params = struct_params<dim_param<Dim>, dim_param<DimIsBorder>, dim_param<DimMajor>, dim_param<DimMinor>,
+	                             structure_param<T>, type_param<MinorLenT>>;
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->template get<0>(); }
+	constexpr T sub_structure() const noexcept {
+		return this->template get<0>();
+	}
 
 	[[nodiscard]]
-	constexpr MinorLenT minor_length() const noexcept { return this->template get<1>(); }
+	constexpr MinorLenT minor_length() const noexcept {
+		return this->template get<1>();
+	}
 
 	static_assert(DimIsBorder != DimMajor, "Cannot use the same name for multiple components of a dimension");
 	static_assert(DimIsBorder != DimMinor, "Cannot use the same name for multiple components of a dimension");
 	static_assert(DimMajor != DimMinor, "Cannot use the same name for multiple components of a dimension");
-	static_assert(DimIsBorder == Dim || !T::signature::template any_accept<DimIsBorder>, "Dimension of this name already exists");
-	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>, "Dimension of this name already exists");
-	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>, "Dimension of this name already exists");
+	static_assert(DimIsBorder == Dim || !T::signature::template any_accept<DimIsBorder>,
+	              "Dimension of this name already exists");
+	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>,
+	              "Dimension of this name already exists");
+	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>,
+	              "Dimension of this name already exists");
+
 private:
 	template<class Original>
 	struct dim_replacement {
 		static_assert(!Original::dependent, "Cannot split a tuple index into blocks");
+
 		template<class, class>
 		struct divmod {
 			using quo = dynamic_arg_length;
 			using rem = dynamic_arg_length;
 		};
+
 		template<std::size_t Num, std::size_t Denom>
 		struct divmod<static_arg_length<Num>, static_arg_length<Denom>> {
 			using quo = static_arg_length<Num / Denom>;
 			using rem = static_arg_length<Num % Denom>;
 		};
+
 		using denom = arg_length_from_t<MinorLenT>;
 		using dm = divmod<typename Original::arg_length, denom>;
-		using body_type = function_sig<DimMajor, typename dm::quo, function_sig<DimMinor, denom, typename Original::ret_sig>>;
-		using border_type = function_sig<DimMajor, static_arg_length<1>, function_sig<DimMinor, typename dm::rem, typename Original::ret_sig>>;
+		using body_type =
+			function_sig<DimMajor, typename dm::quo, function_sig<DimMinor, denom, typename Original::ret_sig>>;
+		using border_type = function_sig<DimMajor, static_arg_length<1>,
+		                                 function_sig<DimMinor, typename dm::rem, typename Original::ret_sig>>;
 		using type = dep_function_sig<DimIsBorder, body_type, border_type>;
 	};
 
@@ -522,22 +574,23 @@ private:
 		static_assert(!State::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
 		static_assert(!State::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>();
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>,
+		                             index_in<DimMinor>>();
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto sub_state_impl(State state, T sub_structure, MinorLenT minor_length) noexcept {
 		using namespace constexpr_arithmetic;
-		if constexpr(State::template contains<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>) {
+		if constexpr (State::template contains<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>) {
 			const auto minor_index = state.template get<index_in<DimMinor>>();
-			if constexpr(is_body<State>()) {
+			if constexpr (is_body<State>()) {
 				const auto major_index = state.template get<index_in<DimMajor>>();
-				return clean_state(state).template with<index_in<Dim>>(major_index*minor_length + minor_index);
+				return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
 			} else /*border*/ {
 				const auto cs = clean_state(state);
 				const auto major_length = sub_structure.template length<Dim>(cs) / minor_length;
-				return cs.template with<index_in<Dim>>(major_length*minor_length + minor_index);
+				return cs.template with<index_in<Dim>>(major_length * minor_length + minor_index);
 			}
 		} else {
 			return clean_state(state);
@@ -558,7 +611,8 @@ public:
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<sub_structure_t>(), std::declval<MinorLenT>()));
+	using sub_state_t =
+		decltype(sub_state_impl(std::declval<State>(), std::declval<sub_structure_t>(), std::declval<MinorLenT>()));
 
 	template<IsState State>
 	static constexpr bool has_size() noexcept {
@@ -568,14 +622,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -588,27 +644,29 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, into_blocks_static_t, State>()) {
+	requires (has_offset_of<Sub, into_blocks_static_t, State>())
+	{
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
-		if constexpr(QDim == DimMajor) {
-			if constexpr(is_body<State>()) {
+		static_assert(!State::template contains<index_in<QDim>>,
+		              "This dimension is already fixed, it cannot be used from outside");
+		if constexpr (QDim == DimMajor) {
+			if constexpr (is_body<State>()) {
 				return sub_structure_t::template has_length<Dim, sub_state_t<State>>();
 			} else /*border*/ {
 				return true;
 			}
-		} else if constexpr(QDim == DimMinor) {
-			if constexpr(is_body<State>()) {
+		} else if constexpr (QDim == DimMinor) {
+			if constexpr (is_body<State>()) {
 				return true;
 			} else /*border*/ {
 				return sub_structure_t::template has_length<Dim, sub_state_t<State>>();
 			}
-		} else if constexpr(QDim == DimIsBorder) {
+		} else if constexpr (QDim == DimIsBorder) {
 			static_assert(!State::template contains<length_in<DimIsBorder>>, "Cannot set length in this dimension");
 			return true;
 		} else {
@@ -616,21 +674,23 @@ public:
 		}
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<QDim, State>()) {
+	requires (has_length<QDim, State>())
+	{
 		using namespace constexpr_arithmetic;
-		if constexpr(QDim == DimIsBorder) {
+		if constexpr (QDim == DimIsBorder) {
 			return make_const<2>();
-		} else if constexpr(QDim == DimMinor) {
-			if constexpr(is_body<State>()) {
+		} else if constexpr (QDim == DimMinor) {
+			if constexpr (is_body<State>()) {
 				return minor_length();
 			} else /*border*/ {
 				return sub_structure().template length<Dim>(sub_state(state)) % minor_length();
 			}
-		} else if constexpr(QDim == DimMajor) {
-			if constexpr(is_body<State>()) {
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (is_body<State>()) {
 				return sub_structure().template length<Dim>(sub_state(state)) / minor_length();
 			} else /*border*/ {
 				return make_const<1>();
@@ -650,7 +710,8 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, into_blocks_static_t, State>()) {
+	requires (has_state_at<Sub, into_blocks_static_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -660,7 +721,8 @@ private:
 	static constexpr bool is_body() noexcept {
 		static_assert(State::template contains<index_in<DimIsBorder>>, "Index has not been set");
 		constexpr auto is_border = state_get_t<State, index_in<DimIsBorder>>::value;
-		static_assert(is_border == 0 || is_border == 1, "The is-border index must be set statically (use lit<0> or lit<1>)");
+		static_assert(is_border == 0 || is_border == 1,
+		              "The is-border index must be set statically (use lit<0> or lit<1>)");
 		return is_border == 0;
 	}
 };
@@ -673,7 +735,9 @@ struct into_blocks_static_proto : strict_contain<MinorLenT> {
 
 	template<class Struct>
 	[[nodiscard]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, Struct, MinorLenT>(s, this->get()); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, Struct, MinorLenT>(s, this->get());
+	}
 };
 
 template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class MinorLenT>
@@ -686,21 +750,22 @@ struct merge_blocks_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "merge_blocks_t";
-	using params = struct_params<
-		dim_param<DimMajor>,
-		dim_param<DimMinor>,
-		dim_param<Dim>,
-		structure_param<T>>;
+	using params = struct_params<dim_param<DimMajor>, dim_param<DimMinor>, dim_param<Dim>, structure_param<T>>;
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->get(); }
+	constexpr T sub_structure() const noexcept {
+		return this->get();
+	}
 
 	static_assert(DimMajor != DimMinor, "Cannot merge a dimension with itself");
-	static_assert(Dim == DimMajor || Dim == DimMinor || !T::signature::template any_accept<Dim>, "Dimension of this name already exists");
+	static_assert(Dim == DimMajor || Dim == DimMinor || !T::signature::template any_accept<Dim>,
+	              "Dimension of this name already exists");
+
 private:
 	template<class Original>
 	struct outer_dim_replacement {
 		static_assert(!Original::dependent, "Cannot merge a tuple index");
+
 		template<class OriginalInner>
 		struct inner_dim_replacement {
 			static_assert(!OriginalInner::dependent, "Cannot merge a tuple index");
@@ -710,10 +775,16 @@ private:
 
 			template<bool = OrigMinor::arg_length::is_static && OrigMajor::arg_length::is_static, class = void>
 			struct merged_len;
+
 			template<class Useless>
-			struct merged_len<true, Useless> { using type = static_arg_length<OrigMajor::arg_length::value * OrigMinor::arg_length::value>; };
+			struct merged_len<true, Useless> {
+				using type = static_arg_length<OrigMajor::arg_length::value * OrigMinor::arg_length::value>;
+			};
+
 			template<class Useless>
-			struct merged_len<false, Useless> { using type = dynamic_arg_length; };
+			struct merged_len<false, Useless> {
+				using type = dynamic_arg_length;
+			};
 
 			using type = function_sig<Dim, typename merged_len<>::type, typename OriginalInner::ret_sig>;
 		};
@@ -724,7 +795,8 @@ private:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto clean_state(State state) noexcept {
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>();
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>,
+		                             index_in<DimMinor>, length_in<DimMinor>>();
 	}
 
 	template<IsState State>
@@ -733,19 +805,21 @@ private:
 		using namespace constexpr_arithmetic;
 		const auto cs = clean_state(state);
 		const auto minor_length = sub_structure.template length<DimMinor>(cs);
-		if constexpr(State::template contains<length_in<Dim>>) {
+		if constexpr (State::template contains<length_in<Dim>>) {
 			const auto dim_length = state.template get<length_in<Dim>>();
 			const auto major_length = dim_length / minor_length;
-			if constexpr(State::template contains<index_in<Dim>>) {
+			if constexpr (State::template contains<index_in<Dim>>) {
 				const auto index = state.template get<index_in<Dim>>();
-				return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(index / minor_length, index % minor_length, major_length);
+				return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(
+					index / minor_length, index % minor_length, major_length);
 			} else {
 				return cs.template with<length_in<DimMajor>>(major_length);
 			}
 		} else {
-			if constexpr(State::template contains<index_in<Dim>>) {
+			if constexpr (State::template contains<index_in<Dim>>) {
 				const auto index = state.template get<index_in<Dim>>();
-				return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length, index % minor_length);
+				return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
+				                                                                index % minor_length);
 			} else {
 				return cs;
 			}
@@ -776,14 +850,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -796,35 +872,41 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, merge_blocks_t, State>()) {
+	requires (has_offset_of<Sub, merge_blocks_t, State>())
+	{
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!State::template contains<index_in<QDim>>, "This dimension is already fixed, it cannot be used from outside");
-		if constexpr(QDim == Dim) {
-			if constexpr(State::template contains<length_in<Dim>>) {
+		static_assert(!State::template contains<index_in<QDim>>,
+		              "This dimension is already fixed, it cannot be used from outside");
+		if constexpr (QDim == Dim) {
+			if constexpr (State::template contains<length_in<Dim>>) {
 				return true;
 			} else {
-				return sub_structure_t::template has_length<DimMajor, sub_state_t<State>>() && sub_structure_t::template has_length<DimMinor, sub_state_t<State>>();
+				return sub_structure_t::template has_length<DimMajor, sub_state_t<State>>() &&
+				       sub_structure_t::template has_length<DimMinor, sub_state_t<State>>();
 			}
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<QDim, State>()) {
+	requires (has_length<QDim, State>())
+	{
 		using namespace constexpr_arithmetic;
-		if constexpr(QDim == Dim) {
-			if constexpr(State::template contains<length_in<Dim>>) {
+		if constexpr (QDim == Dim) {
+			if constexpr (State::template contains<length_in<Dim>>) {
 				return state.template get<length_in<Dim>>();
 			} else {
-				return sub_structure().template length<DimMajor>(sub_state(state)) * sub_structure().template length<DimMinor>(sub_state(state));
+				return sub_structure().template length<DimMajor>(sub_state(state)) *
+				       sub_structure().template length<DimMinor>(sub_state(state));
 			}
 		} else {
 			return sub_structure().template length<QDim>(sub_state(state));
@@ -840,7 +922,8 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, merge_blocks_t, State>()) {
+	requires (has_state_at<Sub, merge_blocks_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -851,7 +934,9 @@ struct merge_blocks_proto {
 
 	template<class Struct>
 	[[nodiscard]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return merge_blocks_t<DimMajor, DimMinor, Dim, Struct>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return merge_blocks_t<DimMajor, DimMinor, Dim, Struct>(s);
+	}
 };
 
 template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim = DimMinor>

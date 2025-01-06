@@ -1,0 +1,50 @@
+# .clang-format configuration file
+
+# General
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+ColumnLimit: 120
+LineEnding: LF
+
+# C++
+Language: Cpp
+
+UseTab: AlignWithSpaces
+
+SortIncludes: true
+
+InsertBraces: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterFunction: false
+  AfterNamespace: false
+  AfterStruct: false
+  AfterUnion: false
+  BeforeCatch: false
+  BeforeElse: false
+  BeforeWhile: false
+  BeforeLambdaBody: false
+  IndentBraces: false
+
+BreakTemplateDeclarations: Yes
+SpaceAfterTemplateKeyword: false
+BreakAfterAttributes: Always
+
+IndentAccessModifiers: false
+AccessModifierOffset: -4
+IndentCaseLabels: false
+RequiresClausePosition: OwnLine
+IndentRequiresClause: false
+IndentPPDirectives: AfterHash
+
+AllowShortFunctionsOnASingleLine: All
+
+SeparateDefinitionBlocks: Always
+
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+  AfterRequiresInClause: true

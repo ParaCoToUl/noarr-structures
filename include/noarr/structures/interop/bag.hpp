@@ -8,8 +8,8 @@
 
 #include "../base/contain.hpp"
 #include "../base/state.hpp"
-#include "../extra/to_struct.hpp"
 #include "../extra/funcs.hpp"
+#include "../extra/to_struct.hpp"
 
 namespace noarr {
 
@@ -93,23 +93,21 @@ class bag_t : flexible_contain<Structure, typename BagPolicy::type> {
 	using base = flexible_contain<Structure, typename BagPolicy::type>;
 
 public:
-	explicit constexpr bag_t(Structure s) : base(s, BagPolicy::construct(s | noarr::get_size()))
-	{ }
+	explicit constexpr bag_t(Structure s) : base(s, BagPolicy::construct(s | noarr::get_size())) {}
 
-	explicit constexpr bag_t(Structure s, typename BagPolicy::type &&data) : base(s, std::move(data))
-	{ }
+	explicit constexpr bag_t(Structure s, typename BagPolicy::type &&data) : base(s, std::move(data)) {}
 
-	explicit constexpr bag_t(Structure s, const typename BagPolicy::type &data) : base(s, data)
-	{ }
+	explicit constexpr bag_t(Structure s, const typename BagPolicy::type &data) : base(s, data) {}
 
-	explicit constexpr bag_t(Structure s, BagPolicy policy) : base(s, policy.construct(s | noarr::get_size()))
-	{ }
+	explicit constexpr bag_t(Structure s, BagPolicy policy) : base(s, policy.construct(s | noarr::get_size())) {}
 
 	/**
 	 * @brief return the wrapped structure which describes the `data` blob
 	 */
 	[[nodiscard]]
-	constexpr auto structure() const noexcept { return base::template get<0>(); }
+	constexpr auto structure() const noexcept {
+		return base::template get<0>();
+	}
 
 	using structure_t = Structure;
 
@@ -117,7 +115,9 @@ public:
 	 * @brief returns the underlying data blob
 	 */
 	[[nodiscard]]
-	constexpr auto data() const noexcept { return BagPolicy::get(base::template get<1>()); }
+	constexpr auto data() const noexcept {
+		return BagPolicy::get(base::template get<1>());
+	}
 
 	using data_t = typename BagPolicy::type;
 
@@ -127,9 +127,10 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<auto ...Dims, class ...Ts> requires IsDimPack<decltype(Dims)...>
+	template<auto... Dims, class... Ts>
+	requires IsDimPack<decltype(Dims)...>
 	[[nodiscard]]
-	constexpr decltype(auto) at(Ts ...ts) const noexcept {
+	constexpr decltype(auto) at(Ts... ts) const noexcept {
 		return structure() | noarr::get_at<Dims...>(data(), ts...);
 	}
 
@@ -138,7 +139,7 @@ public:
 	 *
 	 * @param ts: the dimension values
 	 */
-	 [[nodiscard]]
+	[[nodiscard]]
 	constexpr decltype(auto) operator[](ToState auto state) const noexcept {
 		return structure() | noarr::get_at(data(), convert_to_state(state));
 	}
@@ -149,13 +150,15 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<auto ...Dims, class ...Ts> requires IsDimPack<decltype(Dims)...>
+	template<auto... Dims, class... Ts>
+	requires IsDimPack<decltype(Dims)...>
 	[[nodiscard]]
-	constexpr auto offset(Ts ...ts) const noexcept {
+	constexpr auto offset(Ts... ts) const noexcept {
 		return structure() | noarr::offset<Dims...>(ts...);
 	}
 
-	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
+	template<auto Dim, IsState State>
+	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		return structure_t::template has_length<Dim, State>();
@@ -166,17 +169,21 @@ public:
 	 *
 	 * @tparam Dim: the dimension name
 	 */
-	template<auto Dim> requires IsDim<decltype(Dim)>
+	template<auto Dim>
+	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
 	constexpr auto length() const noexcept
-	requires (has_length<Dim, decltype(empty_state)>()) {
+	requires (has_length<Dim, decltype(empty_state)>())
+	{
 		return structure() | noarr::get_length<Dim>();
 	}
 
-	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
+	template<auto Dim, IsState State>
+	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<Dim, State>()) {
+	requires (has_length<Dim, State>())
+	{
 		return structure() | noarr::get_length<Dim>(state);
 	}
 
@@ -192,14 +199,17 @@ public:
 	 */
 	[[nodiscard]]
 	constexpr auto size() const noexcept
-	requires (has_size<state<>>()) {
+	requires (has_size<state<>>())
+	{
 		return structure() | noarr::get_size();
 	}
 
-	template<auto Dim, IsState State> requires IsDim<decltype(Dim)>
+	template<auto Dim, IsState State>
+	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return structure() | noarr::get_size<Dim>(state);
 	}
 
@@ -210,15 +220,18 @@ public:
 	[[nodiscard]]
 	constexpr auto get_ref() const noexcept;
 
-	template<IsProtoStruct ProtoStruct> requires (ProtoStruct::proto_preserves_layout)
+	template<IsProtoStruct ProtoStruct>
+	requires (ProtoStruct::proto_preserves_layout)
 	[[nodiscard("Returns a new bag")]]
-	friend constexpr auto operator ^(bag_t &&s, ProtoStruct p) {
-		return bag_t<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p, std::move(std::move(s).template get<1>()));
+	friend constexpr auto operator^(bag_t &&s, ProtoStruct p) {
+		return bag_t<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p,
+		                                                     std::move(std::move(s).template get<1>()));
 	}
 
-	template<IsProtoStruct ProtoStruct> requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
+	template<IsProtoStruct ProtoStruct>
+	requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
 	[[nodiscard("Returns a new bag")]]
-	friend constexpr auto operator ^(const bag_t &s, ProtoStruct p) {
+	friend constexpr auto operator^(const bag_t &s, ProtoStruct p) {
 		return bag_t<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p, s.template get<1>());
 	}
 };
@@ -227,7 +240,8 @@ template<class T>
 concept IsBag = IsSpecialization<T, bag_t>;
 
 template<class Structure>
-constexpr bag_t<Structure, helpers::bag_policy<std::unique_ptr>> bag(Structure s, std::unique_ptr<char[]> &&ptr) noexcept {
+constexpr bag_t<Structure, helpers::bag_policy<std::unique_ptr>> bag(Structure s,
+                                                                     std::unique_ptr<char[]> &&ptr) noexcept {
 	return bag_t<Structure, helpers::bag_policy<std::unique_ptr>>(s, std::move(ptr));
 }
 
@@ -242,7 +256,8 @@ constexpr bag_t<Structure, helpers::bag_policy<helpers::bag_raw_pointer_tag>> ba
 }
 
 template<class Structure>
-constexpr bag_t<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>> bag(Structure s, const void *ptr) noexcept {
+constexpr bag_t<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>> bag(Structure s,
+                                                                                        const void *ptr) noexcept {
 	return bag_t<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_tag>>(s, ptr);
 }
 
@@ -254,7 +269,8 @@ template<class Structure>
 using const_raw_bag = decltype(bag(std::declval<Structure>(), std::declval<const void *>()));
 
 /**
- * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using
+ * std::unique_ptr
  *
  * @param s: the structure
  */
@@ -264,7 +280,8 @@ constexpr auto make_unique_bag(Structure s) {
 }
 
 /**
- * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::vector
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using
+ * std::vector
  *
  * @param s: the structure
  */
@@ -274,7 +291,8 @@ constexpr auto make_vector_bag(Structure s) {
 }
 
 /**
- * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using std::unique_ptr
+ * @brief creates a bag with the given structure and automatically creates the underlying data block implemented using
+ * std::unique_ptr
  *
  * @param s: the structure
  */
@@ -305,18 +323,15 @@ constexpr auto make_bag(Structure s, const void *data) noexcept {
 	return const_raw_bag<Structure>(s, data);
 }
 
-
-
 template<class Structure, class BagPolicy>
 constexpr auto bag_t<Structure, BagPolicy>::get_ref() const noexcept {
 	return make_bag(structure(), data());
 }
 
-
-
 template<class T, class P>
 struct to_struct<bag_t<T, P>> {
 	using type = std::remove_cvref_t<T>;
+
 	static constexpr T convert(const bag_t<T, P> &b) noexcept { return b.structure(); }
 };
 
