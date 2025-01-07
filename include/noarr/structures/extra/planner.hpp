@@ -301,7 +301,7 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 	requires (std::same_as<Ending, planner_endings<>>)
 	[[nodiscard("returns a new planner")]]
 	constexpr auto for_each(F f) const {
-		using signature = typename decltype(get_union())::signature;
+		using signature = typename union_struct::signature;
 		return make_planner(get_union(), get_order(), planner_endings(planner_ending_t<signature, F>(f)));
 	}
 
@@ -309,7 +309,7 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 	requires (std::same_as<Ending, planner_endings<>>)
 	[[nodiscard("returns a new planner")]]
 	constexpr auto for_each_elem(F f) const {
-		using signature = typename decltype(get_union())::signature;
+		using signature = typename union_struct::signature;
 		return make_planner(get_union(), get_order(), planner_endings(planner_ending_elem_t<signature, F>(f)));
 	}
 
@@ -317,7 +317,7 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 	requires IsDimPack<decltype(Dims)...>
 	[[nodiscard("returns a new planner")]]
 	constexpr auto for_sections(F f) const {
-		using union_sig = typename decltype(get_union())::signature;
+		using union_sig = typename union_struct::signature;
 
 		struct sigholder_t {
 			using signature = union_sig;
@@ -404,7 +404,7 @@ concept IsPlanner = IsSpecialization<T, planner_t>;
 
 template<IsPlanner P>
 struct to_traverser<P> : std::true_type {
-	using type = decltype(traverser(P().get_union()));
+	using type = decltype(traverser(std::declval<P>().get_union()));
 
 	[[nodiscard]]
 	static constexpr type convert(const P &p) noexcept {
