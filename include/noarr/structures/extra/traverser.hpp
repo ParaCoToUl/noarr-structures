@@ -279,19 +279,35 @@ constexpr auto traverser(union_t<Ts...> u) noexcept {
 }
 
 template<class T>
-struct is_traverser : std::false_type {};
+concept IsTraverser = IsSpecialization<T, traverser_t>;
+
+template<class T>
+struct to_traverser : std::false_type {};
+
+template<class T>
+constexpr bool to_traverser_v = to_traverser<T>::value;
+
+template<class T>
+using to_traverser_t = typename to_traverser<T>::type;
+
+template<class T>
+concept ToTraverser = to_traverser_v<std::remove_cvref_t<T>>;
+
+template<class T>
+requires ToTraverser<T>
+constexpr decltype(auto) convert_to_traverser(T &&t) noexcept {
+	return to_traverser<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
+}
 
 template<class Struct, class Order>
-struct is_traverser<traverser_t<Struct, Order>> : std::true_type {};
+struct to_traverser<traverser_t<Struct, Order>> : std::true_type {
+	using type = traverser_t<Struct, Order>;
 
-template<class T>
-struct is_traverser<const T> : is_traverser<T> {};
-
-template<class T>
-constexpr bool is_traverser_v = is_traverser<T>::value;
-
-template<class T>
-concept IsTraverser = is_traverser_v<std::remove_cvref_t<T>>;
+	[[nodiscard]]
+	static constexpr type convert(const traverser_t<Struct, Order> &traverser) noexcept {
+		return traverser;
+	}
+};
 
 template<IsTraverser T>
 [[nodiscard("returns a new traverser")]]
@@ -300,7 +316,7 @@ constexpr auto operator^(const T &t, IsProtoStruct auto order) noexcept {
 }
 
 template<IsTraverser T>
-struct to_state<T> {
+struct to_state<T> : std::true_type {
 	using type = std::remove_cvref_t<decltype(std::declval<T>().state())>;
 
 	[[nodiscard]]

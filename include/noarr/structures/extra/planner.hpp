@@ -400,19 +400,27 @@ constexpr auto planner(const Ts &...s) noexcept {
 }
 
 template<class T>
-struct is_planner : std::false_type {};
+concept IsPlanner = IsSpecialization<T, planner_t>;
 
-template<class Union, class Order, class Ending>
-struct is_planner<planner_t<Union, Order, Ending>> : std::true_type {};
+template<IsPlanner P>
+struct to_traverser<P> : std::true_type {
+	using type = decltype(traverser(P().get_union()));
 
-template<class T>
-struct is_planner<const T> : is_planner<T> {};
+	[[nodiscard]]
+	static constexpr type convert(const P &p) noexcept {
+		return traverser(p.get_union());
+	}
+};
 
-template<class T>
-constexpr bool is_planner_v = is_planner<T>::value;
+template<IsPlanner P>
+struct to_state<P> : std::true_type {
+	using type = std::remove_cvref_t<decltype(std::declval<P>().state())>;
 
-template<class T>
-concept IsPlanner = is_planner_v<std::remove_cvref_t<T>>;
+	[[nodiscard]]
+	static constexpr type convert(const P &p) noexcept {
+		return p.state();
+	}
+};
 
 template<class... Ts>
 constexpr planner_t<union_t<Ts...>, neutral_proto, planner_endings<>> planner(union_t<Ts...> u) noexcept {
@@ -423,16 +431,6 @@ template<IsPlanner P>
 constexpr auto operator^(const P &p, IsProtoStruct auto order) noexcept {
 	return p.order(order);
 }
-
-template<IsPlanner P>
-struct to_state<P> {
-	using type = std::remove_cvref_t<decltype(std::declval<P>().state())>;
-
-	[[nodiscard]]
-	static constexpr type convert(const P &p) noexcept {
-		return p.state();
-	}
-};
 
 namespace helpers {
 

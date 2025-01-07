@@ -258,26 +258,31 @@ using state_remove_t = decltype(std::declval<State>().template remove<Tags...>()
 static constexpr state<> empty_state;
 
 template<class T>
-struct to_state;
-
-template<IsState T>
-struct to_state<T> {
-	using type = std::remove_cvref_t<T>;
-
-	[[nodiscard]]
-	static constexpr type convert(T t) noexcept {
-		return t;
-	}
-};
+struct to_state : std::false_type {};
 
 template<class T>
-constexpr auto convert_to_state(T &&t) noexcept {
+constexpr bool to_state_v = to_state<T>::value;
+
+template<class T>
+using to_state_t = typename to_state<T>::type;
+
+template<class T>
+concept ToState = to_state_v<std::remove_cvref_t<T>>;
+
+template<class T>
+requires ToState<T>
+constexpr decltype(auto) convert_to_state(T &&t) noexcept {
 	return to_state<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
 }
 
-template<class T>
-concept ToState = requires(T t) {
-	{ convert_to_state(t) } -> IsState;
+template<IsState T>
+struct to_state<T> : std::true_type {
+	using type = std::remove_cvref_t<T>;
+
+	[[nodiscard]]
+	static constexpr type convert(const T &t) noexcept {
+		return t;
+	}
 };
 
 namespace helpers {
