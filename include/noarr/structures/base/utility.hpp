@@ -111,6 +111,10 @@ requires IsDimPack<decltype(Dims)...>
 struct in_dim_sequence {
 	template<auto Dim>
 	requires IsDim<decltype(Dim)>
+	using value_type = bool;
+
+	template<auto Dim>
+	requires IsDim<decltype(Dim)>
 	static constexpr bool value = (... || (Dim == Dims));
 };
 
@@ -303,12 +307,12 @@ constexpr lit_t<I> lit;
 struct empty_t {};
 
 template<class T>
-struct template_negation {
-	template<class... Args>
+struct dim_pred_not {
+	template<auto Dim>
 	using value_type = bool;
 
-	template<class... Args>
-	static constexpr bool value = !T::template value<Args...>;
+	template<auto Dim>
+	static constexpr bool value = !T::template value<Dim>;
 };
 
 template<class>
