@@ -44,6 +44,10 @@ struct bag_raw_pointer_tag;
 template<class...>
 struct bag_const_raw_pointer_tag;
 
+// a helper struct for 'bag_policy' as the 'nullptr' specifier is not a class ()
+template<class...>
+struct bag_nullptr_tag;
+
 template<>
 struct bag_policy<std::unique_ptr> {
 	using type = std::unique_ptr<char[]>;
@@ -77,6 +81,21 @@ struct bag_policy<bag_const_raw_pointer_tag> {
 	[[nodiscard]]
 	static constexpr const void *get(const void *ptr) noexcept {
 		return ptr;
+	}
+};
+
+template<>
+struct bag_policy<bag_nullptr_tag> {
+	using type = std::nullptr_t;
+
+	[[nodiscard]]
+	static constexpr std::nullptr_t construct(std::size_t /*size*/) noexcept {
+		return nullptr;
+	}
+
+	[[nodiscard]]
+	static constexpr std::nullptr_t get(std::nullptr_t /*ptr*/) noexcept {
+		return nullptr;
 	}
 };
 
@@ -262,6 +281,11 @@ constexpr bag_t<Structure, helpers::bag_policy<helpers::bag_const_raw_pointer_ta
 }
 
 template<class Structure>
+constexpr bag_t<Structure, helpers::bag_policy<helpers::bag_nullptr_tag>> bag(Structure s, std::nullptr_t /*unused*/) {
+	return bag_t<Structure, helpers::bag_policy<helpers::bag_nullptr_tag>>(s);
+}
+
+template<class Structure>
 using unique_bag = decltype(bag(std::declval<Structure>(), std::declval<std::unique_ptr<char[]>>()));
 template<class Structure>
 using raw_bag = decltype(bag(std::declval<Structure>(), std::declval<void *>()));
@@ -321,6 +345,17 @@ constexpr auto make_bag(Structure s, void *data) noexcept {
 template<class Structure>
 constexpr auto make_bag(Structure s, const void *data) noexcept {
 	return const_raw_bag<Structure>(s, data);
+}
+
+/**
+ * @brief creates a bag with the given structure and an underlying r/o observing data blob
+ *
+ * @param s: the structure
+ * @param data: the data blob
+ */
+template<class Structure>
+constexpr auto make_bag(Structure s, std::nullptr_t /*unused*/) noexcept {
+	return bag_t<Structure, helpers::bag_policy<helpers::bag_nullptr_tag>>(s);
 }
 
 template<class Structure, class BagPolicy>

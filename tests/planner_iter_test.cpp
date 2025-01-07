@@ -9,7 +9,7 @@
 using namespace noarr;
 
 TEST_CASE("Planner begin end", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	using iter_t = noarr::planner_iterator_t<'x', noarr::union_t<decltype(bag.get_ref())>, noarr::neutral_proto, noarr::planner_endings<>>;
 
 	auto p = noarr::planner(bag);
@@ -25,7 +25,7 @@ TEST_CASE("Planner begin end", "[planner iter]") {
 }
 
 TEST_CASE("Planner iter arithmetics", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	auto b = begin(p);
@@ -98,11 +98,11 @@ TEST_CASE("Planner iter arithmetics", "[planner iter]") {
 }
 
 TEST_CASE("Planner iter type traits", "[planner iter]") {
-	using bag = decltype(make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr).get_ref());
+	using bag = decltype(make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr).get_ref());
 	using iter_t = noarr::planner_iterator_t<'x', noarr::union_t<bag>, noarr::neutral_proto, noarr::planner_endings<>>;
 
 	// iterator should only contain the structure (empty), pointer and index
-	STATIC_REQUIRE(sizeof(iter_t) == sizeof(std::size_t) + sizeof(const void*));
+	STATIC_REQUIRE(sizeof(iter_t) == sizeof(std::size_t) + sizeof(std::nullptr_t));
 
 	// like noarr_test::is_simple, but in addition require assignability
 	// and do *not* require the *absence* of default ctor (since its *presence* is required by std::random_access_iterator)
@@ -116,7 +116,7 @@ TEST_CASE("Planner iter type traits", "[planner iter]") {
 }
 
 TEST_CASE("Planner iter deref", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	std::size_t x = 7;
@@ -132,7 +132,7 @@ TEST_CASE("Planner iter deref", "[planner iter]") {
 }
 
 TEST_CASE("Planner iter deref deref", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	std::size_t x = 7;
@@ -152,7 +152,7 @@ TEST_CASE("Planner iter deref deref", "[planner iter]") {
 }
 
 TEST_CASE("Planner iter for", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	std::size_t x = 0;
@@ -170,7 +170,7 @@ TEST_CASE("Planner iter for", "[planner iter]") {
 }
 
 TEST_CASE("Planner iter for for", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	std::size_t x = 0;
@@ -196,7 +196,7 @@ TEST_CASE("Planner iter for for", "[planner iter]") {
 }
 
 TEST_CASE("Planner trivial iteration", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	std::size_t x = 0, y = 0;
@@ -212,7 +212,7 @@ TEST_CASE("Planner trivial iteration", "[planner iter]") {
 }
 
 TEST_CASE("Planner iteration with hoist", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag) ^ hoist<'y'>();
 
 	std::size_t x = 0, y = 0;
@@ -230,9 +230,9 @@ TEST_CASE("Planner iteration with hoist", "[planner iter]") {
 // TESTS FOR RANGE
 
 TEST_CASE("Planner range methods", "[planner iter]") {
-	auto matrix_bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
-	auto array_bag = make_bag(scalar<int>() ^ array<'x', 1>(), (const void*)nullptr);
-	auto empty_bag = make_bag(scalar<int>() ^ array<'x', 0>(), (const void*)nullptr);
+	auto matrix_bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
+	auto array_bag = make_bag(scalar<int>() ^ array<'x', 1>(), nullptr);
+	auto empty_bag = make_bag(scalar<int>() ^ array<'x', 0>(), nullptr);
 
 	{
 		auto p = noarr::planner(matrix_bag);
@@ -270,7 +270,7 @@ TEST_CASE("Planner range methods", "[planner iter]") {
 }
 
 TEST_CASE("Planner range deref", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	std::size_t x = 7;
@@ -286,7 +286,7 @@ TEST_CASE("Planner range deref", "[planner iter]") {
 }
 
 TEST_CASE("Planner range for", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	std::size_t x = 0;
@@ -304,7 +304,7 @@ TEST_CASE("Planner range for", "[planner iter]") {
 }
 
 TEST_CASE("Planner subrange deref", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	auto r = range<'x'>(p);
@@ -324,7 +324,7 @@ TEST_CASE("Planner subrange deref", "[planner iter]") {
 }
 
 TEST_CASE("Planner subrange for", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'y', 30>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	auto r = range<'x'>(p);
@@ -346,7 +346,7 @@ TEST_CASE("Planner subrange for", "[planner iter]") {
 }
 
 TEST_CASE("Planner subrange for_each", "[planner iter]") {
-	auto bag = make_bag(scalar<int>() ^ array<'x', 20>(), (const void*)nullptr);
+	auto bag = make_bag(scalar<int>() ^ array<'x', 20>(), nullptr);
 	auto p = noarr::planner(bag);
 
 	auto r = range<'x'>(p);

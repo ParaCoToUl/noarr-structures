@@ -17,11 +17,11 @@ TEST_CASE("Wrapper traverser", "[to_struct]") {
 	auto a = at();
 	auto b = bt();
 
-	auto aw = make_bag(a, (char *)nullptr);
-	auto bw = make_bag(b, (char *)nullptr);
+	auto aw = make_bag(a, nullptr);
+	auto bw = make_bag(b, nullptr);
 
-	STATIC_REQUIRE(std::is_same_v<decltype(aw), decltype(bag(a, (char *)nullptr))>);
-	STATIC_REQUIRE(std::is_same_v<decltype(bw), decltype(bag(b, (char *)nullptr))>);
+	STATIC_REQUIRE(std::is_same_v<decltype(aw), decltype(bag(a, nullptr))>);
+	STATIC_REQUIRE(std::is_same_v<decltype(bw), decltype(bag(b, nullptr))>);
 
 	REQUIRE(std::is_empty_v<decltype(traverser(a, b))>);
 	STATIC_REQUIRE(std::is_same_v<decltype(traverser(a, b)), decltype(traverser(aw, bw))>);
@@ -36,8 +36,8 @@ TEST_CASE("Bag traverser", "[to_struct]") {
 	auto a = at();
 	auto b = bt();
 
-	auto aw = make_bag(a, (char *)nullptr);
-	auto bw = make_bag(b, (char *)nullptr);
+	auto aw = make_bag(a, nullptr);
+	auto bw = make_bag(b, nullptr);
 
 	REQUIRE(std::is_empty_v<decltype(traverser(a, b))>);
 	STATIC_REQUIRE(std::is_same_v<decltype(traverser(a, b)), decltype(traverser(aw, bw))>);
@@ -52,10 +52,10 @@ TEST_CASE("Vector wrapper traverser", "[to_struct]") {
 	auto a = at() ^ noarr::set_length<'x', 'y'>(2, 3);
 	auto b = bt() ^ noarr::set_length<'y', 'z'>(3, 4);
 
-	auto aw = noarr::make_bag(a, (char *)nullptr);
-	auto bw = noarr::make_bag(b, (char *)nullptr);
-	STATIC_REQUIRE(std::is_same_v<decltype(aw), decltype(bag(a, (char *)nullptr))>);
-	STATIC_REQUIRE(std::is_same_v<decltype(bw), decltype(bag(b, (char *)nullptr))>);
+	auto aw = noarr::make_bag(a, nullptr);
+	auto bw = noarr::make_bag(b, nullptr);
+	STATIC_REQUIRE(std::is_same_v<decltype(aw), decltype(bag(a, nullptr))>);
+	STATIC_REQUIRE(std::is_same_v<decltype(bw), decltype(bag(b, nullptr))>);
 
 	REQUIRE(noarr_test::equal_data(traverser(a, b), traverser(aw, bw)));
 }
@@ -67,8 +67,8 @@ TEST_CASE("Vector bag traverser", "[to_struct]") {
 	auto a = at() ^ noarr::set_length<'x', 'y'>(2, 3);
 	auto b = bt() ^ noarr::set_length<'y', 'z'>(3, 4);
 
-	auto aw = noarr::make_bag(a, (char *)nullptr);
-	auto bw = noarr::make_bag(b, (char *)nullptr);
+	auto aw = noarr::make_bag(a, nullptr);
+	auto bw = noarr::make_bag(b, nullptr);
 
 	REQUIRE(noarr_test::equal_data(traverser(a, b), traverser(aw, bw)));
 }
