@@ -257,6 +257,13 @@ public:
 template<class T>
 concept IsBag = IsSpecialization<T, bag_t>;
 
+template<IsBag T>
+struct to_struct<T> : std::true_type {
+	using type = std::remove_cvref_t<decltype(std::declval<T>().structure())>;
+
+	static constexpr type convert(const T &b) noexcept { return b.structure(); }
+};
+
 template<class Structure>
 constexpr bag_t<Structure, helpers::bag_policy<std::unique_ptr>> bag(Structure s,
                                                                      std::unique_ptr<char[]> &&ptr) noexcept {
@@ -361,13 +368,6 @@ template<class Structure, class BagPolicy>
 constexpr auto bag_t<Structure, BagPolicy>::get_ref() const noexcept {
 	return make_bag(structure(), data());
 }
-
-template<class T, class P>
-struct to_struct<bag_t<T, P>> {
-	using type = std::remove_cvref_t<T>;
-
-	static constexpr T convert(const bag_t<T, P> &b) noexcept { return b.structure(); }
-};
 
 } // namespace noarr
 

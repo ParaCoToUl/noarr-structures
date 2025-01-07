@@ -8,10 +8,24 @@
 namespace noarr {
 
 template<class T>
-struct to_struct;
+struct to_struct : std::false_type {};
+
+template<class T>
+constexpr bool to_struct_v = to_struct<T>::value;
+
+template<class T>
+using to_struct_t = typename to_struct<T>::type;
+
+template<class T>
+concept ToStruct = to_struct_v<std::remove_cvref_t<T>>;
+
+template<class T>
+constexpr auto convert_to_struct(T &&t) noexcept {
+	return to_struct<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
+}
 
 template<IsStruct T>
-struct to_struct<T> {
+struct to_struct<T> : std::true_type {
 	using type = std::remove_cvref_t<T>;
 
 	[[nodiscard]]
@@ -21,9 +35,11 @@ struct to_struct<T> {
 };
 
 template<class T>
-constexpr auto convert_to_struct(T &&t) noexcept {
-	return to_struct<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
-}
+struct to_struct<pack<T>> : std::true_type {
+	using type = T;
+
+	static constexpr type convert(const pack<T> &p) noexcept { return p.template get<0>(); }
+};
 
 } // namespace noarr
 
