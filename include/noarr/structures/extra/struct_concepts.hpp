@@ -12,10 +12,11 @@ namespace helpers {
 template<class T, auto... Dims>
 requires IsDimPack<decltype(Dims)...>
 struct has_dims {
+private:
 	using struct_type = typename to_struct<T>::type;
 	using dim_tree = sig_dim_tree<typename struct_type::signature>;
-	using restricted = dim_tree_restrict<dim_tree, dim_sequence<Dims...>>;
 
+public:
 	static constexpr bool value = (... && dim_tree_contains<Dims, dim_tree>);
 };
 

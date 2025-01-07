@@ -106,6 +106,14 @@ struct dim_identity_mapper {
 	static constexpr auto value = Dim;
 };
 
+template<auto... Dims>
+requires IsDimPack<decltype(Dims)...>
+struct in_dim_sequence {
+	template<auto Dim>
+	requires IsDim<decltype(Dim)>
+	static constexpr bool value = (... || (Dim == Dims));
+};
+
 namespace helpers {
 
 template<class... Packs>
@@ -156,25 +164,24 @@ struct dim_sequence_concat_impl<dim_sequence<vs1...>> {
 	using type = dim_sequence<vs1...>;
 };
 
-template<class In, class Set>
-struct dim_sequence_restrict_impl;
+template<class In, class Pred>
+struct dim_sequence_filter_impl;
 
-template<auto v, auto... vs, class Set>
-requires (dim_sequence_contains<Set>::template value<v>)
-struct dim_sequence_restrict_impl<dim_sequence<v, vs...>, Set> {
+template<auto v, auto... vs, class Pred>
+requires (Pred::template value<v>)
+struct dim_sequence_filter_impl<dim_sequence<v, vs...>, Pred> {
 	using type =
 		typename dim_sequence_concat_impl<dim_sequence<v>,
-	                                      typename dim_sequence_restrict_impl<dim_sequence<vs...>, Set>::type>::type;
+	                                      typename dim_sequence_filter_impl<dim_sequence<vs...>, Pred>::type>::type;
 };
 
-template<auto v, auto... vs, class Set>
-requires (!dim_sequence_contains<Set>::template value<v>)
-struct dim_sequence_restrict_impl<dim_sequence<v, vs...>, Set> {
-	using type = typename dim_sequence_restrict_impl<dim_sequence<vs...>, Set>::type;
+template<auto v, auto... vs, class Pred>
+struct dim_sequence_filter_impl<dim_sequence<v, vs...>, Pred> {
+	using type = typename dim_sequence_filter_impl<dim_sequence<vs...>, Pred>::type;
 };
 
-template<class Set>
-struct dim_sequence_restrict_impl<dim_sequence<>, Set> {
+template<class Pred>
+struct dim_sequence_filter_impl<dim_sequence<>, Pred> {
 	using type = dim_sequence<>;
 };
 
@@ -201,22 +208,23 @@ struct dim_tree_contains_impl<v, dim_tree<V, Branches...>>
 template<auto v, class... Branches>
 struct dim_tree_contains_impl<v, dim_tree<v, Branches...>> : std::true_type {};
 
-template<class Tree, class Set>
-struct dim_tree_restrict_impl;
+template<class Tree, class Pred>
+struct dim_tree_filter_impl;
 
-template<auto v, class Branch, class Set>
-requires (!dim_sequence_contains<Set>::template value<v>)
-struct dim_tree_restrict_impl<dim_tree<v, Branch>, Set> {
-	using type = typename dim_tree_restrict_impl<Branch, Set>::type;
+template<auto v, class Branch, class Pred>
+requires (!Pred::template value<v>)
+struct dim_tree_filter_impl<dim_tree<v, Branch>, Pred> {
+	using type = typename dim_tree_filter_impl<Branch, Pred>::type;
 };
 
-template<auto v, class... Branches, class Set>
-struct dim_tree_restrict_impl<dim_tree<v, Branches...>, Set> {
-	using type = dim_tree<v, typename dim_tree_restrict_impl<Branches, Set>::type...>;
+template<auto v, class... Branches, class Pred>
+requires (Pred::template value<v>)
+struct dim_tree_filter_impl<dim_tree<v, Branches...>, Pred> {
+	using type = dim_tree<v, typename dim_tree_filter_impl<Branches, Pred>::type...>;
 };
 
-template<class Set>
-struct dim_tree_restrict_impl<dim_sequence<>, Set> {
+template<class Pred>
+struct dim_tree_filter_impl<dim_sequence<>, Pred> {
 	using type = dim_sequence<>;
 };
 
@@ -267,13 +275,13 @@ using integer_sequence_concat = typename helpers::integer_sequence_concat_impl<P
 template<class... Packs>
 using integer_sequence_concat_sep = typename helpers::integer_sequence_concat_sep_impl<Packs...>::type;
 
-template<class In, class Set>
-using dim_sequence_restrict = typename helpers::dim_sequence_restrict_impl<In, Set>::type;
+template<class In, class Pred>
+using dim_sequence_filter = typename helpers::dim_sequence_filter_impl<In, Pred>::type;
 
 using helpers::dim_tree;
 
-template<class In, class Set>
-using dim_tree_restrict = typename helpers::dim_tree_restrict_impl<In, Set>::type;
+template<class In, class Pred>
+using dim_tree_filter = typename helpers::dim_tree_filter_impl<In, Pred>::type;
 
 using helpers::dim_tree_contains;
 
@@ -293,6 +301,15 @@ template<std::size_t I>
 constexpr lit_t<I> lit;
 
 struct empty_t {};
+
+template<class T>
+struct template_negation {
+	template<class... Args>
+	using value_type = bool;
+
+	template<class... Args>
+	static constexpr bool value = !T::template value<Args...>;
+};
 
 template<class>
 static constexpr bool always_false = false;

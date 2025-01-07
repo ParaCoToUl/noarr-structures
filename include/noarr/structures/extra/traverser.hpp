@@ -185,7 +185,7 @@ struct traverser_t : strict_contain<Struct, Order> {
 	requires IsDimPack<decltype(Dim), decltype(Dims)...>
 	constexpr void for_sections(F f) const {
 		using dim_tree =
-			dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dim, Dims...>>;
+			dim_tree_filter<sig_dim_tree<typename decltype(top_struct())::signature>, in_dim_sequence<Dim, Dims...>>;
 		static_assert((dim_tree_contains<Dim, dim_tree> && ... && dim_tree_contains<Dims, dim_tree>),
 		              "Requested dimensions are not present");
 		for_each_impl(dim_tree(), f, empty_state);
@@ -201,7 +201,7 @@ struct traverser_t : strict_contain<Struct, Order> {
 	requires IsDimPack<decltype(Dims)...>
 	constexpr void for_dims(F f) const {
 		using dim_tree =
-			dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dims...>>;
+			dim_tree_filter<sig_dim_tree<typename decltype(top_struct())::signature>, in_dim_sequence<Dims...>>;
 		static_assert((... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
 		for_each_impl(dim_tree_from_sequence<dim_sequence<Dims...>>(), f, empty_state);
 	}
