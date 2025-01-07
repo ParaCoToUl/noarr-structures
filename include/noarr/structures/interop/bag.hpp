@@ -223,13 +223,12 @@ public:
 		return structure() | noarr::get_size();
 	}
 
-	template<auto Dim, IsState State>
-	requires IsDim<decltype(Dim)>
+	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
 	{
-		return structure() | noarr::get_size<Dim>(state);
+		return structure() | noarr::get_size(state);
 	}
 
 	/**
