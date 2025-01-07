@@ -36,9 +36,8 @@ static bool test_case_failed = false;
 			noarr_test::assertion_failed(); \
 			noarr_test::test_case_failed = true; \
 			throw noarr_test::requirement_failed{}; \
-		} else { \
-			noarr_test::assertion_passed(); \
 		} \
+		noarr_test::assertion_passed(); \
 	} while (false)
 
 #define CHECK(...) \

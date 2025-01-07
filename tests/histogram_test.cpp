@@ -37,9 +37,11 @@ void histogram_template_test()
 	auto histogram = noarr::make_bag(noarr::array_t<'x', pixel_range, noarr::scalar<int>>());
 	CHECK(histogram.size() == pixel_range * sizeof(int));
 
-	for (std::size_t i = 0; i < width; i++)
-		for (std::size_t j = 0; j < height; j++)
+	for (std::size_t i = 0; i < width; i++) {
+		for (std::size_t j = 0; j < height; j++) {
 			image.template at<'x','y'>(i, j) = 0;
+		}
+	}
 
 	for (std::size_t i = 0; i < pixel_range; i++)
 		histogram.template at<'x'>(i) = 0;
