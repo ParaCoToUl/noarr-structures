@@ -21,8 +21,8 @@ template<auto... Dims>
 requires IsDimPack<decltype(Dims)...>
 struct zc_uniquity;
 
-template<IsDim auto Dim, auto... Dims>
-requires IsDimPack<decltype(Dims)...>
+template<auto Dim, auto... Dims>
+requires IsDimPack<decltype(Dim), decltype(Dims)...>
 struct zc_uniquity<Dim, Dims...> {
 	static constexpr bool value = (... && (Dims != Dim)) && zc_uniquity<Dims...>::value;
 };
@@ -128,7 +128,8 @@ struct zc_dims_pop<dim_sequence<Acc...>, Last> {
 
 } // namespace helpers
 
-template<std::size_t SpecialLevel, std::size_t GeneralLevel, IsDim auto Dim, class T, auto... Dims>
+template<std::size_t SpecialLevel, std::size_t GeneralLevel, auto Dim, class T, auto... Dims>
+requires IsDimPack<decltype(Dim), decltype(Dims)...>
 struct merge_zcurve_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
@@ -293,7 +294,8 @@ public:
 	}
 };
 
-template<std::size_t SpecialLevel, std::size_t GeneralLevel, IsDim auto Dim, auto... Dims>
+template<std::size_t SpecialLevel, std::size_t GeneralLevel, auto Dim, auto... Dims>
+requires IsDimPack<decltype(Dim), decltype(Dims)...>
 struct merge_zcurve_proto {
 	static constexpr bool proto_preserves_layout = true;
 
@@ -331,7 +333,7 @@ public:
 
 private:
 	template<std::size_t SpecialLevel, std::size_t GeneralLevel, auto Dim, auto... Dims>
-	requires (IsDim<decltype(Dim)> && ... && IsDim<decltype(Dims)>)
+	requires IsDimPack<decltype(Dim), decltype(Dims)...>
 	static constexpr merge_zcurve_proto<SpecialLevel, GeneralLevel, Dim, Dims...>
 	maxlen_alignment(dim_sequence<Dims...> /*ds*/) noexcept {
 		return {};

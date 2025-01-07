@@ -437,7 +437,7 @@ struct to_state<P> {
 namespace helpers {
 
 template<class F, auto... Dims>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 struct for_each_elem_t : public F {};
 
 } // namespace helpers
@@ -447,7 +447,7 @@ struct planner_execute_t {};
 constexpr planner_execute_t planner_execute() noexcept { return {}; }
 
 template<auto... Dims, class F>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 constexpr auto for_each_elem(F &&f) noexcept {
 	return helpers::for_each_elem_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }

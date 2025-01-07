@@ -454,12 +454,9 @@ struct rename_state {
 } // namespace helpers
 
 template<class T, auto... DimPairs>
-requires IsDimPack<decltype(DimPairs)...>
+requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0)
 struct rename_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
-
-	static_assert(sizeof...(DimPairs) % 2 == 0,
-	              "Expected an even number of dimensions. Usage: rename<Old1, New1, Old2, New2, ...>()");
 
 private:
 	using unzip = helpers::rename_unzip_dim_pairs<dim_sequence<>, dim_sequence<>, DimPairs...>;
@@ -613,21 +610,23 @@ struct join_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
 	static constexpr char name[] = "join_t";
-	using params = struct_params<
-		structure_param<T>,
-		dim_param<DimA>,
-		dim_param<DimB>,
-		dim_param<Dim>>;
+	using params = struct_params<structure_param<T>, dim_param<DimA>, dim_param<DimB>, dim_param<Dim>>;
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->get(); }
+	constexpr T sub_structure() const noexcept {
+		return this->get();
+	}
 
 	using sub_structure_t = T;
+
+	static_assert(Dim == DimA || Dim == DimB || !T::signature::template any_accept<Dim>,
+	              "Dimension of this name already exists");
 
 private:
 	[[nodiscard]]
 	static constexpr auto clean_state(IsState auto state) noexcept {
-		return state.template remove<index_in<Dim>, index_in<DimA>, index_in<DimB>, length_in<Dim>, length_in<DimA>, length_in<DimB>>();
+		return state.template remove<index_in<Dim>, index_in<DimA>, index_in<DimB>, length_in<Dim>, length_in<DimA>,
+		                             length_in<DimB>>();
 	}
 
 	template<class State>
@@ -635,11 +634,14 @@ private:
 
 	using dim_a = sig_find_dim<DimA, state<>, typename T::signature>;
 	using dim_b = sig_find_dim<DimB, state<>, typename T::signature>;
+
 	static_assert(!dim_a::dependent && !dim_b::dependent, "Cannot join dependent dimensions");
-	static_assert(std::is_same_v<typename dim_a::arg_length, typename dim_b::arg_length>, "Joined dimensions must have the same length");
+	static_assert(std::is_same_v<typename dim_a::arg_length, typename dim_b::arg_length>,
+	              "Joined dimensions must have the same length");
 
 public:
-	using signature = function_sig<Dim, typename dim_a::arg_length, typename T::signature::template replace<sig_remove_first, DimA, DimB>>;
+	using signature = function_sig<Dim, typename dim_a::arg_length,
+	                               typename T::signature::template replace<sig_remove_first, DimA, DimB>>;
 
 	template<IsState State>
 	[[nodiscard]]
@@ -647,12 +649,16 @@ public:
 		constexpr bool has_index = state.template contains<index_in<Dim>>;
 		constexpr bool has_length = state.template contains<length_in<Dim>>;
 
-		static_assert(!(sub_structure_t::template has_length<DimA, clean_state_t<State>>() ^ sub_structure_t::template has_length<DimB, clean_state_t<State>>()), "Both dimensions must be either sized or unsized");
+		static_assert(!(sub_structure_t::template has_length<DimA, clean_state_t<State>>() ^
+		                sub_structure_t::template has_length<DimB, clean_state_t<State>>()),
+		              "Both dimensions must be either sized or unsized");
 
 		if constexpr (has_index && has_length) {
 			const auto index = state.template get<index_in<Dim>>();
 			const auto length = state.template get<length_in<Dim>>();
-			static_assert(!sub_structure_t::template has_length<DimA, clean_state_t<State>>() && !sub_structure_t::template has_length<DimB, clean_state_t<State>>(), "Cannot set joined dimension length on an already sized structure");
+			static_assert(!sub_structure_t::template has_length<DimA, clean_state_t<State>>() &&
+			                  !sub_structure_t::template has_length<DimB, clean_state_t<State>>(),
+			              "Cannot set joined dimension length on an already sized structure");
 			return clean_state(state).template with<index_in<DimA>, index_in<DimB>, length_in<DimA>, length_in<DimB>>(
 				index, index, length, length);
 		} else if constexpr (has_index) {
@@ -660,7 +666,9 @@ public:
 			return clean_state(state).template with<index_in<DimA>, index_in<DimB>>(index, index);
 		} else if constexpr (has_length) {
 			const auto length = state.template get<length_in<Dim>>();
-			static_assert(!sub_structure_t::template has_length<DimA, clean_state_t<State>>() && !sub_structure_t::template has_length<DimB, clean_state_t<State>>(), "Cannot set joined dimension length on an already sized structure");
+			static_assert(!sub_structure_t::template has_length<DimA, clean_state_t<State>>() &&
+			                  !sub_structure_t::template has_length<DimB, clean_state_t<State>>(),
+			              "Cannot set joined dimension length on an already sized structure");
 			return clean_state(state).template with<length_in<DimA>, length_in<DimB>>(length, length);
 		} else {
 			return clean_state(state);
@@ -678,14 +686,16 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto align(State state) const noexcept
-	requires (has_size<State>()) {
+	requires (has_size<State>())
+	{
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -698,20 +708,24 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_offset_of(State state) const noexcept
-	requires (has_offset_of<Sub, join_t, State>()) {
+	requires (has_offset_of<Sub, join_t, State>())
+	{
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
-	template<auto QDim, IsState State> requires IsDim<decltype(QDim)>
+	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept
-	requires (has_length<QDim, State>()) {
+	requires (has_length<QDim, State>())
+	{
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
@@ -724,22 +738,29 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	constexpr auto strict_state_at(State state) const noexcept
-	requires (has_state_at<Sub, join_t, State>()) {
+	requires (has_state_at<Sub, join_t, State>())
+	{
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
-template<auto DimA, auto DimB, auto Dim = DimA> requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)>
+template<auto DimA, auto DimB, auto Dim = DimA>
+requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)>
 struct join_proto {
 	static constexpr bool proto_preserves_layout = true;
 
 	template<class Struct>
 	[[nodiscard]]
-	constexpr auto instantiate_and_construct(Struct s) const noexcept { return join_t<Struct, DimA, DimB, Dim>(s); }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return join_t<Struct, DimA, DimB, Dim>(s);
+	}
 };
 
-template<auto DimA, auto DimB, auto Dim = DimA> requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)>
-constexpr join_proto<DimA, DimB, Dim> join() noexcept { return {}; }
+template<auto DimA, auto DimB, auto Dim = DimA>
+requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)>
+constexpr join_proto<DimA, DimB, Dim> join() noexcept {
+	return {};
+}
 
 } // namespace noarr
 

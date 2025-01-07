@@ -249,8 +249,8 @@ constexpr auto fix([[maybe_unused]] state<StateItem...> state) noexcept {
 	return (neutral_proto() ^ ... ^ helpers::state_construct_fix(StateItem(), state));
 }
 
-template<IsDim auto Dim, auto... Dims, class... StateItem>
-requires IsDimPack<decltype(Dims)...>
+template<auto Dim, auto... Dims, class... StateItem>
+requires IsDimPack<decltype(Dim), decltype(Dims)...>
 constexpr auto fix(state<StateItem...> state) noexcept {
 	return fix<Dim, Dims...>(get_index<Dim>(state), get_index<Dims>(state)...);
 }

@@ -58,16 +58,7 @@ struct state_item {
 };
 
 template<class T>
-struct is_state_item : std::false_type {};
-
-template<IsTag Tag, class ValueType>
-struct is_state_item<state_item<Tag, ValueType>> : std::true_type {};
-
-template<class T>
-static constexpr bool is_state_item_v = is_state_item<T>::value;
-
-template<class T>
-concept IsStateItem = is_state_item_v<std::remove_cvref_t<T>>;
+concept IsStateItem = IsSpecialization<T, state_item>;
 
 namespace helpers {
 

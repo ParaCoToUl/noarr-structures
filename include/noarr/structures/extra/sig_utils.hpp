@@ -125,7 +125,7 @@ struct sig_remove_first<dep_function_sig<Dim, RetSigs>> {
 	using type = RetSigs;
 };
 
-template<auto Dim, class RetSig, class ...RetSigs>
+template<auto Dim, class RetSig, class... RetSigs>
 struct sig_remove_first<dep_function_sig<Dim, RetSig, RetSigs...>> {
 	static_assert(always_false<sig_remove_first>, "Dependent function signatures are not supported for this operation");
 	using type = RetSig;

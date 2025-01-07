@@ -182,7 +182,7 @@ struct traverser_t : strict_contain<Struct, Order> {
 	}
 
 	template<auto Dim, auto... Dims, class F>
-	requires IsDim<decltype(Dim)> && IsDimPack<decltype(Dims)...>
+	requires IsDimPack<decltype(Dim), decltype(Dims)...>
 	constexpr void for_sections(F f) const {
 		using dim_tree =
 			dim_tree_restrict<sig_dim_tree<typename decltype(top_struct())::signature>, dim_sequence<Dim, Dims...>>;
@@ -312,33 +312,33 @@ struct to_state<T> {
 namespace helpers {
 
 template<class F, auto... Dims>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 struct for_each_t : public F {};
 
 template<class F, auto... Dims>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 struct for_dims_t : public F {};
 
 template<class F, auto... Dims>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 struct for_sections_t : public F {};
 
 } // namespace helpers
 
 template<auto... Dims, class F>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 constexpr auto for_each(F &&f) noexcept {
 	return helpers::for_each_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
 
 template<auto... Dims, class F>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 constexpr auto for_dims(F &&f) noexcept {
 	return helpers::for_dims_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }
 
 template<auto... Dims, class F>
-requires (... && IsDim<decltype(Dims)>)
+requires IsDimPack<decltype(Dims)...>
 constexpr auto for_sections(F &&f) noexcept {
 	return helpers::for_sections_t<std::remove_cvref_t<F>, Dims...>{std::forward<F>(f)};
 }

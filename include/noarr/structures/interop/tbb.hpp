@@ -17,7 +17,7 @@ namespace noarr {
 template<auto Dim, class Struct, class Order>
 requires IsDim<decltype(Dim)>
 template<class Split>
-constexpr traverser_range_t<Dim, Struct, Order>::traverser_range_t(traverser_range_t &orig, Split) noexcept
+constexpr traverser_range_t<Dim, Struct, Order>::traverser_range_t(traverser_range_t &orig, Split /*unused*/) noexcept
 	: base(orig), begin_idx(orig.begin_idx + (orig.end_idx - orig.begin_idx) / 2), end_idx(orig.end_idx) {
 	static_assert(std::is_same_v<Split, tbb::split>, "Invalid constructor call");
 	orig.end_idx = begin_idx;
@@ -49,10 +49,9 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 	} else {
 		// parallel writes may go to colliding offsets => out_ptr must be privatized
 		struct private_ptr {
-			void *raw;
+			void *raw = nullptr;
 
-			constexpr private_ptr() : raw(nullptr) {}
-
+			constexpr private_ptr() noexcept = default;
 			private_ptr(const private_ptr &) = delete;
 			private_ptr(private_ptr &&) = delete;
 			private_ptr &operator=(const private_ptr &) = delete;
@@ -104,10 +103,10 @@ inline void tbb_reduce(const Traverser &t, const FNeut &f_neut, const FAcc &f_ac
 
 struct planner_tbb_execute_t {};
 
-constexpr planner_tbb_execute_t planner_tbb_execute() noexcept { return planner_tbb_execute_t(); }
+constexpr planner_tbb_execute_t planner_tbb_execute() noexcept { return {}; }
 
 template<IsPlanner Planner>
-inline void operator|(const Planner &planner, planner_tbb_execute_t) {
+inline void operator|(const Planner &planner, planner_tbb_execute_t /*unused*/) {
 	tbb::parallel_for(range(planner), [](const auto &sub_range) { sub_range.as_planner().execute(); });
 }
 

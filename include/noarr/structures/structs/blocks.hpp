@@ -13,6 +13,7 @@
 namespace noarr {
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T>
+requires (DimMajor != DimMinor)
 struct into_blocks_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
@@ -24,7 +25,6 @@ struct into_blocks_t : strict_contain<T> {
 		return this->get();
 	}
 
-	static_assert(DimMajor != DimMinor, "Cannot use the same name for both components of a dimension");
 	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>,
 	              "Dimension of this name already exists");
 	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>,
@@ -243,6 +243,7 @@ constexpr auto into_blocks() {
 }
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T>
+requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent != DimMajor)
 struct into_blocks_dynamic_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
@@ -255,9 +256,6 @@ struct into_blocks_dynamic_t : strict_contain<T> {
 		return this->get();
 	}
 
-	static_assert(DimMajor != DimMinor, "Cannot use the same name for two components of a dimension");
-	static_assert(DimMinor != DimIsPresent, "Cannot use the same name for two components of a dimension");
-	static_assert(DimIsPresent != DimMajor, "Cannot use the same name for two components of a dimension");
 	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>,
 	              "Dimension of this name already exists");
 	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>,
@@ -515,6 +513,7 @@ constexpr auto into_blocks_dynamic() {
 }
 
 template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT>
+requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != DimMinor)
 struct into_blocks_static_t : strict_contain<T, MinorLenT> {
 	using strict_contain<T, MinorLenT>::strict_contain;
 
@@ -532,9 +531,6 @@ struct into_blocks_static_t : strict_contain<T, MinorLenT> {
 		return this->template get<1>();
 	}
 
-	static_assert(DimIsBorder != DimMajor, "Cannot use the same name for multiple components of a dimension");
-	static_assert(DimIsBorder != DimMinor, "Cannot use the same name for multiple components of a dimension");
-	static_assert(DimMajor != DimMinor, "Cannot use the same name for multiple components of a dimension");
 	static_assert(DimIsBorder == Dim || !T::signature::template any_accept<DimIsBorder>,
 	              "Dimension of this name already exists");
 	static_assert(DimMajor == Dim || !T::signature::template any_accept<DimMajor>,
@@ -746,6 +742,7 @@ constexpr auto into_blocks_static(MinorLenT minor_length) {
 }
 
 template<IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class T>
+requires (DimMajor != DimMinor)
 struct merge_blocks_t : strict_contain<T> {
 	using strict_contain<T>::strict_contain;
 
@@ -757,7 +754,6 @@ struct merge_blocks_t : strict_contain<T> {
 		return this->get();
 	}
 
-	static_assert(DimMajor != DimMinor, "Cannot merge a dimension with itself");
 	static_assert(Dim == DimMajor || Dim == DimMinor || !T::signature::template any_accept<Dim>,
 	              "Dimension of this name already exists");
 

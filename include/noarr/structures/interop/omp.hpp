@@ -32,10 +32,10 @@ inline void omp_for_sections(const Traverser &t, const F &f) {
 
 struct planner_omp_execute_t {};
 
-constexpr planner_omp_execute_t planner_omp_execute() noexcept { return planner_omp_execute_t(); }
+constexpr planner_omp_execute_t planner_omp_execute() noexcept { return {}; }
 
 template<IsPlanner Planner>
-inline void operator|(const Planner &planner, planner_omp_execute_t) {
+inline void operator|(const Planner &planner, planner_omp_execute_t /*unused*/) {
 #pragma omp parallel for
 	for (auto inner_planner : planner) {
 		inner_planner.execute();
