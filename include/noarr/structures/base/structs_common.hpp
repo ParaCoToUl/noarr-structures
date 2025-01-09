@@ -54,25 +54,15 @@ constexpr bool has_offset_of() noexcept {
 	}
 }
 
-template<class StructInner, class StructOuter>
-constexpr auto offset_of(StructOuter structure, IsState auto state) noexcept {
+template<class StructInner, class StructOuter, IsState State>
+requires (has_offset_of<StructInner, StructOuter, State>())
+constexpr auto offset_of(StructOuter structure, State state) noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return constexpr_arithmetic::make_const<0>();
 	} else {
 		return structure.template strict_offset_of<struct_inner_t>(state);
-	}
-}
-
-template<class StructInner, class StructOuter>
-constexpr auto state_at(StructOuter structure, IsState auto state) noexcept {
-	using struct_inner_t = std::remove_cvref_t<StructInner>;
-	using struct_outer_t = std::remove_cvref_t<StructOuter>;
-	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
-		return state;
-	} else {
-		return structure.template strict_state_at<struct_inner_t>(state);
 	}
 }
 
@@ -84,6 +74,18 @@ constexpr bool has_state_at() noexcept {
 		return true;
 	} else {
 		return struct_outer_t::template has_strict_state_at<struct_inner_t, State>();
+	}
+}
+
+template<class StructInner, class StructOuter, IsState State>
+requires (has_state_at<StructInner, StructOuter, State>())
+constexpr auto state_at(StructOuter structure, State state) noexcept {
+	using struct_inner_t = std::remove_cvref_t<StructInner>;
+	using struct_outer_t = std::remove_cvref_t<StructOuter>;
+	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
+		return state;
+	} else {
+		return structure.template strict_state_at<struct_inner_t>(state);
 	}
 }
 

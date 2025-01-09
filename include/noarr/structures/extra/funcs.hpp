@@ -167,8 +167,7 @@ constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept {
  * @param f: the function
  * @return the result of the piping
  */
-template<class S, class F>
-requires ToStruct<S>
+template<ToStruct S, class F>
 constexpr decltype(auto) operator|(const S &s, F f) {
 	return f(to_struct<S>::convert(s));
 }

@@ -241,7 +241,8 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
+		// Cannot set length of a dimension twice
+		return !State::template contains<length_in<Dim>> && has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
 	template<class Sub, IsState State>
@@ -249,7 +250,6 @@ public:
 	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, set_length_t, State>())
 	{
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length of a dimension twice");
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -257,7 +257,9 @@ public:
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+		// Cannot set length of a dimension twice
+		return !State::template contains<length_in<Dim>> &&
+		       sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
 	template<auto QDim, IsState State>
@@ -266,7 +268,6 @@ public:
 	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
 	{
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set length of a dimension twice");
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
