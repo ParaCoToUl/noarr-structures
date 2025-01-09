@@ -175,6 +175,7 @@ public:
 				return false;
 			}
 		} else if constexpr (QDim == Dim) {
+			// This dimension is consumed by into_blocks
 			return false;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
@@ -430,6 +431,7 @@ public:
 				return false;
 			}
 		} else if constexpr (QDim == Dim) {
+			// This dimension is consumed by into_blocks_dynamic
 			return false;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
@@ -648,9 +650,10 @@ public:
 	template<auto QDim, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!State::template contains<index_in<QDim>>,
-		              "This dimension is already fixed, it cannot be used from outside");
-		if constexpr (QDim == DimMajor) {
+		if constexpr (State::template contains<index_in<QDim>>) {
+			// This dimension is already fixed, it cannot be used from outside
+			return false;
+		} else if constexpr (QDim == DimMajor) {
 			if constexpr (is_body<State>()) {
 				return sub_structure_t::template has_length<Dim, sub_state_t<State>>();
 			} else /*border*/ {
@@ -665,6 +668,9 @@ public:
 		} else if constexpr (QDim == DimIsBorder) {
 			static_assert(!State::template contains<length_in<DimIsBorder>>, "Cannot set length in this dimension");
 			return true;
+		} else if constexpr (QDim == Dim) {
+			// This dimension is consumed by into_blocks_static
+			return false;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}
@@ -796,34 +802,63 @@ private:
 	}
 
 	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
+
+	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
 		using namespace constexpr_arithmetic;
 		const auto cs = clean_state(state);
-		const auto minor_length = sub_structure.template length<DimMinor>(cs);
-		if constexpr (State::template contains<length_in<Dim>>) {
-			const auto dim_length = state.template get<length_in<Dim>>();
-			const auto major_length = dim_length / minor_length;
+		if constexpr (sub_structure_t::template has_length<DimMinor, clean_state_t<State>>() &&
+		              sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
 			if constexpr (State::template contains<index_in<Dim>>) {
-				const auto index = state.template get<index_in<Dim>>();
-				return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(
-					index / minor_length, index % minor_length, major_length);
-			} else {
-				return cs.template with<length_in<DimMajor>>(major_length);
-			}
-		} else {
-			if constexpr (State::template contains<index_in<Dim>>) {
+				const auto minor_length = sub_structure.template length<DimMinor>(cs);
 				const auto index = state.template get<index_in<Dim>>();
 				return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
 				                                                                index % minor_length);
 			} else {
 				return cs;
 			}
+		} else if constexpr (sub_structure_t::template has_length<DimMinor, clean_state_t<State>>()) {
+			const auto minor_length = sub_structure.template length<DimMinor>(cs);
+			if constexpr (State::template contains<length_in<Dim>>) {
+				const auto dim_length = state.template get<length_in<Dim>>();
+				const auto major_length = dim_length / minor_length;
+				if constexpr (State::template contains<index_in<Dim>>) {
+					const auto index = state.template get<index_in<Dim>>();
+					return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(
+						index / minor_length, index % minor_length, major_length);
+				} else {
+					return cs.template with<length_in<DimMajor>>(major_length);
+				}
+			} else {
+				if constexpr (State::template contains<index_in<Dim>>) {
+					const auto index = state.template get<index_in<Dim>>();
+					return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
+					                                                                index % minor_length);
+				} else {
+					return cs;
+				}
+			}
+		} else if constexpr (sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
+			const auto major_length = sub_structure.template length<DimMajor>(cs);
+			if constexpr (State::template contains<length_in<Dim>>) {
+				const auto dim_length = state.template get<length_in<Dim>>();
+				const auto minor_length = dim_length / major_length;
+				if constexpr (State::template contains<index_in<Dim>>) {
+					const auto index = state.template get<index_in<Dim>>();
+					return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>(
+						index / minor_length, index % minor_length, minor_length);
+				} else {
+					return cs.template with<length_in<DimMinor>>(minor_length);
+				}
+			} else {
+				return cs;
+			}
+		} else {
+			return cs;
 		}
 	}
-
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 public:
 	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
@@ -880,11 +915,17 @@ public:
 		              "This dimension is already fixed, it cannot be used from outside");
 		if constexpr (QDim == Dim) {
 			if constexpr (State::template contains<length_in<Dim>>) {
+				static_assert(!sub_structure_t::template has_length<DimMajor, clean_state_t<State>>() ||
+				                  !sub_structure_t::template has_length<DimMinor, clean_state_t<State>>(),
+				              "Two different ways to determine the length of the major dimension");
 				return true;
 			} else {
 				return sub_structure_t::template has_length<DimMajor, sub_state_t<State>>() &&
 				       sub_structure_t::template has_length<DimMinor, sub_state_t<State>>();
 			}
+		} else if constexpr (QDim == DimMinor || QDim == DimMajor) {
+			// This dimension is consumed by merge_blocks
+			return false;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}
