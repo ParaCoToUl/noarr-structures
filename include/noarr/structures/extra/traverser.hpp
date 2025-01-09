@@ -265,6 +265,11 @@ private:
 	constexpr void for_each_impl(dim_sequence<> /*ds*/, F f, noarr::state<> /*state*/) const {
 		f(*this);
 	}
+
+	template<class DimTree, class F, IsState State>
+	friend constexpr void for_each_impl(const traverser_t &traverser, DimTree /*dt*/, F f, State state) {
+		traverser.for_each_impl(DimTree(), f, state);
+	}
 };
 
 template<class... Ts>
