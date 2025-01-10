@@ -165,6 +165,11 @@ constexpr auto get_index(ToState auto state) noexcept {
 	return convert_to_state(state).template get<index_in<Dim>>();
 }
 
+template<IsDim auto Dim>
+constexpr auto get_length_in(ToState auto state) noexcept {
+	return convert_to_state(state).template get<length_in<Dim>>();
+}
+
 template<auto... Dims>
 requires IsDimPack<decltype(Dims)...>
 constexpr auto get_indices(ToState auto state) noexcept {
@@ -173,8 +178,20 @@ constexpr auto get_indices(ToState auto state) noexcept {
 
 template<auto... Dims>
 requires IsDimPack<decltype(Dims)...>
+constexpr auto get_lengths_in(ToState auto state) noexcept {
+	return std::make_tuple(convert_to_state(state).template get<length_in<Dims>>()...);
+}
+
+template<auto... Dims>
+requires IsDimPack<decltype(Dims)...>
 constexpr auto filter_indices(ToState auto state) noexcept {
 	return convert_to_state(state).template filter<index_in<Dims>...>();
+}
+
+template<auto... Dims>
+requires IsDimPack<decltype(Dims)...>
+constexpr auto filter_lengths(ToState auto state) noexcept {
+	return convert_to_state(state).template filter<length_in<Dims>...>();
 }
 
 template<auto... Dims, class... ValueType>
@@ -242,6 +259,16 @@ constexpr auto state_construct_fix(StateItem /*idx*/, IsState auto /*state*/) no
 	return neutral_proto();
 }
 
+template<IsDim auto Dim, class LenT>
+constexpr auto state_construct_set_length(state_item<length_in<Dim>, LenT> /*len*/, IsState auto state) noexcept {
+	return set_length<Dim>(state);
+}
+
+template<class StateItem>
+constexpr auto state_construct_set_length(StateItem /*len*/, IsState auto /*state*/) noexcept {
+	return neutral_proto();
+}
+
 } // namespace helpers
 
 template<class... StateItem>
@@ -253,6 +280,17 @@ template<auto Dim, auto... Dims, class... StateItem>
 requires IsDimPack<decltype(Dim), decltype(Dims)...>
 constexpr auto fix(state<StateItem...> state) noexcept {
 	return fix<Dim, Dims...>(get_index<Dim>(state), get_index<Dims>(state)...);
+}
+
+template<class... StateItem>
+constexpr auto set_length([[maybe_unused]] state<StateItem...> state) noexcept {
+	return (neutral_proto() ^ ... ^ helpers::state_construct_set_length(StateItem(), state));
+}
+
+template<auto Dim, auto... Dims, class... StateItem>
+requires IsDimPack<decltype(Dim), decltype(Dims)...>
+constexpr auto set_length(state<StateItem...> state) noexcept {
+	return (set_length<Dim>(get_length_in<Dim>(state)) ^ ... ^ set_length<Dims>(get_length_in<Dims>(state)));
 }
 
 } // namespace noarr
