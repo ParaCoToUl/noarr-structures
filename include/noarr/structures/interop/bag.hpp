@@ -188,19 +188,10 @@ public:
 	 *
 	 * @tparam Dim: the dimension name
 	 */
-	template<auto Dim>
+	template<auto Dim, IsState State = state<>>
 	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
-	constexpr auto length() const noexcept
-	requires (has_length<Dim, decltype(empty_state)>())
-	{
-		return structure() | noarr::get_length<Dim>();
-	}
-
-	template<auto Dim, IsState State>
-	requires IsDim<decltype(Dim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
+	constexpr auto length(State state = empty_state) const noexcept
 	requires (has_length<Dim, State>())
 	{
 		return structure() | noarr::get_length<Dim>(state);
@@ -216,16 +207,9 @@ public:
 	 * @brief gets the size of the data described by the `structure`
 	 *
 	 */
+	template<IsState State = state<>>
 	[[nodiscard]]
-	constexpr auto size() const noexcept
-	requires (has_size<state<>>())
-	{
-		return structure() | noarr::get_size();
-	}
-
-	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
+	constexpr auto size(State state = empty_state) const noexcept
 	requires (has_size<State>())
 	{
 		return structure() | noarr::get_size(state);

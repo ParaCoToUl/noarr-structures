@@ -37,7 +37,7 @@ struct scalar : strict_contain<> {
 		return constexpr_arithmetic::make_const<sizeof(T)>();
 	}
 
-	template<IsState State>
+	template<IsState State = state<>>
 	[[nodiscard]]
 	static constexpr auto align(State /*unused*/ = empty_state) noexcept
 	requires (has_size<State>())
@@ -51,7 +51,7 @@ struct scalar : strict_contain<> {
 		return false;
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State = state<>>
 	static constexpr void strict_offset_of(State /*unused*/ = empty_state) noexcept
 	requires (has_offset_of<Sub, scalar, State>())
 	{}
@@ -62,7 +62,7 @@ struct scalar : strict_contain<> {
 		return false;
 	}
 
-	template<IsDim auto QDim, IsState State>
+	template<IsDim auto QDim, IsState State = state<>>
 	static constexpr void length(State /*unused*/ = empty_state) noexcept
 	requires (has_length<QDim, State>())
 	{}
@@ -73,7 +73,7 @@ struct scalar : strict_contain<> {
 		return false;
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State = state<>>
 	static constexpr void strict_state_at(State /*unused*/ = empty_state) noexcept
 	requires (has_state_at<Sub, scalar, State>())
 	{}
