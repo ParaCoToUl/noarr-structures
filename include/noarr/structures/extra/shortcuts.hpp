@@ -269,6 +269,33 @@ constexpr auto state_construct_set_length(StateItem /*len*/, IsState auto /*stat
 	return neutral_proto();
 }
 
+template<IsStruct Struct>
+struct index_space_size_impl {
+public:
+	template<class DimTree>
+	static constexpr std::size_t get(Struct structure) noexcept {
+		return get_impl(DimTree{}, structure);
+	}
+
+	static constexpr std::size_t get(Struct structure) noexcept {
+		return get_impl(sig_dim_tree<typename Struct::signature>{}, structure);
+	}
+
+private:
+	template<auto Dim, class... Branches>
+	requires (sizeof...(Branches) != 1)
+	static constexpr std::size_t get_impl(dim_tree<Dim, Branches...> /*dt*/, Struct structure) noexcept {
+		return (... + get_impl(Branches{}, structure));
+	}
+
+	template<auto Dim, class Branch>
+	static constexpr std::size_t get_impl(dim_tree<Dim, Branch> /*dt*/, Struct structure) noexcept {
+		return (structure | get_length<Dim>()) * get_impl(Branch{}, structure);
+	}
+
+	static constexpr std::size_t get_impl(dim_sequence<> /*dt*/, Struct /*structure*/) noexcept { return 1; }
+};
+
 } // namespace helpers
 
 template<class... StateItem>
@@ -291,6 +318,27 @@ template<auto Dim, auto... Dims, class... StateItem>
 requires IsDimPack<decltype(Dim), decltype(Dims)...>
 constexpr auto set_length(state<StateItem...> state) noexcept {
 	return (set_length<Dim>(get_length_in<Dim>(state)) ^ ... ^ set_length<Dims>(get_length_in<Dims>(state)));
+}
+
+template<class Struct>
+constexpr std::size_t index_space_size(Struct structure) noexcept {
+	return helpers::index_space_size_impl<Struct>::get(structure);
+}
+
+template<class DimTree, class Struct>
+constexpr std::size_t index_space_size(Struct structure) noexcept {
+	return helpers::index_space_size_impl<Struct>::template get<DimTree>(structure);
+}
+
+template<IsDim auto Dim, class Branch, class... Branches, IsState State = state<>>
+constexpr auto fix_zeros(dim_tree<Dim, Branch, Branches...> /*unused*/, State state = empty_state) noexcept {
+	return fix_zeros(Branch{}, state & idx<Dim>(lit<0>));
+}
+
+template<auto... Dims, IsState State = state<>> requires IsDimPack<decltype(Dims)...>
+constexpr auto fix_zeros(dim_sequence<Dims...> /*unused*/, State state = empty_state) noexcept {
+	[[maybe_unused]] constexpr auto zero = [](auto /*Dim*/) { return lit<0>; };
+	return state & idx<Dims...>(zero(Dims)...);
 }
 
 } // namespace noarr
