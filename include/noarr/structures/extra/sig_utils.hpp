@@ -131,6 +131,15 @@ struct sig_remove_first<dep_function_sig<Dim, RetSig, RetSigs...>> {
 	using type = RetSig;
 };
 
+template<class Sig>
+struct in_signature {
+	using signature = Sig;
+	using value_type = bool;
+
+	template<IsDim auto Dim>
+	static constexpr bool value = Sig::template any_accept<Dim>;
+};
+
 } // namespace noarr
 
 #endif // NOARR_STRUCTURES_SIG_UTILS_HPP
