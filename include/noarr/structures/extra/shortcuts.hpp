@@ -309,9 +309,25 @@ constexpr auto fix(state<StateItem...> state) noexcept {
 	return fix<Dim, Dims...>(get_index<Dim>(state), get_index<Dims>(state)...);
 }
 
+template<ToState HasState>
+constexpr auto fix(HasState state) noexcept {
+	return fix(convert_to_state(state));
+}
+
+template<auto Dim, auto... Dims, class HasState>
+requires IsDimPack<decltype(Dim), decltype(Dims)...> && ToState<HasState>
+constexpr auto fix(HasState state) noexcept {
+	return fix<Dim, Dims...>(convert_to_state(state));
+}
+
 template<class... StateItem>
 constexpr auto set_length([[maybe_unused]] state<StateItem...> state) noexcept {
 	return (neutral_proto() ^ ... ^ helpers::state_construct_set_length(StateItem(), state));
+}
+
+template<ToState HasState>
+constexpr auto set_length(HasState state) noexcept {
+	return set_length(convert_to_state(state));
 }
 
 template<auto Dim, auto... Dims, class... StateItem>
