@@ -9,15 +9,22 @@
 namespace noarr {
 
 template<auto Tag>
+requires std::is_empty_v<decltype(Tag)> || requires { Tag == Tag; }
 struct dim {
 	/* Currently unspecified content */
+	using tag_type = decltype(Tag);
+	static constexpr tag_type tag = Tag;
 
 	constexpr dim() noexcept = default;
 
 	template<auto Tag2>
 	requires std::same_as<decltype(Tag), decltype(Tag2)>
 	constexpr bool operator==(const dim<Tag2> & /*other*/) const noexcept {
-		return Tag == Tag2;
+		if constexpr (std::is_empty_v<decltype(Tag2)>) {
+			return true;
+		} else {
+			return Tag == Tag2;
+		}
 	}
 
 	template<auto Tag2>

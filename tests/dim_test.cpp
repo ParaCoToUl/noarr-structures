@@ -11,9 +11,9 @@ namespace {
 	constexpr noarr::dim<__LINE__> X;
 	constexpr noarr::dim<__LINE__> x_guard;
 
-	constexpr noarr::dim<__LINE__> y;
-	constexpr noarr::dim<__LINE__> Y;
-	constexpr noarr::dim<__LINE__> y_guard;
+	constexpr noarr::dim<[](){}> y;
+	constexpr noarr::dim<[](){}> Y;
+	constexpr noarr::dim<[](){}> y_guard;
 }
 
 TEST_CASE("Simple use-case of dims", "[dim]") {
