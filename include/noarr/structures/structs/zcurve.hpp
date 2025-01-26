@@ -137,6 +137,12 @@ struct merge_zcurve_t : strict_contain<T> {
 	using params = struct_params<value_param<SpecialLevel>, value_param<GeneralLevel>, dim_param<Dim>,
 	                             structure_param<T>, dim_param<Dims>...>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
@@ -184,18 +190,18 @@ private:
 	[[nodiscard]]
 	static constexpr auto sub_state_impl(State state, T sub_structure, std::index_sequence<DimsI...> /*is*/) noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
-		const auto clean_state = state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
+		const auto tmp_state = clean_state(state);
 		if constexpr (State::template contains<index_in<Dim>>) {
 			const std::size_t index = state.template get<index_in<Dim>>();
 			const auto index_general = index >> SpecialLevel * sizeof...(Dims);
 			const auto index_special = index & ((1U << SpecialLevel * sizeof...(Dims)) - 1U);
 			const auto indices = helpers::zc_general<GeneralLevel - SpecialLevel>(
-				index_general, (sub_structure.template length<Dims>(clean_state) >> SpecialLevel)...);
-			return clean_state.template with<index_in<Dims>...>(
+				index_general, (sub_structure.template length<Dims>(tmp_state) >> SpecialLevel)...);
+			return tmp_state.template with<index_in<Dims>...>(
 				((std::get<DimsI>(indices) << SpecialLevel) +
 			     helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
 		} else {
-			return clean_state;
+			return tmp_state;
 		}
 	}
 
@@ -208,10 +214,18 @@ public:
 		return sub_state_impl(state, sub_structure(), std::make_index_sequence<sizeof...(Dims)>());
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<index_in<Dim>, index_in<Dims>..., length_in<Dims>...>();
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t =
 		decltype(sub_state_impl(std::declval<State>(), std::declval<T>(), std::make_index_sequence<sizeof...(Dims)>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]

@@ -16,6 +16,11 @@ struct bcast_t : strict_contain<T> {
 	static constexpr char name[] = "bcast_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>>;
 
+	template<IsState State>
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return strict_contain<T>::get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return strict_contain<T>::get();
@@ -27,9 +32,17 @@ struct bcast_t : strict_contain<T> {
 		return state.template remove<index_in<Dim>, length_in<Dim>>();
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<index_in<Dim>, length_in<Dim>>();
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state(std::declval<State>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
 	using signature = function_sig<Dim, dynamic_arg_length, typename T::signature>;

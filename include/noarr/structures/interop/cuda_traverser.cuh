@@ -50,6 +50,10 @@ struct cuda_fix_t : strict_contain<T> {
 	static constexpr char name[] = "cuda_fix_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<CudaDim>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure() const noexcept { return this->get(); }
+
 	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	using signature = typename T::signature::template replace<sig_remove_first, Dim>;
@@ -59,9 +63,16 @@ struct cuda_fix_t : strict_contain<T> {
 		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(CudaDim::idx());
 	}
 
+	[[nodiscard]]
+	static __device__ inline auto clean_state(IsState auto state) noexcept {
+		return state.template remove<length_in<Dim>, index_in<Dim>>();
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state(std::declval<State>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]

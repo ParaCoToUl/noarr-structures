@@ -138,20 +138,33 @@ struct reorder_t : strict_contain<T> {
 	static constexpr char name[] = "reorder_t";
 	using params = struct_params<structure_param<T>, dim_param<Dims>...>;
 
+	template<IsState State>
 	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	constexpr T sub_structure() const noexcept {
 		return this->get();
 	}
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr State sub_state(State state) const noexcept {
+	static constexpr State sub_state(State state) noexcept {
+		return state;
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr State clean_state(State state) noexcept {
 		return state;
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = State;
+	template<IsState State>
+	using clean_state_t = State;
 
 	using signature = reassemble_sig<typename T::signature, Dims...>;
 	static constexpr bool complete = reassemble_is_complete<signature>;
@@ -250,13 +263,26 @@ struct hoist_t : strict_contain<T> {
 	static constexpr char name[] = "hoist_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
 	}
 
+	template<IsState State>
 	[[nodiscard]]
-	constexpr auto sub_state(IsState auto state) const noexcept {
+	static constexpr State sub_state(State state) noexcept {
+		return state;
+	}
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr State clean_state(State state) noexcept {
 		return state;
 	}
 
@@ -278,6 +304,8 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = State;
+	template<IsState State>
+	using clean_state_t = State;
 
 	template<IsState State>
 	[[nodiscard]]
@@ -473,6 +501,12 @@ public:
 	static constexpr char name[] = "rename_t";
 	using params = struct_params<structure_param<T>, dim_param<DimPairs>...>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
@@ -514,9 +548,17 @@ public:
 			state.items_restrict(typename helpers::state_filter_items<typename State::items_pack, filter>::result()));
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return sub_state(state);
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state(std::declval<State>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -612,6 +654,12 @@ struct join_t : strict_contain<T> {
 	static constexpr char name[] = "join_t";
 	using params = struct_params<structure_param<T>, dim_param<DimA>, dim_param<DimB>, dim_param<Dim>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
@@ -622,15 +670,16 @@ struct join_t : strict_contain<T> {
 	static_assert(Dim == DimA || Dim == DimB || !T::signature::template any_accept<Dim>,
 	              "Dimension of this name already exists");
 
-private:
 	[[nodiscard]]
 	static constexpr auto clean_state(IsState auto state) noexcept {
 		return state.template remove<index_in<Dim>, index_in<DimA>, index_in<DimB>, length_in<Dim>, length_in<DimA>,
 		                             length_in<DimB>>();
 	}
 
-	template<class State>
+	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
+
+private:
 
 	using dim_a = sig_find_dim<DimA, state<>, typename T::signature>;
 	using dim_b = sig_find_dim<DimB, state<>, typename T::signature>;

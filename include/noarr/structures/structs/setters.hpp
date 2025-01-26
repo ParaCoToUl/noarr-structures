@@ -17,6 +17,12 @@ struct fix_t : strict_contain<T, IdxT> {
 	static constexpr char name[] = "fix_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<IdxT>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->template get<0>();
@@ -51,6 +57,12 @@ private:
 		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(idx);
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state_impl(State state) noexcept {
+		return state.template remove<index_in<Dim>, length_in<Dim>>();
+	}
+
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
@@ -60,9 +72,17 @@ public:
 		return sub_state_impl(state, idx());
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return clean_state_impl(state);
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<IdxT>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state_impl(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -173,6 +193,12 @@ struct set_length_t : strict_contain<T, LenT> {
 	static constexpr char name[] = "set_length_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<LenT>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->template get<0>();
@@ -203,6 +229,12 @@ private:
 		return state.template with<length_in<Dim>>(len);
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state_impl(State state) noexcept {
+		return state.template remove<length_in<Dim>>();
+	}
+
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
@@ -215,6 +247,8 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<LenT>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state_impl(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]

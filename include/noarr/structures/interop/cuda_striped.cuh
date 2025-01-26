@@ -60,9 +60,14 @@ struct cuda_striped_t : strict_contain<T> {
 	using params = struct_params<value_param<NumStripes>, structure_param<ElemType>, value_param<BankCount>,
 	                             value_param<BankWidth>, structure_param<T>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
+
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
 
 	static constexpr auto sub_state(IsState auto state) noexcept { return state.template remove<cuda_stripe_index>(); }
+	static constexpr auto clean_state(IsState auto state) noexcept { return sub_state(state); }
 
 private:
 	static constexpr std::size_t elem_size = decltype(std::declval<ElemType>().size(state<>()))::value;
@@ -91,6 +96,8 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state(std::declval<State>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]

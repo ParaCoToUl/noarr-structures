@@ -27,6 +27,17 @@ struct tuple_t : strict_contain<TS...> {
 	static constexpr char name[] = "tuple_t";
 	using params = struct_params<dim_param<Dim>, structure_param<TS>...>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr auto sub_structure(State /*state*/) const noexcept {
+		if constexpr (State::template contains<index_in<Dim>>) {
+			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
+			return this->template get<index>();
+		} else {
+			static_assert(State::template contains<index_in<Dim>>, "Tuple index must be set");
+		}
+	}
+
 	template<std::size_t Index>
 	[[nodiscard]]
 	constexpr auto sub_structure() const noexcept {
@@ -38,10 +49,17 @@ struct tuple_t : strict_contain<TS...> {
 		return state.template remove<index_in<Dim>>();
 	}
 
+	[[nodiscard]]
+	static constexpr auto clean_state(IsState auto state) noexcept {
+		return state.template remove<index_in<Dim>>();
+	}
+
 	template<std::size_t Index>
 	using sub_structure_t = decltype(std::declval<base>().template get<Index>());
 	template<IsState State>
 	using sub_state_t = decltype(sub_state(std::declval<State>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	constexpr tuple_t() noexcept = default;
 
@@ -217,6 +235,11 @@ struct vector_t : strict_contain<T> {
 
 	explicit constexpr vector_t(T sub_structure) noexcept : strict_contain<T>(sub_structure) {}
 
+	template<IsState State>
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return strict_contain<T>::get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return strict_contain<T>::get();
@@ -227,9 +250,16 @@ struct vector_t : strict_contain<T> {
 		return state.template remove<index_in<Dim>, length_in<Dim>>();
 	}
 
+	[[nodiscard]]
+	static constexpr auto clean_state(IsState auto state) noexcept {
+		return state.template remove<index_in<Dim>, length_in<Dim>>();
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state(std::declval<State>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
 	using signature = function_sig<Dim, dynamic_arg_length, typename T::signature>;

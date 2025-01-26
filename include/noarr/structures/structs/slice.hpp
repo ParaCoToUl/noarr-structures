@@ -20,6 +20,12 @@ struct shift_t : strict_contain<T, StartT> {
 	static constexpr char name[] = "shift_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<StartT>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->template get<0>();
@@ -71,7 +77,7 @@ private:
 	[[nodiscard]]
 	static constexpr auto sub_state_impl(State state, StartT start) noexcept {
 		using namespace constexpr_arithmetic;
-		const auto tmp_state = state.template remove<index_in<Dim>, length_in<Dim>>();
+		const auto tmp_state = clean_state(state);
 		if constexpr (State::template contains<index_in<Dim>>) {
 			if constexpr (State::template contains<length_in<Dim>>) {
 				return tmp_state.template with<index_in<Dim>, length_in<Dim>>(
@@ -97,9 +103,17 @@ public:
 		return sub_state_impl(state, start());
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<index_in<Dim>, length_in<Dim>>();
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -220,6 +234,12 @@ struct slice_t : strict_contain<T, StartT, LenT> {
 	static constexpr char name[] = "slice_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<StartT>, type_param<LenT>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->template get<0>();
@@ -283,9 +303,17 @@ public:
 		return sub_state_impl(state, start());
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<length_in<Dim>, index_in<Dim>>();
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -393,6 +421,12 @@ struct span_t : strict_contain<T, StartT, EndT> {
 	static constexpr char name[] = "span_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<StartT>, type_param<EndT>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->template get<0>();
@@ -456,9 +490,17 @@ public:
 		return sub_state_impl(state, start());
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<length_in<Dim>, index_in<Dim>>();
+	}
+
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -566,6 +608,12 @@ struct step_t : strict_contain<T, StartT, StrideT> {
 	static constexpr char name[] = "step_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>, type_param<StartT>, type_param<StrideT>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->template get<0>();
@@ -628,12 +676,20 @@ public:
 		return sub_state_impl(state, start(), stride());
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<length_in<Dim>, index_in<Dim>>();
+	}
+
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t =
 		decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>(), std::declval<StrideT>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -759,6 +815,12 @@ struct reverse_t : strict_contain<T> {
 	static constexpr char name[] = "reverse_t";
 	using params = struct_params<dim_param<Dim>, structure_param<T>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
@@ -806,11 +868,19 @@ public:
 		return sub_state_impl(state, sub_structure());
 	}
 
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<length_in<Dim>, index_in<Dim>>();
+	}
+
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
 
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<T>()));
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]

@@ -20,6 +20,12 @@ struct into_blocks_t : strict_contain<T> {
 	static constexpr char name[] = "into_blocks_t";
 	using params = struct_params<dim_param<Dim>, dim_param<DimMajor>, dim_param<DimMinor>, structure_param<T>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
@@ -30,6 +36,15 @@ struct into_blocks_t : strict_contain<T> {
 	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>,
 	              "Dimension of this name already exists");
 
+	template<IsState State>
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>,
+		                             length_in<DimMajor>, length_in<DimMinor>>();
+	}
+
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
+
 private:
 	template<class Original>
 	struct dim_replacement {
@@ -39,12 +54,6 @@ private:
 		using type =
 			function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, typename Original::ret_sig>>;
 	};
-
-	template<IsState State>
-	static constexpr auto clean_state(State state) noexcept {
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>,
-		                             length_in<DimMajor>, length_in<DimMinor>>();
-	}
 
 	template<IsState State>
 	[[nodiscard]]
@@ -86,9 +95,6 @@ private:
 			return clean_state(state);
 		}
 	}
-
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -252,6 +258,12 @@ struct into_blocks_dynamic_t : strict_contain<T> {
 	using params = struct_params<dim_param<Dim>, dim_param<DimMajor>, dim_param<DimMinor>, dim_param<DimIsPresent>,
 	                             structure_param<T>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
@@ -263,6 +275,17 @@ struct into_blocks_dynamic_t : strict_contain<T> {
 	              "Dimension of this name already exists");
 	static_assert(DimIsPresent == Dim || !T::signature::template any_accept<DimIsPresent>,
 	              "Dimension of this name already exists");
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		static_assert(!State::template contains<length_in<DimIsPresent>>, "This dimension cannot be resized");
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>,
+		                             length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
+	}
+
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 private:
 	template<class Original>
@@ -276,14 +299,6 @@ private:
 		                 function_sig<DimMinor, minor_length,
 		                              function_sig<DimIsPresent, ispresent_length, typename Original::ret_sig>>>;
 	};
-
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto clean_state(State state) noexcept {
-		static_assert(!State::template contains<length_in<DimIsPresent>>, "This dimension cannot be resized");
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, index_in<DimMinor>,
-		                             length_in<DimMajor>, length_in<DimMinor>, index_in<DimIsPresent>>();
-	}
 
 	template<IsState State>
 	[[nodiscard]]
@@ -326,9 +341,6 @@ private:
 			return clean_state(state);
 		}
 	}
-
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -523,6 +535,12 @@ struct into_blocks_static_t : strict_contain<T, MinorLenT> {
 	using params = struct_params<dim_param<Dim>, dim_param<DimIsBorder>, dim_param<DimMajor>, dim_param<DimMinor>,
 	                             structure_param<T>, type_param<MinorLenT>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->template get<0>();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->template get<0>();
@@ -539,6 +557,19 @@ struct into_blocks_static_t : strict_contain<T, MinorLenT> {
 	              "Dimension of this name already exists");
 	static_assert(DimMinor == Dim || !T::signature::template any_accept<DimMinor>,
 	              "Dimension of this name already exists");
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		static_assert(!State::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
+		static_assert(!State::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
+		static_assert(!State::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>,
+		                             index_in<DimMinor>>();
+	}
+
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 private:
 	template<class Original>
@@ -568,16 +599,6 @@ private:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr auto clean_state(State state) noexcept {
-		static_assert(!State::template contains<length_in<DimIsBorder>>, "This dimension cannot be resized");
-		static_assert(!State::template contains<length_in<DimMajor>>, "This dimension cannot be resized");
-		static_assert(!State::template contains<length_in<DimMinor>>, "This dimension cannot be resized");
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimIsBorder>, index_in<DimMajor>,
-		                             index_in<DimMinor>>();
-	}
-
-	template<IsState State>
-	[[nodiscard]]
 	static constexpr auto sub_state_impl(State state, T sub_structure, MinorLenT minor_length) noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr (State::template contains<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>) {
@@ -594,9 +615,6 @@ private:
 			return clean_state(state);
 		}
 	}
-
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -755,6 +773,12 @@ struct merge_blocks_t : strict_contain<T> {
 	static constexpr char name[] = "merge_blocks_t";
 	using params = struct_params<dim_param<DimMajor>, dim_param<DimMinor>, dim_param<Dim>, structure_param<T>>;
 
+	template<IsState State>
+	[[nodiscard]]
+	constexpr T sub_structure(State /*state*/) const noexcept {
+		return this->get();
+	}
+
 	[[nodiscard]]
 	constexpr T sub_structure() const noexcept {
 		return this->get();
@@ -762,6 +786,16 @@ struct merge_blocks_t : strict_contain<T> {
 
 	static_assert(Dim == DimMajor || Dim == DimMinor || !T::signature::template any_accept<Dim>,
 	              "Dimension of this name already exists");
+
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>,
+		                             index_in<DimMinor>, length_in<DimMinor>>();
+	}
+
+	template<IsState State>
+	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 private:
 	template<class Original>
@@ -793,16 +827,6 @@ private:
 
 		using type = typename Original::ret_sig::template replace<inner_dim_replacement, DimMinor, DimMajor>;
 	};
-
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto clean_state(State state) noexcept {
-		return state.template remove<index_in<Dim>, length_in<Dim>, index_in<DimMajor>, length_in<DimMajor>,
-		                             index_in<DimMinor>, length_in<DimMinor>>();
-	}
-
-	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
