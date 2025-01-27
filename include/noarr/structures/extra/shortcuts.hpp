@@ -7,6 +7,7 @@
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
 #include "../extra/funcs.hpp"
+#include "../extra/traverser.hpp"
 #include "../structs/bcast.hpp"
 #include "../structs/blocks.hpp"
 #include "../structs/layouts.hpp"
@@ -66,46 +67,46 @@ constexpr auto array() noexcept {
 	return array_proto<Dim, L>();
 }
 
-template<IsDim auto Dim, class Struct>
+template<IsDim auto Dim, IsStruct Struct>
 constexpr auto length_like(Struct structure, IsState auto state) noexcept {
 	return set_length<Dim>(structure | get_length<Dim>(state));
 }
 
-template<IsDim auto Dim, class Struct>
+template<IsDim auto Dim, IsStruct Struct>
 constexpr auto length_like(Struct structure) noexcept {
 	return length_like<Dim>(structure, empty_state);
 }
 
 template<auto... Dims, class Struct>
-requires IsDimPack<decltype(Dims)...>
+requires IsDimPack<decltype(Dims)...> && IsStruct<Struct>
 constexpr auto lengths_like(Struct structure, IsState auto state) noexcept {
 	return (... ^ length_like<Dims>(structure, state));
 }
 
 template<auto... Dims, class Struct>
-requires IsDimPack<decltype(Dims)...>
+requires IsDimPack<decltype(Dims)...> && IsStruct<Struct>
 constexpr auto lengths_like(Struct structure) noexcept {
 	return lengths_like<Dims...>(structure, empty_state);
 }
 
-template<IsDim auto Dim, class Struct>
+template<IsDim auto Dim, IsStruct Struct>
 constexpr auto vector_like(Struct structure, IsState auto state) noexcept {
 	return vector<Dim>() ^ length_like<Dim>(structure, state);
 }
 
-template<IsDim auto Dim, class Struct>
+template<IsDim auto Dim, IsStruct Struct>
 constexpr auto vector_like(Struct structure) noexcept {
 	return vector_like<Dim>(structure, empty_state);
 }
 
 template<auto Dim, auto... Dims, class Struct>
-requires IsDimPack<decltype(Dim), decltype(Dims)...>
+requires IsDimPack<decltype(Dim), decltype(Dims)...> && IsStruct<Struct>
 constexpr auto vectors_like(Struct structure, IsState auto state) noexcept {
 	return (vector_like<Dim>(structure, state) ^ ... ^ vector_like<Dims>(structure, state));
 }
 
 template<auto Dim, auto... Dims, class Struct>
-requires IsDimPack<decltype(Dim), decltype(Dims)...>
+requires IsDimPack<decltype(Dim), decltype(Dims)...> && IsStruct<Struct>
 constexpr auto vectors_like(Struct structure) noexcept {
 	return vectors_like<Dim, Dims...>(structure, empty_state);
 }
@@ -121,9 +122,20 @@ constexpr auto vectors_like(Struct structure, State state) noexcept {
 	}(dim_seq());
 }
 
-template<class Struct>
+template<IsStruct Struct>
 constexpr auto vectors_like(Struct structure) noexcept {
 	return vectors_like<Struct>(structure, empty_state);
+}
+
+template<ToTraverser Traverser>
+constexpr auto vectors_like(const Traverser &traverser) noexcept {
+	return vectors_like(convert_to_traverser(traverser).top_struct());
+}
+
+template<auto Dim, auto... Dims, class Traverser>
+requires IsDimPack<decltype(Dim), decltype(Dims)...> && ToTraverser<Traverser>
+constexpr auto vectors_like(const Traverser &traverser) noexcept {
+	return vectors_like<Dim, Dims...>(convert_to_traverser(traverser).top_struct());
 }
 
 template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor = Dim>
@@ -351,9 +363,11 @@ constexpr auto fix_zeros(dim_tree<Dim, Branch, Branches...> /*unused*/, State st
 	return fix_zeros(Branch{}, state & idx<Dim>(lit<0>));
 }
 
-template<auto... Dims, IsState State = state<>> requires IsDimPack<decltype(Dims)...>
+template<auto... Dims, IsState State = state<>>
+requires IsDimPack<decltype(Dims)...>
 constexpr auto fix_zeros(dim_sequence<Dims...> /*unused*/, State state = empty_state) noexcept {
-	[[maybe_unused]] constexpr auto zero = [](auto /*Dim*/) { return lit<0>; };
+	[[maybe_unused]]
+	constexpr auto zero = [](auto /*Dim*/) { return lit<0>; };
 	return state & idx<Dims...>(zero(Dims)...);
 }
 
