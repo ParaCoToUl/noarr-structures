@@ -144,9 +144,7 @@ struct reorder_t : strict_contain<T> {
 		return this->get();
 	}
 
-	constexpr T sub_structure() const noexcept {
-		return this->get();
-	}
+	constexpr T sub_structure() const noexcept { return this->get(); }
 
 	template<IsState State>
 	[[nodiscard]]
@@ -680,7 +678,6 @@ struct join_t : strict_contain<T> {
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
 private:
-
 	using dim_a = sig_find_dim<DimA, state<>, typename T::signature>;
 	using dim_b = sig_find_dim<DimB, state<>, typename T::signature>;
 

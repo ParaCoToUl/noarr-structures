@@ -52,7 +52,9 @@ struct cuda_fix_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return this->get(); }
+	constexpr T sub_structure() const noexcept {
+		return this->get();
+	}
 
 	constexpr T sub_structure() const noexcept { return this->get(); }
 

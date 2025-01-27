@@ -62,11 +62,14 @@ struct cuda_striped_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
+	constexpr T sub_structure() const noexcept {
+		return strict_contain<T>::get();
+	}
 
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
 
 	static constexpr auto sub_state(IsState auto state) noexcept { return state.template remove<cuda_stripe_index>(); }
+
 	static constexpr auto clean_state(IsState auto state) noexcept { return sub_state(state); }
 
 private:
