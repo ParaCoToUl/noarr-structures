@@ -414,6 +414,14 @@ static_assert(!is_contiguous<into_blocks_t<'x', 'y', 'z', vector_t<'x', scalar<i
 
 } // namespace helpers
 
+template <class T, class State>
+concept IsContiguous = requires {
+	requires IsStruct<T>;
+	requires IsState<State>;
+
+	requires helpers::is_contiguous<T, State>::value;
+};
+
 template<class T, IsState State>
 constexpr bool is_contiguous() noexcept {
 	return helpers::is_contiguous<T, State>::value;
