@@ -46,7 +46,8 @@ TEST_CASE("bcast test", "[has_test]") {
 	STATIC_REQUIRE(!(testee ^ set_length<'y'>(2) ^ fix<'x'>(4) ^ fix<'y'>(1) | has_length<'x'>()));
 	STATIC_REQUIRE(!(testee ^ set_length<'y'>(2) ^ fix<'x'>(4) ^ fix<'y'>(1) | has_length<'y'>()));
 	STATIC_REQUIRE(!(testee ^ set_length<'y'>(2) ^ fix<'x'>(4) ^ fix<'y'>(1) | has_length<'z'>()));
-	STATIC_REQUIRE(!(testee ^ set_length<'y'>(2) ^ fix<'x'>(4) ^ fix<'y'>(1) ^ fix<'z'>(0) | has_offset()));
+	STATIC_REQUIRE(testee ^ set_length<'y'>(2) ^ fix<'x'>(4) ^ fix<'y'>(1) ^ fix<'z'>(0) | has_offset());
+	STATIC_REQUIRE((testee ^ set_length<'y'>(2) ^ fix<'x'>(4) ^ fix<'y'>(1) ^ fix<'z'>(0) | offset()) == 1 * 42 * sizeof(int) + 4 * sizeof(int));
 
 	STATIC_REQUIRE(testee ^ set_length<'y'>(2) ^ set_length<'z'>(3) ^ fix<'z'>(1) | has_size());
 	STATIC_REQUIRE((testee ^ set_length<'y'>(2) ^ set_length<'z'>(3) ^ fix<'z'>(1) | get_size()) == 42 * 2 * sizeof(int));

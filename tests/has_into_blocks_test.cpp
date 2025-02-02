@@ -361,3 +361,32 @@ TEST_CASE("into_blocks pre test", "[has_test]") {
 	STATIC_REQUIRE(testee ^ set_length<'x'>(7) ^ fix<'m'>(4) ^ fix<'x'>(1) | has_offset());
 	STATIC_REQUIRE((testee ^ set_length<'x'>(7) ^ fix<'m'>(4) ^ fix<'x'>(1) | offset()) == 1 * 6 * sizeof(int) + 4 * sizeof(int));
 }
+
+TEST_CASE("into_blocks unrelated test", "[has_test]") {
+	constexpr auto testee = scalar<int>() ^ vector<'x'>() ^ into_blocks<'y', 'M', 'm'>();
+
+	STATIC_REQUIRE(!(testee | has_size()));
+	STATIC_REQUIRE(!(testee | has_length<'x'>()));
+	STATIC_REQUIRE(!(testee | has_length<'y'>()));
+	STATIC_REQUIRE(!(testee | has_length<'M'>()));
+	STATIC_REQUIRE(!(testee | has_length<'m'>()));
+	STATIC_REQUIRE(!(testee | has_offset()));
+
+	STATIC_REQUIRE(testee ^ set_length<'x'>(10) | has_size());
+	STATIC_REQUIRE((testee ^ set_length<'x'>(10) | get_size()) == 10 * sizeof(int));
+	STATIC_REQUIRE(testee ^ set_length<'x'>(10) | has_length<'x'>());
+	STATIC_REQUIRE((testee ^ set_length<'x'>(10) | get_length<'x'>()) == 10);
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) | has_length<'y'>()));
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) | has_length<'M'>()));
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) | has_length<'m'>()));
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) | has_offset()));
+
+	STATIC_REQUIRE(testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | has_size());
+	STATIC_REQUIRE((testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | get_size()) == 10 * sizeof(int));
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | has_length<'x'>()));
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | has_length<'y'>()));
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | has_length<'M'>()));
+	STATIC_REQUIRE(!(testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | has_length<'m'>()));
+	STATIC_REQUIRE(testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | has_offset());
+	STATIC_REQUIRE((testee ^ set_length<'x'>(10) ^ fix<'x'>(4) | offset()) == 4 * sizeof(int));
+}

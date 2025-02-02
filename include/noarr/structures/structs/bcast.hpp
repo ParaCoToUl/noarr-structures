@@ -72,11 +72,7 @@ struct bcast_t : strict_contain<T> {
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		if constexpr (State::template contains<index_in<Dim>, length_in<Dim>>) {
-			return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-		} else {
-			return false;
-		}
+		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
 	template<class Sub, IsState State>

@@ -134,11 +134,7 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		if constexpr (!State::template contains<index_in<DimMajor>, index_in<DimMinor>>) {
-			return false;
-		} else {
-			return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-		}
+		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
 	template<class Sub, IsState State>
