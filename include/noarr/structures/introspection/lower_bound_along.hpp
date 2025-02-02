@@ -215,8 +215,10 @@ public:
 		using sub_structure_t = typename Structure::sub_structure_t;
 		using sub_state_t = typename Structure::template sub_state_t<State>;
 
-		return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
-		                                                                             structure.sub_state(state));
+		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
+
+		return has_lower_bound_along<Dim_, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+		                                                                              structure.sub_state(state));
 	}
 };
 

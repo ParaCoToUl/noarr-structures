@@ -414,7 +414,7 @@ static_assert(!is_contiguous<into_blocks_t<'x', 'y', 'z', vector_t<'x', scalar<i
 
 } // namespace helpers
 
-template <class T, class State>
+template<class T, class State>
 concept IsContiguous = requires {
 	requires IsStruct<T>;
 	requires IsState<State>;
