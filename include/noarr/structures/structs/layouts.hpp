@@ -115,18 +115,21 @@ struct tuple_t : strict_contain<TS...> {
 	requires (has_offset_of<Sub, tuple_t, State>())
 	{
 		using namespace constexpr_arithmetic;
+
 		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 		const auto sub_stat = sub_state(state);
+
 		return size_inner(std::make_index_sequence<index>(), sub_stat) +
 		       offset_of<Sub>(sub_structure<index>(), sub_stat);
 	}
 
 	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set tuple length");
 		if constexpr (QDim == Dim) {
-			return true;
+			return !State::template contains<index_in<Dim>>;
 		} else if constexpr (State::template contains<index_in<Dim>>) {
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 			return sub_structure_t<index>::template has_length<QDim, sub_state_t<State>>();
@@ -324,10 +327,11 @@ struct vector_t : strict_contain<T> {
 	}
 
 	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		if constexpr (QDim == Dim) {
-			return State::template contains<length_in<Dim>>;
+			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}

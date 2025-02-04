@@ -407,7 +407,7 @@ public:
 					              "Two different ways to determine the length of the minor dimension");
 					return true;
 				} else {
-					return sub_structure_t::template has_length<Dim, sub_state_t<State>>();
+					return sub_structure_t::template has_length<Dim, clean_state_t<State>>();
 				}
 			}
 		} else if constexpr (QDim == DimMinor) {
@@ -454,18 +454,26 @@ public:
 	{
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == DimIsPresent) {
-			if constexpr (State::template contains<length_in<DimMinor>>) {
+			if constexpr (State::template contains<length_in<DimMinor>, length_in<DimMajor>>) {
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
 				const auto minor_length = state.template get<length_in<DimMinor>>();
-				const auto full_length = sub_structure().template length<Dim>(sub_state(state));
+				const auto major_length = state.template get<length_in<DimMajor>>();
+				const auto full_length = minor_length * major_length;
+				const auto full_index = major_index * minor_length + minor_index;
+				return std::size_t(full_index < full_length);
+			} else if constexpr (State::template contains<length_in<DimMinor>>) {
+				const auto major_index = state.template get<index_in<DimMajor>>();
+				const auto minor_index = state.template get<index_in<DimMinor>>();
+				const auto minor_length = state.template get<length_in<DimMinor>>();
+				const auto full_length = sub_structure().template length<Dim>(clean_state(state));
 				const auto full_index = major_index * minor_length + minor_index;
 				return std::size_t(full_index < full_length);
 			} else {
 				const auto major_index = state.template get<index_in<DimMajor>>();
 				const auto minor_index = state.template get<index_in<DimMinor>>();
 				const auto major_length = state.template get<length_in<DimMajor>>();
-				const auto full_length = sub_structure().template length<Dim>(sub_state(state));
+				const auto full_length = sub_structure().template length<Dim>(clean_state(state));
 				const auto minor_length = (full_length + major_length - make_const<1>()) / major_length;
 				const auto full_index = major_index * minor_length + minor_index;
 				return std::size_t(full_index < full_length);
