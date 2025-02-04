@@ -176,6 +176,148 @@ public:
 // TODO: implement step_t
 // TODO: implement reverse_t
 
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
+struct has_stride_along<QDim, shift_t<Dim, T, StartT>, State> {
+private:
+	using Structure = shift_t<Dim, T, StartT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                    structure.sub_state(state));
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class LenT, IsState State>
+struct has_stride_along<QDim, slice_t<Dim, T, StartT, LenT>, State> {
+private:
+	using Structure = slice_t<Dim, T, StartT, LenT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                    structure.sub_state(state));
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class EndT, IsState State>
+struct has_stride_along<QDim, span_t<Dim, T, StartT, EndT>, State> {
+private:
+	using Structure = span_t<Dim, T, StartT, EndT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                    structure.sub_state(state));
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class StrideT, IsState State>
+struct has_stride_along<QDim, step_t<Dim, T, StartT, StrideT>, State> {
+private:
+	using Structure = step_t<Dim, T, StartT, StrideT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		using namespace constexpr_arithmetic;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                    structure.sub_state(state)) * structure.stride();
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
+struct has_stride_along<QDim, reverse_t<Dim, T>, State> {
+private:
+	using Structure = reverse_t<Dim, T>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		using namespace constexpr_arithmetic;
+
+		using sub_stride_t = decltype(has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                    structure.sub_state(state)));
+
+		return -static_cast<std::make_signed_t<sub_stride_t>>(has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(
+			structure.sub_structure(), structure.sub_state(state)));
+	}
+};
+
 template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T, IsState State>
 requires (DimMajor != DimMinor)
 struct has_stride_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
@@ -324,6 +466,17 @@ static_assert(stride_along<'x'>(scalar<int>() ^ bcast<'x'>() ^ set_length<'x'>(0
 static_assert(HasStrideAlong<set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(1), state<>()) == sizeof(int));
 
+// TODO: implement reorder_t
+// TODO: implement hoist_t
+// TODO: implement rename_t
+// TODO: implement join_t
+
+// TODO: implement shift_t
+// TODO: implement slice_t
+// TODO: implement span_t
+// TODO: implement step_t
+// TODO: implement reverse_t
+
 // into_blocks_t
 static_assert(!HasStrideAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'x', state<>>);
 static_assert(!HasStrideAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'y', state<>>);
@@ -352,6 +505,12 @@ static_assert(HasStrideAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<i
 static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ into_blocks<'x', 'x', 'y'>(),
                                 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>(
 									42, 5)) == 42 * sizeof(int));
+
+// TODO: implement into_blocks_static_t
+// TODO: implement into_blocks_dynamic_t
+// TODO: implement merge_blocks_t
+
+// TODO: implement zcurve_t
 
 } // namespace noarr
 

@@ -112,6 +112,91 @@ public:
 // TODO: implement step_t
 // TODO: implement reverse_t
 
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
+struct is_uniform_along<QDim, shift_t<Dim, T, StartT>, State> {
+private:
+	using Structure = shift_t<Dim, T, StartT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class LenT, IsState State>
+struct is_uniform_along<QDim, slice_t<Dim, T, StartT, LenT>, State> {
+private:
+	using Structure = slice_t<Dim, T, StartT, LenT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class EndT, IsState State>
+struct is_uniform_along<QDim, span_t<Dim, T, StartT, EndT>, State> {
+private:
+	using Structure = span_t<Dim, T, StartT, EndT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class StrideT, IsState State>
+struct is_uniform_along<QDim, step_t<Dim, T, StartT, StrideT>, State> {
+private:
+	using Structure = step_t<Dim, T, StartT, StrideT>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
+template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
+struct is_uniform_along<QDim, reverse_t<Dim, T>, State> {
+private:
+	using Structure = reverse_t<Dim, T>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
 template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T, IsState State>
 requires (DimMajor != DimMinor)
 struct is_uniform_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
@@ -158,6 +243,11 @@ concept IsUniformAlong = requires {
 
 	requires helpers::is_uniform_along<Dim, T, State>::value;
 };
+
+template<auto Dim, class Structure, class State>
+constexpr bool is_uniform_along(Structure /*structure*/, State /*state*/) noexcept {
+	return helpers::is_uniform_along<Dim, Structure, State>::value;
+}
 
 // tests
 
@@ -209,6 +299,28 @@ static_assert(!IsUniformAlong<set_length_t<'x', scalar<int>, std::size_t>, 'x', 
 static_assert(IsUniformAlong<set_length_t<'x', bcast_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 static_assert(IsUniformAlong<set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 
+
+// TODO: implement reorder_t
+// TODO: implement hoist_t
+// TODO: implement rename_t
+// TODO: implement join_t
+
+// shift_t
+static_assert(!IsUniformAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<>>);
+static_assert(!IsUniformAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+static_assert(!IsUniformAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
+static_assert(IsUniformAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+// TODO: implement slice_t
+// TODO: implement span_t
+// TODO: implement step_t
+// TODO: implement reverse_t
+
 // into_blocks_t
 static_assert(!IsUniformAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'x', state<>>);
 static_assert(!IsUniformAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'y', state<>>);
@@ -231,6 +343,13 @@ static_assert(IsUniformAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<i
                              state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>>);
 static_assert(IsUniformAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<int>>>, 'x',
                              state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>>);
+
+
+// TODO: implement into_blocks_static_t
+// TODO: implement into_blocks_dynamic_t
+// TODO: implement merge_blocks_t
+
+// TODO: implement zcurve_t
 
 } // namespace noarr
 

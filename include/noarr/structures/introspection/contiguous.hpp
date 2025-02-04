@@ -29,11 +29,11 @@ struct is_contiguous<scalar<ValueType>, State> : std::true_type {};
 template<IsDim auto Dim, class T, IsState State>
 struct is_contiguous<vector_t<Dim, T>, State> {
 private:
-	using structure = vector_t<Dim, T>;
+	using Structure = vector_t<Dim, T>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<length_in<Dim>>) {
-			return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+			return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 		} else {
 			return false;
 		}
@@ -47,18 +47,18 @@ public:
 template<IsDim auto Dim, class... Ts, IsState State>
 struct is_contiguous<tuple_t<Dim, Ts...>, State> {
 private:
-	using structure = tuple_t<Dim, Ts...>;
+	using Structure = tuple_t<Dim, Ts...>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<index_in<Dim>>) {
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 
-			using sub_struct = typename structure::template sub_structure_t<index>;
-			using sub_state = typename structure::template sub_state_t<State>;
+			using sub_struct = typename Structure::template sub_structure_t<index>;
+			using sub_state = typename Structure::template sub_state_t<State>;
 
 			return is_contiguous<sub_struct, sub_state>::value;
 		} else {
-			return (... && is_contiguous<Ts, typename structure::template sub_state_t<State>>::value);
+			return (... && is_contiguous<Ts, typename Structure::template sub_state_t<State>>::value);
 		}
 	}
 
@@ -70,11 +70,11 @@ public:
 template<IsDim auto Dim, class T, IsState State>
 struct is_contiguous<bcast_t<Dim, T>, State> {
 private:
-	using structure = bcast_t<Dim, T>;
+	using Structure = bcast_t<Dim, T>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<length_in<Dim>>) {
-			return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+			return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 		} else {
 			return false;
 		}
@@ -88,10 +88,10 @@ public:
 template<IsDim auto Dim, class T, class IdxT, IsState State>
 struct is_contiguous<fix_t<Dim, T, IdxT>, State> {
 private:
-	using structure = fix_t<Dim, T, IdxT>;
+	using Structure = fix_t<Dim, T, IdxT>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -102,10 +102,10 @@ public:
 template<IsDim auto Dim, class T, class LenT, IsState State>
 struct is_contiguous<set_length_t<Dim, T, LenT>, State> {
 private:
-	using structure = set_length_t<Dim, T, LenT>;
+	using Structure = set_length_t<Dim, T, LenT>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -117,10 +117,10 @@ template<class T, auto... Dims, IsState State>
 requires IsDimPack<decltype(Dims)...>
 struct is_contiguous<reorder_t<T, Dims...>, State> {
 private:
-	using structure = reorder_t<T, Dims...>;
+	using Structure = reorder_t<T, Dims...>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -131,10 +131,10 @@ public:
 template<IsDim auto Dim, class T, IsState State>
 struct is_contiguous<hoist_t<Dim, T>, State> {
 private:
-	using structure = hoist_t<Dim, T>;
+	using Structure = hoist_t<Dim, T>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -146,10 +146,10 @@ template<class T, auto... DimPairs, class State>
 requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0) && IsState<State>
 struct is_contiguous<rename_t<T, DimPairs...>, State> {
 private:
-	using structure = rename_t<T, DimPairs...>;
+	using Structure = rename_t<T, DimPairs...>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -161,10 +161,10 @@ template<class T, auto DimA, auto DimB, auto Dim, class State>
 requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)> && (DimA != DimB) && IsState<State>
 struct is_contiguous<join_t<T, DimA, DimB, Dim>, State> {
 private:
-	using structure = join_t<T, DimA, DimB, Dim>;
+	using Structure = join_t<T, DimA, DimB, Dim>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -175,10 +175,10 @@ public:
 template<IsDim auto Dim, class T, class StartT, IsState State>
 struct is_contiguous<shift_t<Dim, T, StartT>, State> {
 private:
-	using structure = shift_t<Dim, T, StartT>;
+	using Structure = shift_t<Dim, T, StartT>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -189,10 +189,10 @@ public:
 template<IsDim auto Dim, class T, class StartT, class LenT, IsState State>
 struct is_contiguous<slice_t<Dim, T, StartT, LenT>, State> {
 private:
-	using structure = slice_t<Dim, T, StartT, LenT>;
+	using Structure = slice_t<Dim, T, StartT, LenT>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 	}
 
 public:
@@ -203,7 +203,7 @@ public:
 template<IsDim auto Dim, class T, class StartT, class EndT, IsState State>
 struct is_contiguous<span_t<Dim, T, StartT, EndT>, State> {
 private:
-	using structure = span_t<Dim, T, StartT, EndT>;
+	using Structure = span_t<Dim, T, StartT, EndT>;
 
 	static constexpr bool get_value() noexcept {
 		return is_contiguous<T, typename slice_t<Dim, T, StartT, EndT>::template sub_state_t<State>>::value;
@@ -217,7 +217,7 @@ public:
 template<IsDim auto Dim, class T, class StartT, class StrideT, IsState State>
 struct is_contiguous<step_t<Dim, T, StartT, StrideT>, State> {
 private:
-	using structure = step_t<Dim, T, StartT, StrideT>;
+	using Structure = step_t<Dim, T, StartT, StrideT>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<index_in<Dim>>) {
@@ -235,7 +235,7 @@ public:
 template<IsDim auto Dim, class T, IsState State>
 struct is_contiguous<reverse_t<Dim, T>, State> {
 private:
-	using structure = reverse_t<Dim, T>;
+	using Structure = reverse_t<Dim, T>;
 
 	static constexpr bool get_value() noexcept {
 		return is_contiguous<T, typename reverse_t<Dim, T>::template sub_state_t<State>>::value;
@@ -250,17 +250,17 @@ template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T, IsSt
 requires (DimMajor != DimMinor)
 struct is_contiguous<into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
 private:
-	using structure = into_blocks_t<Dim, DimMajor, DimMinor, T>;
+	using Structure = into_blocks_t<Dim, DimMajor, DimMinor, T>;
 	using indexless_state = decltype(std::declval<State>().template remove<index_in<DimMajor>, index_in<DimMinor>>());
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (structure::template has_length<DimMajor, indexless_state>() &&
-		              structure::template has_length<DimMinor, indexless_state>()) {
+		if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
+		              Structure::template has_length<DimMinor, indexless_state>()) {
 			if constexpr (State::template contains<index_in<DimMinor>> &&
 			              !State::template contains<index_in<DimMajor>>) {
 				return false;
 			} else {
-				return is_contiguous<T, typename structure::template sub_state_t<State>>::value;
+				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 			}
 		} else {
 			return false;
@@ -276,7 +276,7 @@ template<IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Di
 requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent != DimMajor)
 struct is_contiguous<into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
 private:
-	using structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
+	using Structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsPresent>>) {
@@ -296,7 +296,7 @@ template<IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto
 requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != DimMinor)
 struct is_contiguous<into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
 private:
-	using structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
+	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>, index_in<DimMajor>,
