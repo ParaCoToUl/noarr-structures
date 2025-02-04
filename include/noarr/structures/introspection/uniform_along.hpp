@@ -106,12 +106,6 @@ public:
 // TODO: implement rename_t
 // TODO: implement join_t
 
-// TODO: implement shift_t
-// TODO: implement slice_t
-// TODO: implement span_t
-// TODO: implement step_t
-// TODO: implement reverse_t
-
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
 struct is_uniform_along<QDim, shift_t<Dim, T, StartT>, State> {
 private:
@@ -316,10 +310,53 @@ static_assert(IsUniformAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_
 static_assert(!IsUniformAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
 static_assert(!IsUniformAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
 
-// TODO: implement slice_t
-// TODO: implement span_t
-// TODO: implement step_t
-// TODO: implement reverse_t
+// slice_t
+static_assert(!IsUniformAlong<slice_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(!IsUniformAlong<slice_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<slice_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<slice_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+static_assert(!IsUniformAlong<slice_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(IsUniformAlong<slice_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<slice_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<slice_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<slice_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+// span_t
+static_assert(!IsUniformAlong<span_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(!IsUniformAlong<span_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<span_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<span_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+static_assert(!IsUniformAlong<span_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(IsUniformAlong<span_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<span_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<span_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<span_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+// step_t
+static_assert(!IsUniformAlong<step_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(!IsUniformAlong<step_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<step_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<step_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+static_assert(!IsUniformAlong<step_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(IsUniformAlong<step_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<step_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<step_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<step_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+// reverse_t
+static_assert(!IsUniformAlong<reverse_t<'x', scalar<int>>, 'x', state<>>);
+static_assert(!IsUniformAlong<reverse_t<'x', scalar<int>>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<reverse_t<'x', scalar<int>>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<reverse_t<'x', scalar<int>>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+
+static_assert(!IsUniformAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'x', state<>>);
+static_assert(IsUniformAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
 
 // into_blocks_t
 static_assert(!IsUniformAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'x', state<>>);
