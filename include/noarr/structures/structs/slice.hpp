@@ -854,8 +854,13 @@ private:
 		using namespace constexpr_arithmetic;
 		if constexpr (State::template contains<index_in<Dim>>) {
 			const auto tmp_state = state.template remove<index_in<Dim>>();
-			return tmp_state.template with<index_in<Dim>>(sub_structure.template length<Dim>(tmp_state) -
-			                                              make_const<1>() - state.template get<index_in<Dim>>());
+
+			if constexpr (sub_structure_t::template has_length<Dim, decltype(tmp_state)>()) {
+				return tmp_state.template with<index_in<Dim>>(sub_structure.template length<Dim>(tmp_state) -
+															make_const<1>() - state.template get<index_in<Dim>>());
+			} else {
+				return tmp_state;
+			}
 		} else {
 			return state;
 		}
