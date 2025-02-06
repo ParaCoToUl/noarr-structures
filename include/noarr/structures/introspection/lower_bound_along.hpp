@@ -354,11 +354,59 @@ public:
 
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
-			// TODO: implement
-			return;
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state));
 		} else {
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 			                                                                              structure.sub_state(state));
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state, auto min, auto max) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		if constexpr (QDim == Dim) {
+			using namespace constexpr_arithmetic;
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min + structure.start(), max + structure.start());
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min + structure.start(), max + structure.start());
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		if constexpr (QDim == Dim) {
+			using namespace constexpr_arithmetic;
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state)) - structure.start();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state)) - structure.start();
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto max) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		if constexpr (QDim == Dim) {
+			using namespace constexpr_arithmetic;
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), min + structure.start(), max + structure.start()) - structure.start();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), min + structure.start(), max + structure.start()) - structure.start();
 		}
 	}
 };
