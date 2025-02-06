@@ -170,7 +170,34 @@ public:
 
 
 // TODO: implement reorder_t
-// TODO: implement hoist_t
+
+template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
+struct has_offset_along<QDim, hoist_t<Dim, T>, State> {
+private:
+	using Structure = hoist_t<Dim, T>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_offset_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto offset(Structure structure, State state, auto index) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+		                                                                  structure.sub_state(state), index);
+	}
+};
+
 // TODO: implement rename_t
 // TODO: implement join_t
 
@@ -439,7 +466,6 @@ static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(
 
 
 // TODO: reorder_t
-// TODO: hoist_t
 // TODO: rename_t
 // TODO: join_t
 

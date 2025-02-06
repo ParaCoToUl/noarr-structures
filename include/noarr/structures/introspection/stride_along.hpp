@@ -166,15 +166,36 @@ public:
 };
 
 // TODO: implement reorder_t
-// TODO: implement hoist_t
+
+template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
+struct has_stride_along<QDim, hoist_t<Dim, T>, State> {
+private:
+	using Structure = hoist_t<Dim, T>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                    structure.sub_state(state));
+	}
+};
+
 // TODO: implement rename_t
 // TODO: implement join_t
-
-// TODO: implement shift_t
-// TODO: implement slice_t
-// TODO: implement span_t
-// TODO: implement step_t
-// TODO: implement reverse_t
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
 struct has_stride_along<QDim, shift_t<Dim, T, StartT>, State> {

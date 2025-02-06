@@ -102,7 +102,24 @@ public:
 };
 
 // TODO: implement reorder_t
-// TODO: implement hoist_t
+
+template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
+struct is_uniform_along<QDim, hoist_t<Dim, T>, State> {
+private:
+	using Structure = hoist_t<Dim, T>;
+
+	static constexpr bool get_value() noexcept {
+		using sub_structure_t = typename Structure::sub_structure_t;
+		using sub_state_t = typename Structure::template sub_state_t<State>;
+
+		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
 // TODO: implement rename_t
 // TODO: implement join_t
 
