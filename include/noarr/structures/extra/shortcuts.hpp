@@ -89,6 +89,12 @@ constexpr auto lengths_like(Struct structure) noexcept {
 	return lengths_like<Dims...>(structure, empty_state);
 }
 
+template<auto Dim, auto... Dims, class Traverser>
+requires IsDimPack<decltype(Dim), decltype(Dims)...> && ToTraverser<Traverser>
+constexpr auto lengths_like(const Traverser &traverser) noexcept {
+	return lengths_like<Dim, Dims...>(convert_to_traverser(traverser).top_struct());
+}
+
 template<IsDim auto Dim, IsStruct Struct>
 constexpr auto vector_like(Struct structure, IsState auto state) noexcept {
 	return vector<Dim>() ^ length_like<Dim>(structure, state);
