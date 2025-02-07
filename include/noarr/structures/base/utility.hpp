@@ -322,6 +322,24 @@ struct dim_pred_not {
 	static constexpr bool value = !T::template value<Dim>;
 };
 
+template<class T, class U>
+struct dim_pred_or {
+	template<auto Dim>
+	using value_type = bool;
+
+	template<auto Dim>
+	static constexpr bool value = T::template value<Dim> || U::template value<Dim>;
+};
+
+template<class T, class U>
+struct dim_pred_and {
+	template<auto Dim>
+	using value_type = bool;
+
+	template<auto Dim>
+	static constexpr bool value = T::template value<Dim> && U::template value<Dim>;
+};
+
 template<class>
 static constexpr bool always_false = false;
 template<auto>
