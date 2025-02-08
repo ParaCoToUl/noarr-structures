@@ -88,7 +88,28 @@ struct is_uniform_along<QDim, set_length_t<Dim, T, LenT>, State> : generic_is_un
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct is_uniform_along<QDim, hoist_t<Dim, T>, State> : generic_is_uniform_along<QDim, hoist_t<Dim, T>, State> {};
 
-// TODO: implement rename_t
+template<IsDim auto QDim, class T, auto... DimPairs, IsState State>
+requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0)
+struct is_uniform_along<QDim, rename_t<T, DimPairs...>, State> {
+private:
+	using Structure = rename_t<T, DimPairs...>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	constexpr static auto QDimNew = helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (Structure::internal::template contains<QDim> && !Structure::external::template contains<QDim>) {
+			return false;
+		} else {
+			return is_uniform_along<QDimNew, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
 
 template<IsDim auto QDim, IsDim auto DimA, IsDim auto DimB, IsDim auto Dim, class T, IsState State>
 requires (DimA != DimB)
@@ -227,8 +248,26 @@ static_assert(!IsUniformAlong<set_length_t<'x', scalar<int>, std::size_t>, 'x', 
 static_assert(IsUniformAlong<set_length_t<'x', bcast_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 static_assert(IsUniformAlong<set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 
-// TODO: implement rename_t
-// TODO: implement join_t
+// rename_t
+static_assert(!IsUniformAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<>>);
+static_assert(!IsUniformAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'y', state<>>);
+static_assert(IsUniformAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+
+// join_t
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y', state<>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y', state<state_item<index_in<'y'>, std::size_t>>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y', state<state_item<length_in<'y'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'z', state<>>);
+static_assert(!IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'z', state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(IsUniformAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'z', state<state_item<length_in<'z'>, std::size_t>>>);
 
 // shift_t
 static_assert(!IsUniformAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<>>);

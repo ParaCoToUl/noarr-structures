@@ -486,8 +486,12 @@ struct rename_t : strict_contain<T> {
 
 private:
 	using unzip = helpers::rename_unzip_dim_pairs<dim_sequence<>, dim_sequence<>, DimPairs...>;
+
+public:
 	using internal = typename unzip::even;
 	using external = typename unzip::odd;
+
+private:
 	using rename_state = typename helpers::rename_state<external, internal>;
 
 public:

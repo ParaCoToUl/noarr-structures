@@ -172,7 +172,33 @@ struct has_offset_along<QDim, hoist_t<Dim, T>, State> : generic_has_offset_along
 
 template<IsDim auto QDim, class T, auto... DimPairs, IsState State>
 requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0)
-struct has_offset_along<QDim, rename_t<T, DimPairs...>, State> : generic_has_offset_along<QDim, rename_t<T, DimPairs...>, State> {};
+struct has_offset_along<QDim, rename_t<T, DimPairs...>, State> {
+private:
+	using Structure = rename_t<T, DimPairs...>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	constexpr static auto QDimNew = helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
+
+	static constexpr bool get_value() noexcept {
+		return has_offset_along<QDimNew, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto offset(Structure structure, State state) noexcept
+	requires value
+	{
+		if constexpr (Structure::internal::template contains<QDim> && !Structure::external::template contains<QDim>) {
+			return false;
+		} else {
+			return has_offset_along<QDimNew, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+																				structure.sub_state(state));
+		}
+	}
+};
 
 template<IsDim auto QDim, class T, auto DimA, auto DimB, auto Dim, IsState State>
 requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)> && (DimA != DimB)
@@ -345,7 +371,18 @@ static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(
 static_assert(HasOffsetAlong<set_length_t<'x', bcast_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 static_assert(offset_along<'x'>(scalar<int>() ^ bcast<'x'>() ^ set_length<'x'>(6), state<>()) == 0 * sizeof(int));
 
-// TODO: rename_t
+// rename_t
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'x', state<>>);
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'x', state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'y', state<>>);
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'y', state<state_item<index_in<'y'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<rename_t<scalar<int>, 'x', 'y'>, 'y', state<state_item<length_in<'y'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(HasOffsetAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'y', state<state_item<length_in<'y'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(offset_along<'y'>(scalar<int>() ^ vector<'x'>() ^ rename<'x', 'y'>(),
+									 state<state_item<length_in<'y'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 3)) == 3 * sizeof(int));
 
 // join_t
 static_assert(!HasOffsetAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<>>);

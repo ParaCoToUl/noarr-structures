@@ -170,8 +170,74 @@ public:
 	}
 };
 
-// TODO: implement rename_t
-// TODO: implement join_t
+
+template<IsDim auto QDim, class T, auto... DimPairs, IsState State>
+requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0)
+struct has_stride_along<QDim, rename_t<T, DimPairs...>, State> {
+private:
+	using Structure = rename_t<T, DimPairs...>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	constexpr static auto QDimNew = helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (Structure::internal::template contains<QDim> && !Structure::external::template contains<QDim>) {
+			return false;
+		} else {
+			return has_stride_along<QDimNew, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		return has_stride_along<QDimNew, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                    structure.sub_state(state));
+	}
+};
+
+template<IsDim auto QDim, class T, auto DimA, auto DimB, auto Dim, IsState State>
+requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)> && (DimA != DimB)
+struct has_stride_along<QDim, join_t<T, DimA, DimB, Dim>, State> {
+private:
+	using Structure = join_t<T, DimA, DimB, Dim>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == Dim) {
+			return has_stride_along<DimA, sub_structure_t, sub_state_t>::value &&
+			       has_stride_along<DimB, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimA || QDim == DimB) {
+			return false;
+		} else {
+			return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		if constexpr (QDim == Dim) {
+			return has_stride_along<DimA, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                  structure.sub_state(state)) +
+			       has_stride_along<DimB, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                  structure.sub_state(state));
+		} else {
+			return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                  structure.sub_state(state));
+		}
+	}
+};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
 struct has_stride_along<QDim, shift_t<Dim, T, StartT>, State> {
@@ -437,8 +503,31 @@ static_assert(stride_along<'x'>(scalar<int>() ^ bcast<'x'>() ^ set_length<'x'>(0
 static_assert(HasStrideAlong<set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(1), state<>()) == sizeof(int));
 
-// TODO: implement rename_t
-// TODO: implement join_t
+// rename_t
+static_assert(!HasStrideAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<>>);
+static_assert(!HasStrideAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(HasStrideAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(stride_along<'y'>(scalar<int>() ^ vector<'x'>() ^ rename<'x', 'y'>(),
+								state<state_item<length_in<'y'>, std::size_t>>(42)) == sizeof(int));
+
+// join_t
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'x',
+							  state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y', state<>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y', state<state_item<index_in<'y'>, std::size_t>>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'y',
+							  state<state_item<length_in<'y'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'z', state<>>);
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'z', state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'z', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(stride_along<'z'>(scalar<int>() ^ vector<'x'>() ^ vector<'y'>() ^ join<'x', 'y', 'z'>(),
+								state<state_item<length_in<'z'>, std::size_t>>(42)) == sizeof(int) + 42 * sizeof(int));
+static_assert(!HasStrideAlong<join_t<vector_t<'x', vector_t<'y', scalar<int>>>, 'x', 'y', 'z'>, 'z',
+							  state<state_item<length_in<'z'>, std::size_t>, state_item<index_in<'z'>, std::size_t>>>);
 
 // shift_t
 static_assert(!HasStrideAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<>>);

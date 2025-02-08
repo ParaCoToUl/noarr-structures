@@ -429,7 +429,56 @@ public:
 	}
 };
 
-// TODO: implement rename_t
+template<IsDim auto QDim, class T, auto... DimPairs, IsState State>
+requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0)
+struct has_lower_bound_along<QDim, rename_t<T, DimPairs...>, State> {
+private:
+	using Structure = rename_t<T, DimPairs...>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	constexpr static auto QDimNew = helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (Structure::internal::template contains<QDim> && !Structure::external::template contains<QDim>) {
+			return false;
+		} else {
+			return has_lower_bound_along<QDimNew, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto lower_bound(Structure structure, State state) noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDimNew, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+		                                                                               structure.sub_state(state));
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDimNew, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+		                                                                               structure.sub_state(state), min, end);
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDimNew, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+		                                                                                structure.sub_state(state));
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDimNew, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+		                                                                                structure.sub_state(state), min, end);
+	}
+};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
 struct has_lower_bound_along<QDim, shift_t<Dim, T, StartT>, State> {
@@ -929,7 +978,11 @@ static_assert(HasLowerBoundAlong<set_length_t<'x', vector_t<'x', scalar<int>>, s
 static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(5), state<>()) == 0 * sizeof(int));
 static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(5), state<>(), 3, 4) == 3 * sizeof(int));
 
-// TODO: implement rename_t
+// rename_t
+static_assert(!HasLowerBoundAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<>>);
+static_assert(!HasLowerBoundAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'x', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(HasLowerBoundAlong<rename_t<vector_t<'x', scalar<int>>, 'x', 'y'>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(lower_bound_along<'y'>(scalar<int>() ^ vector<'x'>() ^ rename<'x', 'y'>(), state<state_item<length_in<'y'>, std::size_t>>(5)) == 0 * sizeof(int));
 
 // shift_t
 static_assert(!HasLowerBoundAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<>>);
