@@ -103,6 +103,7 @@ template<IsDim auto QDim, IsDim auto Dim, class... Ts, IsState State>
 struct has_lower_bound_along<QDim, tuple_t<Dim, Ts...>, State> {
 private:
 	using Structure = tuple_t<Dim, Ts...>;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<index_in<Dim>>) {
@@ -115,7 +116,6 @@ private:
 					return false;
 				} else {
 					using sub_structure_t = typename Structure::template sub_structure_t<index>;
-					using sub_state_t = typename Structure::template sub_state_t<State>;
 
 					return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 				}
@@ -143,7 +143,6 @@ public:
 			constexpr std::size_t index = index_t::value;
 
 			using sub_structure_t = typename Structure::template sub_structure_t<index>;
-			using sub_state_t = typename Structure::template sub_state_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(index),
 																							structure.sub_state(state));
@@ -166,7 +165,6 @@ public:
 			constexpr std::size_t index = index_t::value;
 
 			using sub_structure_t = typename Structure::template sub_structure_t<index>;
-			using sub_state_t = typename Structure::template sub_state_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(index),
 																							structure.sub_state(state), min, end);
@@ -176,7 +174,6 @@ public:
 			constexpr std::size_t index = decltype(min)::value;
 
 			using sub_structure_t = typename Structure::template sub_structure_t<index>;
-			using sub_state_t = typename Structure::template sub_state_t<State>;
 
 			return offset_of<sub_structure_t>(structure, state.template with<index_in<Dim>>(min));
 		}
@@ -192,7 +189,6 @@ public:
 			constexpr std::size_t index = index_t::value;
 
 			using sub_structure_t = typename Structure::template sub_structure_t<index>;
-			using sub_state_t = typename Structure::template sub_state_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(index),
 																							structure.sub_state(state));
@@ -215,7 +211,6 @@ public:
 			constexpr std::size_t index = index_t::value;
 
 			using sub_structure_t = typename Structure::template sub_structure_t<index>;
-			using sub_state_t = typename Structure::template sub_state_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(index),
 																							structure.sub_state(state), min, end);

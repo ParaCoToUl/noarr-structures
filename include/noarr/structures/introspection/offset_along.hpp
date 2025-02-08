@@ -117,6 +117,7 @@ template<IsDim auto QDim, IsDim auto Dim, class... Ts, IsState State>
 struct has_offset_along<QDim, tuple_t<Dim, Ts...>, State> {
 private:
 	using Structure = tuple_t<Dim, Ts...>;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<index_in<Dim>>) {
@@ -126,7 +127,6 @@ private:
 				constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 
 				using sub_structure_t = typename Structure::template sub_structure_t<index>;
-				using sub_state_t = typename Structure::template sub_state_t<State>;
 
 				if constexpr (QDim == Dim) {
 					return has_offset_of<sub_structure_t, Structure, State>();
@@ -151,7 +151,6 @@ public:
 		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 
 		using sub_structure_t = typename Structure::template sub_structure_t<index>;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
 
 		if constexpr (QDim == Dim) {
 			return offset_of<sub_structure_t>(structure, state);
