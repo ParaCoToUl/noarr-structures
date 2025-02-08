@@ -27,10 +27,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_lower_bound_along<QDim, bcast_t<Dim, T>, State> {
 private:
 	using Structure = bcast_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
 
 		if constexpr (QDim == Dim) {
 			if constexpr (State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>) {
@@ -53,9 +53,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			return make_const<0>(); // lower bound of a broadcasted dimension is always 0
@@ -68,9 +65,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			return make_const<0>(); // lower bound of a broadcasted dimension is always 0
@@ -83,11 +77,7 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
-
 		if constexpr (QDim == Dim) {
 			return make_const<0>(); // the canonical offset of the lower bound of a broadcasted dimension is always the lowest index
 		} else {
@@ -99,11 +89,7 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
-
 		if constexpr (QDim == Dim) {
 			return min; // the canonical offset of the lower bound of a broadcasted dimension is always the lowest index
 		} else {
@@ -113,15 +99,142 @@ public:
 	}
 };
 
+template<IsDim auto QDim, IsDim auto Dim, class... Ts, IsState State>
+struct has_lower_bound_along<QDim, tuple_t<Dim, Ts...>, State> {
+private:
+	using Structure = tuple_t<Dim, Ts...>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (State::template contains<index_in<Dim>>) {
+			using index_t = state_get_t<State, index_in<Dim>>;
+
+			if constexpr (requires { index_t::value; requires (index_t::value < sizeof...(Ts)); }) {
+				constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
+
+				if constexpr (QDim == Dim) {
+					return false;
+				} else {
+					using sub_structure_t = typename Structure::template sub_structure_t<index>;
+					using sub_state_t = typename Structure::template sub_state_t<State>;
+
+					return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
+				}
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == Dim) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto lower_bound(Structure structure, State state) noexcept
+	requires value
+	{
+		if constexpr (State::template contains<index_in<Dim>>) {
+			// QDim != Dim
+			using index_t = state_get_t<State, index_in<Dim>>;
+
+			constexpr std::size_t index = index_t::value;
+
+			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_state_t = typename Structure::template sub_state_t<State>;
+
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(index),
+																							structure.sub_state(state));
+
+		} else {
+			using namespace constexpr_arithmetic;
+			// QDim == Dim
+			return make_const<0>();
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
+	requires value && requires { decltype(min)::value; requires (decltype(min)::value < sizeof...(Ts));
+		decltype(end)::value; requires (decltype(min)::value < decltype(end)::value); }
+	{
+		if constexpr (State::template contains<index_in<Dim>>) {
+			// QDim != Dim
+			using index_t = state_get_t<State, index_in<Dim>>;
+
+			constexpr std::size_t index = index_t::value;
+
+			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_state_t = typename Structure::template sub_state_t<State>;
+
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(index),
+																							structure.sub_state(state), min, end);
+
+		} else {
+			// QDim == Dim
+			constexpr std::size_t index = decltype(min)::value;
+
+			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_state_t = typename Structure::template sub_state_t<State>;
+
+			return offset_of<sub_structure_t>(structure, state.template with<index_in<Dim>>(min));
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
+	requires value
+	{
+		if constexpr (State::template contains<index_in<Dim>>) {
+			// QDim != Dim
+			using index_t = state_get_t<State, index_in<Dim>>;
+
+			constexpr std::size_t index = index_t::value;
+
+			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_state_t = typename Structure::template sub_state_t<State>;
+
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(index),
+																							structure.sub_state(state));
+
+		} else {
+			using namespace constexpr_arithmetic;
+			// QDim == Dim
+			return make_const<0>();
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
+	requires value && requires { decltype(min)::value; requires (decltype(min)::value < sizeof...(Ts));
+		decltype(end)::value; requires (decltype(min)::value < decltype(end)::value); }
+	{
+		if constexpr (State::template contains<index_in<Dim>>) {
+			// QDim != Dim
+			using index_t = state_get_t<State, index_in<Dim>>;
+
+			constexpr std::size_t index = index_t::value;
+
+			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_state_t = typename Structure::template sub_state_t<State>;
+
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(index),
+																							structure.sub_state(state), min, end);
+
+		} else {
+			// QDim == Dim
+			return min;
+		}
+	}
+};
+
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_lower_bound_along<QDim, vector_t<Dim, T>, State> {
 private:
 	using Structure = vector_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			if constexpr (State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>) {
 				using namespace constexpr_arithmetic;
@@ -143,9 +256,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			return make_const<0>(); // lower bound of a vectorized dimension is always 0
@@ -158,9 +268,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			return structure.sub_structure().size(structure.sub_state(state)) * min;
@@ -173,11 +280,7 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
-
 		if constexpr (QDim == Dim) {
 			return make_const<0>(); // the canonical offset of the lower bound of a vectorized dimension is always the lowest index
 		} else {
@@ -189,11 +292,7 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
-
 		if constexpr (QDim == Dim) {
 			return min; // the canonical offset of the lower bound of a vectorized dimension is always the lowest index
 		} else {
@@ -207,11 +306,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class IdxT, IsState State>
 struct has_lower_bound_along<QDim, fix_t<Dim, T, IdxT>, State> {
 private:
 	using Structure = fix_t<Dim, T, IdxT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -222,9 +320,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 		                                                                              structure.sub_state(state));
 	}
@@ -232,9 +327,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 		                                                                              structure.sub_state(state), min, end);
 	}
@@ -242,9 +334,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
 		                                                                               structure.sub_state(state));
 	}
@@ -252,9 +341,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
 		                                                                               structure.sub_state(state), min, end);
 	}
@@ -264,11 +350,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class LenT, IsState State>
 struct has_lower_bound_along<QDim, set_length_t<Dim, T, LenT>, State> {
 private:
 	using Structure = set_length_t<Dim, T, LenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -279,9 +364,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 		                                                                              structure.sub_state(state));
 	}
@@ -289,9 +371,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 		                                                                              structure.sub_state(state), min, end);
 	}
@@ -299,9 +378,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
 		                                                                               structure.sub_state(state));
 	}
@@ -309,9 +385,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
 		                                                                               structure.sub_state(state), min, end);
 	}
@@ -321,11 +394,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_lower_bound_along<QDim, hoist_t<Dim, T>, State> {
 private:
 	using Structure = hoist_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -336,9 +408,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 		                                                                              structure.sub_state(state));
 	}
@@ -346,9 +415,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 		                                                                              structure.sub_state(state), min, end);
 	}
@@ -356,9 +422,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
 		                                                                               structure.sub_state(state));
 	}
@@ -366,26 +429,21 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
 		                                                                               structure.sub_state(state), min, end);
 	}
 };
 
 // TODO: implement rename_t
-// TODO: implement join_t
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
 struct has_lower_bound_along<QDim, shift_t<Dim, T, StartT>, State> {
 private:
 	using Structure = shift_t<Dim, T, StartT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -396,16 +454,13 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto sub_structure = structure.sub_structure();
 			const auto sub_state = structure.sub_state(state);
 			const auto start = structure.start();
 			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(sub_structure,
-			                                                                              sub_state, start, sub_structure.template length<Dim>(sub_state) - start);
+			                                                                              sub_state, start, sub_structure.template length<Dim>(sub_state));
 		} else {
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 			                                                                              structure.sub_state(state));
@@ -415,9 +470,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto start = structure.start();
@@ -432,9 +484,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto sub_structure = structure.sub_structure();
@@ -451,9 +500,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto start = structure.start();
@@ -470,11 +516,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class LenT, IsS
 struct has_lower_bound_along<QDim, slice_t<Dim, T, StartT, LenT>, State> {
 private:
 	using Structure = slice_t<Dim, T, StartT, LenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -485,9 +530,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto sub_structure = structure.sub_structure();
@@ -504,9 +546,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto start = structure.start();
@@ -521,9 +560,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto sub_structure = structure.sub_structure();
@@ -540,9 +576,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto start = structure.start();
@@ -559,11 +592,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class EndT, IsS
 struct has_lower_bound_along<QDim, span_t<Dim, T, StartT, EndT>, State> {
 private:
 	using Structure = span_t<Dim, T, StartT, EndT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -574,9 +606,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto sub_structure = structure.sub_structure();
@@ -594,9 +623,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto start = structure.start();
@@ -611,9 +637,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto sub_structure = structure.sub_structure();
@@ -631,9 +654,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			const auto start = structure.start();
@@ -646,17 +666,14 @@ public:
 	}
 };
 
-// TODO: implement step_t
-
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_lower_bound_along<QDim, reverse_t<Dim, T>, State> {
 private:
 	using Structure = reverse_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -667,9 +684,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
 		                                                                              structure.sub_state(state));
 	}
@@ -677,9 +691,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		const auto sub_structure = structure.sub_structure();
 		const auto sub_state = structure.sub_state(state);
 
@@ -700,9 +711,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		const auto sub_structure = structure.sub_structure();
 		const auto sub_state = structure.sub_state(state);
 
@@ -718,9 +726,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		const auto sub_structure = structure.sub_structure();
 		const auto sub_state = structure.sub_state(state);
 
@@ -744,11 +749,10 @@ requires (DimMajor != DimMinor)
 struct has_lower_bound_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
 private:
 	using Structure = into_blocks_t<Dim, DimMajor, DimMinor, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == DimMinor) {
 			// the lower bound of the DimMinor dimension is always equal to the lower bound of the Dim dimension
 			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value;
@@ -775,9 +779,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		// TODO: fix this (for major dimension)
 		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
 
@@ -788,9 +789,6 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		// TODO: fix this (for major dimension)
 		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
 
@@ -801,9 +799,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		// TODO: fix this (for major dimension)
 		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
 
@@ -814,9 +809,6 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		// TODO: fix this (for major dimension)
 		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
 
@@ -906,7 +898,11 @@ static_assert(lower_bound_along<'x'>(
 				  scalar<int>() ^ vector<'y'>() ^ vector<'x'>(),
 				  state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>>(5, 42)) == 0 * sizeof(int));
 
-// TODO: tuple_t
+// tuple_t
+static_assert(HasLowerBoundAlong<tuple_t<'x', scalar<int>, scalar<int>>, 'x', state<>>);
+static_assert(lower_bound_along<'x'>(pack(scalar<int>(), scalar<int>()) ^ tuple<'x'>(), state<>()) == 0 * sizeof(int));
+static_assert(lower_bound_along<'x'>(pack(scalar<int>(), scalar<int>()) ^ tuple<'x'>() ^ shift<'x'>(lit<1>), state<>()) == 1 * sizeof(int));
+static_assert(!HasLowerBoundAlong<tuple_t<'x', scalar<int>, scalar<int>>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
 
 // scalar
 static_assert(!HasLowerBoundAlong<scalar<int>, 'x', state<>>);
@@ -939,7 +935,6 @@ static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<
 static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(5), state<>(), 3, 4) == 3 * sizeof(int));
 
 // TODO: implement rename_t
-// TODO: implement join_t
 
 // shift_t
 static_assert(!HasLowerBoundAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<>>);
@@ -986,8 +981,6 @@ static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<
 static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ span<'x'>(5, 10), state<>(), 3, 4) == 8 * sizeof(int));
 static_assert(HasLowerBoundAlong<span_t<'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t, std::size_t>, 'x', state<>>);
 static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ span<'y'>(5, 10), state<>()) == 0 * sizeof(int));
-
-// TODO: implement step_t
 
 // reverse_t
 static_assert(!HasLowerBoundAlong<reverse_t<'x', scalar<int>>, 'x', state<>>);

@@ -23,15 +23,30 @@ namespace helpers {
 template<IsDim auto QDim, class T, IsState State>
 struct is_uniform_along : std::false_type {};
 
+template<IsDim auto QDim, class T, IsState State>
+struct generic_is_uniform_along {
+private:
+	using Structure = T;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct is_uniform_along<QDim, bcast_t<Dim, T>, State> {
 private:
 	using Structure = bcast_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
 		} else {
@@ -48,11 +63,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct is_uniform_along<QDim, vector_t<Dim, T>, State> {
 private:
 	using Structure = vector_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
 		} else {
@@ -66,154 +80,63 @@ public:
 };
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class IdxT, IsState State>
-struct is_uniform_along<QDim, fix_t<Dim, T, IdxT>, State> {
-private:
-	using Structure = fix_t<Dim, T, IdxT>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, fix_t<Dim, T, IdxT>, State> : generic_is_uniform_along<QDim, fix_t<Dim, T, IdxT>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class LenT, IsState State>
-struct is_uniform_along<QDim, set_length_t<Dim, T, LenT>, State> {
-private:
-	using Structure = set_length_t<Dim, T, LenT>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, set_length_t<Dim, T, LenT>, State> : generic_is_uniform_along<QDim, set_length_t<Dim, T, LenT>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
-struct is_uniform_along<QDim, hoist_t<Dim, T>, State> {
-private:
-	using Structure = hoist_t<Dim, T>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, hoist_t<Dim, T>, State> : generic_is_uniform_along<QDim, hoist_t<Dim, T>, State> {};
 
 // TODO: implement rename_t
-// TODO: implement join_t
+
+template<IsDim auto QDim, IsDim auto DimA, IsDim auto DimB, IsDim auto Dim, class T, IsState State>
+requires (DimA != DimB)
+struct is_uniform_along<QDim, join_t<T, DimA, DimB, Dim>, State> {
+private:
+	using Structure = join_t<T, DimA, DimB, Dim>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == Dim) {
+			return is_uniform_along<DimA, sub_structure_t, sub_state_t>::value && is_uniform_along<DimB, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimA || QDim == DimB) {
+			return false;
+		} else {
+			return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
-struct is_uniform_along<QDim, shift_t<Dim, T, StartT>, State> {
-private:
-	using Structure = shift_t<Dim, T, StartT>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, shift_t<Dim, T, StartT>, State> : generic_is_uniform_along<QDim, shift_t<Dim, T, StartT>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class LenT, IsState State>
-struct is_uniform_along<QDim, slice_t<Dim, T, StartT, LenT>, State> {
-private:
-	using Structure = slice_t<Dim, T, StartT, LenT>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, slice_t<Dim, T, StartT, LenT>, State> : generic_is_uniform_along<QDim, slice_t<Dim, T, StartT, LenT>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class EndT, IsState State>
-struct is_uniform_along<QDim, span_t<Dim, T, StartT, EndT>, State> {
-private:
-	using Structure = span_t<Dim, T, StartT, EndT>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, span_t<Dim, T, StartT, EndT>, State> : generic_is_uniform_along<QDim, span_t<Dim, T, StartT, EndT>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class StrideT, IsState State>
-struct is_uniform_along<QDim, step_t<Dim, T, StartT, StrideT>, State> {
-private:
-	using Structure = step_t<Dim, T, StartT, StrideT>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, step_t<Dim, T, StartT, StrideT>, State> : generic_is_uniform_along<QDim, step_t<Dim, T, StartT, StrideT>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
-struct is_uniform_along<QDim, reverse_t<Dim, T>, State> {
-private:
-	using Structure = reverse_t<Dim, T>;
-
-	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
-		return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
-
-public:
-	using value_type = bool;
-	static constexpr bool value = get_value();
-};
+struct is_uniform_along<QDim, reverse_t<Dim, T>, State> : generic_is_uniform_along<QDim, reverse_t<Dim, T>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T, IsState State>
 requires (DimMajor != DimMinor)
 struct is_uniform_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
 private:
 	using Structure = into_blocks_t<Dim, DimMajor, DimMinor, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == DimMinor) {
 			return is_uniform_along<Dim, sub_structure_t, sub_state_t>::value;
 		} else if constexpr (QDim == DimMajor) {
@@ -388,7 +311,6 @@ static_assert(IsUniformAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<i
                              state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>>);
 static_assert(IsUniformAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<int>>>, 'x',
                              state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>>);
-
 
 // TODO: implement into_blocks_static_t
 // TODO: implement into_blocks_dynamic_t

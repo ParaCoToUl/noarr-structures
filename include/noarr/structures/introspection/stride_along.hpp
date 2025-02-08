@@ -28,11 +28,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_stride_along<QDim, bcast_t<Dim, T>, State> {
 private:
 	using Structure = bcast_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
 		} else {
@@ -47,9 +46,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			return make_const<0>(); // stride of a broadcasted dimension is always 0
@@ -64,11 +60,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_stride_along<QDim, vector_t<Dim, T>, State> {
 private:
 	using Structure = vector_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			if constexpr (State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>) {
 				using namespace constexpr_arithmetic;
@@ -93,9 +88,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == Dim) {
 			using namespace constexpr_arithmetic;
 			constexpr auto zero = make_const<0>();
@@ -109,17 +101,14 @@ public:
 	}
 };
 
-// TODO: implement tuple_t
-
 template<IsDim auto QDim, IsDim auto Dim, class T, class IdxT, IsState State>
 struct has_stride_along<QDim, fix_t<Dim, T, IdxT>, State> {
 private:
 	using Structure = fix_t<Dim, T, IdxT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -130,9 +119,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 		                                                                    structure.sub_state(state));
 	}
@@ -142,11 +128,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class LenT, IsState State>
 struct has_stride_along<QDim, set_length_t<Dim, T, LenT>, State> {
 private:
 	using Structure = set_length_t<Dim, T, LenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -157,9 +142,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 		                                                                    structure.sub_state(state));
 	}
@@ -169,11 +151,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_stride_along<QDim, hoist_t<Dim, T>, State> {
 private:
 	using Structure = hoist_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -184,9 +165,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 		                                                                    structure.sub_state(state));
 	}
@@ -199,11 +177,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, IsState State>
 struct has_stride_along<QDim, shift_t<Dim, T, StartT>, State> {
 private:
 	using Structure = shift_t<Dim, T, StartT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -214,9 +191,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 		                                                                    structure.sub_state(state));
 	}
@@ -226,11 +200,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class LenT, IsS
 struct has_stride_along<QDim, slice_t<Dim, T, StartT, LenT>, State> {
 private:
 	using Structure = slice_t<Dim, T, StartT, LenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -241,9 +214,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 		                                                                    structure.sub_state(state));
 	}
@@ -253,11 +223,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class EndT, IsS
 struct has_stride_along<QDim, span_t<Dim, T, StartT, EndT>, State> {
 private:
 	using Structure = span_t<Dim, T, StartT, EndT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -268,9 +237,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 		                                                                    structure.sub_state(state));
 	}
@@ -280,11 +246,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, class StartT, class StrideT, 
 struct has_stride_along<QDim, step_t<Dim, T, StartT, StrideT>, State> {
 private:
 	using Structure = step_t<Dim, T, StartT, StrideT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -295,9 +260,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
 
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
@@ -309,11 +271,10 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_stride_along<QDim, reverse_t<Dim, T>, State> {
 private:
 	using Structure = reverse_t<Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 	}
 
@@ -324,9 +285,6 @@ public:
 	static constexpr auto stride(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		using namespace constexpr_arithmetic;
 
 		using sub_stride_t = decltype(+has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
@@ -342,11 +300,10 @@ requires (DimMajor != DimMinor)
 struct has_stride_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
 private:
 	using Structure = into_blocks_t<Dim, DimMajor, DimMinor, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == DimMinor) {
 			// the stride of the minor dimension is the stride of Dim in the substructure
 			return has_stride_along<Dim, sub_structure_t, sub_state_t>::value;
@@ -369,9 +326,6 @@ private:
 	}
 
 	static constexpr auto get_stride(Structure structure, State state) noexcept {
-		using sub_structure_t = typename Structure::sub_structure_t;
-		using sub_state_t = typename Structure::template sub_state_t<State>;
-
 		if constexpr (QDim == DimMinor) {
 			return has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 			                                                                   structure.sub_state(state));
