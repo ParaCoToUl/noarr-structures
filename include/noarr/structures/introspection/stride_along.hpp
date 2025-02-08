@@ -165,8 +165,6 @@ public:
 	}
 };
 
-// TODO: implement reorder_t
-
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_stride_along<QDim, hoist_t<Dim, T>, State> {
 private:
@@ -331,7 +329,7 @@ public:
 
 		using namespace constexpr_arithmetic;
 
-		using sub_stride_t = decltype(has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		using sub_stride_t = decltype(+has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 		                                                                    structure.sub_state(state)));
 
 		return -static_cast<std::make_signed_t<sub_stride_t>>(has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(
@@ -460,8 +458,6 @@ static_assert(stride_along<'x'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>(),
                                 state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>>(
 									5, 42)) == 42 * sizeof(int));
 
-// TODO: tuple_t
-
 // scalar
 static_assert(!HasStrideAlong<scalar<int>, 'x', state<>>);
 static_assert(!HasStrideAlong<scalar<int>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
@@ -487,16 +483,110 @@ static_assert(stride_along<'x'>(scalar<int>() ^ bcast<'x'>() ^ set_length<'x'>(0
 static_assert(HasStrideAlong<set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(1), state<>()) == sizeof(int));
 
-// TODO: implement reorder_t
-// TODO: implement hoist_t
 // TODO: implement rename_t
 // TODO: implement join_t
 
-// TODO: implement shift_t
-// TODO: implement slice_t
-// TODO: implement span_t
-// TODO: implement step_t
-// TODO: implement reverse_t
+// shift_t
+static_assert(!HasStrideAlong<shift_t<'x', scalar<int>, std::size_t>, 'x', state<>>);
+static_assert(!HasStrideAlong<shift_t<'x', scalar<int>, std::size_t>, 'x',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<shift_t<'x', scalar<int>, std::size_t>, 'x',
+							  state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ shift<'x'>(4), state<state_item<length_in<'x'>, std::size_t>>(42)) == sizeof(int));
+static_assert(HasStrideAlong<shift_t<'y', vector_t<'x', scalar<int>>, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ shift<'y'>(4), state<state_item<length_in<'x'>, std::size_t>>(42)) == sizeof(int));
+static_assert(!HasStrideAlong<shift_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'y',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<shift_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t>, 'x',
+							 state<>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ shift<'x'>(4), state<>()) == sizeof(int));
+static_assert(!HasStrideAlong<shift_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t>, 'y',
+							  state<>>);
+
+// slice_t
+static_assert(!HasStrideAlong<slice_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(!HasStrideAlong<slice_t<'x', scalar<int>, std::size_t, std::size_t>, 'x',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<slice_t<'x', scalar<int>, std::size_t, std::size_t>, 'x',
+							  state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<slice_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ slice<'x'>(4, 2), state<state_item<length_in<'x'>, std::size_t>>(42)) == sizeof(int));
+static_assert(HasStrideAlong<slice_t<'y', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ slice<'y'>(4, 3), state<state_item<length_in<'x'>, std::size_t>>(42)) == sizeof(int));
+static_assert(!HasStrideAlong<slice_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'y',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<slice_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t, std::size_t>, 'x',
+							 state<>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ slice<'x'>(4, 4), state<>()) == sizeof(int));
+static_assert(!HasStrideAlong<slice_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t, std::size_t>, 'y',
+							  state<>>);
+
+// span_t
+static_assert(!HasStrideAlong<span_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(!HasStrideAlong<span_t<'x', scalar<int>, std::size_t, std::size_t>, 'x',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<span_t<'x', scalar<int>, std::size_t, std::size_t>, 'x',
+							  state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<span_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ span<'x'>(4, 6), state<state_item<length_in<'x'>, std::size_t>>(42)) == sizeof(int));
+static_assert(HasStrideAlong<span_t<'y', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ span<'y'>(4, 8), state<state_item<length_in<'x'>, std::size_t>>(42)) == sizeof(int));
+static_assert(!HasStrideAlong<span_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'y',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<span_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t, std::size_t>, 'x',
+							 state<>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ span<'x'>(4, 7), state<>()) == sizeof(int));
+static_assert(!HasStrideAlong<span_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t, std::size_t>, 'y',
+							  state<>>);
+
+// step_t
+static_assert(!HasStrideAlong<step_t<'x', scalar<int>, std::size_t, std::size_t>, 'x', state<>>);
+static_assert(!HasStrideAlong<step_t<'x', scalar<int>, std::size_t, std::size_t>, 'x',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<step_t<'x', scalar<int>, std::size_t, std::size_t>, 'x',
+							  state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<step_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ step<'x'>(4, 6), state<state_item<length_in<'x'>, std::size_t>>(42)) == 6 * sizeof(int));
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ step<'x'>(4, 6) ^ step<'x'>(0, 2), state<state_item<length_in<'x'>, std::size_t>>(42)) == 2 * 6 * sizeof(int));
+static_assert(HasStrideAlong<step_t<'y', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ step<'y'>(4, 8), state<state_item<length_in<'x'>, std::size_t>>(42)) == 8 * sizeof(int));
+static_assert(!HasStrideAlong<step_t<'x', vector_t<'x', scalar<int>>, std::size_t, std::size_t>, 'y',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<step_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t, std::size_t>, 'x',
+							 state<>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ step<'x'>(4, 7), state<>()) == 7 * sizeof(int));
+static_assert(!HasStrideAlong<step_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t, std::size_t>, 'y',
+							  state<>>);
+
+// reverse_t
+static_assert(!HasStrideAlong<reverse_t<'x', scalar<int>>, 'x', state<>>);
+static_assert(!HasStrideAlong<reverse_t<'x', scalar<int>>, 'x',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<reverse_t<'x', scalar<int>>, 'x',
+							  state<state_item<index_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ reverse<'x'>(), state<state_item<length_in<'x'>, std::size_t>>(42)) == -static_cast<int>(sizeof(int)));
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ reverse<'x'>() ^ reverse<'x'>(), state<state_item<length_in<'x'>, std::size_t>>(42)) == static_cast<int>(sizeof(int)));
+static_assert(HasStrideAlong<reverse_t<'y', vector_t<'x', scalar<int>>>, 'x',
+							 state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ reverse<'y'>(), state<state_item<length_in<'x'>, std::size_t>>(42)) == -static_cast<int>(sizeof(int)));
+static_assert(!HasStrideAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'y',
+							  state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<reverse_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x',
+							 state<>>);
+static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ reverse<'x'>(), state<>()) == -static_cast<int>(sizeof(int)));
+static_assert(!HasStrideAlong<reverse_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y',
+							  state<>>);
 
 // into_blocks_t
 static_assert(!HasStrideAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'x', state<>>);

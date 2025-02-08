@@ -203,8 +203,6 @@ public:
 	}
 };
 
-// TODO: implement tuple_t
-
 template<IsDim auto QDim, IsDim auto Dim, class T, class IdxT, IsState State>
 struct has_lower_bound_along<QDim, fix_t<Dim, T, IdxT>, State> {
 private:
@@ -318,8 +316,6 @@ public:
 		                                                                               structure.sub_state(state), min, end);
 	}
 };
-
-// TODO: implement reorder_t
 
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_lower_bound_along<QDim, hoist_t<Dim, T>, State> {
@@ -942,7 +938,6 @@ static_assert(HasLowerBoundAlong<set_length_t<'x', vector_t<'x', scalar<int>>, s
 static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(5), state<>()) == 0 * sizeof(int));
 static_assert(lower_bound_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(5), state<>(), 3, 4) == 3 * sizeof(int));
 
-// TODO: implement reorder_t
 // TODO: implement rename_t
 // TODO: implement join_t
 

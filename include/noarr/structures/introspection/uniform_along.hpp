@@ -65,8 +65,6 @@ public:
 	static constexpr bool value = get_value();
 };
 
-// TODO: implement tuple_t
-
 template<IsDim auto QDim, IsDim auto Dim, class T, class IdxT, IsState State>
 struct is_uniform_along<QDim, fix_t<Dim, T, IdxT>, State> {
 private:
@@ -100,8 +98,6 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 };
-
-// TODO: implement reorder_t
 
 template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct is_uniform_along<QDim, hoist_t<Dim, T>, State> {
@@ -287,8 +283,6 @@ static_assert(IsUniformAlong<vector_t<'x', vector_t<'y', scalar<int>>>, 'y',
 static_assert(IsUniformAlong<vector_t<'x', vector_t<'y', scalar<int>>>, 'x',
                              state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>>>);
 
-// TODO: tuple_t
-
 // scalar
 static_assert(!IsUniformAlong<scalar<int>, 'x', state<>>);
 static_assert(!IsUniformAlong<scalar<int>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
@@ -310,9 +304,6 @@ static_assert(!IsUniformAlong<set_length_t<'x', scalar<int>, std::size_t>, 'x', 
 static_assert(IsUniformAlong<set_length_t<'x', bcast_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 static_assert(IsUniformAlong<set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
 
-
-// TODO: implement reorder_t
-// TODO: implement hoist_t
 // TODO: implement rename_t
 // TODO: implement join_t
 
