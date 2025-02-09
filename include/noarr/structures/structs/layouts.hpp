@@ -311,7 +311,7 @@ struct vector_t : strict_contain<T> {
 	requires (has_offset_of<Sub, vector_t, State>())
 	{
 		using namespace constexpr_arithmetic;
-		if constexpr (!std::is_same_v<decltype(state.template get<length_in<Dim>>()),
+		if constexpr (!std::is_same_v<decltype(std::declval<State>().template get<length_in<Dim>>()),
 		                              std::integral_constant<std::size_t, 1>>) {
 			// offset = index * elem_size + offset_within_elem
 			const auto index = state.template get<index_in<Dim>>();
