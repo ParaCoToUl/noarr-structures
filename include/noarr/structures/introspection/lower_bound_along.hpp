@@ -1445,10 +1445,24 @@ requires HasLowerBoundAlong<T, Dim, State>
 }
 
 template<auto Dim, class T, class State>
+constexpr auto lower_bound_at(T structure, State state) noexcept
+requires HasLowerBoundAlong<T, Dim, State>
+{
+	return helpers::has_lower_bound_along<Dim, T, State>::lower_bound_at(structure, state);
+}
+
+template<auto Dim, class T, class State>
 constexpr auto lower_bound_along(T structure, State state, auto min, auto end) noexcept
 requires HasLowerBoundAlong<T, Dim, State>
 {
 	return helpers::has_lower_bound_along<Dim, T, State>::lower_bound(structure, state, min, end);
+}
+
+template<auto Dim, class T, class State>
+constexpr auto lower_bound_at(T structure, State state, auto min, auto end) noexcept
+requires HasLowerBoundAlong<T, Dim, State>
+{
+	return helpers::has_lower_bound_along<Dim, T, State>::lower_bound_at(structure, state, min, end);
 }
 
 } // namespace noarr
