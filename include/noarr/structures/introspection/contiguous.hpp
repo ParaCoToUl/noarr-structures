@@ -277,10 +277,17 @@ requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent !
 struct is_contiguous<into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
 private:
 	using Structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
+	using indexless_state = decltype(std::declval<State>().template remove<index_in<DimMajor>, index_in<DimMinor>>());
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsPresent>>) {
-			// TODO:
+		if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
+		              Structure::template has_length<DimMinor, indexless_state>()) {
+			if constexpr (State::template contains<index_in<DimMinor>> &&
+			              !State::template contains<index_in<DimMajor>>) {
+				return false;
+			} else {
+				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
+			}
 		} else {
 			return false;
 		}
@@ -297,11 +304,22 @@ requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != 
 struct is_contiguous<into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
 private:
 	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
+	using indexless_state = decltype(std::declval<State>().template remove<index_in<DimMajor>, index_in<DimMinor>,
+	                                                                    index_in<DimIsBorder>>());
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>, index_in<DimMajor>,
-		                                       index_in<DimMinor>, index_in<DimIsBorder>>) {
-			// TODO:
+		if constexpr (State::template contains<index_in<DimIsBorder>>) {
+			if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
+							Structure::template has_length<DimMinor, indexless_state>()) {
+				if constexpr (State::template contains<index_in<DimMinor>> &&
+							!State::template contains<index_in<DimMajor>>) {
+					return false;
+				} else {
+					return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
+				}
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
@@ -407,10 +425,15 @@ static_assert(!is_contiguous<into_blocks_t<'x', 'y', 'z', vector_t<'x', scalar<i
                                    state_item<index_in<'z'>, std::size_t>>>::value);
 
 // contiguous into_blocks_dynamic
-
-// contiguous into_blocks_static
-
-// contiguous zcurve
+static_assert(
+	is_contiguous<into_blocks_dynamic_t<'x', 'y', 'z', 'w', vector_t<'x', scalar<int>>>,
+				  state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>::value);
+static_assert(is_contiguous<into_blocks_dynamic_t<'x', 'y', 'z', 'w', vector_t<'x', scalar<int>>>,
+							state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>,
+								  state_item<index_in<'y'>, std::size_t>>>::value);
+static_assert(!is_contiguous<into_blocks_dynamic_t<'x', 'y', 'z', 'w', vector_t<'x', scalar<int>>>,
+							 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>,
+								   state_item<index_in<'z'>, std::size_t>>>::value);
 
 } // namespace helpers
 

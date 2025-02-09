@@ -280,9 +280,11 @@ public:
 	{
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == DimMajor) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>())));
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>()))) -
+			offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
 		} else if constexpr (QDim == DimMinor) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>())));
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>()))) -
+			offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
 		} else {
 			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
 			                                                                  structure.sub_state(state));
@@ -322,11 +324,14 @@ public:
 		using namespace constexpr_arithmetic;
 
 		if constexpr (QDim == DimMajor) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>())));
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>()))) -
+			offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
 		} else if constexpr (QDim == DimMinor) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>())));
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>()))) -
+			offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
 		} else if constexpr (QDim == DimIsBorder) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>, index_in<DimMajor>>(make_const<0>(), make_const<0>())));
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
+			- offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsBorder>>(make_const<0>(), make_const<0>(), make_const<0>())));
 		} else {
 			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
 			                                                                  structure.sub_state(state));
@@ -366,11 +371,13 @@ public:
 		using namespace constexpr_arithmetic;
 
 		if constexpr (QDim == DimMajor) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>())));
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>())))
+			- offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
 		} else if constexpr (QDim == DimMinor) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>())));
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>())))
+			- offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
 		} else if constexpr (QDim == DimIsPresent) {
-			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
+			return make_const<0>();
 		} else {
 			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
 			                                                                  structure.sub_state(state));

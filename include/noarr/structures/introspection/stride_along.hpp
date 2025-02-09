@@ -392,11 +392,13 @@ private:
 	}
 
 	static constexpr auto get_stride(Structure structure, State state) noexcept {
+		using namespace constexpr_arithmetic;
 		if constexpr (QDim == DimMinor) {
 			return has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 			                                                                   structure.sub_state(state));
 		} else if constexpr (QDim == DimMajor) {
-			return structure.template length<DimMinor>(state) *
+			const auto minor_len = structure.template length<DimMinor>(state);
+			return minor_len *
 			       has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 			                                                                   structure.sub_state(state));
 		} else {
@@ -416,11 +418,103 @@ public:
 	}
 };
 
-// TODO: implement into_blocks_static_t
-// TODO: implement into_blocks_dynamic_t
-// TODO: implement merge_blocks_t
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT, IsState State>
+requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != DimMinor)
+struct has_stride_along<QDim, into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
+private:
+	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-// TODO: implement zcurve_t
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMinor) {
+			return has_stride_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (Structure::template has_length<DimMinor, State>()) {
+				return has_stride_along<Dim, sub_structure_t, sub_state_t>::value;
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == DimIsBorder || QDim == Dim) {
+			return false;
+		} else {
+			return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                   structure.sub_state(state));
+		} else if constexpr (QDim == DimMajor) {
+			const auto minor_len = structure.template length<DimMinor>(state);
+			return minor_len *
+			       has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                   structure.sub_state(state));
+		} else {
+			return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                    structure.sub_state(state));
+		}
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T, IsState State>
+requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent != DimMajor)
+struct has_stride_along<QDim, into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
+private:
+	using Structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMinor) {
+			return has_stride_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (Structure::template has_length<DimMinor, State>()) {
+				return has_stride_along<Dim, sub_structure_t, sub_state_t>::value;
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == DimIsPresent) {
+			return true;
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto stride(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                   structure.sub_state(state));
+		} else if constexpr (QDim == DimMajor) {
+			const auto minor_len = structure.template length<DimMinor>(state);
+			return minor_len *
+			       has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                   structure.sub_state(state));
+		} else if constexpr (QDim == DimIsPresent) {
+			return make_const<0>();
+		} else {
+			return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                    structure.sub_state(state));
+		}
+	}
+};
 
 } // namespace helpers
 
@@ -660,11 +754,53 @@ static_assert(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ into_blocks<'x',
                                 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>(
 									42, 5)) == 42 * sizeof(int));
 
-// TODO: implement into_blocks_static_t
-// TODO: implement into_blocks_dynamic_t
-// TODO: implement merge_blocks_t
+// into_blocks_static_t
+static_assert(!HasStrideAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'x', state<state_item<index_in<'y'>, lit_t<0>>>>);
+static_assert(HasStrideAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'z', state<state_item<index_in<'y'>, lit_t<0>>>>);
+static_assert(stride_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_static<'x', 'y', 'z', 'w'>(lit<4>),
+state<state_item<index_in<'y'>, lit_t<0>>>()) == 4 * sizeof(int));
+static_assert(HasStrideAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'w', state<state_item<index_in<'y'>, lit_t<0>>>>);
+static_assert(stride_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_static<'x', 'y', 'z', 'w'>(lit<4>),
+state<state_item<index_in<'y'>, lit_t<0>>>()) == sizeof(int));
+static_assert(!HasStrideAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'y', state<>>);
 
-// TODO: implement zcurve_t
+static_assert(HasStrideAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'z', state<state_item<index_in<'y'>, lit_t<1>>>>);
+static_assert(stride_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_static<'x', 'y', 'z', 'w'>(lit<4>),
+state<state_item<index_in<'y'>, lit_t<1>>>()) == 2 * sizeof(int));
+static_assert(HasStrideAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'w', state<state_item<index_in<'y'>, lit_t<1>>>>);
+static_assert(stride_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_static<'x', 'y', 'z', 'w'>(lit<4>),
+state<state_item<index_in<'y'>, lit_t<1>>>()) == sizeof(int));
+
+// into_blocks_dynamic_t
+static_assert(!HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x', state<>>);
+static_assert(!HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<>>);
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'z', state<>>);
+static_assert(stride_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<>()) == sizeof(int));
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'w', state<>>);
+static_assert(stride_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<>()) == 0);
+
+static_assert(!HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(!HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'z', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'x'>, std::size_t>>(7)) == sizeof(int));
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'w', state<state_item<length_in<'x'>, std::size_t>>>);
+static_assert(stride_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'x'>, std::size_t>>(7)) == 0);
+
+static_assert(!HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(stride_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'y'>, std::size_t>>(7)) == 6 * sizeof(int));
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'z', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(stride_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'y'>, std::size_t>>(7)) == sizeof(int));
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'w', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(stride_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'y'>, std::size_t>>(7)) == 0);
+
+static_assert(!HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(stride_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'z'>, std::size_t>>(7)) == 7 * sizeof(int));
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'z', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(stride_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'z'>, std::size_t>>(7)) == sizeof(int));
+static_assert(HasStrideAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'w', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(stride_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'z'>, std::size_t>>(7)) == 0);
 
 } // namespace noarr
 

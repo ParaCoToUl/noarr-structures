@@ -15,6 +15,8 @@
 #include "../structs/views.hpp"
 #include "../structs/zcurve.hpp"
 
+// TODO: could be more elegant to define min_state and end_state instead of min and end
+
 namespace noarr {
 
 namespace helpers {
@@ -49,6 +51,16 @@ private:
 public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
+
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		if constexpr (QDim == Dim) {
+			return true;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+		}
+	}
 
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
@@ -133,13 +145,29 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		if constexpr (State::template contains<index_in<Dim>>) {
+			// QDim != Dim
+			using index_t = state_get_t<State, index_in<Dim>>;
+			constexpr std::size_t index = index_t::value;
+
+			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else {
+			// QDim == Dim
+			return true;
+		}
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
 		if constexpr (State::template contains<index_in<Dim>>) {
 			// QDim != Dim
 			using index_t = state_get_t<State, index_in<Dim>>;
-
 			constexpr std::size_t index = index_t::value;
 
 			using sub_structure_t = typename Structure::template sub_structure_t<index>;
@@ -161,7 +189,6 @@ public:
 		if constexpr (State::template contains<index_in<Dim>>) {
 			// QDim != Dim
 			using index_t = state_get_t<State, index_in<Dim>>;
-
 			constexpr std::size_t index = index_t::value;
 
 			using sub_structure_t = typename Structure::template sub_structure_t<index>;
@@ -248,6 +275,16 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		if constexpr (QDim == Dim) {
+			return true;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+		}
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
@@ -312,6 +349,12 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
@@ -356,6 +399,12 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
@@ -399,6 +448,12 @@ private:
 public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
+
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+	}
 
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
@@ -451,6 +506,12 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDimNew, sub_structure_t, sub_state_t>::is_monotonic();
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
@@ -494,6 +555,12 @@ private:
 public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
+
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+	}
 
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
@@ -571,6 +638,12 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
@@ -646,6 +719,12 @@ private:
 public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
+
+	static constexpr auto is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+	}
 
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
@@ -725,6 +804,12 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
@@ -799,11 +884,19 @@ private:
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == DimMinor) {
 			// the lower bound of the DimMinor dimension is always equal to the lower bound of the Dim dimension
-			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value;
+			if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+				return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+			} else {
+				return false;
+			}
 		} else if constexpr (QDim == DimMajor) {
 			if constexpr (Structure::template has_length<DimMinor, State>()) {
 				// the lower bound of the DimMajor dimension is always equal to the lower bound of the Dim dimension
-				return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value;
+				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+					return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}
@@ -820,52 +913,485 @@ public:
 	using value_type = bool;
 	static constexpr bool value = get_value();
 
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else if constexpr (QDim == DimMajor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+		}
+	}
+
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		// TODO: fix this (for major dimension)
-		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
-
-		return has_lower_bound_along<Dim_, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
-		                                                                              structure.sub_state(state));
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), make_const<0>(), structure.template length<DimMinor>(state));
+		} else if constexpr (QDim == DimMajor) {
+			return make_const<0>();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state));
+		}
 	}
 
 	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		// TODO: fix this (for major dimension)
-		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
-
-		return has_lower_bound_along<Dim_, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
-		                                                                              structure.sub_state(state), min, end);
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		} else if constexpr (QDim == DimMajor) {
+			const auto len = structure.template length<DimMinor>(state);
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+				                                                                              structure.sub_state(state), min * len, end * len);
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		}
 	}
 
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		// TODO: fix this (for major dimension)
-		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
-
-		return has_lower_bound_along<Dim_, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
-		                                                                               structure.sub_state(state));
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), make_const<0>(), structure.template length<DimMinor>(state));
+		} else if constexpr (QDim == DimMajor) {
+			if (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                            structure.sub_state(state)) == make_const<0>()) {
+				return make_const<0>();
+			} else {
+				return structure.template length<DimMinor>(state) - make_const<1>();
+			}
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state));
+		}
 	}
 
 	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
 	requires value
 	{
-		// TODO: fix this (for major dimension)
-		constexpr auto Dim_ = (QDim == DimMinor || QDim == DimMajor) ? Dim : QDim;
-
-		return has_lower_bound_along<Dim_, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
-		                                                                               structure.sub_state(state), min, end);
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), min, end);
+		} else if constexpr (QDim == DimMajor) {
+			if (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                            structure.sub_state(state)) == make_const<0>()) {
+				return min;
+			} else {
+				return end - make_const<1>();
+			}
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), min, end);
+		}
 	}
 };
 
-// TODO: implement into_blocks_static_t
-// TODO: implement into_blocks_dynamic_t
-// TODO: implement merge_blocks_t
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT, IsState State>
+requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != DimMinor)
+struct has_lower_bound_along<QDim, into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
+private:
+	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-// TODO: implement zcurve_t
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMinor) {
+			if constexpr (!State::template contains<index_in<DimIsBorder>>) {
+				return false;
+			} else if constexpr (Structure::template has_length<DimMinor, State>()) {
+				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+					return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (!State::template contains<index_in<DimIsBorder>>) {
+				return false;
+			} else if constexpr (Structure::template has_length<DimMinor, State>()) {
+				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+					return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == DimIsBorder) {
+			if constexpr (State::template contains<index_in<DimIsBorder>>) {
+				return false;
+			} else if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+				return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else if constexpr (QDim == DimMajor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else if constexpr (QDim == DimIsBorder) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			const auto len = structure.template length<DimMinor>(state);
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), make_const<0>(), len);
+		} else if constexpr (QDim == DimMajor || QDim == DimIsBorder) {
+			return make_const<0>();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state));
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		} else if constexpr (QDim == DimMajor) {
+			const auto len = structure.template length<DimMinor>(state);
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+				                                                                              structure.sub_state(state), min * len, end * len);
+		} else if constexpr (QDim == DimIsBorder) {
+			return make_const<0>();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), make_const<0>(), structure.template length<DimMinor>(state));
+		} else if constexpr (QDim == DimMajor) {
+			if (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                            structure.sub_state(state)) == make_const<0>()) {
+				return make_const<0>();
+			} else {
+				return structure.template length<DimMinor>(state) - make_const<1>();
+			}
+		} else if constexpr (QDim == DimIsBorder) {
+			if (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                            structure.sub_state(state)) == make_const<0>()) {
+				return make_const<0>();
+			} else {
+				return make_const<1>();
+			}
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state));
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), min, end);
+		} else if constexpr (QDim == DimMajor) {
+			const auto len = structure.template length<DimMinor>(state);
+			if (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                            structure.sub_state(state)) == make_const<0>()) {
+				return min;
+			} else {
+				return end - make_const<1>();
+			}
+		} else if constexpr (QDim == DimIsBorder) {
+			const auto len = structure.template length<DimMinor>(state);
+			if (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                            structure.sub_state(state)) == make_const<0>()) {
+				return min;
+			} else {
+				return end - make_const<1>();
+			}
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), min, end);
+		}
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T, IsState State>
+requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent != DimMajor)
+struct has_lower_bound_along<QDim, into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
+private:
+	using Structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMinor) {
+			if constexpr (Structure::template has_length<DimMinor, State>()) {
+				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+					return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == DimMajor) {
+			if constexpr (Structure::template has_length<DimMinor, State>()) {
+				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+					return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == DimIsPresent) {
+			if constexpr (Structure::template has_length<DimMinor, State>()) {
+				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
+					return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else if constexpr (QDim == DimMajor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else if constexpr (QDim == DimIsPresent) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			const auto len = structure.template length<DimMinor>(state);
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), make_const<0>(), len);
+		} else if constexpr (QDim == DimMajor || QDim == DimIsPresent) {
+			return make_const<0>();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state));
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		} else if constexpr (QDim == DimMajor) {
+			const auto len = structure.template length<DimMinor>(state);
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+				                                                                              structure.sub_state(state), min * len, end * len);
+		} else if constexpr (QDim == DimIsPresent) {
+			return make_const<0>();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMinor) {
+			return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state), make_const<0>(), structure.template length<DimMinor>(state));
+		} else if constexpr (QDim == DimMajor) {
+			if (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                            structure.sub_state(state)) == make_const<0>()) {
+				return make_const<0>();
+			} else {
+				return structure.template length<DimMinor>(state) - make_const<1>();
+			}
+		} else if constexpr (QDim == DimIsPresent) {
+			return make_const<0>();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                               structure.sub_state(state));
+		}
+	}
+};
+
+template<IsDim auto QDim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class T, IsState State>
+struct has_lower_bound_along<QDim, merge_blocks_t<DimMajor, DimMinor, Dim, T>, State> {
+private:
+	using Structure = merge_blocks_t<DimMajor, DimMinor, Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == Dim) {
+			if constexpr (has_lower_bound_along<DimMajor, sub_structure_t, sub_state_t>::value &&
+			       has_lower_bound_along<DimMinor, sub_structure_t, sub_state_t>::value) {
+				return has_lower_bound_along<DimMajor, sub_structure_t, sub_state_t>::is_monotonic() &&
+				       has_lower_bound_along<DimMinor, sub_structure_t, sub_state_t>::is_monotonic();
+			} else {
+				return false;
+			}
+		} else if constexpr (QDim == DimMajor || QDim == DimMinor) {
+			return false;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr bool is_monotonic() noexcept
+	requires value
+	{
+		if constexpr (QDim == Dim) {
+			return has_lower_bound_along<DimMajor, sub_structure_t, sub_state_t>::is_monotonic() &&
+			       has_lower_bound_along<DimMinor, sub_structure_t, sub_state_t>::is_monotonic();
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == Dim) {
+			const auto sub_structure = structure.sub_structure();
+			const auto sub_state = structure.sub_state(state);
+
+			const auto major = has_lower_bound_along<DimMajor, sub_structure_t, sub_state_t>::lower_bound(sub_structure,
+			                                                                                              sub_state);
+			const auto minor = has_lower_bound_along<DimMinor, sub_structure_t, sub_state_t>::lower_bound(sub_structure,
+			                                                                                              sub_state);
+			return major + minor;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state));
+		}
+	}
+
+	static constexpr auto lower_bound(Structure structure, State state, auto min, auto end) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == Dim) {
+			const auto sub_structure = structure.sub_structure();
+			const auto sub_state = structure.sub_state(state);
+
+			const auto length = sub_structure.template length<DimMinor>(sub_state);
+			const auto major = has_lower_bound_along<DimMajor, sub_structure_t, sub_state_t>::lower_bound(sub_structure,
+			                                                                                              sub_state, min / length, end / length);
+			const auto minor = has_lower_bound_along<DimMinor, sub_structure_t, sub_state_t>::lower_bound(sub_structure,
+			                                                                                              sub_state, min % length, end % length);
+			return major + minor;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == Dim) {
+			const auto sub_structure = structure.sub_structure();
+			const auto sub_state = structure.sub_state(state);
+
+			const auto major = has_lower_bound_along<DimMajor, sub_structure_t, sub_state_t>::lower_bound_at(sub_structure, sub_state);
+			const auto minor = has_lower_bound_along<DimMinor, sub_structure_t, sub_state_t>::lower_bound_at(sub_structure, sub_state);
+			return major + minor;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                              structure.sub_state(state));
+		}
+	}
+
+	static constexpr auto lower_bound_at(Structure structure, State state, auto min, auto end) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == Dim) {
+			const auto sub_structure = structure.sub_structure();
+			const auto sub_state = structure.sub_state(state);
+
+			const auto length = sub_structure.template length<DimMinor>(sub_state);
+			const auto major = has_lower_bound_along<DimMajor, sub_structure_t, sub_state_t>::lower_bound_at(sub_structure,
+			                                                                                                 sub_state, min / length, end / length);
+			const auto minor = has_lower_bound_along<DimMinor, sub_structure_t, sub_state_t>::lower_bound_at(sub_structure,
+			                                                                                                 sub_state, min % length, end % length);
+			return major + minor;
+		} else {
+			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(structure.sub_structure(),
+			                                                                              structure.sub_state(state), min, end);
+		}
+	}
+};
 
 } // namespace helpers
 
@@ -1079,11 +1605,52 @@ static_assert(lower_bound_along<'x'>(
 				  scalar<int>() ^ vector<'x'>() ^ into_blocks<'x', 'x', 'y'>(),
 				  state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>(42, 5)) == 0 * sizeof(int));
 
-// TODO: implement into_blocks_static_t
-// TODO: implement into_blocks_dynamic_t
-// TODO: implement merge_blocks_t
+// into_blocks_static_t
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', scalar<int>, std::integral_constant<std::size_t, 4>>, 'x', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', scalar<int>, std::integral_constant<std::size_t, 4>>, 'y', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', scalar<int>, std::integral_constant<std::size_t, 4>>, 'z', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', scalar<int>, std::integral_constant<std::size_t, 4>>, 'w', state<>>);
 
-// TODO: implement zcurve_t
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'x', state<>>);
+static_assert(HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'y', state<>>);
+static_assert(lower_bound_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_static<'x', 'y', 'z', 'w'>(lit<4>), state<>()) == 0 * sizeof(int));
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'z', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'w', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'x', state<state_item<index_in<'y'>, lit_t<0>>>>);
+static_assert(!HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'y', state<state_item<index_in<'y'>, lit_t<0>>>>);
+static_assert(HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'z', state<state_item<index_in<'y'>, lit_t<0>>>>);
+static_assert(lower_bound_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_static<'x', 'y', 'z', 'w'>(lit<4>), state<state_item<index_in<'y'>, lit_t<0>>>(lit<0>)) == 0 * sizeof(int));
+static_assert(HasLowerBoundAlong<into_blocks_static_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 4>>, 'w', state<state_item<index_in<'y'>, lit_t<0>>>>);
+static_assert(lower_bound_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_static<'x', 'y', 'z', 'w'>(lit<4>), state<state_item<index_in<'y'>, lit_t<0>>>(lit<0>)) == 0 * sizeof(int));
+
+// into_blocks_dynamic_t
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'x', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'y', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'z', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'w', state<>>);
+
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'z', state<>>);
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<>>);
+
+static_assert(!HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<state_item<length_in<'y'>, std::size_t>>>);
+static_assert(lower_bound_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'y'>, std::size_t>>(5)) == 0 * sizeof(int));
+static_assert(HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(lower_bound_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'z'>, std::size_t>>(5)) == 0 * sizeof(int));
+static_assert(HasLowerBoundAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'w', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(lower_bound_along<'w'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ into_blocks_dynamic<'x', 'y', 'z', 'w'>(), state<state_item<length_in<'z'>, std::size_t>>(5)) == 0 * sizeof(int));
+
+// merge_blocks_t
+static_assert(!HasLowerBoundAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'x', state<>>);
+static_assert(!HasLowerBoundAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'y', state<>>);
+static_assert(!HasLowerBoundAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'z', state<>>);
+
+static_assert(!HasLowerBoundAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'y', vector_t<'x', scalar<int>>>, std::size_t>, std::size_t>>, 'x', state<>>);
+static_assert(!HasLowerBoundAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'y', vector_t<'x', scalar<int>>>, std::size_t>, std::size_t>>, 'y', state<>>);
+static_assert(HasLowerBoundAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'y', vector_t<'x', scalar<int>>>, std::size_t>, std::size_t>>, 'z', state<>>);
+static_assert(lower_bound_along<'z'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>() ^ set_length<'x'>(42) ^ set_length<'y'>(5) ^ merge_blocks<'x', 'y', 'z'>(), state<>()) == 0 * sizeof(int));
 
 } // namespace noarr
 
