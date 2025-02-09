@@ -696,8 +696,8 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto sub_state(State state) noexcept {
-		constexpr bool has_index = state.template contains<index_in<Dim>>;
-		constexpr bool has_length = state.template contains<length_in<Dim>>;
+		constexpr bool has_index = State::template contains<index_in<Dim>>;
+		constexpr bool has_length = State::template contains<length_in<Dim>>;
 
 		static_assert(!(sub_structure_t::template has_length<DimA, clean_state_t<State>>() ^
 		                sub_structure_t::template has_length<DimB, clean_state_t<State>>()),
