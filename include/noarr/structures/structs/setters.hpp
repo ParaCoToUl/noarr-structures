@@ -51,17 +51,19 @@ private:
 		using type = typename original::template ret_sig<IdxT::value>;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, IdxT idx) noexcept {
-		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(idx);
-	}
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, IdxT idx) noexcept {
+			return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(idx);
+		}
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto clean_state_impl(State state) noexcept {
-		return state.template remove<index_in<Dim>, length_in<Dim>>();
-	}
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto clean_state(State state) noexcept {
+			return state.template remove<index_in<Dim>, length_in<Dim>>();
+		}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -69,20 +71,20 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, idx());
+		return impl::sub_state(state, idx());
 	}
 
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto clean_state(State state) noexcept {
-		return clean_state_impl(state);
+		return impl::clean_state(state);
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<IdxT>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<IdxT>()));
 	template<IsState State>
-	using clean_state_t = decltype(clean_state_impl(std::declval<State>()));
+	using clean_state_t = decltype(impl::clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -223,17 +225,19 @@ private:
 		static_assert(value_always_false<Dim>, "Cannot set tuple length");
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, LenT len) noexcept {
-		return state.template with<length_in<Dim>>(len);
-	}
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, LenT len) noexcept {
+			return state.template with<length_in<Dim>>(len);
+		}
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto clean_state_impl(State state) noexcept {
-		return state.template remove<length_in<Dim>>();
-	}
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto clean_state(State state) noexcept {
+			return state.template remove<length_in<Dim>>();
+		}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -241,14 +245,14 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, len());
+		return impl::sub_state(state, len());
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<LenT>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<LenT>()));
 	template<IsState State>
-	using clean_state_t = decltype(clean_state_impl(std::declval<State>()));
+	using clean_state_t = decltype(impl::clean_state(std::declval<State>()));
 
 	template<IsState State>
 	[[nodiscard]]

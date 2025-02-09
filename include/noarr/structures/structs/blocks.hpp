@@ -55,46 +55,48 @@ private:
 			function_sig<DimMajor, major_length, function_sig<DimMinor, minor_length, typename Original::ret_sig>>;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
-		using namespace constexpr_arithmetic;
-		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
-		if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
-			const auto major_length = state.template get<length_in<DimMajor>>();
-			const auto minor_length = state.template get<length_in<DimMinor>>();
-			if constexpr (have_indices) {
-				const auto major_index = state.template get<index_in<DimMajor>>();
-				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(
-					major_length * minor_length, major_index * minor_length + minor_index);
-			} else {
-				return clean_state(state).template with<length_in<Dim>>(major_length * minor_length);
-			}
-		} else if constexpr (State::template contains<length_in<DimMinor>>) {
-			if constexpr (have_indices) {
-				const auto minor_length = state.template get<length_in<DimMinor>>();
-				const auto major_index = state.template get<index_in<DimMajor>>();
-				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
-			} else {
-				return clean_state(state);
-			}
-		} else if constexpr (State::template contains<length_in<DimMajor>>) {
-			if constexpr (have_indices) {
-				const auto cs = clean_state(state);
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, T sub_structure) noexcept {
+			using namespace constexpr_arithmetic;
+			constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
+			if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
 				const auto major_length = state.template get<length_in<DimMajor>>();
-				const auto minor_length = sub_structure.template length<Dim>(cs) / major_length;
-				const auto major_index = state.template get<index_in<DimMajor>>();
-				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return cs.template with<index_in<Dim>>(major_index * minor_length + minor_index);
+				const auto minor_length = state.template get<length_in<DimMinor>>();
+				if constexpr (have_indices) {
+					const auto major_index = state.template get<index_in<DimMajor>>();
+					const auto minor_index = state.template get<index_in<DimMinor>>();
+					return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(
+						major_length * minor_length, major_index * minor_length + minor_index);
+				} else {
+					return clean_state(state).template with<length_in<Dim>>(major_length * minor_length);
+				}
+			} else if constexpr (State::template contains<length_in<DimMinor>>) {
+				if constexpr (have_indices) {
+					const auto minor_length = state.template get<length_in<DimMinor>>();
+					const auto major_index = state.template get<index_in<DimMajor>>();
+					const auto minor_index = state.template get<index_in<DimMinor>>();
+					return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
+				} else {
+					return clean_state(state);
+				}
+			} else if constexpr (State::template contains<length_in<DimMajor>>) {
+				if constexpr (have_indices) {
+					const auto cs = clean_state(state);
+					const auto major_length = state.template get<length_in<DimMajor>>();
+					const auto minor_length = sub_structure.template length<Dim>(cs) / major_length;
+					const auto major_index = state.template get<index_in<DimMajor>>();
+					const auto minor_index = state.template get<index_in<DimMinor>>();
+					return cs.template with<index_in<Dim>>(major_index * minor_length + minor_index);
+				} else {
+					return clean_state(state);
+				}
 			} else {
 				return clean_state(state);
 			}
-		} else {
-			return clean_state(state);
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -102,12 +104,12 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, sub_structure());
+		return impl::sub_state(state, sub_structure());
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<T>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<T>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -296,47 +298,49 @@ private:
 		                              function_sig<DimIsPresent, ispresent_length, typename Original::ret_sig>>>;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
-		using namespace constexpr_arithmetic;
-		constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
-		if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
-			const auto major_length = state.template get<length_in<DimMajor>>();
-			const auto minor_length = state.template get<length_in<DimMinor>>();
-			if constexpr (have_indices) {
-				const auto major_index = state.template get<index_in<DimMajor>>();
-				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(
-					major_length * minor_length, major_index * minor_length + minor_index);
-			} else {
-				return clean_state(state).template with<length_in<Dim>>(major_length * minor_length);
-			}
-		} else if constexpr (State::template contains<length_in<DimMinor>>) {
-			if constexpr (have_indices) {
-				const auto minor_length = state.template get<length_in<DimMinor>>();
-				const auto major_index = state.template get<index_in<DimMajor>>();
-				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
-			} else {
-				return clean_state(state);
-			}
-		} else if constexpr (State::template contains<length_in<DimMajor>>) {
-			if constexpr (have_indices) {
-				const auto cs = clean_state(state);
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, T sub_structure) noexcept {
+			using namespace constexpr_arithmetic;
+			constexpr bool have_indices = State::template contains<index_in<DimMajor>, index_in<DimMinor>>;
+			if constexpr (State::template contains<length_in<DimMajor>, length_in<DimMinor>>) {
 				const auto major_length = state.template get<length_in<DimMajor>>();
-				const auto minor_length =
-					(sub_structure.template length<Dim>(cs) + major_length - make_const<1>()) / major_length;
-				const auto major_index = state.template get<index_in<DimMajor>>();
-				const auto minor_index = state.template get<index_in<DimMinor>>();
-				return cs.template with<index_in<Dim>>(major_index * minor_length + minor_index);
+				const auto minor_length = state.template get<length_in<DimMinor>>();
+				if constexpr (have_indices) {
+					const auto major_index = state.template get<index_in<DimMajor>>();
+					const auto minor_index = state.template get<index_in<DimMinor>>();
+					return clean_state(state).template with<length_in<Dim>, index_in<Dim>>(
+						major_length * minor_length, major_index * minor_length + minor_index);
+				} else {
+					return clean_state(state).template with<length_in<Dim>>(major_length * minor_length);
+				}
+			} else if constexpr (State::template contains<length_in<DimMinor>>) {
+				if constexpr (have_indices) {
+					const auto minor_length = state.template get<length_in<DimMinor>>();
+					const auto major_index = state.template get<index_in<DimMajor>>();
+					const auto minor_index = state.template get<index_in<DimMinor>>();
+					return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
+				} else {
+					return clean_state(state);
+				}
+			} else if constexpr (State::template contains<length_in<DimMajor>>) {
+				if constexpr (have_indices) {
+					const auto cs = clean_state(state);
+					const auto major_length = state.template get<length_in<DimMajor>>();
+					const auto minor_length =
+						(sub_structure.template length<Dim>(cs) + major_length - make_const<1>()) / major_length;
+					const auto major_index = state.template get<index_in<DimMajor>>();
+					const auto minor_index = state.template get<index_in<DimMinor>>();
+					return cs.template with<index_in<Dim>>(major_index * minor_length + minor_index);
+				} else {
+					return clean_state(state);
+				}
 			} else {
 				return clean_state(state);
 			}
-		} else {
-			return clean_state(state);
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -344,12 +348,12 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, sub_structure());
+		return impl::sub_state(state, sub_structure());
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<T>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<T>()));
 
 	template<IsState State>
 	[[nodiscard]]
@@ -601,24 +605,26 @@ private:
 		using type = dep_function_sig<DimIsBorder, body_type, border_type>;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, T sub_structure, MinorLenT minor_length) noexcept {
-		using namespace constexpr_arithmetic;
-		if constexpr (State::template contains<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>) {
-			const auto minor_index = state.template get<index_in<DimMinor>>();
-			if constexpr (is_body<State>()) {
-				const auto major_index = state.template get<index_in<DimMajor>>();
-				return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
-			} else /*border*/ {
-				const auto cs = clean_state(state);
-				const auto major_length = sub_structure.template length<Dim>(cs) / minor_length;
-				return cs.template with<index_in<Dim>>(major_length * minor_length + minor_index);
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, T sub_structure, MinorLenT minor_length) noexcept {
+			using namespace constexpr_arithmetic;
+			if constexpr (State::template contains<index_in<DimIsBorder>, index_in<DimMajor>, index_in<DimMinor>>) {
+				const auto minor_index = state.template get<index_in<DimMinor>>();
+				if constexpr (is_body<State>()) {
+					const auto major_index = state.template get<index_in<DimMajor>>();
+					return clean_state(state).template with<index_in<Dim>>(major_index * minor_length + minor_index);
+				} else /*border*/ {
+					const auto cs = clean_state(state);
+					const auto major_length = sub_structure.template length<Dim>(cs) / minor_length;
+					return cs.template with<index_in<Dim>>(major_length * minor_length + minor_index);
+				}
+			} else {
+				return clean_state(state);
 			}
-		} else {
-			return clean_state(state);
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -626,13 +632,13 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, sub_structure(), minor_length());
+		return impl::sub_state(state, sub_structure(), minor_length());
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t =
-		decltype(sub_state_impl(std::declval<State>(), std::declval<sub_structure_t>(), std::declval<MinorLenT>()));
+		decltype(impl::sub_state(std::declval<State>(), std::declval<sub_structure_t>(), std::declval<MinorLenT>()));
 
 	template<IsState State>
 	static constexpr bool has_size() noexcept {
@@ -832,61 +838,63 @@ private:
 		using type = typename Original::ret_sig::template replace<inner_dim_replacement, DimMinor, DimMajor>;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
-		using namespace constexpr_arithmetic;
-		const auto cs = clean_state(state);
-		if constexpr (sub_structure_t::template has_length<DimMinor, clean_state_t<State>>() &&
-		              sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
-			if constexpr (State::template contains<index_in<Dim>>) {
-				const auto minor_length = sub_structure.template length<DimMinor>(cs);
-				const auto index = state.template get<index_in<Dim>>();
-				return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
-				                                                                index % minor_length);
-			} else {
-				return cs;
-			}
-		} else if constexpr (sub_structure_t::template has_length<DimMinor, clean_state_t<State>>()) {
-			const auto minor_length = sub_structure.template length<DimMinor>(cs);
-			if constexpr (State::template contains<length_in<Dim>>) {
-				const auto dim_length = state.template get<length_in<Dim>>();
-				const auto major_length = dim_length / minor_length;
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, T sub_structure) noexcept {
+			using namespace constexpr_arithmetic;
+			const auto cs = clean_state(state);
+			if constexpr (sub_structure_t::template has_length<DimMinor, clean_state_t<State>>() &&
+						sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
 				if constexpr (State::template contains<index_in<Dim>>) {
-					const auto index = state.template get<index_in<Dim>>();
-					return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(
-						index / minor_length, index % minor_length, major_length);
-				} else {
-					return cs.template with<length_in<DimMajor>>(major_length);
-				}
-			} else {
-				if constexpr (State::template contains<index_in<Dim>>) {
+					const auto minor_length = sub_structure.template length<DimMinor>(cs);
 					const auto index = state.template get<index_in<Dim>>();
 					return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
-					                                                                index % minor_length);
+																					index % minor_length);
 				} else {
 					return cs;
 				}
-			}
-		} else if constexpr (sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
-			const auto major_length = sub_structure.template length<DimMajor>(cs);
-			if constexpr (State::template contains<length_in<Dim>>) {
-				const auto dim_length = state.template get<length_in<Dim>>();
-				const auto minor_length = dim_length / major_length;
-				if constexpr (State::template contains<index_in<Dim>>) {
-					const auto index = state.template get<index_in<Dim>>();
-					return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>(
-						index / minor_length, index % minor_length, minor_length);
+			} else if constexpr (sub_structure_t::template has_length<DimMinor, clean_state_t<State>>()) {
+				const auto minor_length = sub_structure.template length<DimMinor>(cs);
+				if constexpr (State::template contains<length_in<Dim>>) {
+					const auto dim_length = state.template get<length_in<Dim>>();
+					const auto major_length = dim_length / minor_length;
+					if constexpr (State::template contains<index_in<Dim>>) {
+						const auto index = state.template get<index_in<Dim>>();
+						return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMajor>>(
+							index / minor_length, index % minor_length, major_length);
+					} else {
+						return cs.template with<length_in<DimMajor>>(major_length);
+					}
 				} else {
-					return cs.template with<length_in<DimMinor>>(minor_length);
+					if constexpr (State::template contains<index_in<Dim>>) {
+						const auto index = state.template get<index_in<Dim>>();
+						return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
+																						index % minor_length);
+					} else {
+						return cs;
+					}
+				}
+			} else if constexpr (sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
+				const auto major_length = sub_structure.template length<DimMajor>(cs);
+				if constexpr (State::template contains<length_in<Dim>>) {
+					const auto dim_length = state.template get<length_in<Dim>>();
+					const auto minor_length = dim_length / major_length;
+					if constexpr (State::template contains<index_in<Dim>>) {
+						const auto index = state.template get<index_in<Dim>>();
+						return cs.template with<index_in<DimMajor>, index_in<DimMinor>, length_in<DimMinor>>(
+							index / minor_length, index % minor_length, minor_length);
+					} else {
+						return cs.template with<length_in<DimMinor>>(minor_length);
+					}
+				} else {
+					return cs;
 				}
 			} else {
 				return cs;
 			}
-		} else {
-			return cs;
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<outer_dim_replacement, DimMajor, DimMinor>;
@@ -894,12 +902,12 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, sub_structure());
+		return impl::sub_state(state, sub_structure());
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<sub_structure_t>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<sub_structure_t>()));
 
 	template<IsState State>
 	static constexpr bool has_size() noexcept {

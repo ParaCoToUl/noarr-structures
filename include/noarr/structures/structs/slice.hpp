@@ -73,26 +73,28 @@ private:
 		using type = typename pack_helper<>::type;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, StartT start) noexcept {
-		using namespace constexpr_arithmetic;
-		const auto tmp_state = clean_state(state);
-		if constexpr (State::template contains<index_in<Dim>>) {
-			if constexpr (State::template contains<length_in<Dim>>) {
-				return tmp_state.template with<index_in<Dim>, length_in<Dim>>(
-					state.template get<index_in<Dim>>() + start, state.template get<length_in<Dim>>() + start);
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, StartT start) noexcept {
+			using namespace constexpr_arithmetic;
+			const auto tmp_state = clean_state(state);
+			if constexpr (State::template contains<index_in<Dim>>) {
+				if constexpr (State::template contains<length_in<Dim>>) {
+					return tmp_state.template with<index_in<Dim>, length_in<Dim>>(
+						state.template get<index_in<Dim>>() + start, state.template get<length_in<Dim>>() + start);
+				} else {
+					return tmp_state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start);
+				}
 			} else {
-				return tmp_state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start);
-			}
-		} else {
-			if constexpr (State::template contains<length_in<Dim>>) {
-				return tmp_state.template with<length_in<Dim>>(state.template get<length_in<Dim>>() + start);
-			} else {
-				return tmp_state;
+				if constexpr (State::template contains<length_in<Dim>>) {
+					return tmp_state.template with<length_in<Dim>>(state.template get<length_in<Dim>>() + start);
+				} else {
+					return tmp_state;
+				}
 			}
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -100,7 +102,7 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, start());
+		return impl::sub_state(state, start());
 	}
 
 	template<IsState State>
@@ -111,7 +113,7 @@ public:
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<StartT>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
@@ -283,16 +285,18 @@ private:
 		using type = typename pack_helper<>::type;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, StartT start) noexcept {
-		using namespace constexpr_arithmetic;
-		if constexpr (State::template contains<index_in<Dim>>) {
-			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start);
-		} else {
-			return state;
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, StartT start) noexcept {
+			using namespace constexpr_arithmetic;
+			if constexpr (State::template contains<index_in<Dim>>) {
+				return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start);
+			} else {
+				return state;
+			}
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -300,7 +304,7 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, start());
+		return impl::sub_state(state, start());
 	}
 
 	template<IsState State>
@@ -311,7 +315,7 @@ public:
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<StartT>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
@@ -470,16 +474,18 @@ private:
 		using type = typename pack_helper<>::type;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, StartT start) noexcept {
-		using namespace constexpr_arithmetic;
-		if constexpr (State::template contains<index_in<Dim>>) {
-			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start);
-		} else {
-			return state;
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, StartT start) noexcept {
+			using namespace constexpr_arithmetic;
+			if constexpr (State::template contains<index_in<Dim>>) {
+				return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() + start);
+			} else {
+				return state;
+			}
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<dim_replacement, Dim>;
@@ -487,7 +493,7 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, start());
+		return impl::sub_state(state, start());
 	}
 
 	template<IsState State>
@@ -498,7 +504,7 @@ public:
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<StartT>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
@@ -658,22 +664,24 @@ private:
 		using type = typename pack_helper<>::type;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, StartT start, StrideT stride) noexcept {
-		using namespace constexpr_arithmetic;
-		if constexpr (State::template contains<index_in<Dim>>) {
-			return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride + start);
-		} else {
-			return state;
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, StartT start, StrideT stride) noexcept {
+			using namespace constexpr_arithmetic;
+			if constexpr (State::template contains<index_in<Dim>>) {
+				return state.template with<index_in<Dim>>(state.template get<index_in<Dim>>() * stride + start);
+			} else {
+				return state;
+			}
 		}
-	}
+	};
 
 public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, start(), stride());
+		return impl::sub_state(state, start(), stride());
 	}
 
 	template<IsState State>
@@ -687,7 +695,7 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t =
-		decltype(sub_state_impl(std::declval<State>(), std::declval<StartT>(), std::declval<StrideT>()));
+		decltype(impl::sub_state(std::declval<State>(), std::declval<StartT>(), std::declval<StrideT>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
@@ -848,29 +856,31 @@ private:
 		using type = typename pack_helper<>::type;
 	};
 
-	template<IsState State>
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, T sub_structure) noexcept {
-		using namespace constexpr_arithmetic;
-		if constexpr (State::template contains<index_in<Dim>>) {
-			const auto tmp_state = state.template remove<index_in<Dim>>();
+	struct impl {
+		template<IsState State>
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, T sub_structure) noexcept {
+			using namespace constexpr_arithmetic;
+			if constexpr (State::template contains<index_in<Dim>>) {
+				const auto tmp_state = state.template remove<index_in<Dim>>();
 
-			if constexpr (sub_structure_t::template has_length<Dim, decltype(tmp_state)>()) {
-				return tmp_state.template with<index_in<Dim>>(sub_structure.template length<Dim>(tmp_state) -
-															make_const<1>() - state.template get<index_in<Dim>>());
+				if constexpr (sub_structure_t::template has_length<Dim, decltype(tmp_state)>()) {
+					return tmp_state.template with<index_in<Dim>>(sub_structure.template length<Dim>(tmp_state) -
+																make_const<1>() - state.template get<index_in<Dim>>());
+				} else {
+					return tmp_state;
+				}
 			} else {
-				return tmp_state;
+				return state;
 			}
-		} else {
-			return state;
 		}
-	}
+	};
 
 public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, sub_structure());
+		return impl::sub_state(state, sub_structure());
 	}
 
 	template<IsState State>
@@ -883,7 +893,7 @@ public:
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state_impl(std::declval<State>(), std::declval<T>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<T>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 

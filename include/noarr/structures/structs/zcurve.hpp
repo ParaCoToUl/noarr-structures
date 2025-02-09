@@ -185,25 +185,27 @@ private:
 
 	using outer_dim_replacer = dim_replacer<sizeof...(Dims), static_arg_length<1U>>;
 
-	template<std::size_t... DimsI, class State>
-	requires (sizeof...(DimsI) == sizeof...(Dims) && IsState<State>)
-	[[nodiscard]]
-	static constexpr auto sub_state_impl(State state, T sub_structure, std::index_sequence<DimsI...> /*is*/) noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
-		const auto tmp_state = clean_state(state);
-		if constexpr (State::template contains<index_in<Dim>>) {
-			const std::size_t index = state.template get<index_in<Dim>>();
-			const auto index_general = index >> SpecialLevel * sizeof...(Dims);
-			const auto index_special = index & ((1U << SpecialLevel * sizeof...(Dims)) - 1U);
-			const auto indices = helpers::zc_general<GeneralLevel - SpecialLevel>(
-				index_general, (sub_structure.template length<Dims>(tmp_state) >> SpecialLevel)...);
-			return tmp_state.template with<index_in<Dims>...>(
-				((std::get<DimsI>(indices) << SpecialLevel) +
-			     helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
-		} else {
-			return tmp_state;
+	struct impl {
+		template<std::size_t... DimsI, class State>
+		requires (sizeof...(DimsI) == sizeof...(Dims) && IsState<State>)
+		[[nodiscard]]
+		static constexpr auto sub_state(State state, T sub_structure, std::index_sequence<DimsI...> /*is*/) noexcept {
+			static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+			const auto tmp_state = clean_state(state);
+			if constexpr (State::template contains<index_in<Dim>>) {
+				const std::size_t index = state.template get<index_in<Dim>>();
+				const auto index_general = index >> SpecialLevel * sizeof...(Dims);
+				const auto index_special = index & ((1U << SpecialLevel * sizeof...(Dims)) - 1U);
+				const auto indices = helpers::zc_general<GeneralLevel - SpecialLevel>(
+					index_general, (sub_structure.template length<Dims>(tmp_state) >> SpecialLevel)...);
+				return tmp_state.template with<index_in<Dims>...>(
+					((std::get<DimsI>(indices) << SpecialLevel) +
+					helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
+			} else {
+				return tmp_state;
+			}
 		}
-	}
+	};
 
 public:
 	using signature = typename T::signature::template replace<outer_dim_replacer::template replacement, Dims...>;
@@ -211,7 +213,7 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	constexpr auto sub_state(State state) const noexcept {
-		return sub_state_impl(state, sub_structure(), std::make_index_sequence<sizeof...(Dims)>());
+		return impl::sub_state(state, sub_structure(), std::make_index_sequence<sizeof...(Dims)>());
 	}
 
 	template<IsState State>
@@ -223,7 +225,7 @@ public:
 	using sub_structure_t = T;
 	template<IsState State>
 	using sub_state_t =
-		decltype(sub_state_impl(std::declval<State>(), std::declval<T>(), std::make_index_sequence<sizeof...(Dims)>()));
+		decltype(impl::sub_state(std::declval<State>(), std::declval<T>(), std::make_index_sequence<sizeof...(Dims)>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
