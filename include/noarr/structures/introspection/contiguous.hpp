@@ -304,15 +304,16 @@ requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != 
 struct is_contiguous<into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
 private:
 	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
-	using indexless_state = decltype(std::declval<State>().template remove<index_in<DimMajor>, index_in<DimMinor>,
-	                                                                    index_in<DimIsBorder>>());
+	using indexless_state =
+		decltype(std::declval<State>()
+	                 .template remove<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsBorder>>());
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (State::template contains<index_in<DimIsBorder>>) {
 			if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
-							Structure::template has_length<DimMinor, indexless_state>()) {
+			              Structure::template has_length<DimMinor, indexless_state>()) {
 				if constexpr (State::template contains<index_in<DimMinor>> &&
-							!State::template contains<index_in<DimMajor>>) {
+				              !State::template contains<index_in<DimMajor>>) {
 					return false;
 				} else {
 					return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;

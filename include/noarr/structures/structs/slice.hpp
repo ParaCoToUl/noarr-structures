@@ -866,7 +866,8 @@ private:
 
 				if constexpr (sub_structure_t::template has_length<Dim, decltype(tmp_state)>()) {
 					return tmp_state.template with<index_in<Dim>>(sub_structure.template length<Dim>(tmp_state) -
-																make_const<1>() - state.template get<index_in<Dim>>());
+					                                              make_const<1>() -
+					                                              state.template get<index_in<Dim>>());
 				} else {
 					return tmp_state;
 				}

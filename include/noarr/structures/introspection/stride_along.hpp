@@ -108,9 +108,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -131,9 +129,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -154,9 +150,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -170,7 +164,6 @@ public:
 	}
 };
 
-
 template<IsDim auto QDim, class T, auto... DimPairs, IsState State>
 requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0)
 struct has_stride_along<QDim, rename_t<T, DimPairs...>, State> {
@@ -179,7 +172,8 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	constexpr static auto QDimNew = helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
+	constexpr static auto QDimNew =
+		helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (Structure::internal::template contains<QDim> && !Structure::external::template contains<QDim>) {
@@ -197,7 +191,7 @@ public:
 	requires value
 	{
 		return has_stride_along<QDimNew, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-		                                                                    structure.sub_state(state));
+		                                                                       structure.sub_state(state));
 	}
 };
 
@@ -229,12 +223,12 @@ public:
 	{
 		if constexpr (QDim == Dim) {
 			return has_stride_along<DimA, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-			                                                                  structure.sub_state(state)) +
+			                                                                    structure.sub_state(state)) +
 			       has_stride_along<DimB, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-			                                                                  structure.sub_state(state));
+			                                                                    structure.sub_state(state));
 		} else {
 			return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-			                                                                  structure.sub_state(state));
+			                                                                    structure.sub_state(state));
 		}
 	}
 };
@@ -246,9 +240,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -269,9 +261,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -292,9 +282,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -315,9 +303,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -329,7 +315,8 @@ public:
 		using namespace constexpr_arithmetic;
 
 		return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-		                                                                    structure.sub_state(state)) * structure.stride();
+		                                                                    structure.sub_state(state)) *
+		       structure.stride();
 	}
 };
 
@@ -340,9 +327,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	static constexpr bool get_value() noexcept {
-		return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
-	}
+	static constexpr bool get_value() noexcept { return has_stride_along<QDim, sub_structure_t, sub_state_t>::value; }
 
 public:
 	using value_type = bool;
@@ -353,11 +338,12 @@ public:
 	{
 		using namespace constexpr_arithmetic;
 
-		using sub_stride_t = decltype(+has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-		                                                                    structure.sub_state(state)));
-
-		return -static_cast<std::make_signed_t<sub_stride_t>>(has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(
+		using sub_stride_t = decltype(+has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(
 			structure.sub_structure(), structure.sub_state(state)));
+
+		return -static_cast<std::make_signed_t<sub_stride_t>>(
+			has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+		                                                                 structure.sub_state(state)));
 	}
 };
 
@@ -398,9 +384,8 @@ private:
 			                                                                   structure.sub_state(state));
 		} else if constexpr (QDim == DimMajor) {
 			const auto minor_len = structure.template length<DimMinor>(state);
-			return minor_len *
-			       has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-			                                                                   structure.sub_state(state));
+			return minor_len * has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                               structure.sub_state(state));
 		} else {
 			return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 			                                                                    structure.sub_state(state));
@@ -418,7 +403,8 @@ public:
 	}
 };
 
-template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT, IsState State>
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T,
+         class MinorLenT, IsState State>
 requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != DimMinor)
 struct has_stride_along<QDim, into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
 private:
@@ -455,9 +441,8 @@ public:
 			                                                                   structure.sub_state(state));
 		} else if constexpr (QDim == DimMajor) {
 			const auto minor_len = structure.template length<DimMinor>(state);
-			return minor_len *
-			       has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-			                                                                   structure.sub_state(state));
+			return minor_len * has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                               structure.sub_state(state));
 		} else {
 			return has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
 			                                                                    structure.sub_state(state));
@@ -465,7 +450,8 @@ public:
 	}
 };
 
-template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T, IsState State>
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T,
+         IsState State>
 requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent != DimMajor)
 struct has_stride_along<QDim, into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
 private:
@@ -504,9 +490,8 @@ public:
 			                                                                   structure.sub_state(state));
 		} else if constexpr (QDim == DimMajor) {
 			const auto minor_len = structure.template length<DimMinor>(state);
-			return minor_len *
-			       has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-			                                                                   structure.sub_state(state));
+			return minor_len * has_stride_along<Dim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
+			                                                                               structure.sub_state(state));
 		} else if constexpr (QDim == DimIsPresent) {
 			return make_const<0>();
 		} else {

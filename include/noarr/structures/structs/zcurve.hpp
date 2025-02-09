@@ -200,7 +200,7 @@ private:
 					index_general, (sub_structure.template length<Dims>(tmp_state) >> SpecialLevel)...);
 				return tmp_state.template with<index_in<Dims>...>(
 					((std::get<DimsI>(indices) << SpecialLevel) +
-					helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
+				     helpers::zc_special<sizeof...(Dims), DimsI>(index_special))...);
 			} else {
 				return tmp_state;
 			}
@@ -224,8 +224,8 @@ public:
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t =
-		decltype(impl::sub_state(std::declval<State>(), std::declval<T>(), std::make_index_sequence<sizeof...(Dims)>()));
+	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<T>(),
+	                                             std::make_index_sequence<sizeof...(Dims)>()));
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 

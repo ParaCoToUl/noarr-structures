@@ -845,12 +845,12 @@ private:
 			using namespace constexpr_arithmetic;
 			const auto cs = clean_state(state);
 			if constexpr (sub_structure_t::template has_length<DimMinor, clean_state_t<State>>() &&
-						sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
+			              sub_structure_t::template has_length<DimMajor, clean_state_t<State>>()) {
 				if constexpr (State::template contains<index_in<Dim>>) {
 					const auto minor_length = sub_structure.template length<DimMinor>(cs);
 					const auto index = state.template get<index_in<Dim>>();
 					return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
-																					index % minor_length);
+					                                                                index % minor_length);
 				} else {
 					return cs;
 				}
@@ -870,7 +870,7 @@ private:
 					if constexpr (State::template contains<index_in<Dim>>) {
 						const auto index = state.template get<index_in<Dim>>();
 						return cs.template with<index_in<DimMajor>, index_in<DimMinor>>(index / minor_length,
-																						index % minor_length);
+						                                                                index % minor_length);
 					} else {
 						return cs;
 					}
