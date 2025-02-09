@@ -178,11 +178,104 @@ public:
 	static constexpr bool value = get_value();
 };
 
-// TODO: implement into_blocks_static_t
-// TODO: implement into_blocks_dynamic_t
-// TODO: implement merge_blocks_t
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT, IsState State>
+requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != DimMinor)
+struct is_uniform_along<QDim, into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
+private:
+	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-// TODO: implement zcurve_t
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMajor) {
+			return is_uniform_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMinor) {
+			return is_uniform_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimIsBorder) {
+			return is_uniform_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T, IsState State>
+requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent != DimMajor)
+struct is_uniform_along<QDim, into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
+private:
+	using Structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMajor) {
+			return is_uniform_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMinor) {
+			return is_uniform_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimIsPresent) {
+			return is_uniform_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
+template<IsDim auto QDim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class T, IsState State>
+struct is_uniform_along<QDim, merge_blocks_t<DimMajor, DimMinor, Dim, T>, State> {
+private:
+	using Structure = merge_blocks_t<DimMajor, DimMinor, Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == Dim) {
+			return is_uniform_along<DimMajor, sub_structure_t, sub_state_t>::value && is_uniform_along<DimMinor, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMajor || QDim == DimMinor) {
+			return false;
+		} else {
+			return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
+
+template<IsDim auto QDim, std::size_t SpecialLevel, std::size_t GeneralLevel, IsDim auto Dim, class T, auto... Dims, IsState State>
+requires IsDimPack<decltype(Dims)...>
+struct is_uniform_along<QDim, merge_zcurve_t<SpecialLevel, GeneralLevel, Dim, T, Dims...>, State> {
+private:
+	using Structure = merge_zcurve_t<SpecialLevel, GeneralLevel, Dim, T, Dims...>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == Dim) {
+			return (... && is_uniform_along<Dims, sub_structure_t, sub_state_t>::value);
+		} else if constexpr ((... || (QDim == Dims))) {
+			return false;
+		} else {
+			return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+};
 
 } // namespace helpers
 
@@ -351,11 +444,55 @@ static_assert(IsUniformAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<i
 static_assert(IsUniformAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<int>>>, 'x',
                              state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'x'>, std::size_t>>>);
 
-// TODO: implement into_blocks_static_t
-// TODO: implement into_blocks_dynamic_t
-// TODO: implement merge_blocks_t
+// into_blocks_static_t
+static_assert(!IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', scalar<int>, std::size_t>, 'x', state<>>);
+static_assert(!IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', scalar<int>, std::size_t>, 'y', state<>>);
+static_assert(!IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', scalar<int>, std::size_t>, 'z', state<>>);
 
-// TODO: implement zcurve_t
+static_assert(!IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', vector_t<'x', scalar<int>>, std::size_t>, 'x', state<>>);
+static_assert(!IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', vector_t<'x', scalar<int>>, std::size_t>, 'y', state<>>);
+static_assert(!IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', vector_t<'x', scalar<int>>, std::size_t>, 'z', state<>>);
+static_assert(IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t>, 'x',
+							 state<>>);
+static_assert(IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t>, 'y',
+							 state<>>);
+static_assert(IsUniformAlong<into_blocks_static_t<'x', 'x', 'y', 'z', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::size_t>, 'z',
+							 state<>>);
+
+// into_blocks_dynamic_t
+static_assert(!IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'x', state<>>);
+static_assert(!IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'y', state<>>);
+static_assert(!IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'z', state<>>);
+static_assert(!IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'w', state<>>);
+static_assert(!IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'y',
+							 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+static_assert(!IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'z',
+							 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+static_assert(!IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', scalar<int>>, 'w',
+							 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+
+static_assert(IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', vector_t<'x', scalar<int>>>, 'y',
+							 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+static_assert(IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', vector_t<'x', scalar<int>>>, 'z',
+							 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+static_assert(IsUniformAlong<into_blocks_dynamic_t<'x', 'y', 'z', 'w', vector_t<'x', scalar<int>>>, 'w',
+							 state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+
+// merge_blocks_t
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'x', state<>>);
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'y', state<>>);
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'z', state<>>);
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'z', state<state_item<length_in<'z'>, std::size_t>>>);
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'z',
+							  state<state_item<length_in<'y'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'z',
+							  state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'z'>, std::size_t>>>);
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'z',
+							  state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>>>);
+
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'y', vector_t<'x', scalar<int>>>, std::size_t>, std::size_t>>, 'x', state<>>);
+static_assert(!IsUniformAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'y', vector_t<'x', scalar<int>>>, std::size_t>, std::size_t>>, 'y', state<>>);
+static_assert(IsUniformAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'y', vector_t<'x', scalar<int>>>, std::size_t>, std::size_t>>, 'z', state<>>);
 
 } // namespace noarr
 

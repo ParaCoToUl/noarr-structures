@@ -253,13 +253,166 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_offset_along<QDim, reverse_t<Dim, T>, State> : generic_has_offset_along<QDim, reverse_t<Dim, T>, State> {};
 
 template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, class T, IsState State>
-struct has_offset_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> : generic_has_offset_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {};
+struct has_offset_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
+private:
+	using Structure = into_blocks_t<Dim, DimMajor, DimMinor, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-// TODO: implement into_blocks_static_t
-// TODO: implement into_blocks_dynamic_t
-// TODO: implement merge_blocks_t
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMajor) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMinor) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
 
-// TODO: implement zcurve_t
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto offset(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+		if constexpr (QDim == DimMajor) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>())));
+		} else if constexpr (QDim == DimMinor) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>())));
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+			                                                                  structure.sub_state(state));
+		}
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimIsBorder, IsDim auto DimMajor, IsDim auto DimMinor, class T, class MinorLenT, IsState State>
+requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != DimMinor)
+struct has_offset_along<QDim, into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
+private:
+	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMajor) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMinor) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimIsBorder) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto offset(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+
+		if constexpr (QDim == DimMajor) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>())));
+		} else if constexpr (QDim == DimMinor) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>())));
+		} else if constexpr (QDim == DimIsBorder) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>, index_in<DimMajor>>(make_const<0>(), make_const<0>())));
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+			                                                                  structure.sub_state(state));
+		}
+	}
+};
+
+template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto DimIsPresent, class T, IsState State>
+requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent != DimMajor)
+struct has_offset_along<QDim, into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
+private:
+	using Structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == DimMajor) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMinor) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimIsPresent) {
+			return has_offset_along<Dim, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == Dim) {
+			return false;
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto offset(Structure structure, State state) noexcept
+	requires value
+	{
+		using namespace constexpr_arithmetic;
+
+		if constexpr (QDim == DimMajor) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMinor>>(make_const<0>())));
+		} else if constexpr (QDim == DimMinor) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>>(make_const<0>())));
+		} else if constexpr (QDim == DimIsPresent) {
+			return offset_along<Dim>(structure.sub_structure(), structure.sub_state(state.template with<index_in<DimMajor>, index_in<DimMinor>>(make_const<0>(), make_const<0>())));
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+			                                                                  structure.sub_state(state));
+		}
+	}
+};
+
+template<IsDim auto QDim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto Dim, class T, IsState State>
+struct has_offset_along<QDim, merge_blocks_t<DimMajor, DimMinor, Dim, T>, State> {
+private:
+	using Structure = merge_blocks_t<DimMajor, DimMinor, Dim, T>;
+	using sub_structure_t = typename Structure::sub_structure_t;
+	using sub_state_t = typename Structure::template sub_state_t<State>;
+
+	static constexpr bool get_value() noexcept {
+		if constexpr (QDim == Dim) {
+			return has_offset_along<DimMajor, sub_structure_t, sub_state_t>::value && has_offset_along<DimMinor, sub_structure_t, sub_state_t>::value;
+		} else if constexpr (QDim == DimMajor || QDim == DimMinor) {
+			return false;
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::value;
+		}
+	}
+
+public:
+	using value_type = bool;
+	static constexpr bool value = get_value();
+
+	static constexpr auto offset(Structure structure, State state) noexcept
+	requires value
+	{
+		if constexpr (QDim == Dim) {
+			return has_offset_along<DimMajor, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+			                                                                  structure.sub_state(state))
+				+ has_offset_along<DimMinor, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+			                                                                  structure.sub_state(state));
+		} else {
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(),
+			                                                                  structure.sub_state(state));
+		}
+	}
+};
 
 } // namespace helpers
 
@@ -464,8 +617,7 @@ static_assert(!HasOffsetAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'x', s
 static_assert(HasOffsetAlong<reverse_t<'x', bcast_t<'x', scalar<int>>>, 'x', state<state_item<index_in<'x'>, std::size_t>>>);
 static_assert(offset_along<'x'>(scalar<int>() ^ bcast<'x'>() ^ reverse<'x'>(), state<state_item<index_in<'x'>, std::size_t>>(5)) == 0 * sizeof(int));
 
-
-// TODO: into_blocks_t
+// into_blocks_t
 static_assert(!HasOffsetAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'x', state<>>);
 static_assert(!HasOffsetAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'y', state<>>);
 static_assert(
@@ -476,12 +628,94 @@ static_assert(!HasOffsetAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'x',
                               state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>>>);
 static_assert(!HasOffsetAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'y',
                               state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<into_blocks_t<'x', 'x', 'y', scalar<int>>, 'x',
+							  state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>>>);
 
-// TODO: into_blocks_static_t
-// TODO: into_blocks_dynamic_t
-// TODO: merge_blocks_t
+							  static_assert(HasOffsetAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<int>>>, 'x',
+								state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ into_blocks<'x', 'y'>(), state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 7, 3, 2)) == 3 * sizeof(int));
+static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks<'x', 'y'>(), state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 3, 2)) == 3 * sizeof(int));
+static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks<'x', 'y'>(), state<state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(7, 3, 2)) == 3 * sizeof(int));
+static_assert(HasOffsetAlong<into_blocks_t<'x', 'x', 'y', vector_t<'x', scalar<int>>>, 'y',
+								 state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(offset_along<'y'>(scalar<int>() ^ vector<'x'>() ^ into_blocks<'x', 'y'>(), state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 7, 3, 2)) == 2 * 5 * sizeof(int));
+static_assert(offset_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks<'x', 'y'>(), state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 3, 2)) == 2 * 5 * sizeof(int));
+static_assert(offset_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks<'x', 'y'>(), state<state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(7, 3, 2)) == 2 * 5 * sizeof(int));
+static_assert(!HasOffsetAlong<into_blocks_t<'x', 'y', 'z', vector_t<'x', scalar<int>>>, 'x',
+								 state<state_item<length_in<'x'>, std::size_t>, state_item<length_in<'y'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
 
-// TODO: zcurve_t
+// into_blocks_static_t
+static_assert(!HasOffsetAlong<into_blocks_static_t<'x', 'x', 'y', 'z', scalar<int>, std::size_t>, 'x', state<>>);
+static_assert(!HasOffsetAlong<into_blocks_static_t<'x', 'x', 'y', 'z', scalar<int>, std::size_t>, 'y', state<>>);
+static_assert(!HasOffsetAlong<into_blocks_static_t<'x', 'x', 'y', 'z', scalar<int>, std::size_t>, 'z', state<>>);
+
+static_assert(HasOffsetAlong<into_blocks_static_t<'x', 'z', 'x', 'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 16>>, 'x',
+	state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>>);
+static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_static<'x', 'z', 'x', 'y'>(lit<16>), state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>(3, 2, lit<0>)) == 3 * 16 * sizeof(int));
+static_assert(HasOffsetAlong<into_blocks_static_t<'x', 'z', 'x', 'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 16>>, 'y',
+	state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>>);
+static_assert(offset_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_static<'x', 'z', 'x', 'y'>(lit<16>), state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>(3, 2, lit<0>)) == 2 * sizeof(int));
+static_assert(HasOffsetAlong<into_blocks_static_t<'x', 'z', 'x', 'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 16>>, 'z',
+	state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>>);
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_static<'x', 'z', 'x', 'y'>(lit<16>), state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>(3, 2, lit<0>)) == 0);
+
+static_assert(HasOffsetAlong<into_blocks_static_t<'x', 'z', 'x', 'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 16>>, 'x',
+	state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<1>>>>);
+static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_static<'x', 'z', 'x', 'y'>(lit<16>), state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>(3, 2, lit<1>)) == 3 * 16 * sizeof(int));
+static_assert(HasOffsetAlong<into_blocks_static_t<'x', 'z', 'x', 'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 16>>, 'y',
+	state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<1>>>>);
+static_assert(offset_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_static<'x', 'z', 'x', 'y'>(lit<16>), state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>(3, 2, lit<1>)) == 2 * sizeof(int));
+static_assert(HasOffsetAlong<into_blocks_static_t<'x', 'z', 'x', 'y', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>, std::integral_constant<std::size_t, 16>>, 'z',
+	state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<1>>>>);
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_static<'x', 'z', 'x', 'y'>(lit<16>), state<state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>, state_item<index_in<'z'>, lit_t<0>>>(3, 2, lit<1>)) == 0);
+
+// into_blocks_dynamic_t
+static_assert(!HasOffsetAlong<into_blocks_dynamic_t<'x', 'x', 'y', 'z', scalar<int>>, 'x', state<>>);
+static_assert(!HasOffsetAlong<into_blocks_dynamic_t<'x', 'x', 'y', 'z', scalar<int>>, 'y', state<>>);
+static_assert(!HasOffsetAlong<into_blocks_dynamic_t<'x', 'x', 'y', 'z', scalar<int>>, 'z', state<>>);
+
+static_assert(HasOffsetAlong<into_blocks_dynamic_t<'x', 'x', 'y', 'z', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x',
+	state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(offset_along<'x'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_dynamic<'x', 'x', 'y', 'z'>(),
+	state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 3, 2)) == 3 * 7 * sizeof(int));
+static_assert(HasOffsetAlong<into_blocks_dynamic_t<'x', 'x', 'y', 'z', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'y',
+	state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(offset_along<'y'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_dynamic<'x', 'x', 'y', 'z'>(),
+	state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 3, 2)) == 2 * sizeof(int));
+static_assert(HasOffsetAlong<into_blocks_dynamic_t<'x', 'x', 'y', 'z', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'z',
+	state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>>);
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'x'>() ^ set_length<'x'>(35) ^ into_blocks_dynamic<'x', 'x', 'y', 'z'>(),
+	state<state_item<length_in<'x'>, std::size_t>, state_item<index_in<'x'>, std::size_t>, state_item<index_in<'y'>, std::size_t>>(5, 3, 2)) == 0);
+
+// merge_blocks_t
+static_assert(!HasOffsetAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'x', state<>>);
+static_assert(!HasOffsetAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'y', state<>>);
+static_assert(!HasOffsetAlong<merge_blocks_t<'x', 'y', 'z', scalar<int>>, 'z', state<>>);
+
+static_assert(!HasOffsetAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'x', vector_t<'y', scalar<int>>>, std::size_t>, std::size_t>>, 'x',
+	state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'x', vector_t<'y', scalar<int>>>, std::size_t>, std::size_t>>, 'y',
+	state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(HasOffsetAlong<merge_blocks_t<'x', 'y', 'z', set_length_t<'x', set_length_t<'y', vector_t<'x', vector_t<'y', scalar<int>>>, std::size_t>, std::size_t>>, 'z',
+	state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>() ^ set_length<'x'>(3) ^ set_length<'y'>(5) ^ merge_blocks<'x', 'y', 'z'>(),
+	state<state_item<index_in<'z'>, std::size_t>>(2)) == 2 * sizeof(int));
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>() ^ set_length<'x'>(3) ^ set_length<'y'>(5) ^ merge_blocks<'x', 'y', 'z'>(),
+	state<state_item<index_in<'z'>, std::size_t>>(3)) == 3 * sizeof(int));
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>() ^ set_length<'x'>(3) ^ set_length<'y'>(5) ^ merge_blocks<'x', 'y', 'z'>(),
+	state<state_item<index_in<'z'>, std::size_t>>(5)) == 5 * sizeof(int));
+static_assert(!HasOffsetAlong<merge_blocks_t<'y', 'x', 'z', set_length_t<'x', set_length_t<'y', vector_t<'x', vector_t<'y', scalar<int>>>, std::size_t>, std::size_t>>, 'x',
+	state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(!HasOffsetAlong<merge_blocks_t<'y', 'x', 'z', set_length_t<'x', set_length_t<'y', vector_t<'x', vector_t<'y', scalar<int>>>, std::size_t>, std::size_t>>, 'y',
+	state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(HasOffsetAlong<merge_blocks_t<'y', 'x', 'z', set_length_t<'x', set_length_t<'y', vector_t<'x', vector_t<'y', scalar<int>>>, std::size_t>, std::size_t>>, 'z',
+	state<state_item<index_in<'z'>, std::size_t>>>);
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>() ^ set_length<'x'>(3) ^ set_length<'y'>(5) ^ merge_blocks<'y', 'x', 'z'>(),
+	state<state_item<index_in<'z'>, std::size_t>>(2)) == 2 * 5 * sizeof(int));
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>() ^ set_length<'x'>(3) ^ set_length<'y'>(5) ^ merge_blocks<'y', 'x', 'z'>(),
+	state<state_item<index_in<'z'>, std::size_t>>(3)) == 1 * sizeof(int));
+static_assert(offset_along<'z'>(scalar<int>() ^ vector<'y'>() ^ vector<'x'>() ^ set_length<'x'>(3) ^ set_length<'y'>(5) ^ merge_blocks<'y', 'x', 'z'>(),
+	state<state_item<index_in<'z'>, std::size_t>>(5)) == (2 * 5 + 1) * sizeof(int));
 
 } // namespace noarr
 
