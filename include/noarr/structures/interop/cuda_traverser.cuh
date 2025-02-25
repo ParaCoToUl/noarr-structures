@@ -122,7 +122,9 @@ struct cuda_fix_t : strict_contain<T> {
 
 	template<IsDim auto QDim, IsState State>
 	[[nodiscard]]
-	__device__ inline std::size_t length(State state) const noexcept {
+	__device__ inline std::size_t length(State state) const noexcept
+	requires (has_length<QDim, State>())
+	{
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
