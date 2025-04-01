@@ -81,6 +81,8 @@ private:
 				} else {
 					return clean_state(state);
 				}
+			} else if constexpr (!sub_structure_t::template has_length<Dim, clean_state_t<State>>()) {
+				return clean_state(state);
 			} else if constexpr (State::template contains<length_in<DimMajor>>) {
 				if constexpr (have_indices) {
 					const auto cs = clean_state(state);
