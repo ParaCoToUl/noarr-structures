@@ -1,8 +1,9 @@
 #ifndef NOARR_STRUCTURES_UTILITY_HPP
 #define NOARR_STRUCTURES_UTILITY_HPP
 
-#include <concepts>
 #include <cstddef>
+
+#include <concepts>
 #include <type_traits>
 #include <utility>
 
@@ -209,7 +210,7 @@ template<auto v, class Tree>
 struct dim_tree_contains_impl : std::false_type {};
 
 template<auto v, class Tree>
-static constexpr bool dim_tree_contains = helpers::dim_tree_contains_impl<v, Tree>::value;
+static constexpr bool dim_tree_contains = dim_tree_contains_impl<v, Tree>::value;
 
 template<auto v, auto V, class... Branches>
 requires (v != V)
@@ -218,6 +219,85 @@ struct dim_tree_contains_impl<v, dim_tree<V, Branches...>>
 
 template<auto v, class... Branches>
 struct dim_tree_contains_impl<v, dim_tree<v, Branches...>> : std::true_type {};
+
+template<auto v, class Tree>
+struct dim_tree_branches_impl : std::integral_constant<std::size_t, 0> {};
+
+template<auto v, class Tree>
+static constexpr auto dim_tree_branches = dim_tree_branches_impl<v, Tree>::value;
+
+template<std::size_t... Is>
+struct max_impl : std::integral_constant<std::size_t, 0> {};
+
+template<std::size_t I>
+struct max_impl<I> : std::integral_constant<std::size_t, I> {};
+
+template<std::size_t I, std::size_t J>
+struct max_impl<I, J> : std::integral_constant<std::size_t, (I > J ? I : J)> {};
+
+template<std::size_t I, std::size_t... Is>
+struct max_impl<I, Is...> : max_impl<I, max_impl<Is...>::value> {};
+
+template<auto v, auto V, class... Branches>
+requires (v != V)
+struct dim_tree_branches_impl<v, dim_tree<V, Branches...>> {
+	static constexpr auto value = max_impl<
+		dim_tree_branches_impl<v, Branches>::value...
+	>::value;
+};
+
+template<auto v, class... Branches>
+struct dim_tree_branches_impl<v, dim_tree<v, Branches...>> {
+	static constexpr auto value = sizeof...(Branches);
+};
+
+template<auto v, std::size_t I, class Tree>
+struct dim_tree_fix_impl {
+	using type = Tree;
+};
+
+template<auto v, std::size_t I, class Tree>
+using dim_tree_fix = typename dim_tree_fix_impl<v, I, Tree>::type;
+
+template<auto v, std::size_t I, auto V, class... Branches>
+requires (v != V)
+struct dim_tree_fix_impl<v, I, dim_tree<V, Branches...>> {
+	using type = dim_tree<V, typename dim_tree_fix_impl<v, I, Branches>::type...>;
+};
+
+template<auto v, std::size_t I, class... Branches>
+struct dim_tree_fix_impl<v, I, dim_tree<v, Branches...>> {
+	using type = std::tuple_element_t<I, std::tuple<Branches...>>;
+};
+
+template<auto v, class Tree>
+struct dim_tree_hoist_impl {
+private:
+	static constexpr auto branches = dim_tree_branches_impl<v, Tree>::value;
+	using indices = std::make_index_sequence<branches>;
+	using tree = decltype([]<std::size_t... Is>(std::index_sequence<Is...>) {
+		return dim_tree<v, typename dim_tree_fix_impl<v, Is, Tree>::type...>{};
+	}(indices{}));
+
+public:
+	using type = tree;
+};
+
+template<class Tree, auto... vs>
+struct dim_tree_reorder_impl;
+
+template<class Tree, auto... vs>
+using dim_tree_reorder = typename dim_tree_reorder_impl<Tree, vs...>::type;
+
+template<class Tree>
+struct dim_tree_reorder_impl<Tree> {
+	using type = Tree;
+};
+
+template<auto v, auto... vs, class Tree>
+struct dim_tree_reorder_impl<Tree, v, vs...> {
+	using type = typename dim_tree_hoist_impl<v, typename dim_tree_reorder_impl<Tree, vs...>::type>::type;
+};
 
 template<class Tree, class Pred>
 struct dim_tree_filter_impl;
@@ -295,6 +375,9 @@ template<class In, class Pred>
 using dim_tree_filter = typename helpers::dim_tree_filter_impl<In, Pred>::type;
 
 using helpers::dim_tree_contains;
+
+template<class In, auto... Dims> requires IsDimPack<decltype(Dims)...>
+using dim_tree_reorder = typename helpers::dim_tree_reorder_impl<In, Dims...>::type;
 
 template<class Seq>
 using dim_tree_from_sequence = typename helpers::dim_tree_from_sequence_impl<Seq>::type;

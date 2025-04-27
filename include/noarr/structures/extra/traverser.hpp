@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_TRAVERSER_HPP
 
 #include <cstddef>
+
 #include <type_traits>
 #include <utility>
 
@@ -203,7 +204,8 @@ struct traverser_t : strict_contain<Struct, Order> {
 		using dim_tree =
 			dim_tree_filter<sig_dim_tree<typename decltype(top_struct())::signature>, in_dim_sequence<Dims...>>;
 		static_assert((... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
-		for_each_impl(dim_tree_from_sequence<dim_sequence<Dims...>>(), f, empty_state);
+		using reordered_tree = dim_tree_reorder<dim_tree, Dims...>;
+		for_each_impl(reordered_tree(), f, empty_state);
 	}
 
 	[[nodiscard("construct an object representing the state of the traverser")]]
