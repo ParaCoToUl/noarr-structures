@@ -241,9 +241,7 @@ struct max_impl<I, Is...> : max_impl<I, max_impl<Is...>::value> {};
 template<auto v, auto V, class... Branches>
 requires (v != V)
 struct dim_tree_branches_impl<v, dim_tree<V, Branches...>> {
-	static constexpr auto value = max_impl<
-		dim_tree_branches_impl<v, Branches>::value...
-	>::value;
+	static constexpr auto value = max_impl<dim_tree_branches_impl<v, Branches>::value...>::value;
 };
 
 template<auto v, class... Branches>
@@ -376,7 +374,8 @@ using dim_tree_filter = typename helpers::dim_tree_filter_impl<In, Pred>::type;
 
 using helpers::dim_tree_contains;
 
-template<class In, auto... Dims> requires IsDimPack<decltype(Dims)...>
+template<class In, auto... Dims>
+requires IsDimPack<decltype(Dims)...>
 using dim_tree_reorder = typename helpers::dim_tree_reorder_impl<In, Dims...>::type;
 
 template<class Seq>

@@ -194,7 +194,7 @@ TEST_CASE("reverse_t", "[stride_along]") {
 	STATIC_REQUIRE(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ reverse<'x'>() ^ reverse<'x'>(), state<state_item<length_in<'x'>, std::size_t>>(42)) == static_cast<int>(sizeof(int)));
 	STATIC_REQUIRE(HasStrideAlong<reverse_t<'y', vector_t<'x', scalar<int>>>, 'x',
 								state<state_item<length_in<'x'>, std::size_t>>>);
-	STATIC_REQUIRE(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ reverse<'y'>(), state<state_item<length_in<'x'>, std::size_t>>(42)) == -static_cast<int>(sizeof(int)));
+	STATIC_REQUIRE(stride_along<'x'>(scalar<int>() ^ vector<'x'>() ^ reverse<'y'>(), state<state_item<length_in<'x'>, std::size_t>>(42)) == static_cast<int>(sizeof(int)));
 	STATIC_REQUIRE(!HasStrideAlong<reverse_t<'x', vector_t<'x', scalar<int>>>, 'y',
 								state<state_item<length_in<'x'>, std::size_t>>>);
 	STATIC_REQUIRE(HasStrideAlong<reverse_t<'x', set_length_t<'x', vector_t<'x', scalar<int>>, std::size_t>>, 'x',

@@ -340,10 +340,13 @@ public:
 
 		using sub_stride_t = decltype(+has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(
 			structure.sub_structure(), structure.sub_state(state)));
-
-		return -static_cast<std::make_signed_t<sub_stride_t>>(
-			has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(structure.sub_structure(),
-		                                                                 structure.sub_state(state)));
+		const auto sub_stride = has_stride_along<QDim, sub_structure_t, sub_state_t>::stride(
+			structure.sub_structure(), structure.sub_state(state));
+		if constexpr (QDim == Dim) {
+			return -static_cast<std::make_signed_t<sub_stride_t>>(sub_stride);
+		} else {
+			return sub_stride;
+		}
 	}
 };
 
