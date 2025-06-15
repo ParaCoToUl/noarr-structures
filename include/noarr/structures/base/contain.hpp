@@ -166,7 +166,7 @@ constexpr auto contain_cat(const contain<TS1...> &c1, std::index_sequence<Idxs1.
 constexpr auto contain_cat() noexcept { return contain<>(); }
 
 template<class... TS>
-constexpr auto contain_cat(const contain<TS...> &c) noexcept {
+constexpr decltype(auto) contain_cat(const contain<TS...> &c) noexcept {
 	return c;
 }
 

@@ -19,7 +19,7 @@ using to_struct_t = typename to_struct<T>::type;
 template<class T>
 concept ToStruct = to_struct_v<std::remove_cvref_t<T>>;
 
-template<class T>
+template<ToStruct T>
 constexpr auto convert_to_struct(T &&t) noexcept {
 	return to_struct<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
 }
