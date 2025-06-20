@@ -148,26 +148,38 @@ struct contain<> : private helpers::contain_impl<> {
 template<class... TS>
 contain(TS &&...) -> contain<std::remove_cvref_t<TS>...>;
 
-template<class... TS1, class... TS2, class... Contains>
-constexpr auto contain_cat(const contain<TS1...> &c1, const contain<TS2...> &c2, Contains &&...contains) noexcept {
-	using iss1 = std::index_sequence_for<TS1...>;
-	using iss2 = std::index_sequence_for<TS2...>;
-	return contain_cat(c1, iss1(), c2, iss2(), std::forward<Contains>(contains)...);
+template<class T>
+struct is_contain : std::false_type {};
+
+template<class... TS>
+struct is_contain<contain<TS...>> : std::true_type {};
+
+template<class T>
+constexpr bool is_contain_v = is_contain<std::remove_cvref_t<T>>::value;
+
+template<class T>
+concept IsContain = is_contain_v<T>;
+
+template<class C1, std::size_t... Idxs1, class C2, std::size_t... Idxs2, class... Contains>
+constexpr auto contain_cat_impl(C1 &&c1, std::index_sequence<Idxs1...> /*unused*/,
+                           C2 &&c2, std::index_sequence<Idxs2...> /*unused*/,
+                           Contains &&...contains) noexcept {
+	return contain_cat(contain(std::forward<C1>(c1).template get<Idxs1>()..., std::forward<C2>(c2).template get<Idxs2>()...),
+	                   std::forward<Contains>(contains)...);
 }
 
-template<class... TS1, std::size_t... Idxs1, class... TS2, std::size_t... Idxs2, class... Contains>
-constexpr auto contain_cat(const contain<TS1...> &c1, std::index_sequence<Idxs1...> /*unused*/,
-                           const contain<TS2...> &c2, std::index_sequence<Idxs2...> /*unused*/,
-                           Contains &&...contains) noexcept {
-	return contain_cat(contain(c1.template get<Idxs1>()..., c2.template get<Idxs2>()...),
-	                   std::forward<Contains>(contains)...);
+template<class C1, class C2, class... Contains>
+constexpr auto contain_cat(C1 &&c1, C2 &&c2, Contains &&...contains) noexcept {
+	using iss1 = std::make_index_sequence<std::tuple_size<std::remove_cvref_t<C1>>::value>;
+	using iss2 = std::make_index_sequence<std::tuple_size<std::remove_cvref_t<C2>>::value>;
+	return contain_cat_impl(std::forward<C1>(c1), iss1(), std::forward<C2>(c2), iss2(), std::forward<Contains>(contains)...);
 }
 
 constexpr auto contain_cat() noexcept { return contain<>(); }
 
-template<class... TS>
-constexpr decltype(auto) contain_cat(const contain<TS...> &c) noexcept {
-	return c;
+template<class T>
+constexpr decltype(auto) contain_cat(T &&c) noexcept {
+	return std::forward<T>(c);
 }
 
 } // namespace helpers
@@ -192,10 +204,7 @@ template<class... TS>
 requires (... && IsContainable<TS>)
 using flexible_contain = helpers::contain<TS...>;
 
-template<class... TS>
-constexpr auto contain_cat(TS &&...ts) noexcept {
-	return helpers::contain_cat(std::forward<TS>(ts)...);
-}
+using helpers::contain_cat;
 
 } // namespace noarr
 
