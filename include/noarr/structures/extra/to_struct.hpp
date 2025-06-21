@@ -20,7 +20,7 @@ template<class T>
 concept ToStruct = to_struct_v<std::remove_cvref_t<T>>;
 
 template<ToStruct T>
-constexpr auto convert_to_struct(T &&t) noexcept {
+constexpr decltype(auto) convert_to_struct(T &&t) noexcept {
 	return to_struct<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
 }
 
@@ -29,7 +29,7 @@ struct to_struct<T> : std::true_type {
 	using type = std::remove_cvref_t<T>;
 
 	[[nodiscard]]
-	static constexpr type convert(T t) noexcept {
+	static constexpr decltype(auto) convert(T t) noexcept {
 		return t;
 	}
 };
@@ -38,7 +38,7 @@ template<class T>
 struct to_struct<pack<T>> : std::true_type {
 	using type = T;
 
-	static constexpr type convert(const pack<T> &p) noexcept { return p.template get<0>(); }
+	static constexpr decltype(auto) convert(const pack<T> &p) noexcept { return p.template get<0>(); }
 };
 
 } // namespace noarr

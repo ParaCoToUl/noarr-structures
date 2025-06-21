@@ -135,25 +135,25 @@ struct make_proto_impl : F {
 	static constexpr bool proto_preserves_layout = PreservesLayout;
 
 	template<class Struct>
-	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+	constexpr decltype(auto) instantiate_and_construct(Struct s) const noexcept {
 		return (*this)(s);
 	}
 };
 
 template<class... Structs, class ProtoStruct, std::size_t... Indices>
 requires IsProtoStruct<ProtoStruct>
-constexpr auto pass_pack(const pack<Structs...> &s, ProtoStruct &&p, std::index_sequence<Indices...> /*unused*/) noexcept {
+constexpr decltype(auto) pass_pack(const pack<Structs...> &s, ProtoStruct &&p, std::index_sequence<Indices...> /*unused*/) noexcept {
 	return std::forward<ProtoStruct>(p).instantiate_and_construct(s.template get<Indices>()...);
 }
 
 template<class Arg, class... Args, std::size_t... Indices>
-constexpr auto pass_pack(Arg &&s, const pack<Args...> &p, std::index_sequence<Indices...> /*unused*/) noexcept {
-	return pack(std::forward<Arg>(s) ^ p.template get<Indices>()...);
+constexpr auto pass_pack(const Arg &s, const pack<Args...> &p, std::index_sequence<Indices...> /*unused*/) noexcept {
+	return pack((s ^ p.template get<Indices>())...);
 }
 
 template<class... Structs, class Arg, std::size_t... Indices>
 constexpr auto pass_pack(const pack<Structs...> &s, const to_each<Arg> &p, std::index_sequence<Indices...> /*unused*/) noexcept {
-	return pack(s.template get<Indices>() ^ p...);
+	return pack((s.template get<Indices>() ^ p)...);
 }
 
 } // namespace helpers
@@ -170,27 +170,27 @@ constexpr auto make_proto(F f) noexcept {
 template<class Struct, class ProtoStruct>
 requires (IsStruct<Struct> && IsProtoStruct<ProtoStruct>)
 [[nodiscard("Constructs a new structure")]]
-constexpr auto operator^(Struct &&s, ProtoStruct &&p) noexcept {
+constexpr decltype(auto) operator^(Struct &&s, ProtoStruct &&p) noexcept {
 	return std::forward<ProtoStruct>(p).instantiate_and_construct(std::forward<Struct>(s));
 }
 
 template<class... Structs, class ProtoStruct>
 requires (IsProtoStruct<ProtoStruct> && ... && IsStruct<Structs>)
 [[nodiscard("Constructs a new structure")]]
-constexpr auto operator^(const pack<Structs...> &s, const ProtoStruct &p) noexcept {
+constexpr decltype(auto) operator^(const pack<Structs...> &s, const ProtoStruct &p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
 
 template<class Arg, class... Args>
 [[nodiscard("Constructs a new pack of structures")]]
-constexpr auto operator^(Arg &&s, const pack<Args...> &p) noexcept {
+constexpr decltype(auto) operator^(Arg &&s, const pack<Args...> &p) noexcept {
 	return helpers::pass_pack(std::forward<Arg>(s), p, std::make_index_sequence<sizeof...(Args)>());
 }
 
 template<class... Structs, class Arg>
 requires (... && IsStruct<Structs>)
 [[nodiscard("Constructs a new pack of structures")]]
-constexpr auto operator^(const pack<Structs...> &s, const to_each<Arg> &p) noexcept {
+constexpr decltype(auto) operator^(const pack<Structs...> &s, const to_each<Arg> &p) noexcept {
 	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
 }
 
@@ -218,14 +218,14 @@ struct compose_proto<pack<InnerProtoStructs...>, OuterProtoStruct>
 
 	template<class Struct>
 	[[nodiscard("Constructs a new proto-structure")]]
-	constexpr auto instantiate_and_construct(Struct &&s) const noexcept {
+	constexpr decltype(auto) instantiate_and_construct(Struct &&s) const noexcept {
 		return std::forward<Struct>(s) ^ this->template get<0>() ^ this->template get<1>();
 	}
 
 	template<class... Structs>
 	requires (sizeof...(Structs) != 1)
 	[[nodiscard("Constructs a new proto-structure")]]
-	constexpr auto instantiate_and_construct(Structs &&... s) const noexcept {
+	constexpr decltype(auto) instantiate_and_construct(Structs &&... s) const noexcept {
 		return pack(std::forward<Structs>(s)...) ^ this->template get<0>() ^ this->template get<1>();
 	}
 };
