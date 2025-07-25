@@ -14,10 +14,10 @@ requires IsDimPack<decltype(Dims)...>
 struct has_dims {
 private:
 	using struct_type = typename to_struct<T>::type;
-	using dim_tree = sig_dim_tree<typename struct_type::signature>;
+	using dim_tree_helper = sig_dim_tree<typename struct_type::signature>;
 
 public:
-	static constexpr bool value = (... && dim_tree_contains<Dims, dim_tree>);
+	static constexpr bool value = (... && dim_tree_contains<Dims, dim_tree_helper>);
 };
 
 } // namespace helpers

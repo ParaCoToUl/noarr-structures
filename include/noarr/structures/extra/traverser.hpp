@@ -185,26 +185,26 @@ struct traverser_t : strict_contain<Struct, Order> {
 	template<auto Dim, auto... Dims, class F>
 	requires IsDimPack<decltype(Dim), decltype(Dims)...>
 	constexpr void for_sections(F f) const {
-		using dim_tree =
+		using dim_tree_helper =
 			dim_tree_filter<sig_dim_tree<typename decltype(top_struct())::signature>, in_dim_sequence<Dim, Dims...>>;
-		static_assert((dim_tree_contains<Dim, dim_tree> && ... && dim_tree_contains<Dims, dim_tree>),
+		static_assert((dim_tree_contains<Dim, dim_tree_helper> && ... && dim_tree_contains<Dims, dim_tree_helper>),
 		              "Requested dimensions are not present");
-		for_each_impl(dim_tree(), f, empty_state);
+		for_each_impl(dim_tree_helper(), f, empty_state);
 	}
 
 	template<class F>
 	constexpr void for_sections(F f) const {
-		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
-		for_each_impl(dim_tree(), f, empty_state);
+		using dim_tree_helper = sig_dim_tree<typename decltype(top_struct())::signature>;
+		for_each_impl(dim_tree_helper(), f, empty_state);
 	}
 
 	template<auto... Dims, class F>
 	requires IsDimPack<decltype(Dims)...>
 	constexpr void for_dims(F f) const {
-		using dim_tree =
+		using dim_tree_helper =
 			dim_tree_filter<sig_dim_tree<typename decltype(top_struct())::signature>, in_dim_sequence<Dims...>>;
-		static_assert((... && dim_tree_contains<Dims, dim_tree>), "Requested dimensions are not present");
-		using reordered_tree = dim_tree_reorder<dim_tree, Dims...>;
+		static_assert((... && dim_tree_contains<Dims, dim_tree_helper>), "Requested dimensions are not present");
+		using reordered_tree = dim_tree_reorder<dim_tree_helper, Dims...>;
 		for_each_impl(reordered_tree(), f, empty_state);
 	}
 

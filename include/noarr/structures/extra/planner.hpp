@@ -332,8 +332,8 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 	constexpr void execute() const
 	requires (!std::same_as<Ending, planner_endings<>>)
 	{
-		using dim_tree = sig_dim_tree<typename decltype(top_struct())::signature>;
-		for_each_impl(dim_tree(), empty_state);
+		using dim_tree_helper = sig_dim_tree<typename decltype(top_struct())::signature>;
+		for_each_impl(dim_tree_helper(), empty_state);
 	}
 
 	// execute the planner
