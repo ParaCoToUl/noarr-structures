@@ -35,7 +35,7 @@ private:
 	static constexpr bool get_value() noexcept {
 
 		if constexpr (QDim == Dim) {
-			if constexpr (State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>) {
+			if constexpr (state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>) {
 				using namespace constexpr_arithmetic;
 				constexpr auto zero = make_const<0>();
 				return has_offset_of<sub_structure_t, Structure,
@@ -119,7 +119,7 @@ private:
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			using index_t = state_get_t<State, index_in<Dim>>;
 
 			if constexpr (requires {
@@ -152,7 +152,7 @@ public:
 	static constexpr bool is_monotonic() noexcept
 	requires value
 	{
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
 			using index_t = state_get_t<State, index_in<Dim>>;
 			constexpr std::size_t index = index_t::value;
@@ -169,7 +169,7 @@ public:
 	static constexpr auto lower_bound(Structure structure, State state) noexcept
 	requires value
 	{
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
 			using index_t = state_get_t<State, index_in<Dim>>;
 			constexpr std::size_t index = index_t::value;
@@ -194,7 +194,7 @@ public:
 		requires ((decltype(min)::value) < decltype(end)::value);
 	}
 	{
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
 			using index_t = state_get_t<State, index_in<Dim>>;
 			constexpr std::size_t index = index_t::value;
@@ -217,7 +217,7 @@ public:
 	static constexpr auto lower_bound_at(Structure structure, State state) noexcept
 	requires value
 	{
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
 			using index_t = state_get_t<State, index_in<Dim>>;
 
@@ -243,7 +243,7 @@ public:
 		requires ((decltype(min)::value) < decltype(end)::value);
 	}
 	{
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
 			using index_t = state_get_t<State, index_in<Dim>>;
 
@@ -270,7 +270,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
-			if constexpr (State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>) {
+			if constexpr (state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>) {
 				using namespace constexpr_arithmetic;
 				constexpr auto zero = make_const<0>();
 				return has_offset_of<sub_structure_t, Structure,
@@ -1036,7 +1036,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == DimMinor) {
-			if constexpr (!State::template contains<index_in<DimIsBorder>>) {
+			if constexpr (!state_contains<State, index_in<DimIsBorder>>) {
 				return false;
 			} else if constexpr (Structure::template has_length<DimMinor, State>()) {
 				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
@@ -1048,7 +1048,7 @@ private:
 				return false;
 			}
 		} else if constexpr (QDim == DimMajor) {
-			if constexpr (!State::template contains<index_in<DimIsBorder>>) {
+			if constexpr (!state_contains<State, index_in<DimIsBorder>>) {
 				return false;
 			} else if constexpr (Structure::template has_length<DimMinor, State>()) {
 				if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
@@ -1060,7 +1060,7 @@ private:
 				return false;
 			}
 		} else if constexpr (QDim == DimIsBorder) {
-			if constexpr (State::template contains<index_in<DimIsBorder>>) {
+			if constexpr (state_contains<State, index_in<DimIsBorder>>) {
 				return false;
 			} else if constexpr (has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::value) {
 				return has_lower_bound_along<Dim, sub_structure_t, sub_state_t>::is_monotonic();

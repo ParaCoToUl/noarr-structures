@@ -204,7 +204,7 @@ private:
 	constexpr auto offset_inner(State state, Idx index_of_period) const noexcept {
 		using namespace constexpr_arithmetic;
 		const auto offset_of_period = index_of_period * make_const<total_width>();
-		if constexpr (State::template contains<cuda_stripe_index>) {
+		if constexpr (state_contains<State, cuda_stripe_index>) {
 			const auto offset_of_stripe = state.template get<cuda_stripe_index>() * make_const<stripe_padded_width>();
 			return offset_of_period + offset_of_stripe;
 		} else {

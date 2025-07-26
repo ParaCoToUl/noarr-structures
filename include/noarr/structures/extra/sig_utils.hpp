@@ -30,7 +30,7 @@ struct sig_find_dim_impl<QDim, State, function_sig<QDim, ArgLength, RetSig>> {
 template<auto QDim, IsState State, auto Dim, class... RetSigs>
 requires (Dim != QDim) && IsDim<decltype(Dim)> && IsDim<decltype(QDim)>
 struct sig_find_dim_impl<QDim, State, dep_function_sig<Dim, RetSigs...>> {
-	static_assert(State::template contains<index_in<Dim>>, "Cannot extract dimension from within tuple");
+	static_assert(state_contains<State, index_in<Dim>>, "Cannot extract dimension from within tuple");
 	static constexpr std::size_t idx = state_get_t<State, index_in<Dim>>::value;
 	using ret_sig = typename dep_function_sig<Dim, RetSigs...>::template ret_sig<idx>;
 	using type = typename sig_find_dim_impl<QDim, State, ret_sig>::type;

@@ -117,7 +117,7 @@ private:
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			using index_t = state_get_t<State, index_in<Dim>>;
 
 			if constexpr (requires {

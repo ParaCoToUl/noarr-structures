@@ -59,7 +59,7 @@ struct sig_get_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 };
 
 template<IsDim auto Dim, class... RetSigs, IsState State>
-requires (State::template contains<index_in<Dim>>)
+requires (state_contains<State, index_in<Dim>>)
 struct sig_get_scalar<dep_function_sig<Dim, RetSigs...>, State> {
 	static_assert(
 		requires { state_get_t<State, index_in<Dim>>::value; },

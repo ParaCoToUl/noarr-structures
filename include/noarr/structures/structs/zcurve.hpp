@@ -190,9 +190,9 @@ private:
 		requires (sizeof...(DimsI) == sizeof...(Dims) && IsState<State>)
 		[[nodiscard]]
 		static constexpr auto sub_state(State state, T sub_structure, std::index_sequence<DimsI...> /*is*/) noexcept {
-			static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+			static_assert(!state_contains<State, length_in<Dim>>, "Cannot set z-curve length");
 			const auto tmp_state = clean_state(state);
-			if constexpr (State::template contains<index_in<Dim>>) {
+			if constexpr (state_contains<State, index_in<Dim>>) {
 				const std::size_t index = state.template get<index_in<Dim>>();
 				const auto index_general = index >> SpecialLevel * sizeof...(Dims);
 				const auto index_special = index & ((1U << SpecialLevel * sizeof...(Dims)) - 1U);
@@ -266,9 +266,9 @@ public:
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!State::template contains<index_in<QDim>>,
+		static_assert(!state_contains<State, index_in<QDim>>,
 		              "This dimension is already fixed, it cannot be used from outside");
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set z-curve length");
 		if constexpr (QDim == Dim) {
 			return (... && sub_structure_t::template has_length<Dims, sub_state_t<State>>());
 		} else {
@@ -290,7 +290,7 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
-		static_assert(!State::template contains<length_in<Dim>>, "Cannot set z-curve length");
+		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set z-curve length");
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 

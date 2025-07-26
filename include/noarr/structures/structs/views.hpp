@@ -21,7 +21,7 @@ struct reassemble_scalar;
 
 template<IsDim auto Dim, class ArgLength, class RetSig, IsState State>
 struct reassemble_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
-	template<bool cond = State::template contains<index_in<Dim>>, class = void>
+	template<bool cond = state_contains<State, index_in<Dim>>, class = void>
 	struct ty;
 
 	template<class Useless>
@@ -37,7 +37,7 @@ struct reassemble_scalar<function_sig<Dim, ArgLength, RetSig>, State> {
 
 template<IsDim auto Dim, class... RetSigs, IsState State>
 struct reassemble_scalar<dep_function_sig<Dim, RetSigs...>, State> {
-	template<bool cond = State::template contains<index_in<Dim>>, class = void>
+	template<bool cond = state_contains<State, index_in<Dim>>, class = void>
 	struct ty;
 
 	template<class Useless>
@@ -679,8 +679,8 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr auto sub_state(State state) noexcept {
-		constexpr bool has_index = State::template contains<index_in<Dim>>;
-		constexpr bool has_length = State::template contains<length_in<Dim>>;
+		constexpr bool has_index = state_contains<State, index_in<Dim>>;
+		constexpr bool has_length = state_contains<State, length_in<Dim>>;
 
 		static_assert(!(sub_structure_t::template has_length<DimA, clean_state_t<State>>() ^
 		                sub_structure_t::template has_length<DimB, clean_state_t<State>>()),

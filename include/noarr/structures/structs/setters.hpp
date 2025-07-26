@@ -272,7 +272,7 @@ public:
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
 		// Cannot set length of a dimension twice
-		return !State::template contains<length_in<Dim>> && has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
+		return !state_contains<State, length_in<Dim>> && has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
 	template<class Sub, IsState State>
@@ -287,8 +287,7 @@ public:
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		// Cannot set length of a dimension twice
-		return !State::template contains<length_in<Dim>> &&
-		       sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+		return !state_contains<State, length_in<Dim>> && sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
 	template<auto QDim, IsState State>

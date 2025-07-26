@@ -242,11 +242,14 @@ constexpr bool is_state_v = is_state<T>::value;
 template<class T>
 concept IsState = is_state_v<std::remove_cvref_t<T>>;
 
-template<class State, auto Dim>
-concept HasNotSetIndex = IsState<State> && !State::template contains<index_in<Dim>>;
+template<IsState State, IsTag... Tags>
+constexpr bool state_contains = std::remove_cvref_t<State>::template contains<Tags...>;
 
 template<class State, auto Dim>
-concept HasSetIndex = IsState<State> && State::template contains<index_in<Dim>>;
+concept HasNotSetIndex = IsState<State> && !state_contains<State, index_in<Dim>>;
+
+template<class State, auto Dim>
+concept HasSetIndex = IsState<State> && state_contains<State, index_in<Dim>>;
 
 template<IsState State, IsTag Tag>
 using state_get_t = decltype(std::declval<State>().template get<Tag>());

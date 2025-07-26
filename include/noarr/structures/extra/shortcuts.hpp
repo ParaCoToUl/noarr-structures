@@ -220,7 +220,7 @@ constexpr auto idx(ValueType... value) noexcept {
 
 template<IsDim auto Dim, class F, IsState State>
 constexpr auto update_index(State state, F f) noexcept {
-	static_assert(State::template contains<index_in<Dim>>,
+	static_assert(state_contains<State, index_in<Dim>>,
 	              "Requested dimension does not exist. To add a new dimension instead of updating existing one, use "
 	              ".template with<index_in<'...'>>(...)");
 	const auto new_index = f(state.template get<index_in<Dim>>());
@@ -231,7 +231,7 @@ template<auto... Dims, IsState State, class... Diffs>
 requires (sizeof...(Dims) == sizeof...(Diffs)) && IsDimPack<decltype(Dims)...>
 constexpr auto neighbor(State state, Diffs... diffs) noexcept {
 	using namespace noarr::constexpr_arithmetic;
-	static_assert((... && State::template contains<index_in<Dims>>), "Requested dimension does not exist");
+	static_assert((... && state_contains<State, index_in<Dims>>), "Requested dimension does not exist");
 	static_assert((... && std::is_same_v<state_get_t<State, index_in<Dims>>, std::size_t>),
 	              "Cannot shift in a dimension that is not dynamic");
 	return state.template with<index_in<Dims>...>(

@@ -85,7 +85,7 @@ struct bcast_t : strict_contain<T> {
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		if constexpr (QDim == Dim) {
-			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
+			return state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>;
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 		}

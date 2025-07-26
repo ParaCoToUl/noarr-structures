@@ -46,7 +46,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
-			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
+			return state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>;
 		} else {
 			return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
 		}
@@ -66,7 +66,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
-			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
+			return state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>;
 		} else {
 			return is_uniform_along<QDim, sub_structure_t, sub_state_t>::value;
 		}

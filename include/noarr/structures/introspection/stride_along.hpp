@@ -33,7 +33,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
-			return State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>;
+			return state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>;
 		} else {
 			return has_stride_along<QDim, sub_structure_t, sub_state_t>::value;
 		}
@@ -65,7 +65,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
-			if constexpr (State::template contains<length_in<Dim>> && !State::template contains<index_in<Dim>>) {
+			if constexpr (state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>) {
 				using namespace constexpr_arithmetic;
 				constexpr auto zero = make_const<0>();
 				constexpr auto one = make_const<1>();

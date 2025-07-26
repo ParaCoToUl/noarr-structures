@@ -32,7 +32,7 @@ private:
 	using Structure = vector_t<Dim, T>;
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<length_in<Dim>>) {
+		if constexpr (state_contains<State, length_in<Dim>>) {
 			return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 		} else {
 			return false;
@@ -50,7 +50,7 @@ private:
 	using Structure = tuple_t<Dim, Ts...>;
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 
 			using sub_struct = typename Structure::template sub_structure_t<index>;
@@ -73,7 +73,7 @@ private:
 	using Structure = bcast_t<Dim, T>;
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<length_in<Dim>>) {
+		if constexpr (state_contains<State, length_in<Dim>>) {
 			return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
 		} else {
 			return false;
@@ -220,7 +220,7 @@ private:
 	using Structure = step_t<Dim, T, StartT, StrideT>;
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<index_in<Dim>>) {
+		if constexpr (state_contains<State, index_in<Dim>>) {
 			return is_contiguous<T, typename step_t<Dim, T, StartT, StrideT>::template sub_state_t<State>>::value;
 		} else {
 			return false;
@@ -256,8 +256,8 @@ private:
 	static constexpr bool get_value() noexcept {
 		if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
 		              Structure::template has_length<DimMinor, indexless_state>()) {
-			if constexpr (State::template contains<index_in<DimMinor>> &&
-			              !State::template contains<index_in<DimMajor>>) {
+			if constexpr (state_contains<State, index_in<DimMinor>> &&
+			              !state_contains<State, index_in<DimMajor>>) {
 				return false;
 			} else {
 				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
@@ -282,8 +282,8 @@ private:
 	static constexpr bool get_value() noexcept {
 		if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
 		              Structure::template has_length<DimMinor, indexless_state>()) {
-			if constexpr (State::template contains<index_in<DimMinor>> &&
-			              !State::template contains<index_in<DimMajor>>) {
+			if constexpr (state_contains<State, index_in<DimMinor>> &&
+			              !state_contains<State, index_in<DimMajor>>) {
 				return false;
 			} else {
 				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
@@ -309,11 +309,11 @@ private:
 	                 .template remove<index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsBorder>>());
 
 	static constexpr bool get_value() noexcept {
-		if constexpr (State::template contains<index_in<DimIsBorder>>) {
+		if constexpr (state_contains<State, index_in<DimIsBorder>>) {
 			if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
 			              Structure::template has_length<DimMinor, indexless_state>()) {
-				if constexpr (State::template contains<index_in<DimMinor>> &&
-				              !State::template contains<index_in<DimMajor>>) {
+				if constexpr (state_contains<State, index_in<DimMinor>> &&
+				              !state_contains<State, index_in<DimMajor>>) {
 					return false;
 				} else {
 					return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
