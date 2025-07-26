@@ -60,13 +60,15 @@ struct cuda_fix_t : strict_contain<T> {
 
 	using signature = typename T::signature::template replace<sig_remove_first, Dim>;
 
+	template<IsState State>
 	[[nodiscard]]
-	static __device__ inline auto sub_state(IsState auto state) noexcept {
+	static __device__ inline auto sub_state(State state) noexcept {
 		return state.template remove<length_in<Dim>>().template with<index_in<Dim>>(CudaDim::idx());
 	}
 
+	template<IsState State>
 	[[nodiscard]]
-	static __device__ inline auto clean_state(IsState auto state) noexcept {
+	static __device__ inline auto clean_state(State state) noexcept {
 		return state.template remove<length_in<Dim>, index_in<Dim>>();
 	}
 
@@ -83,18 +85,16 @@ struct cuda_fix_t : strict_contain<T> {
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	__device__ inline std::size_t size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	__device__ inline std::size_t size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -105,10 +105,9 @@ struct cuda_fix_t : strict_contain<T> {
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	__device__ inline std::size_t strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, cuda_fix_t, State>())
-	{
+	[[nodiscard]]
+	__device__ inline std::size_t strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -121,10 +120,9 @@ struct cuda_fix_t : strict_contain<T> {
 	}
 
 	template<IsDim auto QDim, IsState State>
-	[[nodiscard]]
-	__device__ inline std::size_t length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	__device__ inline std::size_t length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
@@ -135,10 +133,9 @@ struct cuda_fix_t : strict_contain<T> {
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	__device__ inline auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, cuda_fix_t, State>())
-	{
+	[[nodiscard]]
+	__device__ inline auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

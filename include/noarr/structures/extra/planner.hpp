@@ -31,41 +31,38 @@ constexpr bool is_activated_v = is_activated<Ending>::value;
 
 template<class Sig, class F>
 struct planner_ending_elem_t : flexible_contain<F> {
+	using base = flexible_contain<F>;
 	using signature = Sig;
 	static constexpr bool activated = IsGroundSig<signature>;
 
-	using flexible_contain<F>::flexible_contain;
+	using base::base;
 
 	template<class NewOrder>
 	[[nodiscard]]
-	constexpr auto order(NewOrder new_order) const noexcept {
+	constexpr auto order(NewOrder /*new_order*/) const noexcept {
 		struct sigholder_t {
 			using signature = Sig;
 			static_assert(!always_false<signature>);
 		};
 
-		return planner_ending_elem_t<typename decltype(sigholder_t() ^ new_order)::signature, F>(
-			flexible_contain<F>::get());
+		return planner_ending_elem_t<typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature, F>(
+			base::get());
 	}
 
 	template<class Planner>
 	constexpr void operator()(const Planner &planner) const {
-		run(planner, std::make_index_sequence<Planner::num_structs>());
+		return run(planner, std::make_index_sequence<Planner::num_structs>());
 	}
 
 private:
 	template<class Planner, std::size_t... Idxs>
-	constexpr void run(const Planner &planner, std::index_sequence<Idxs...> /*unused*/) const
-	requires (requires(F f) { f(planner.template get_struct<Idxs>()[planner.state()]...); })
-	{
-		flexible_contain<F>::get()(planner.template get_struct<Idxs>()[planner.state()]...);
-	}
-
-	template<class Planner, std::size_t... Idxs>
-	constexpr void run(const Planner &planner, std::index_sequence<Idxs...> /*unused*/) const
-	requires (requires(F f) { f(planner.state(), planner.template get_struct<Idxs>()[planner.state()]...); })
-	{
-		flexible_contain<F>::get()(planner.state(), planner.template get_struct<Idxs>()[planner.state()]...);
+	constexpr void run(const Planner &planner, std::index_sequence<Idxs...> /*unused*/) const {
+		const auto state = planner.state();
+		if constexpr (requires(F f) { f(state, planner.template get_struct<Idxs>()[state]...); }) {
+			base::get()(state, planner.template get_struct<Idxs>()[state]...);
+		} else {
+			base::get()(planner.template get_struct<Idxs>()[state]...);
+		}
 	}
 };
 
@@ -82,13 +79,14 @@ struct planner_ending_t : flexible_contain<F> {
 
 	template<class NewOrder>
 	[[nodiscard]]
-	constexpr auto order(NewOrder new_order) const noexcept {
+	constexpr auto order(NewOrder /*new_order*/) const noexcept {
 		struct sigholder_t {
 			using signature = Sig;
 			static_assert(!always_false<signature>);
 		};
 
-		return planner_ending_t<typename decltype(sigholder_t() ^ new_order)::signature, F>(flexible_contain<F>::get());
+		return planner_ending_t<typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature, F>(
+			flexible_contain<F>::get());
 	}
 
 	template<class Planner>
@@ -227,13 +225,13 @@ struct planner_sections_t : flexible_contain<F> {
 
 	template<class NewOrder>
 	[[nodiscard]]
-	constexpr auto order(NewOrder new_order) const noexcept {
+	constexpr auto order(NewOrder /*new_order*/) const noexcept {
 		struct sigholder_t {
 			using signature = Sig;
 			static_assert(!always_false<signature>);
 		};
 
-		return planner_sections_t<typename decltype(sigholder_t() ^ new_order)::signature, F>(
+		return planner_sections_t<typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature, F>(
 			flexible_contain<F>::get());
 	}
 

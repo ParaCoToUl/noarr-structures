@@ -18,9 +18,9 @@ constexpr auto has_length() noexcept {
 	return []<class Struct>(Struct /*unused*/) constexpr noexcept { return Struct::template has_length<Dim, State>(); };
 }
 
-template<auto Dim>
-requires IsDim<decltype(Dim)>
-constexpr auto get_length(IsState auto state) noexcept {
+template<auto Dim, class State>
+requires IsDim<decltype(Dim)> && IsState<State>
+constexpr auto get_length(State state) noexcept {
 	return [state](auto structure) constexpr noexcept { return structure.template length<Dim>(state); };
 }
 
@@ -51,8 +51,8 @@ constexpr auto has_offset() noexcept {
 	return []<class Struct>(Struct /*unused*/) constexpr noexcept { return has_offset_of<SubStruct, Struct, State>(); };
 }
 
-template<class SubStruct>
-constexpr auto offset(IsState auto state) noexcept {
+template<class SubStruct, IsState State>
+constexpr auto offset(State state) noexcept {
 	return [state](auto structure) constexpr noexcept { return offset_of<SubStruct>(structure, state); };
 }
 
@@ -95,7 +95,8 @@ constexpr auto has_size() noexcept {
 	return []<class Struct>(Struct /*unused*/) constexpr noexcept { return Struct::template has_size<State>(); };
 }
 
-constexpr auto get_size(IsState auto state) noexcept {
+template<IsState State>
+constexpr auto get_size(State state) noexcept {
 	return [state](auto structure) constexpr noexcept { return structure.size(state); };
 }
 

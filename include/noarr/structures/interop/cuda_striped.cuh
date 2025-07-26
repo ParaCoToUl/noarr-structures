@@ -68,9 +68,17 @@ struct cuda_striped_t : strict_contain<T> {
 
 	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
 
-	static constexpr auto sub_state(IsState auto state) noexcept { return state.template remove<cuda_stripe_index>(); }
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto sub_state(State state) noexcept {
+		return state.template remove<cuda_stripe_index>();
+	}
 
-	static constexpr auto clean_state(IsState auto state) noexcept { return sub_state(state); }
+	template<IsState State>
+	[[nodiscard]]
+	static constexpr auto clean_state(State state) noexcept {
+		return sub_state(state);
+	}
 
 private:
 	static constexpr std::size_t elem_size = decltype(std::declval<ElemType>().size(state<>()))::value;
@@ -109,10 +117,9 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		// substructure size
 		const auto sub_size = sub_structure().size(sub_state(state));
@@ -126,10 +133,9 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		return std::max(sub_structure().align(sub_state(state), make_const<BankWidth>()));
 	}
@@ -141,10 +147,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, cuda_striped_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		const auto sub_offset = offset_of<Sub>(sub_structure(), sub_state(state));
 		const auto offset_major = sub_offset / make_const<stripe_width>();
@@ -165,11 +170,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
@@ -180,9 +183,8 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	constexpr void strict_state_at(State) const noexcept
-	requires (state_at<Sub, cuda_striped_t, State>())
-	{
+	requires (has_state_at<Sub, cuda_striped_t, State>())
+	constexpr void strict_state_at(State) const noexcept {
 		static_assert(always_false<cuda_striped_t>, "A cuda_striped_t cannot be used in this context");
 	}
 

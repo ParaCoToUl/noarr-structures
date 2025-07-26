@@ -54,18 +54,16 @@ struct bcast_t : strict_contain<T> {
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -76,10 +74,9 @@ struct bcast_t : strict_contain<T> {
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, bcast_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -95,11 +92,9 @@ struct bcast_t : strict_contain<T> {
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		if constexpr (QDim == Dim) {
 			return state.template get<length_in<Dim>>();
 		} else {
@@ -114,10 +109,9 @@ struct bcast_t : strict_contain<T> {
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, bcast_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

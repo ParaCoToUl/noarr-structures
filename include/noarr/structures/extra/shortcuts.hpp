@@ -67,8 +67,8 @@ constexpr auto array() noexcept {
 	return array_proto<Dim, L>();
 }
 
-template<IsDim auto Dim, IsStruct Struct>
-constexpr auto length_like(Struct structure, IsState auto state) noexcept {
+template<IsDim auto Dim, IsStruct Struct, IsState State>
+constexpr auto length_like(Struct structure, State state) noexcept {
 	return set_length<Dim>(structure | get_length<Dim>(state));
 }
 
@@ -77,9 +77,9 @@ constexpr auto length_like(Struct structure) noexcept {
 	return length_like<Dim>(structure, empty_state);
 }
 
-template<auto... Dims, class Struct>
-requires IsDimPack<decltype(Dims)...> && IsStruct<Struct>
-constexpr auto lengths_like(Struct structure, IsState auto state) noexcept {
+template<auto... Dims, class Struct, class State>
+requires IsDimPack<decltype(Dims)...> && IsStruct<Struct> && IsState<State>
+constexpr auto lengths_like(Struct structure, State state) noexcept {
 	return (... ^ length_like<Dims>(structure, state));
 }
 
@@ -95,8 +95,8 @@ constexpr auto lengths_like(const Traverser &traverser) noexcept {
 	return lengths_like<Dim, Dims...>(convert_to_traverser(traverser).top_struct());
 }
 
-template<IsDim auto Dim, IsStruct Struct>
-constexpr auto vector_like(Struct structure, IsState auto state) noexcept {
+template<IsDim auto Dim, IsStruct Struct, IsState State>
+constexpr auto vector_like(Struct structure, State state) noexcept {
 	return vector<Dim>() ^ length_like<Dim>(structure, state);
 }
 
@@ -105,9 +105,9 @@ constexpr auto vector_like(Struct structure) noexcept {
 	return vector_like<Dim>(structure, empty_state);
 }
 
-template<auto Dim, auto... Dims, class Struct>
-requires IsDimPack<decltype(Dim), decltype(Dims)...> && IsStruct<Struct>
-constexpr auto vectors_like(Struct structure, IsState auto state) noexcept {
+template<auto Dim, auto... Dims, class Struct, IsState State>
+requires IsDimPack<decltype(Dim), decltype(Dims)...> && IsStruct<Struct> && IsState<State>
+constexpr auto vectors_like(Struct structure, State state) noexcept {
 	return (vector_like<Dim>(structure, state) ^ ... ^ vector_like<Dims>(structure, state));
 }
 
@@ -267,23 +267,23 @@ constexpr auto symmetric_spans(Struct structure, Offsets... offsets) noexcept {
 
 namespace helpers {
 
-template<IsDim auto Dim, class IdxT>
-constexpr auto state_construct_fix(state_item<index_in<Dim>, IdxT> /*idx*/, IsState auto state) noexcept {
+template<IsDim auto Dim, class IdxT, IsState State>
+constexpr auto state_construct_fix(state_item<index_in<Dim>, IdxT> /*idx*/, State state) noexcept {
 	return fix<Dim>(state);
 }
 
-template<class StateItem>
-constexpr auto state_construct_fix(StateItem /*idx*/, IsState auto /*state*/) noexcept {
+template<class StateItem, IsState State>
+constexpr auto state_construct_fix(StateItem /*idx*/, State /*state*/) noexcept {
 	return neutral_proto();
 }
 
-template<IsDim auto Dim, class LenT>
-constexpr auto state_construct_set_length(state_item<length_in<Dim>, LenT> /*len*/, IsState auto state) noexcept {
+template<IsDim auto Dim, class LenT, IsState State>
+constexpr auto state_construct_set_length(state_item<length_in<Dim>, LenT> /*len*/, State state) noexcept {
 	return set_length<Dim>(state);
 }
 
-template<class StateItem>
-constexpr auto state_construct_set_length(StateItem /*len*/, IsState auto /*state*/) noexcept {
+template<class StateItem, IsState State>
+constexpr auto state_construct_set_length(StateItem /*len*/, State /*state*/) noexcept {
 	return neutral_proto();
 }
 

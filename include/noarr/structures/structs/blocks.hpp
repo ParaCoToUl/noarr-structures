@@ -120,18 +120,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -142,10 +140,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, into_blocks_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -189,11 +186,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		static_assert(!State::template contains<index_in<QDim>>,
 		              "This dimension is already fixed, it cannot be used from outside");
@@ -225,10 +220,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, into_blocks_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -364,18 +358,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -390,10 +382,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, into_blocks_dynamic_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -453,11 +444,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == DimIsPresent) {
 			if constexpr (State::template contains<length_in<DimMinor>, length_in<DimMajor>>) {
@@ -512,10 +501,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, into_blocks_dynamic_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -648,18 +636,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -670,10 +656,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, into_blocks_static_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -707,11 +692,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == DimIsBorder) {
 			return make_const<2>();
@@ -740,10 +723,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, into_blocks_static_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -917,18 +899,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -939,10 +919,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, merge_blocks_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -970,11 +949,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			if constexpr (State::template contains<length_in<Dim>>) {
@@ -995,10 +972,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, merge_blocks_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

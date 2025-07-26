@@ -124,18 +124,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -146,10 +144,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, shift_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -191,10 +188,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, shift_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -327,18 +323,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -350,10 +344,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, slice_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -366,11 +359,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		if constexpr (QDim == Dim) {
 			return len();
 		} else {
@@ -386,10 +377,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, slice_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		static_assert(!State::template contains<length_in<Dim>>, "Cannot set slice length");
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
@@ -516,18 +506,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -539,10 +527,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, span_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -555,11 +542,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			return end() - start();
@@ -576,10 +561,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, span_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -707,18 +691,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -730,10 +712,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, step_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -746,11 +727,9 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
-	[[nodiscard]]
-	constexpr auto length(State state) const noexcept
 	requires (has_length<QDim, State>())
-	{
+	[[nodiscard]]
+	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr (QDim == Dim) {
 			const auto sub_length = sub_structure().template length<Dim>(state);
@@ -768,10 +747,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, step_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
@@ -905,18 +883,16 @@ public:
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto size(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
 	template<IsState State>
-	[[nodiscard]]
-	constexpr auto align(State state) const noexcept
 	requires (has_size<State>())
-	{
+	[[nodiscard]]
+	constexpr auto align(State state) const noexcept {
 		return sub_structure().align(sub_state(state));
 	}
 
@@ -927,10 +903,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept
 	requires (has_offset_of<Sub, reverse_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_offset_of(State state) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state));
 	}
 
@@ -955,10 +930,9 @@ public:
 	}
 
 	template<class Sub, IsState State>
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept
 	requires (has_state_at<Sub, reverse_t, State>())
-	{
+	[[nodiscard]]
+	constexpr auto strict_state_at(State state) const noexcept {
 		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };

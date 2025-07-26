@@ -122,33 +122,37 @@ struct union_t : strict_contain<Structs...> {
 private:
 	template<auto Dim, std::size_t I>
 	[[nodiscard("returns the index of the first struct that accepts the dimension")]]
-	static constexpr auto find_first_match() noexcept {
+	static constexpr std::size_t find_first_match() noexcept {
 		using sub_sig = typename to_struct<sub_structure_t<I>>::type::signature;
 		if constexpr (sub_sig::template any_accept<Dim>) {
-			return std::integral_constant<std::size_t, I>();
+			return I;
 		} else if constexpr (I < sizeof...(Structs) - 1) {
 			return find_first_match<Dim, I + 1>();
+		} else {
+			return sizeof...(Structs);
 		}
 	}
 
 	template<auto Dim>
-	requires IsDim<decltype(Dim)>
-	using first_match = decltype(find_first_match<Dim, 0>());
+	static constexpr std::size_t first_match = find_first_match<Dim, 0>();
 
 public:
 	template<auto Dim, IsState State>
-	requires IsDim<decltype(Dim)> && requires { first_match<Dim>::value; }
+	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		return sub_structure_t<first_match<Dim>::value>::template has_length<Dim, State>();
+		if constexpr (first_match<Dim> < sizeof...(Structs)) {
+			return sub_structure_t<first_match<Dim>>::template has_length<Dim, State>();
+		} else {
+			return false;
+		}
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)> && requires { first_match<QDim>::value; }
+	requires (has_length<QDim, State>())
 	[[nodiscard("returns the length of the first struct that accepts the dimension")]]
 	constexpr auto length(State state) const noexcept {
-		// return base::template get<first_match<QDim>::value>().template length<QDim>(state);
-		return sub_structure<first_match<QDim>::value>().template length<QDim>(state);
+		return sub_structure<first_match<QDim>>().template length<QDim>(state);
 	}
 };
 
