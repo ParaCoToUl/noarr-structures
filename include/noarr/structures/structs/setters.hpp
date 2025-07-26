@@ -287,7 +287,8 @@ public:
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		// Cannot set length of a dimension twice
-		return !state_contains<State, length_in<Dim>> && sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+		return !state_contains<State, length_in<Dim>> &&
+		       sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
 	template<auto QDim, IsState State>

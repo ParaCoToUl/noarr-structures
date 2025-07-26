@@ -256,8 +256,7 @@ private:
 	static constexpr bool get_value() noexcept {
 		if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
 		              Structure::template has_length<DimMinor, indexless_state>()) {
-			if constexpr (state_contains<State, index_in<DimMinor>> &&
-			              !state_contains<State, index_in<DimMajor>>) {
+			if constexpr (state_contains<State, index_in<DimMinor>> && !state_contains<State, index_in<DimMajor>>) {
 				return false;
 			} else {
 				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
@@ -282,8 +281,7 @@ private:
 	static constexpr bool get_value() noexcept {
 		if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
 		              Structure::template has_length<DimMinor, indexless_state>()) {
-			if constexpr (state_contains<State, index_in<DimMinor>> &&
-			              !state_contains<State, index_in<DimMajor>>) {
+			if constexpr (state_contains<State, index_in<DimMinor>> && !state_contains<State, index_in<DimMajor>>) {
 				return false;
 			} else {
 				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
@@ -312,8 +310,7 @@ private:
 		if constexpr (state_contains<State, index_in<DimIsBorder>>) {
 			if constexpr (Structure::template has_length<DimMajor, indexless_state>() &&
 			              Structure::template has_length<DimMinor, indexless_state>()) {
-				if constexpr (state_contains<State, index_in<DimMinor>> &&
-				              !state_contains<State, index_in<DimMajor>>) {
+				if constexpr (state_contains<State, index_in<DimMinor>> && !state_contains<State, index_in<DimMajor>>) {
 					return false;
 				} else {
 					return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
