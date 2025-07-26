@@ -175,8 +175,9 @@ struct traverser_t : strict_contain<Struct, Order> {
 		return this->template get<1>();
 	}
 
+	template<IsProtoStruct NewOrder>
 	[[nodiscard("returns a new traverser")]]
-	constexpr auto order(IsProtoStruct auto new_order) const noexcept {
+	constexpr auto order(NewOrder new_order) const noexcept {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
 	}
 
@@ -320,9 +321,9 @@ struct to_traverser<traverser_t<Struct, Order>> : std::true_type {
 	}
 };
 
-template<IsTraverser T>
+template<IsTraverser T, IsProtoStruct Order>
 [[nodiscard("returns a new traverser")]]
-constexpr auto operator^(const T &t, IsProtoStruct auto order) noexcept {
+constexpr auto operator^(const T &t, Order order) noexcept {
 	return t.order(order);
 }
 

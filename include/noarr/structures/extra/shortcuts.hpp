@@ -178,38 +178,38 @@ requires (sizeof...(Dims) == sizeof...(Lengths)) && IsDimPack<decltype(Dims)...>
 
 // Working with state (especially in traverser lambdas)
 
-template<IsDim auto Dim>
-constexpr auto get_index(ToState auto state) noexcept {
-	return convert_to_state(state).template get<index_in<Dim>>();
+template<IsDim auto Dim, ToState HasState>
+constexpr auto get_index(HasState has_state) noexcept {
+	return convert_to_state(has_state).template get<index_in<Dim>>();
 }
 
-template<IsDim auto Dim>
-constexpr auto get_length_in(ToState auto state) noexcept {
-	return convert_to_state(state).template get<length_in<Dim>>();
+template<IsDim auto Dim, ToState HasState>
+constexpr auto get_length_in(HasState has_state) noexcept {
+	return convert_to_state(has_state).template get<length_in<Dim>>();
 }
 
-template<auto... Dims>
-requires IsDimPack<decltype(Dims)...>
-constexpr auto get_indices(ToState auto state) noexcept {
-	return std::make_tuple(convert_to_state(state).template get<index_in<Dims>>()...);
+template<auto... Dims, class HasState>
+requires IsDimPack<decltype(Dims)...> && ToState<HasState>
+constexpr auto get_indices(HasState has_state) noexcept {
+	return std::make_tuple(convert_to_state(has_state).template get<index_in<Dims>>()...);
 }
 
-template<auto... Dims>
-requires IsDimPack<decltype(Dims)...>
-constexpr auto get_lengths_in(ToState auto state) noexcept {
-	return std::make_tuple(convert_to_state(state).template get<length_in<Dims>>()...);
+template<auto... Dims, class HasState>
+requires IsDimPack<decltype(Dims)...> && ToState<HasState>
+constexpr auto get_lengths_in(HasState has_state) noexcept {
+	return std::make_tuple(convert_to_state(has_state).template get<length_in<Dims>>()...);
 }
 
-template<auto... Dims>
-requires IsDimPack<decltype(Dims)...>
-constexpr auto filter_indices(ToState auto state) noexcept {
-	return convert_to_state(state).template filter<index_in<Dims>...>();
+template<auto... Dims, class HasState>
+requires IsDimPack<decltype(Dims)...> && ToState<HasState>
+constexpr auto filter_indices(HasState has_state) noexcept {
+	return convert_to_state(has_state).template filter<index_in<Dims>...>();
 }
 
-template<auto... Dims>
-requires IsDimPack<decltype(Dims)...>
-constexpr auto filter_lengths(ToState auto state) noexcept {
-	return convert_to_state(state).template filter<length_in<Dims>...>();
+template<auto... Dims, class HasState>
+requires IsDimPack<decltype(Dims)...> && ToState<HasState>
+constexpr auto filter_lengths(HasState has_state) noexcept {
+	return convert_to_state(has_state).template filter<length_in<Dims>...>();
 }
 
 template<auto... Dims, class... ValueType>

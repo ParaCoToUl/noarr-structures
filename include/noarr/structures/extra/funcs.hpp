@@ -21,7 +21,9 @@ constexpr auto has_length() noexcept {
 template<auto Dim, class State>
 requires IsDim<decltype(Dim)> && IsState<State>
 constexpr auto get_length(State state) noexcept {
-	return [state](auto structure) constexpr noexcept { return structure.template length<Dim>(state); };
+	return [state]<class Struct>(Struct structure) constexpr noexcept
+	requires (Struct::template has_length<Dim, State>())
+	{ return structure.template length<Dim>(state); };
 }
 
 /**
@@ -97,7 +99,9 @@ constexpr auto has_size() noexcept {
 
 template<IsState State>
 constexpr auto get_size(State state) noexcept {
-	return [state](auto structure) constexpr noexcept { return structure.size(state); };
+	return [state]<class Struct>(Struct structure) constexpr noexcept
+	requires (Struct::template has_size<State>())
+	{ return structure.size(state); };
 }
 
 /**

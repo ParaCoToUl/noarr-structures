@@ -45,8 +45,9 @@ struct planner_ending_elem_t : flexible_contain<F> {
 			static_assert(!always_false<signature>);
 		};
 
-		return planner_ending_elem_t<typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature, F>(
-			base::get());
+		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
+
+		return planner_ending_elem_t<typename new_sigholder_t::signature, F>(base::get());
 	}
 
 	template<class Planner>
@@ -72,10 +73,11 @@ struct helpers::is_activated_impl<planner_ending_elem_t<Sig, F>>
 
 template<class Sig, class F>
 struct planner_ending_t : flexible_contain<F> {
+	using base = flexible_contain<F>;
 	using signature = Sig;
 	static constexpr bool activated = IsGroundSig<signature>;
 
-	using flexible_contain<F>::flexible_contain;
+	using base::base;
 
 	template<class NewOrder>
 	[[nodiscard]]
@@ -85,13 +87,14 @@ struct planner_ending_t : flexible_contain<F> {
 			static_assert(!always_false<signature>);
 		};
 
-		return planner_ending_t<typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature, F>(
-			flexible_contain<F>::get());
+		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
+
+		return planner_ending_t<typename new_sigholder_t::signature, F>(base::get());
 	}
 
 	template<class Planner>
 	constexpr void operator()(const Planner &planner) const {
-		flexible_contain<F>::get()(planner.state());
+		base::get()(planner.state());
 	}
 };
 
@@ -110,14 +113,14 @@ constexpr auto make_planner_endings(flexible_contain<Endings...> endings) noexce
 
 template<class... Endings>
 struct planner_endings : flexible_contain<Endings...> {
+	using base = flexible_contain<Endings...>;
 	static constexpr std::size_t activated_count = (0 + ... + (helpers::is_activated_v<Endings> ? 1 : 0));
 	static_assert(activated_count <= 1, "ambiguous activation of planner endings");
 	static constexpr bool activated = activated_count == 1;
 
-	using flexible_contain<Endings...>::flexible_contain;
+	using base::base;
 
-	explicit constexpr planner_endings(flexible_contain<Endings...> contain) noexcept
-		: flexible_contain<Endings...>(contain) {}
+	explicit constexpr planner_endings(base contain) noexcept : base(contain) {}
 
 	template<class NewOrder>
 	[[nodiscard]]
@@ -218,10 +221,11 @@ struct planner_t;
 
 template<class Sig, class F>
 struct planner_sections_t : flexible_contain<F> {
+	using base = flexible_contain<F>;
 	using signature = Sig;
 	static constexpr bool activated = IsGroundSig<signature>;
 
-	using flexible_contain<F>::flexible_contain;
+	using base::base;
 
 	template<class NewOrder>
 	[[nodiscard]]
@@ -231,13 +235,14 @@ struct planner_sections_t : flexible_contain<F> {
 			static_assert(!always_false<signature>);
 		};
 
-		return planner_sections_t<typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature, F>(
-			flexible_contain<F>::get());
+		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
+
+		return planner_sections_t<typename new_sigholder_t::signature, F>(base::get());
 	}
 
 	template<class Planner>
 	constexpr void operator()(const Planner &planner) const {
-		flexible_contain<F>::get()(planner);
+		base::get()(planner);
 	}
 };
 
@@ -422,8 +427,8 @@ constexpr planner_t<union_t<Ts...>, neutral_proto, planner_endings<>> planner(un
 	return planner_t<union_t<Ts...>, neutral_proto, planner_endings<>>(u, neutral_proto(), planner_endings<>());
 }
 
-template<IsPlanner P>
-constexpr auto operator^(const P &p, IsProtoStruct auto order) noexcept {
+template<IsPlanner P, IsProtoStruct Order>
+constexpr auto operator^(const P &p, Order order) noexcept {
 	return p.order(order);
 }
 

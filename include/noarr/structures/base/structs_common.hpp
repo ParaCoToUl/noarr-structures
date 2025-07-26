@@ -34,12 +34,14 @@ struct type_param {
 
 template<auto V>
 struct value_param {
+	using value_type = decltype(V);
 	static constexpr auto value = V;
 };
 
 template<auto Dim>
 requires IsDim<decltype(Dim)>
 struct dim_param {
+	using value_type = decltype(Dim);
 	static constexpr auto value = Dim;
 };
 
@@ -60,10 +62,17 @@ constexpr auto offset_of(StructOuter structure, State state) noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
-		return constexpr_arithmetic::make_const<0>();
+		return constexpr_arithmetic::make_const<0>(); // offset of itself is always 0
 	} else {
 		return structure.template strict_offset_of<struct_inner_t>(state);
 	}
+}
+
+template<class StructInner, class StructOuter, IsState State>
+constexpr void offset_of(StructOuter /*structure*/, State /*state*/) noexcept {
+	static_assert(
+		has_offset_of<StructInner, StructOuter, State>(),
+		"The inner structure is not accessed in the outer structure with the given state, cannot get its offset");
 }
 
 template<class StructInner, class StructOuter, IsState State>
@@ -87,6 +96,13 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 	} else {
 		return structure.template strict_state_at<struct_inner_t>(state);
 	}
+}
+
+template<class StructInner, class StructOuter, IsState State>
+constexpr void state_at(StructOuter /*structure*/, State /*state*/) noexcept {
+	static_assert(
+		has_state_at<StructInner, StructOuter, State>(),
+		"The inner structure is not accessed in the outer structure with the given state, cannot get its state");
 }
 
 template<class... Args>
@@ -180,20 +196,20 @@ template<class... Structs, class ProtoStruct>
 requires (IsProtoStruct<ProtoStruct> && ... && IsStruct<Structs>)
 [[nodiscard("Constructs a new structure")]]
 constexpr decltype(auto) operator^(const pack<Structs...> &s, const ProtoStruct &p) noexcept {
-	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
+	return helpers::pass_pack(s, p, std::index_sequence_for<Structs...>());
 }
 
 template<class Arg, class... Args>
 [[nodiscard("Constructs a new pack of structures")]]
 constexpr decltype(auto) operator^(Arg &&s, const pack<Args...> &p) noexcept {
-	return helpers::pass_pack(std::forward<Arg>(s), p, std::make_index_sequence<sizeof...(Args)>());
+	return helpers::pass_pack(std::forward<Arg>(s), p, std::index_sequence_for<Args...>());
 }
 
 template<class... Structs, class Arg>
 requires (... && IsStruct<Structs>)
 [[nodiscard("Constructs a new pack of structures")]]
 constexpr decltype(auto) operator^(const pack<Structs...> &s, const to_each<Arg> &p) noexcept {
-	return helpers::pass_pack(s, p, std::make_index_sequence<sizeof...(Structs)>());
+	return helpers::pass_pack(s, p, std::index_sequence_for<Structs...>());
 }
 
 struct neutral_proto {

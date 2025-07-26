@@ -158,9 +158,10 @@ public:
 	 *
 	 * @param ts: the dimension values
 	 */
+	template<ToState HasState>
 	[[nodiscard]]
-	constexpr decltype(auto) operator[](ToState auto state) const noexcept {
-		return structure() | noarr::get_at(data(), convert_to_state(state));
+	constexpr decltype(auto) operator[](HasState has_state) const noexcept {
+		return structure() | noarr::get_at(data(), convert_to_state(has_state));
 	}
 
 	/**
