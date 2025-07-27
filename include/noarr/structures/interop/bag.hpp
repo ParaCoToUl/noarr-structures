@@ -112,13 +112,34 @@ class bag_t : flexible_contain<Structure, typename BagPolicy::type> {
 	using base = flexible_contain<Structure, typename BagPolicy::type>;
 
 public:
+	using structure_t = Structure;
+	using data_t = typename BagPolicy::type;
+
 	explicit constexpr bag_t(Structure s) : base(s, BagPolicy::construct(s | noarr::get_size())) {}
 
-	explicit constexpr bag_t(Structure s, typename BagPolicy::type &&data) : base(s, std::move(data)) {}
+	explicit constexpr bag_t(Structure s, data_t &&data) : base(s, std::move(data)) {}
 
-	explicit constexpr bag_t(Structure s, const typename BagPolicy::type &data) : base(s, data) {}
+	explicit constexpr bag_t(Structure s, const data_t &data) : base(s, data) {}
 
 	explicit constexpr bag_t(Structure s, BagPolicy policy) : base(s, policy.construct(s | noarr::get_size())) {}
+
+	constexpr bag_t(const bag_t &other) noexcept
+	requires (std::is_trivially_copy_constructible_v<data_t>)
+	= default;
+	constexpr bag_t(const bag_t &other) // move or use .get_ref() instead
+	requires (!std::is_trivially_copy_constructible_v<data_t>)
+	= delete;
+	constexpr bag_t(bag_t &&other) noexcept = default;
+
+	constexpr bag_t &operator=(const bag_t &other) noexcept
+	requires (std::is_trivially_copy_assignable_v<data_t>)
+	= default;
+	constexpr bag_t &operator=(const bag_t &other) noexcept // move or use .get_ref() instead
+	requires (!std::is_trivially_copy_assignable_v<data_t>)
+	= delete;
+	constexpr bag_t &operator=(bag_t &&other) noexcept = default;
+
+	constexpr ~bag_t() = default;
 
 	/**
 	 * @brief return the wrapped structure which describes the `data` blob
@@ -128,8 +149,6 @@ public:
 		return base::template get<0>();
 	}
 
-	using structure_t = Structure;
-
 	/**
 	 * @brief returns the underlying data blob
 	 */
@@ -137,8 +156,6 @@ public:
 	constexpr auto data() const noexcept {
 		return BagPolicy::get(base::template get<1>());
 	}
-
-	using data_t = typename BagPolicy::type;
 
 	/**
 	 * @brief accesses a value in `data` by fixing dimensions in the `structure`
@@ -229,7 +246,7 @@ public:
 	}
 
 	template<IsProtoStruct ProtoStruct>
-	requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<typename BagPolicy::type>)
+	requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<data_t>)
 	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator^(const bag_t &s, ProtoStruct p) {
 		return bag_t<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p, s.template get<1>());

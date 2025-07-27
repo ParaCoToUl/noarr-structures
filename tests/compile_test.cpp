@@ -26,7 +26,7 @@ TEST_CASE("Examples for Noarr Structures", "[compile test]") {
 	                              noarr::array<'r', ROWS>();
 
 
-	const auto matrix = noarr::bag(row_major_matrix);
+	auto matrix = noarr::bag(row_major_matrix);
 	const std::size_t row = 2, col = 3;
 
 	int& value = matrix[noarr::idx<'r', 'c'>(row, col)];
@@ -45,6 +45,14 @@ TEST_CASE("Examples for Noarr Structures", "[compile test]") {
 
 		REQUIRE(value == 42);
 	}
+
+	const auto snd_matrix = matrix.get_ref();
+
+	[matrix = std::move(matrix), snd_matrix](){
+		(void)matrix;
+		(void)snd_matrix;
+	}();
+
 }
 
 #include <noarr/traversers.hpp>
