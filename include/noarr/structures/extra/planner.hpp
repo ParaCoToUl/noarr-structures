@@ -42,7 +42,7 @@ struct planner_ending_elem_t : flexible_contain<F> {
 	constexpr auto order(NewOrder /*new_order*/) const noexcept {
 		struct sigholder_t {
 			using signature = Sig;
-			static_assert(!always_false<signature>);
+			static_assert(!always_false<signature>); // prevents false warnings
 		};
 
 		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
@@ -84,7 +84,7 @@ struct planner_ending_t : flexible_contain<F> {
 	constexpr auto order(NewOrder /*new_order*/) const noexcept {
 		struct sigholder_t {
 			using signature = Sig;
-			static_assert(!always_false<signature>);
+			static_assert(!always_false<signature>); // prevents false warnings
 		};
 
 		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
@@ -232,7 +232,7 @@ struct planner_sections_t : flexible_contain<F> {
 	constexpr auto order(NewOrder /*new_order*/) const noexcept {
 		struct sigholder_t {
 			using signature = Sig;
-			static_assert(!always_false<signature>);
+			static_assert(!always_false<signature>); // prevents false warnings
 		};
 
 		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
@@ -324,7 +324,7 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 
 		struct sigholder_t {
 			using signature = union_sig;
-			static_assert(!always_false<signature>); // suppresses warnings
+			static_assert(!always_false<signature>); // prevents false warnings // suppresses warnings
 		};
 
 		using signature = typename decltype(sigholder_t() ^ reorder<Dims...>())::signature;
