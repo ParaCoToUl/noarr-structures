@@ -1,4 +1,6 @@
-#!/bin/sh -e
+#!/bin/bash
+
+set -eo pipefail
 
 my_dir="docs_check"
 
@@ -32,21 +34,44 @@ else
 	test -z "$CI" # fail iff in CI
 fi
 
+if ! which g++ >/dev/null 2>&1 && ! which clang++ >/dev/null 2>&1; then
+	echo "No suitable compiler found"
+	exit 1
+fi
+
 echo
 echo "Will compile: $snipdir/"
 
-echo 'GCC, C++20...'
-g++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
-g++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
+if which g++ >/dev/null 2>&1; then
+	echo 'GCC, C++20...'
+	g++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
+	g++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
 
-echo 'Exec, C++20...'
-"$aout"
+	echo 'Exec, C++20...'
+	"$aout"
 
-echo 'GCC, C++23...'
-g++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
-g++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
+	echo 'GCC, C++23...'
+	g++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
+	g++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
 
-echo 'Exec, C++23...'
-"$aout"
+	echo 'Exec, C++23...'
+	"$aout"
+fi
+
+if which clang++ >/dev/null 2>&1; then
+    echo 'CLANG, C++20...'
+    clang++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -Wno-unused-parameter -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
+    clang++ --std=c++20 -Og -Wall -Wno-unused -Wextra -pedantic -Wno-unused-parameter -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
+
+	echo 'Exec, C++20...'
+	"$aout"
+
+	echo 'CLANG, C++23...'
+	clang++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -Wno-unused-parameter -I "$include" -I "$include_dummy" "$snipdir"/*.hpp
+	clang++ --std=c++23 -Og -Wall -Wno-unused -Wextra -pedantic -Wno-unused-parameter -I "$include" -I "$include_dummy" "$snipdir"/*.cpp -o "$aout"
+
+	echo 'Exec, C++23...'
+	"$aout"
+fi
 
 echo 'OK'

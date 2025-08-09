@@ -132,17 +132,16 @@ private:
 
 // contains nothing
 template<>
-struct contain_impl<> {};
+struct contain_impl<> {
+	template<std::size_t I = 0>
+	requires false
+	constexpr void get() const noexcept {}
+};
 
 template<class... TS>
 struct contain : private helpers::contain_impl<TS...> {
 	using helpers::contain_impl<TS...>::contain_impl;
 	using helpers::contain_impl<TS...>::get;
-};
-
-template<>
-struct contain<> : private helpers::contain_impl<> {
-	using helpers::contain_impl<>::contain_impl;
 };
 
 template<class... TS>
