@@ -174,85 +174,85 @@ struct bar_t : public noarr::strict_contain<T, U> {
 	using signature = ...;
 
 private:
-        constexpr T sub_structure() const noexcept {
-                // sub-structure is stored in an inherited field, retrieve it from there
-                return noarr::strict_contain<T, U>::template get<0>();
-        }
+	constexpr T sub_structure() const noexcept {
+		// sub-structure is stored in an inherited field, retrieve it from there
+		return noarr::strict_contain<T, U>::template get<0>();
+	}
 
-        constexpr U get_u() const noexcept {
-                // the U value stored in an inherited field, retrieve it from there
-                return noarr::strict_contain<T, U>::template get<1>();
-        }
+	constexpr U get_u() const noexcept {
+		// the U value stored in an inherited field, retrieve it from there
+		return noarr::strict_contain<T, U>::template get<1>();
+	}
 
-        constexpr auto sub_state(noarr::IsState auto state) const noexcept {
-                return ...;
-        }
+	constexpr auto sub_state(noarr::IsState auto state) const noexcept {
+		return ...;
+	}
 public:
-        template<noarr::IsState State>
-        static constexpr bool has_size() noexcept {
-                return T::template has_size<decltype(sub_state(std::declval<State>()))>();
-        }
+	template<noarr::IsState State>
+	static constexpr bool has_size() noexcept {
+		return T::template has_size<decltype(sub_state(std::declval<State>()))>();
+	}
 
-        template<noarr::IsState State>
-        constexpr auto size(State state) const noexcept
-        requires(has_size<State>())
-        {
-                auto sub_size = sub_structure().size(sub_state(state));
-                return ...; // could return sub_size if it is the same
-        }
+	template<noarr::IsState State>
+	constexpr auto size(State state) const noexcept
+	requires(has_size<State>())
+	{
+		auto sub_size = sub_structure().size(sub_state(state));
+		return ...; // could return sub_size if it is the same
+	}
 
-        template<noarr::IsState State>
-        constexpr auto align(State state) const noexcept
-        requires(has_size<State>())
-        {
-                return sub_structure().align(sub_state(state));
-        }
+	template<noarr::IsState State>
+	constexpr auto align(State state) const noexcept
+	requires(has_size<State>())
+	{
+		return sub_structure().align(sub_state(state));
+	}
 
-        template<class Sub, noarr::IsState State>
-        static constexpr bool has_strict_offset_of() noexcept {
-                return noarr::has_offset_of<Sub, T, decltype(sub_state(std::declval<State>()))>();
-        }
+	template<class Sub, noarr::IsState State>
+	static constexpr bool has_strict_offset_of() noexcept {
+		return noarr::has_offset_of<Sub, T, decltype(sub_state(std::declval<State>()))>();
+	}
 
-        template<class Sub, noarr::IsState State>
-        constexpr auto strict_offset_of(State state) const noexcept
-        requires(has_strict_offset_of<Sub, State>())
-        {
-                auto sub_offset = noarr::offset_of<Sub>(sub_structure(), sub_state(state));
-                return ...; // could return sub_offset if it is the same
-        }
+	template<class Sub, noarr::IsState State>
+	constexpr auto strict_offset_of(State state) const noexcept
+	requires(has_strict_offset_of<Sub, State>())
+	{
+		auto sub_offset = noarr::offset_of<Sub>(sub_structure(), sub_state(state));
+		return ...; // could return sub_offset if it is the same
+	}
 
-        template<auto QDim, noarr::IsState State>
-        static constexpr bool has_length() noexcept {
-                if constexpr (QDim == Dim)
-                        return true;
-                else
-                        return T::template has_length<QDim, decltype(sub_state(std::declval<State>()))>();
-        }
+	template<auto QDim, noarr::IsState State>
+	static constexpr bool has_length() noexcept {
+		if constexpr (QDim == Dim)
+			return true;
+		else
+			return T::template has_length<QDim, decltype(sub_state(std::declval<State>()))>();
+	}
 
-        template<auto QDim, noarr::IsState State>
-        constexpr auto length(State state) const noexcept
-        requires(has_length<QDim, State>())
-        {
-                if constexpr(QDim == Dim) {
-                        // here we return our own length
-                        return ...;
-                } else {
-                        // caller asked somebody else, forward to sub-structure
-                        return sub_structure().template length<QDim>(sub_state(state));
-                }
-        }
+	template<auto QDim, noarr::IsState State>
+	constexpr auto length(State state) const noexcept
+	requires(has_length<QDim, State>())
+	{
+		if constexpr(QDim == Dim) {
+			// here we return our own length
+			return ...;
+		} else {
+			// caller asked somebody else, forward to sub-structure
+			return sub_structure().template length<QDim>(sub_state(state));
+		}
+	}
 
-        template<class Sub, noarr::IsState State>
-        static constexpr bool has_strict_state_at() noexcept {
-                return noarr::has_state_at<Sub, T, decltype(sub_state(std::declval<State>()))>();
-        }
+	template<class Sub, noarr::IsState State>
+	static constexpr bool has_strict_state_at() noexcept {
+		return noarr::has_state_at<Sub, T, decltype(sub_state(std::declval<State>()))>();
+	}
 
-        template<class Sub, noarr::IsState State>
-        constexpr auto strict_state_at(State state) const noexcept
-        requires(has_strict_state_at<Sub, State>())
-        {
-                return noarr::state_at<Sub>(sub_structure(), sub_state(state));
-        }
+	template<class Sub, noarr::IsState State>
+	constexpr auto strict_state_at(State state) const noexcept
+	requires(has_strict_state_at<Sub, State>())
+	{
+		return noarr::state_at<Sub>(sub_structure(), sub_state(state));
+	}
 };
 ```
 
@@ -286,9 +286,9 @@ struct bar {
 	static constexpr bool proto_preserves_layout = true or false;
 
 	template<class Struct>
-        constexpr auto instantiate_and_construct(Struct s) const noexcept {
-                return bar_t<Dim, Struct, U, V>(s, u);
-        }
+	constexpr auto instantiate_and_construct(Struct s) const noexcept {
+		return bar_t<Dim, Struct, U, V>(s, u);
+	}
 };
 auto pixel = noarr::scalar<int>();
 auto proto = bar<'x', int, 1>{0};
