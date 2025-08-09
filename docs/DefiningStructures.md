@@ -190,7 +190,7 @@ private:
 public:
 	template<noarr::IsState State>
 	static constexpr bool has_size() noexcept {
-		return T::template has_size<decltype(sub_state(std::declval<State>()))>();
+		return T::template has_size<decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
 	}
 
 	template<noarr::IsState State>
@@ -210,7 +210,7 @@ public:
 
 	template<class Sub, noarr::IsState State>
 	static constexpr bool has_strict_offset_of() noexcept {
-		return noarr::has_offset_of<Sub, T, decltype(sub_state(std::declval<State>()))>();
+		return noarr::has_offset_of<Sub, T, decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
 	}
 
 	template<class Sub, noarr::IsState State>
@@ -226,7 +226,7 @@ public:
 		if constexpr (QDim == Dim)
 			return true;
 		else
-			return T::template has_length<QDim, decltype(sub_state(std::declval<State>()))>();
+			return T::template has_length<QDim, decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
 	}
 
 	template<auto QDim, noarr::IsState State>
@@ -244,7 +244,7 @@ public:
 
 	template<class Sub, noarr::IsState State>
 	static constexpr bool has_strict_state_at() noexcept {
-		return noarr::has_state_at<Sub, T, decltype(sub_state(std::declval<State>()))>();
+		return noarr::has_state_at<Sub, T, decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
 	}
 
 	template<class Sub, noarr::IsState State>
