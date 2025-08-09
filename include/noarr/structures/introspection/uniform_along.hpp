@@ -2,14 +2,16 @@
 #define NOARR_STRUCTURES_UNIFORM_ALONG_HPP
 
 #include <cstddef>
+
 #include <type_traits>
 
 #include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
 
 #include "../structs/bcast.hpp"
 #include "../structs/blocks.hpp"
 #include "../structs/layouts.hpp"
-#include "../structs/scalar.hpp"
 #include "../structs/setters.hpp"
 #include "../structs/slice.hpp"
 #include "../structs/views.hpp"

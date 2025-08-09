@@ -1,5 +1,7 @@
 #include <noarr_test/macros.hpp>
 
+#include <cstddef>
+
 #include <noarr/structures.hpp>
 #include <noarr/structures/extra/shortcuts.hpp>
 #include <noarr/structures/extra/traverser.hpp>

@@ -2,6 +2,8 @@
 #define NOARR_STRUCTURES_STRUCTS_COMMON_HPP
 
 #include <cstddef>
+
+#include <concepts>
 #include <type_traits>
 #include <utility>
 

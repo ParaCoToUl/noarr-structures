@@ -1,8 +1,9 @@
 #ifndef NOARR_STRUCTURES_STATE_HPP
 #define NOARR_STRUCTURES_STATE_HPP
 
-#include <concepts>
 #include <cstddef>
+
+#include <concepts>
 #include <type_traits>
 
 #include "contain.hpp"

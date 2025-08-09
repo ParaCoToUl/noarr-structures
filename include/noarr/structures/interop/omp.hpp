@@ -1,8 +1,8 @@
 #ifndef NOARR_STRUCTURES_OMP_HPP
 #define NOARR_STRUCTURES_OMP_HPP
 
-#include <utility>
-
+#include "../extra/planner.hpp"
+#include "../extra/traverser.hpp"
 #include "../interop/planner_iter.hpp"
 #include "../interop/traverser_iter.hpp"
 

@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <execution>
 
+#include "../extra/planner.hpp"
+#include "../extra/traverser.hpp"
 #include "../interop/planner_iter.hpp"
 #include "../interop/traverser_iter.hpp"
 

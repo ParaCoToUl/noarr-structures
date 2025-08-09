@@ -2,7 +2,9 @@
 #define NOARR_STRUCTURES_MANGLE_HPP
 
 #include <cstddef>
+
 #include <limits>
+#include <type_traits>
 #include <utility>
 
 #include "../base/contain.hpp"

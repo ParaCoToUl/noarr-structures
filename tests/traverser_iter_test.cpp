@@ -1,8 +1,11 @@
 #include <noarr_test/macros.hpp>
 
+#include <cstddef>
+
 #include <concepts>
 #include <iterator>
 #include <ranges>
+#include <type_traits>
 
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/extra/traverser.hpp>

@@ -7,6 +7,10 @@
 
 #include <noarr_test/macros.hpp>
 
+#include <cstddef>
+
+#include <utility>
+
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>
 

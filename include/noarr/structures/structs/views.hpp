@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_VIEWS_HPP
 
 #include <cstddef>
+
 #include <type_traits>
 #include <utility>
 

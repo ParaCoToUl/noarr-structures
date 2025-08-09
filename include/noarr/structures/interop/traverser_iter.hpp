@@ -2,12 +2,14 @@
 #define NOARR_STRUCTURES_TRAVERSER_ITER_HPP
 
 #include <cstddef>
+
 #include <iterator>
 #include <utility>
 
 #include "../base/contain.hpp"
 #include "../base/signature.hpp"
 #include "../base/state.hpp"
+#include "../base/utility.hpp"
 #include "../extra/traverser.hpp"
 #include "../structs/setters.hpp"
 #include "../structs/slice.hpp"

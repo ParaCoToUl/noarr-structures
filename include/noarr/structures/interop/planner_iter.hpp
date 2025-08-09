@@ -2,16 +2,18 @@
 #define NOARR_STRUCTURES_INTEROP_PLANNER_ITER_HPP
 
 #include <cstddef>
+
 #include <iterator>
 #include <utility>
 
 #include "../base/contain.hpp"
 #include "../base/state.hpp"
+#include "../base/utility.hpp"
 #include "../extra/planner.hpp"
+#include "../extra/traverser.hpp"
+#include "../interop/traverser_iter.hpp"
 #include "../structs/setters.hpp"
 #include "../structs/slice.hpp"
-#include "noarr/structures/base/utility.hpp"
-#include "noarr/structures/interop/traverser_iter.hpp"
 
 namespace noarr {
 

@@ -2,6 +2,7 @@
 #define NOARR_STRUCTURES_BLOCKS_HPP
 
 #include <cstddef>
+
 #include <type_traits>
 
 #include "../base/contain.hpp"

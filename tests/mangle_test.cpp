@@ -1,9 +1,13 @@
 #include <noarr_test/macros.hpp>
 
-#include <noarr/structures_extended.hpp>
-#include <noarr/structures/extra/mangle.hpp>
+#include <cstddef>
 
 #include <string>
+#include <type_traits>
+#include <utility>
+
+#include <noarr/structures_extended.hpp>
+#include <noarr/structures/extra/mangle.hpp>
 
 template<char... Chars>
 std::string cp2a(std::integer_sequence<char, Chars...>) { return {Chars...}; }

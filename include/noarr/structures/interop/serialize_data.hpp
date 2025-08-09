@@ -1,6 +1,7 @@
 #ifndef NOARR_STRUCTURES_SERIALIZE_DATA_HPP
 #define NOARR_STRUCTURES_SERIALIZE_DATA_HPP
 
+#include "../base/state.hpp"
 #include "../extra/traverser.hpp"
 
 namespace noarr {

@@ -1,9 +1,11 @@
-#include "noarr/structures/extra/shortcuts.hpp"
 #include <noarr_test/macros.hpp>
+
+#include <cstddef>
 
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/extra/traverser.hpp>
 #include <noarr/structures/interop/traverser_iter.hpp>
+#include <noarr/structures/extra/shortcuts.hpp>
 
 using namespace noarr;
 

@@ -1,6 +1,11 @@
 #include <noarr_test/macros.hpp>
 #include <noarr_test/defs.hpp>
 
+#include <cstddef>
+
+#include <iterator>
+#include <type_traits>
+
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/interop/bag.hpp>
 #include <noarr/structures/extra/planner.hpp>

@@ -1,7 +1,11 @@
 #include <noarr_test/macros.hpp>
 
+#include <cstddef>
+
 #include <noarr/structures_extended.hpp>
+
 #include "noarr_test_cuda_dummy.hpp"
+
 #include <noarr/structures/interop/cuda_traverser.cuh>
 
 TEST_CASE("Cuda traverser simple 6D", "[cuda]") {

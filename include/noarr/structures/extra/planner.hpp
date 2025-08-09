@@ -2,10 +2,13 @@
 #define NOARR_STRUCTURES_PLANNER_HPP
 
 #include <cstddef>
+
+#include <concepts>
 #include <type_traits>
 #include <utility>
 
 #include "../base/contain.hpp"
+#include "../base/signature.hpp"
 #include "../base/state.hpp"
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"

@@ -1,8 +1,9 @@
 #ifndef NOARR_STRUCTURES_ZCURVE_HPP
 #define NOARR_STRUCTURES_ZCURVE_HPP
 
-#include <bit>
 #include <cstddef>
+
+#include <bit>
 #include <tuple>
 #include <type_traits>
 #include <utility>

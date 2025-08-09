@@ -1,6 +1,8 @@
 #include <noarr_test/macros.hpp>
 #include <noarr_test/defs.hpp>
 
+#include <cstddef>
+
 #include <noarr/structures_extended.hpp>
 
 using noarr::lit;

@@ -3,6 +3,7 @@
 
 
 #define __device__
+#define __host__
 
 typedef unsigned uint;
 

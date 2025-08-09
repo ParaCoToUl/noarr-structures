@@ -1,5 +1,7 @@
 #include <noarr_test/macros.hpp>
 
+#include <cstddef>
+
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/introspection/uniform_along.hpp>
 

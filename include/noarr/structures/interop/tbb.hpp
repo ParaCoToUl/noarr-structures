@@ -2,11 +2,15 @@
 #define NOARR_STRUCTURES_TBB_HPP
 
 #include <cstdlib>
+
 #include <type_traits>
 
 #include <tbb/tbb.h>
 
 #include "../base/state.hpp"
+#include "../base/utility.hpp"
+#include "../extra/planner.hpp"
+#include "../extra/traverser.hpp"
 #include "../interop/bag.hpp"
 #include "../interop/planner_iter.hpp"
 #include "../interop/traverser_iter.hpp"

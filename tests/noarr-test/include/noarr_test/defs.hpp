@@ -23,13 +23,13 @@ static constexpr bool is_simple = true
 	;
 
 template<class T>
-static constexpr bool type_is_simple(const T&) {
+static constexpr bool type_is_simple(const T &/*t*/) {
 	return is_simple<T>;
 }
 
 
 template<typename T1, typename T2>
-constexpr static bool equal_data(const T1 &, const T2 &) { return false; }
+constexpr static bool equal_data(const T1 &/*t1*/, const T2 &/*t2*/) { return false; }
 template<typename T>
 constexpr static bool equal_data(const T &t1, const T &t2) {
 	if constexpr (std::is_empty_v<T>) {

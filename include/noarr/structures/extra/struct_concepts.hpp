@@ -23,8 +23,8 @@ public:
 } // namespace helpers
 
 template<class T, auto... Dims>
-concept HasDims = IsDimPack<decltype(Dims)...> && requires(T) { typename to_struct<T>::type; } &&
-                  helpers::has_dims<T, Dims...>::value;
+concept HasDims =
+	IsDimPack<decltype(Dims)...> && requires { typename to_struct<T>::type; } && helpers::has_dims<T, Dims...>::value;
 
 } // namespace noarr
 

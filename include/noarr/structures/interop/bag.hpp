@@ -4,10 +4,13 @@
 #include <cstddef>
 #include <memory>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "../base/contain.hpp"
 #include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
 #include "../extra/funcs.hpp"
 #include "../extra/to_struct.hpp"
 

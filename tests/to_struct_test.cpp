@@ -1,7 +1,7 @@
 #include <noarr_test/macros.hpp>
 #include <noarr_test/defs.hpp>
 
-#include <cstring>
+#include <type_traits>
 
 #include <noarr/structures.hpp>
 #include <noarr/structures/extra/shortcuts.hpp>

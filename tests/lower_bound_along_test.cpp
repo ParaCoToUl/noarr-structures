@@ -1,5 +1,9 @@
 #include <noarr_test/macros.hpp>
 
+#include <cstddef>
+
+#include <type_traits>
+
 #include <noarr/structures_extended.hpp>
 #include <noarr/structures/introspection/lower_bound_along.hpp>
 
