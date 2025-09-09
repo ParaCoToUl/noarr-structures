@@ -1,4 +1,4 @@
-name: Docs check
+name: Docs check - Ubuntu
 
 on:
   push:
@@ -6,17 +6,17 @@ on:
     - 'include/**'
     - 'docs/**'
     - 'docs_check/**'
-    - '.github/workflows/noarr_docs_check.yml'
+    - '.github/workflows/noarr_docs_check_ubuntu.yml'
 
 jobs:
   build:
-    runs-on: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Install gcc
-      run: sudo apt-get update && sudo apt-get install gcc-10 g++-10
+      run: sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install g++ clang
 
     - name: Test
       run: docs_check/check

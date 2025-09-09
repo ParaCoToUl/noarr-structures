@@ -1,0 +1,20 @@
+name: Docs check - Windows
+
+on:
+  push:
+    paths:
+    - 'include/**'
+    - 'docs/**'
+    - 'docs_check/**'
+    - '.github/workflows/noarr_docs_check_windows.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Test
+      working-directory: ${{github.workspace}}\docs_check
+      run: python3 .\check.py

@@ -3,6 +3,8 @@
 Execute `check` (shell script without suffix) to check the documentation for broken {links/snippets/style}.
 Arguments and cwd are ignored, execute in any directory.
 
+On Windows, use `python docs_check/check.py` from a Developer Command Prompt (so `cl.exe` is available) or with other compilers (MinGW `g++`, LLVM `clang++`) on PATH. The Python runner mirrors the shell script and supports MSVC, GCC and Clang.
+
 
 ## Link and style checks
 
