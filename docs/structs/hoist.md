@@ -42,7 +42,7 @@ noarr::traverser(matrix)
 	.for_each([](auto inner_trav) { /* ... */ }); // the default with the current definition
 
 noarr::traverser(matrix)
-	.for_dims<'i', 'j'>([](auto inner_trav) { /* ... */ });
+	.template for_dims<'i', 'j'>([](auto inner_trav) { /* ... */ });
 
 noarr::traverser(matrix)
 	.order(noarr::hoist<'i'>())
@@ -54,7 +54,7 @@ noarr::traverser(matrix ^ noarr::hoist<'i'>())
 // various ways to do a j-major traversal (column-by-column if i is row index)
 
 noarr::traverser(matrix)
-	.for_dims<'j', 'i'>([](auto inner_trav) { /* ... */ });
+	.template for_dims<'j', 'i'>([](auto inner_trav) { /* ... */ });
 
 noarr::traverser(matrix)
 	.order(noarr::hoist<'j'>())

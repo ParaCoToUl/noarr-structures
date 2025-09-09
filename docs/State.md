@@ -22,9 +22,9 @@ The primary use of state is as a parameter to [functions](BasicUsage.md#function
 | --------------------------------------------------------------------- | ------------------------------------------ |
 | `structure_or_bag \| noarr::get_at(data_ptr, state)`                  | `bag[state]`                               |
 | `structure_or_bag \| noarr::offset(state)`                            | `bag.offset(state)`                        |
-| `structure_or_bag \| noarr::offset<SubStructure>(state)`              | `bag.offset<SubStructure>(state)`          |
+| `structure_or_bag \| noarr::offset<SubStructure>(state)`              | `bag.template offset<SubStructure>(state)` |
 | `structure_or_bag \| noarr::get_size(state)`                          | N/A (`bag.get_size()` never needs a state) |
-| `structure_or_bag \| noarr::get_length<Dim>(state)`                   | `bag.get_length<Dim>(state)`               |
+| `structure_or_bag \| noarr::get_length<Dim>(state)`                   | `bag.template get_length<Dim>(state)`      |
 
 State is also used internally when handling these queries.
 The top-level structure receives a state from the caller, obtains (and deletes) the items it needs,
@@ -37,7 +37,7 @@ as detailed in [the relevant section in Signature documentation](Signature.md#re
 ### Traverser
 
 State is the parameter passed by [Traverser](Traverser.md) to the user lambda in [`.for_each(lambda)`](Traverser.md#for_eachlambda).
-The other method, [`.for_dims<...>(lambda)`](Traverser.md#for_dimslambda) does not pass a state,
+The other method, [`.template for_dims<...>(lambda)`](Traverser.md#for_dimslambda) does not pass a state,
 but [`.state()`](Traverser.md#state-obtaining-a-plain-state-in-for_dims) can be used on the parameter to get one.
 
 ### Creating a state

@@ -7,7 +7,7 @@ It is possible to pass it in a [state](../State.md):
 // a structure with no lengths
 auto my_matrix = noarr::scalar<float>() ^ noarr::vector<'i'>() ^ noarr::vector<'j'>();
 
-auto state = noarr::idx<'i', 'j'>(2, 1).with<noarr::length_in<'i'>, noarr::length_in<'j'>>(3, 3);
+auto state = noarr::idx<'i', 'j'>(2, 1).template with<noarr::length_in<'i'>, noarr::length_in<'j'>>(3, 3);
 std::size_t thirty_six = my_matrix | noarr::get_size(state);
 std::size_t twenty = my_matrix | noarr::offset(state);
 // ...

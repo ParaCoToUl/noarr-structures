@@ -34,7 +34,7 @@ The following example counts the columns in a really impractical way:
 
 ```cpp
 std::size_t num_cols = 0;
-noarr::traverser(matrix).for_dims<'j'>([&](auto t) {
+noarr::traverser(matrix).template for_dims<'j'>([&](auto t) {
 	// this code executes for each column, that is, for each distinct j
 	num_cols++;
 });
@@ -51,7 +51,7 @@ The outer `for_dims` call iterates all `'j'` while the inner `for_each` calls it
 
 ```cpp
 // normalize each column separately
-noarr::traverser(matrix).for_dims<'j'>([&](auto t) {
+noarr::traverser(matrix).template for_dims<'j'>([&](auto t) {
 	// this code executes for each column:
 	// t is a traverser with 'j' fixed
 
@@ -78,7 +78,7 @@ The following example sketches some ways to traverse a 3D array:
 auto a3d = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>() ^ noarr::array<'k', 500>());
 
 // iterate all possible indices for 'j'
-noarr::traverser(a3d).for_dims<'j'>([&](auto trav) {
+noarr::traverser(a3d).template for_dims<'j'>([&](auto trav) {
 	// trav has 'j' fixed (what remains is 'k' and 'i')
 
 	// iterate all possible indices for 'k' and 'i'
@@ -88,7 +88,7 @@ noarr::traverser(a3d).for_dims<'j'>([&](auto trav) {
 });
 
 // iterate all possible indices for 'k' and 'i'
-noarr::traverser(a3d).for_dims<'k', 'i'>([&](auto trav) {
+noarr::traverser(a3d).template for_dims<'k', 'i'>([&](auto trav) {
 	// trav has 'k' and 'i' fixed (what remains is 'j')
 
 	// iterate all possible indices for 'j'
@@ -98,7 +98,7 @@ noarr::traverser(a3d).for_dims<'k', 'i'>([&](auto trav) {
 });
 
 // iterate all possible indices for 'i'
-noarr::traverser(a3d).for_dims<'i'>([&](auto trav) {
+noarr::traverser(a3d).template for_dims<'i'>([&](auto trav) {
 	// trav has 'i' fixed (what remains is 'k' and 'j')
 
 	// iterate all possible indices for 'j'
@@ -117,7 +117,7 @@ The following edge cases are possible, too:
 
 ```cpp
 // iterate all possible indices for 'i', 'j', 'k', effectively iterating all elements
-noarr::traverser(a3d).for_dims<'i', 'j', 'k'>([&](auto trav) {
+noarr::traverser(a3d).template for_dims<'i', 'j', 'k'>([&](auto trav) {
 	// trav has 'i', 'j', 'k' fixed (nothing remains)
 
 	// this traversal will have exactly one iteration (it will not add any dimensions)
@@ -127,7 +127,7 @@ noarr::traverser(a3d).for_dims<'i', 'j', 'k'>([&](auto trav) {
 });
 
 // perform one iteration, passing an equivalent traverser to the lambda
-noarr::traverser(a3d).for_dims<>([&](auto trav) {
+noarr::traverser(a3d).template for_dims<>([&](auto trav) {
 	// trav has no dimensions fixed, it is the same as the outer `noarr::traverser(matrix)`
 
 	// iterate all possible indices for 'i', 'j', 'k'
@@ -151,7 +151,7 @@ noarr::traverser(matrix).for_each([&](auto s) {
 	matrix[s] = 0;
 });
 
-noarr::traverser(matrix).for_dims<'j', 'i'>([&](auto t) {
+noarr::traverser(matrix).template for_dims<'j', 'i'>([&](auto t) {
 	// t is a traverser, we need a state
 	auto s = t.state();
 	matrix[s] = 0;
@@ -162,7 +162,7 @@ Note that `state()` can be called on any traverser, but it may not always be dir
 For example:
 
 ```cpp
-noarr::traverser(matrix).for_dims<'i'>([&](auto t) {
+noarr::traverser(matrix).template for_dims<'i'>([&](auto t) {
 	auto s = t.state(); // this is OK, s contains just 'i'
 	matrix[s] = 0; // this fails, s does not contain 'j'!
 });
@@ -410,7 +410,7 @@ for(auto trav : noarr::traverser(matrix).range()) {
 
 Traverser range supports additional features not available in traverser directly:
 
-- An optional template argument can be added to the `.range()` call to explicitly select a dimension, e.g. `.range<'i'>()`.
+- An optional template argument can be added to the `.range()` call to explicitly select a dimension, e.g. `.template range<'i'>()`.
 - The range object has `.begin_idx` and `.end_idx` fields that can be used to limit the iteration range.
   They are initialized to `0` and the length, respectively, so by default, no elements are omitted.
 - The range object can be converted to a traverser using `as_traverser()`. The new traverser will honor `begin_idx` and `end_idx`.
