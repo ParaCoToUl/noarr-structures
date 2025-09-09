@@ -21,6 +21,9 @@ jobs:
         python-version: '3.x'
         check-latest: true
 
+    - name: Activate the Developer Command Prompt for VS
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Test
       working-directory: ${{github.workspace}}\docs_check
       run: python .\check.py
