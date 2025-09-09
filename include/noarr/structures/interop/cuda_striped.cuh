@@ -49,7 +49,7 @@ struct cuda_stripe_index {
 
 template<class ValueType>
 constexpr auto cuda_stripe_idx(ValueType value) noexcept {
-	return empty_state.with<cuda_stripe_index>(value);
+	return empty_state.template with<cuda_stripe_index>(value);
 }
 
 template<std::size_t NumStripes, class ElemType, std::size_t BankCount, std::size_t BankWidth, class T>

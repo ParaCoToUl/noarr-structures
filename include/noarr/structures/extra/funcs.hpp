@@ -75,7 +75,7 @@ constexpr auto has_offset() noexcept { return has_offset<state<>>(); }
 template<class SubStruct, auto... Dims, class... Idxs>
 requires IsDimPack<decltype(Dims)...>
 constexpr auto offset(Idxs... idxs) noexcept {
-	return offset<SubStruct>(empty_state.with<index_in<Dims>...>(idxs...));
+	return offset<SubStruct>(empty_state.template with<index_in<Dims>...>(idxs...));
 }
 
 template<IsState State>
@@ -89,7 +89,7 @@ constexpr auto offset(State state) noexcept {
 template<auto... Dims, class... Idxs>
 requires IsDimPack<decltype(Dims)...>
 constexpr auto offset(Idxs... idxs) noexcept {
-	return offset(empty_state.with<index_in<Dims>...>(idxs...));
+	return offset(empty_state.template with<index_in<Dims>...>(idxs...));
 }
 
 template<IsState State>
@@ -160,7 +160,7 @@ constexpr auto get_at(CvVoid *ptr, State state) noexcept {
 template<auto... Dims, class... Idxs, class CvVoid>
 requires IsDimPack<decltype(Dims)...>
 constexpr auto get_at(CvVoid *ptr, Idxs... idxs) noexcept {
-	return get_at(ptr, empty_state.with<index_in<Dims>...>(idxs...));
+	return get_at(ptr, empty_state.template with<index_in<Dims>...>(idxs...));
 }
 
 /**
