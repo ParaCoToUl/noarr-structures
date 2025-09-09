@@ -1,6 +1,13 @@
 #ifndef NOARR_STRUCTURES_CUDA_TRAVERSER_HPP
 #define NOARR_STRUCTURES_CUDA_TRAVERSER_HPP
 
+#include <cstddef>
+
+#include "../base/contain.hpp"
+#include "../base/state.hpp"
+#include "../base/structs_common.hpp"
+#include "../base/utility.hpp"
+#include "../extra/sig_utils.hpp"
 #include "../extra/traverser.hpp"
 
 namespace noarr {

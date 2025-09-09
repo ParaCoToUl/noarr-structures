@@ -7,6 +7,8 @@
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
 #include "../extra/funcs.hpp"
+#include "../extra/sig_utils.hpp"
+#include "../extra/to_struct.hpp"
 #include "../extra/traverser.hpp"
 #include "../structs/bcast.hpp"
 #include "../structs/blocks.hpp"

@@ -1,6 +1,8 @@
 #ifndef NOARR_STRUCTURES_CUDA_STRIPED_HPP
 #define NOARR_STRUCTURES_CUDA_STRIPED_HPP
 
+#include <cstddef>
+
 #include <algorithm>
 
 #include "../base/contain.hpp"
