@@ -48,7 +48,7 @@ We can then pair the layout with data to create a complete data structure:
 ```cpp
 auto matrix = noarr::bag(row_major_matrix);
 
-// `matrix.data()` and `matrix.structure()` return the data and the layout
+// `matrix.data()` and `matrix.structure()` return the data and the layout, respectively.
 ```
 
 
@@ -72,29 +72,29 @@ matrix[noarr::idx<'r', 'c'>(row, column)] = value;
 
 The library provides a way to traverse data structures in a flexible way. The traversers can be used to perform operations on the data in a layout-agnostic way.
 
-The following code snippet demonstrates how to create a traverser that iterates over the values in a matrix in a default order for the given layout:
+The following code snippet demonstrates how to create a traverser that iterates over the values in a matrix in a default traversal order for the given layout and sets them to zero:
 
 ```cpp
-// prepare the traverser
+// Prepare the traverser
 auto traverser = noarr::traverser(matrix);
 
-// use the traverser to iterate over the values
+// Use the traverser to iterate over the values
 traverser | [&](auto idx) {
-    matrix[idx] = 0; // set the value to 0
+    matrix[idx] = 0;
 };
 ```
 
 If we want to iterate over the values in a different order, we can simply modify the traverser:
 
 ```cpp
-// prepare the traverser to iterate in a specific order
+// Prepare the traverser to iterate in a specific order
 // - iterate over the rows in the outer loop and columns in the inner
 auto traverser = noarr::traverser(matrix) ^ noarr::hoist<'r', 'c'>();
 
-// use the traverser to iterate over the values
+// Use the traverser to iterate over the values
 // - the code does not need to change
 traverser | [&](auto idx) {
-    matrix[idx] = 0; // set the value to 0
+    matrix[idx] = 0;
 };
 ```
 
@@ -105,7 +105,7 @@ Noarr Structures is a header-only library - to use it, simply include one of the
 
 ```cpp
 #include <noarr/structures_extended.hpp>
-// or (to include the traversers as well)
+// Or (to include the traversers as well)
 #include <noarr/traversers.hpp>
 ```
 
@@ -162,7 +162,7 @@ Previous publications related to the library:
 Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 
-### Matrix example tests  <!-- Exclude this line from linear documentation -->
+### Matrix example tests
 
 [![Noarr matrix example test ubuntu-22](../../actions/workflows/noarr_matrix_example_test_ubuntu_22.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_ubuntu_22.yml) [![Noarr matrix example test ubuntu-24](../../actions/workflows/noarr_matrix_example_test_ubuntu_24.yml/badge.svg)](../../actions/workflows/noarr_matrix_example_test_ubuntu_24.yml)
 
@@ -171,28 +171,22 @@ Examples can be found at [examples/matrix](examples/matrix "matrix example").
 
 ## Running tests
 
-To ensure the library works properly on your system, you can run the tests provided in the `tests` directory (using CMake).
+To ensure the library works properly on your system, you can run the tests provided in the `tests` directory (using CMake and CTest):
 
 ```sh
-# from the root of the repository:
+# From the root of the repository:
 
-# enter the `tests` directory
+# Enter the `tests` directory
 cd tests
 
-# create the `build` directory
-cmake -E make_directory build
+# Configure the build environment
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
-# enter the `build` directory
-cd build
+# Build the `test-runner` executable according to the configuration
+cmake --build build --config Debug
 
-# configure the build environment
-cmake .. -DCMAKE_BUILD_TYPE=Debug
-
-# build the `test-runner` executable according to the configuration
-cmake --build . --config Debug
-
-# NOTE: adding `-j<NUMBER_OF_THREADS>` might speed up the build process 
-
-# run the tests
-ctest -C Debug -V
+# Run the tests
+ctest --test-dir build -C Debug -V
 ```
+
+Note that adding `-j<N>` to the build command might speed up the build process by allowing multiple jobs to run in parallel.

@@ -93,10 +93,10 @@ private:
 	// how many successive elements fit in the stripe width
 	static constexpr std::size_t stripe_width_elems = stripe_padded_width / elem_size;
 	// stripe width, in bytes, without stripe padding --- i.e. how many successive bytes of the original structure will
-	// be successive in the new structure
+	//   be successive in the new structure
 	static constexpr std::size_t stripe_width = stripe_width_elems * elem_size;
 	// the period after which we return to stripe 0 --- i.e. the width of all stripes, including stripe padding, and
-	// including possible additional padding at the end
+	//   including possible additional padding at the end
 	static constexpr std::size_t total_width =
 		helpers::pad_to_multiple<stripe_padded_width * NumStripes, BankCount * BankWidth>;
 
