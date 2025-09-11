@@ -38,7 +38,8 @@ as detailed in [the relevant section in Signature documentation](Signature.md#re
 
 State is the parameter passed by [Traverser](Traverser.md) to the user lambda in [`.for_each(lambda)`](Traverser.md#for_eachlambda).
 The other method, [`.template for_dims<...>(lambda)`](Traverser.md#for_dimslambda) does not pass a state,
-but [`.state()`](Traverser.md#state-obtaining-a-plain-state-in-for_dims) can be used on the parameter to get one.
+but [`.state()`](Traverser.md#state-obtaining-a-plain-state-in-for_dims) can be used on the parameter to get one;
+alternatively, you can use the traverser directly as a state to query the structure.
 
 ### Creating a state
 

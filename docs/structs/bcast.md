@@ -5,13 +5,13 @@ Add an ignored [dimension](../Glossary.md#dimension) to a structure.
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, typename T>
+template<auto Dim, typename T>
 struct noarr::bcast_t;
 
-template<char... Dims>
+template<auto... Dims>
 constexpr proto noarr::bcast();
 
-template<char... Dims>
+template<auto... Dims>
 constexpr proto noarr::bcast(auto... lengths);
 // = noarr::bcast<Dims...>() ^ noarr::set_length<Dims...>(lengths)
 ```

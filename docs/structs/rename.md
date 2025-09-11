@@ -5,10 +5,10 @@ Rename the specified [dimensions](../Glossary.md#dimension) in a structure.
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<typename T, char... DimPairs>
+template<typename T, auto... DimPairs>
 struct noarr::rename_t;
 
-template<char... DimPairs>
+template<auto... DimPairs>
 constexpr proto noarr::rename();
 ```
 

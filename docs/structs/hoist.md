@@ -5,10 +5,10 @@ Move the specified [dimension](../Glossary.md#dimension) to the top level (for [
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, typename T>
+template<auto Dim, typename T>
 struct noarr::hoist_t;
 
-template<char Dim>
+template<auto Dim>
 constexpr proto noarr::hoist();
 ```
 

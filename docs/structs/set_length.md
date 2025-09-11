@@ -5,10 +5,10 @@ Set the [length](../Glossary.md#length) in the specified [dimension](../Glossary
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, typename T, typename LenT>
+template<auto Dim, typename T, typename LenT>
 struct noarr::set_length_t;
 
-template<char... Dims>
+template<auto... Dims>
 constexpr proto noarr::set_length(auto... lengths);
 ```
 

@@ -5,12 +5,12 @@ Select a subsequence of [indices](../Glossary.md#index) in the specified [dimens
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, typename T, typename StartT, typename StepT>
+template<auto Dim, typename T, typename StartT, typename StepT>
 struct noarr::step_t;
 
 constexpr proto noarr::step(auto start, auto step);
 
-template<char Dim>
+template<auto Dim>
 constexpr proto noarr::step(auto start, auto step);
 ```
 

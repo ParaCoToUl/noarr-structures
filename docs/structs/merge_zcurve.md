@@ -6,7 +6,7 @@ which walks the original dimensions in the [Z-order curve](https://en.wikipedia.
 ```hpp
 #include <noarr/structures/structs/zcurve.hpp>
 
-template<char... Dims, char Dim>
+template<auto... Dims, auto Dim>
 struct noarr::merge_zcurve {
 	template<int MaxLen, int Alignment>
 	constexpr proto maxlen_alignment();

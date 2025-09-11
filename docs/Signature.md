@@ -39,7 +39,7 @@ An example of such a structure is [`noarr::scalar<T>`](structs/scalar.md), altho
 This kind of structure is the most common. It also includes the array example from the [introduction](#introduction), and [many others](#examples).
 
 The signature of such structures is in the form `noarr::function_sig<Dim, ArgLength, RetSig>` where
-- `Dim` is a dimension name (`char`)
+- `Dim` is a dimension name (`auto`)
 - `ArgLength` is `noarr::dynamic_arg_length` or `noarr::static_arg_length<...>` (see below)
 - `RetSig` is another signature type
 
@@ -78,7 +78,7 @@ That being said, direct usage of signatures is also possible and supported. As m
 template<class T>
 struct foo;
 
-template<char Dim, class ArgLength, class RetSig>
+template<auto Dim, class ArgLength, class RetSig>
 struct foo<noarr::function_sig<Dim, ArgLength, RetSig>> {
 	// Inspect Dim, ArgLength, and RetSig:
 	static constexpr bool xxx = ArgLength::is_known; // true for false for dynamic_arg_length and static_arg_length, false for dynamic_arg_length
@@ -87,7 +87,7 @@ struct foo<noarr::function_sig<Dim, ArgLength, RetSig>> {
 	using example_recursion = foo<RetSig>;
 };
 
-template<char Dim, class... RetSigs>
+template<auto Dim, class... RetSigs>
 struct foo<noarr::dep_function_sig<Dim, RetSigs...>> {
 	// Inspect Dim and RetSigs:
 	static constexpr bool zzz = sizeof...(RetSigs);
@@ -271,9 +271,9 @@ using new_sig = typename old_sig::template replace<replacement, old_dim>;
 // Note that the following specializations are never needed.
 // ::replace will never try to instantiate the Replacement template for something that does not match the requested dimension name.
 
-template<char Dim, class ArgLength, class RetSig>
+template<auto Dim, class ArgLength, class RetSig>
 struct replacement<noarr::function_sig<Dim, ArgLength, RetSig>> { /*...*/ }; // dimension name Dim other than the requested old_dim
-template<char Dim, class... RetSigs>
+template<auto Dim, class... RetSigs>
 struct replacement<noarr::dep_function_sig<Dim, RetSigs...>> { /*...*/ }; // dimension name Dim other than the requested old_dim
 template<class ValueType>
 struct replacement<noarr::scalar_sig<ValueType>> { /*...*/ }; // no dimension name at all

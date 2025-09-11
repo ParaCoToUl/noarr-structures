@@ -73,7 +73,7 @@ substitutions: dict[tuple[str, int], dict[str, str | Callable[[re.Match[str]], s
     ('docs/structs/into_blocks.md', 2): {r'/\*\.\.\.\*/': '[](auto){}'},
     ('docs/structs/into_blocks.md', 5): {'num_elems': '42', 'input_data': 'std::calloc(42, sizeof(float))'},
     ('docs/structs/into_blocks.md', 6): {'num_elems': '42', 'input_data': 'std::calloc(42, sizeof(float))'},
-    ('docs/structs/merge_zcurve.md', 0): {', char Dim': ''},
+    ('docs/structs/merge_zcurve.md', 0): {', auto Dim': ''},
     ('docs/structs/rename.md', 1): {r'/\*\.\.\.\*/': 'std::calloc(42, sizeof(float))'},
     ('docs/structs/rename.md', 2): {r'/\*\.\.\.\*/': '(void*)nullptr', '^matmul': 'auto UNIQ = (matmul', r'^\)': '),0)'},
     ('docs/structs/rename.md', 3): {r'/\*\.\.\.\*/': '(void*)nullptr'},

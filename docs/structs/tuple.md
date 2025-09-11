@@ -6,10 +6,10 @@ to select between the original structures (now elements of the whole).
 ```hpp
 #include <noarr/structures.hpp>
 
-template<char Dim, typename... Ts>
+template<auto Dim, typename... Ts>
 struct noarr::tuple;
 
-template<char Dim>
+template<auto Dim>
 constexpr noarr::tuple<Dim, /*...*/> make_tuple(auto... ts);
 ```
 

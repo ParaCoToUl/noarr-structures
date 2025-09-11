@@ -5,10 +5,10 @@ Shift the [index](../Glossary.md#index) in the specified [dimension](../Glossary
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, typename T, typename DeltaT>
+template<auto Dim, typename T, typename DeltaT>
 struct noarr::shift_t;
 
-template<char... Dims>
+template<auto... Dims>
 constexpr proto noarr::shift(auto... deltas);
 ```
 

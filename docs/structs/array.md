@@ -6,10 +6,10 @@ and use a new [dimension](../Glossary.md#dimension) (of the specified constant l
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, std::size_t Len, typename T>
+template<auto Dim, std::size_t Len, typename T>
 using noarr::array = /*...*/;
 
-template<char Dim, std::size_t Len>
+template<auto Dim, std::size_t Len>
 constexpr proto noarr::array();
 // = noarr::vector<Dim>(lit<Len>)
 ```

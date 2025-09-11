@@ -14,16 +14,16 @@ __device__ inline proto noarr::cuda_step_block();
 
 __device__ inline proto noarr::cuda_step_grid();
 
-template<char Dim, typename CG>
+template<auto Dim, typename CG>
 __device__ inline proto noarr::cuda_step();
 
-template<char Dim>
+template<auto Dim>
 __device__ inline proto noarr::cuda_step(const auto &cg);
 
-template<char Dim>
+template<auto Dim>
 __device__ inline proto noarr::cuda_step_block();
 
-template<char Dim>
+template<auto Dim>
 __device__ inline proto noarr::cuda_step_grid();
 ```
 

@@ -5,10 +5,10 @@ Set the [index](../Glossary.md#index) in the specified [dimension](../Glossary.m
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, typename T, typename IdxT>
+template<auto Dim, typename T, typename IdxT>
 struct noarr::fix_t;
 
-template<char... Dims>
+template<auto... Dims>
 constexpr proto noarr::fix(auto... indices);
 
 constexpr proto noarr::fix(auto state);

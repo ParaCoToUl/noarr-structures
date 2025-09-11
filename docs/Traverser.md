@@ -152,7 +152,10 @@ noarr::traverser(matrix).for_each([&](auto s) {
 });
 
 noarr::traverser(matrix).template for_dims<'j', 'i'>([&](auto t) {
-	// t is a traverser, we need a state
+	// we can use traverser as if it was a state
+	matrix[t] = 0;
+
+	// or we can extract the state explicitly
 	auto s = t.state();
 	matrix[s] = 0;
 });
@@ -220,7 +223,7 @@ In these cases, one of the options may be conceptually much more appropriate tha
 The `order` function can be applied multiple times, `.order(A).order(B)` is equivalent to `.order(A ^ B)`.
 The dimension names passed to `for_dims` are looked up in the updated structure.
 For example, in the above snippet, `for_dims<'x', 'y'>` would be appropriate in both variants, while `for_dims<'i'>` in neither.
-The inner traverser `.state()` is the same as the state passed to `for_each`.
+The inner traverser's `.state()` is the same as the state passed to `for_each`.
 In the above snippet, it would have `'i'` in the first variant, and `'x'`, `'y'` in the second variant.
 
 ### Usages of `order`
@@ -338,8 +341,7 @@ for(auto trav : noarr::traverser(matrix)) {
 	// ~or~
 
 	for(auto unit_trav : trav) { // iterate the topmost dimension of trav, leaving no dimensions
-		auto state = unit_trav.state();
-		matrix[state] = 0;
+		matrix[unit_trav] = 0;
 	}
 }
 ```
@@ -351,7 +353,7 @@ It is not necessary to come up with a new name every time. The following example
 auto cube = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 25>() ^ noarr::array<'j', 30>() ^ noarr::array<'k', 35>());
 
 for(auto trav : noarr::traverser(cube)) for(auto trav : trav) for(auto trav : trav) {
-	cube[trav.state()] = 0;
+	cube[trav] = 0;
 }
 ```
 
@@ -376,8 +378,7 @@ for(auto trav : noarr::traverser(matrix)) {
 	// ~or~
 
 	for(auto unit_trav : trav) { // iterate the topmost dimension of trav, leaving no dimensions
-		auto state = unit_trav.state();
-		matrix[state] = 0;
+		matrix[unit_trav] = 0;
 	}
 }
 ```
@@ -426,7 +427,7 @@ tbb::parallel_for(noarr::traverser(matrix).range(), [&](auto subrange) {
 		// note: the original structure was two-dimensional,
 		// we have only iterated one dimension - the other one still remains
 		for(auto trav : trav) {
-			matrix[trav.state()] = 0;
+			matrix[trav] = 0;
 		}
 	}
 
@@ -565,7 +566,7 @@ __global__ void matmul(T trav, A a, B b, C c) {
 		result += a[state] * b[state];
 	});
 
-	c[trav.state()] = result;
+	c[trav] = result;
 }
 
 // a_data, b_data, c_data are pointers to memory accessible from the GPU device
@@ -595,7 +596,7 @@ __global__ void matmul(T trav, A a, B b, C c) {
 			result += a[state] * b[state];
 		});
 
-		c[trav.state()] = result;
+		c[trav] = result;
 	});
 }
 

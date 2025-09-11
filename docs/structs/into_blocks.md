@@ -5,30 +5,30 @@ Split the structure into blocks according to the specified [dimension](../Glossa
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, char DimMajor, char DimMinor, typename T>
+template<auto Dim, auto DimMajor, auto DimMinor, typename T>
 struct noarr::into_blocks_t;
 
-template<char Dim, char DimMajor, char DimMinor, char DimIsPresent, typename T>
+template<auto Dim, auto DimMajor, auto DimMinor, auto DimIsPresent, typename T>
 struct noarr::into_blocks_dynamic_t;
 
-template<char Dim, char DimIsBorder, char DimMajor, char DimMinor, typename T, typename MinorLenT>
+template<auto Dim, auto DimIsBorder, auto DimMajor, auto DimMinor, typename T, typename MinorLenT>
 struct noarr::into_blocks_static_t;
 
-template<char Dim, char DimMajor, char DimMinor>
+template<auto Dim, auto DimMajor, auto DimMinor>
 constexpr proto noarr::into_blocks();
 
-template<char Dim, char DimMajor, char DimMinor>
+template<auto Dim, auto DimMajor, auto DimMinor>
 constexpr proto noarr::into_blocks(auto minor_length);
 // = noarr::into_blocks<Dim, DimMajor, DimMinor>() ^ noarr::set_length<DimMinor>(minor_length)
 
-template<char Dim, char DimMajor, char DimMinor, char DimIsPresent>
+template<auto Dim, auto DimMajor, auto DimMinor, auto DimIsPresent>
 constexpr proto noarr::into_blocks_dynamic();
 
-template<char Dim, char DimMajor, char DimMinor, char DimIsPresent>
+template<auto Dim, auto DimMajor, auto DimMinor, auto DimIsPresent>
 constexpr proto noarr::into_blocks_dynamic(auto minor_length);
 // = noarr::into_blocks_dynamic<Dim, DimMajor, DimMinor, DimIsPresent>() ^ noarr::set_length<DimMinor>(minor_length)
 
-template<char Dim, char DimIsBorder, char DimMajor, char DimMinor>
+template<auto Dim, auto DimIsBorder, auto DimMajor, auto DimMinor>
 constexpr proto noarr::into_blocks_static(auto minor_length);
 ```
 

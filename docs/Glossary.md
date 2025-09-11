@@ -17,8 +17,8 @@ An object that remembers both the structure [structure](#structure) and a pointe
 
 ### dimension
 
-A [structure](#structure) can have multiple dimensions. Unlike multidimensional arrays in C++ or C, these dimensions are named -- identified by `char`s (e.g. `'x'`, `'y'`).
-Like in C++ or C arrays, to get the memory offset of an element, one must specify the [index](#index) for each dimension.
+A [structure](#structure) can have multiple dimensions. Unlike multidimensional arrays in C++ or C, each dimension is named -- identified by a `char` (e.g. `'x'`, `'y'`) or an object of `noarr::dim<auto TAG>`.
+Like in C++ or C arrays, to get the memory offset of an element, one must specify the [index](#index) for each dimension0.
 The [lengths](#length) (index ranges) can be [queried/set](BasicUsage.md#lengths) on the structure,
 and the dimensions themselves can be inspected at compile time using the structure's [signature](#signature).
 See also [Dimension Kinds](DimensionKinds.md).

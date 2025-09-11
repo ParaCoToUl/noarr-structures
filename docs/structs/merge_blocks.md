@@ -5,10 +5,10 @@ Opposite of [`into_blocks`](into_blocks.md): Merge the two specified [dimensions
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char DimMajor, char DimMinor, char Dim, typename T>
+template<auto DimMajor, auto DimMinor, auto Dim, typename T>
 struct noarr::merge_blocks_t;
 
-template<char DimMajor, char DimMinor, char Dim>
+template<auto DimMajor, auto DimMinor, auto Dim>
 constexpr proto noarr::merge_blocks();
 ```
 

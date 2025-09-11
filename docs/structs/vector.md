@@ -6,10 +6,10 @@ and use a new [dimension](../Glossary.md#dimension) (of an unknown length) to se
 ```hpp
 #include <noarr/structures.hpp>
 
-template<char Dim, typename T>
+template<auto Dim, typename T>
 struct noarr::vector;
 
-template<char Dim>
+template<auto Dim>
 constexpr proto noarr::vector();
 ```
 

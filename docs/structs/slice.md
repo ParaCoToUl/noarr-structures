@@ -5,10 +5,10 @@ Slice the structure in the specified [dimension](../Glossary.md#dimension) (thus
 ```hpp
 #include <noarr/structures_extended.hpp>
 
-template<char Dim, typename T, typename StartT, typename LenT>
+template<auto Dim, typename T, typename StartT, typename LenT>
 struct noarr::slice_t;
 
-template<char Dim>
+template<auto Dim>
 constexpr proto noarr::slice(auto start, auto length);
 ```
 
@@ -107,7 +107,7 @@ auto matrix = noarr::scalar<float>()
 We could even introduce a proto-structure for it:
 
 ```cpp
-template<char Dim>
+template<auto Dim>
 auto my_padded_vector(auto len, auto a) {
 	return noarr::vector<Dim>((len + a - 1) / a * a) ^ noarr::slice<Dim>(lit<0>, len);
 }
