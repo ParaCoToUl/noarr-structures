@@ -134,3 +134,35 @@ auto item_3_4_6 = fixed | noarr::offset<'z'>(6);
 
 Normally the state would be created somewhere else (e.g. given to you in [traverser](Traverser.md) lambda).
 Otherwise, you could just use `... ^ noarr::fix<'x', 'y'>(3, 4)`.
+
+### Arithmetic and comparisons for states
+
+State supports `==` and `!=` comparisons, as well as `+` and `-` operators (however, note that the arithmetic follows the unsigned integer rules).
+
+```cpp
+auto s1 = noarr::idx<'x', 'y'>(3, 4);
+auto s2 = noarr::idx<'x', 'y'>(2, 3);
+
+assert(s1 != s2);
+assert(s1 == (s2 + noarr::idx<'x', 'y'>(1, 1)));
+assert((s1 - noarr::idx<'x', 'y'>(1, 1)) == s2);
+```
+
+This can replace some uses of `update_index` and `neighbor`:
+
+```cpp
+auto s1 = noarr::idx<'x', 'y'>(3, 4);
+auto south_east = s1 + noarr::idx<'x', 'y'>(1, 1);
+auto north_west = s1 - noarr::idx<'x', 'y'>(1, 1);
+
+// however, for some cases, this might require more typing
+auto south_west = s1 + noarr::idx<'x'>(1) - noarr::idx<'y'>(1);
+auto north_east = s1 - noarr::idx<'x'>(1) + noarr::idx<'y'>(1);
+
+// compare to the use of neighbor
+auto south_west2 = noarr::neighbor<'x', 'y'>(s1, 1, -1);
+auto north_east2 = noarr::neighbor<'x', 'y'>(s1, -1, 1);
+
+assert(south_west == south_west2);
+assert(north_east == north_east2);
+```
