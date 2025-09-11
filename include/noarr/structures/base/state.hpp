@@ -11,7 +11,7 @@
 
 namespace noarr {
 
-template<typename T>
+template<class T>
 concept IsTag = requires(T a) {
 	requires IsDimSequence<typename T::dims>;
 	{ T::template all_accept<dim_accepter> } -> std::convertible_to<bool>;

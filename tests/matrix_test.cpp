@@ -27,7 +27,7 @@ struct MatrixStructureGetter<MatrixDataLayout::Columns>
 	}
 };
 
-template<typename MatrixSource, typename MatrixDestination>
+template<class MatrixSource, class MatrixDestination>
 void matrix_copy(MatrixSource& matrix_src, MatrixDestination& matrix_dst)
 {
 	std::size_t x_size = matrix_src.template length<'x'>();
@@ -41,7 +41,7 @@ void matrix_copy(MatrixSource& matrix_src, MatrixDestination& matrix_dst)
 			matrix_dst.template at<'x', 'y'>(i, j) = matrix_src.template at<'x', 'y'>(i, j);
 }
 
-template<typename Matrix>
+template<class Matrix>
 void matrix_transpose(Matrix& matrix)
 {
 	std::size_t x_size = matrix.template length<'x'>();
@@ -54,7 +54,7 @@ void matrix_transpose(Matrix& matrix)
 			std::swap(matrix.template at<'x', 'y'>(i, j), matrix.template at<'x', 'y'>(j, i));
 }
 
-template<typename Matrix1, typename Matrix2>
+template<class Matrix1, class Matrix2>
 bool are_equal_matrices(Matrix1& matrix1, Matrix2& matrix2)
 {
 	std::size_t x_size = matrix1.template length<'x'>();
@@ -74,7 +74,7 @@ bool are_equal_matrices(Matrix1& matrix1, Matrix2& matrix2)
 	return true;
 }
 
-template<typename Matrix1, typename Matrix2, typename Matrix3>
+template<class Matrix1, class Matrix2, class Matrix3>
 void matrix_add(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
 	std::size_t x_size = matrix1.template length<'x'>();
@@ -96,7 +96,7 @@ void matrix_add(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 		}
 }
 
-template<typename Matrix1>
+template<class Matrix1>
 void matrix_scalar_multiplication(Matrix1& matrix1, int scalar)
 {
 	std::size_t x_size = matrix1.template length<'x'>();
@@ -107,7 +107,7 @@ void matrix_scalar_multiplication(Matrix1& matrix1, int scalar)
 			matrix1.template at<'x', 'y'>(i, j) *= scalar;
 }
 
-template<typename Matrix1, typename Matrix2, typename Matrix3>
+template<class Matrix1, class Matrix2, class Matrix3>
 void matrix_multiply(Matrix1& matrix1, Matrix2& matrix2, Matrix3& matrix3)
 {
 	std::size_t x1_size = matrix1.template length<'x'>();
@@ -202,7 +202,7 @@ bool are_equal_classic_matrices(matrix& m1, matrix& m2)
 	return true;
 }
 
-template<typename Matrix1>
+template<class Matrix1>
 matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 {
 	std::size_t x_size = matrix1.template length<'x'>();
@@ -217,7 +217,7 @@ matrix noarr_matrix_to_clasic(Matrix1& matrix1)
 	return m;
 }
 
-template<typename Matrix1>
+template<class Matrix1>
 void classic_matrix_to_noarr(matrix& m1, Matrix1& matrix1)
 {
 	std::size_t x_size = matrix1.template length<'x'>();

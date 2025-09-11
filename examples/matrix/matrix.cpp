@@ -119,7 +119,7 @@ bool are_equal_classic_matrices(classic_matrix& m1, classic_matrix& m2)
  * @param source: noarr matrix
  * @return classic_matrix created from noarr matrix
  */
-template<typename Matrix>
+template<class Matrix>
 classic_matrix noarr_matrix_to_clasic(Matrix& source)
 {
 	// we will cache matrix size values
@@ -144,7 +144,7 @@ classic_matrix noarr_matrix_to_clasic(Matrix& source)
  * @tparam structure: Structure defining structure to be used by result noarr matrix
  * @return Matrix noarr matrix created from source classic_matrix
  */
-template<typename Structure>
+template<class Structure>
 auto clasic_matrix_to_noarr(classic_matrix& source, Structure structure)
 {
 	// we will allocate target noarr matrix
@@ -194,7 +194,7 @@ classic_matrix clasic_matrix_multiply(classic_matrix& matrix1, classic_matrix& m
  * @param size: size of the matrices to be used
  * @tparam structure: structure defining structure to be used by noarr matrix
  */
-template<typename Structure>
+template<class Structure>
 void matrix_demo(std::size_t size, Structure structure)
 {
 	// generating random classic matrix 1

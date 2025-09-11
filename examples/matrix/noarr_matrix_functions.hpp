@@ -16,7 +16,7 @@
  * @tparam structure: Structure defining structure to be used by result noarr matrix
  * @return Matrix noarr matrix created from source noarr matrices
  */
-template<typename Matrix, typename Matrix2, typename Structure3>
+template<class Matrix, class Matrix2, class Structure3>
 auto noarr_matrix_multiply(Matrix& matrix1, Matrix2& matrix2, Structure3 structure)
 {
 	auto result = noarr::make_bag(structure);
@@ -54,7 +54,7 @@ auto noarr_matrix_multiply(Matrix& matrix1, Matrix2& matrix2, Structure3 structu
  * @tparam structure: Structure defining structure to be used by result noarr matrix
  * @return Matrix noarr matrix created from source noarr matrix
  */
-template<typename Matrix, typename Structure>
+template<class Matrix, class Structure>
 auto noarr_matrix_copy(Matrix& source, Structure structure)
 {
 	auto result = noarr::make_bag(structure);
@@ -71,7 +71,7 @@ auto noarr_matrix_copy(Matrix& source, Structure structure)
  *
  * @tparam matrix: source noarr matrix
  */
-template<typename Matrix>
+template<class Matrix>
 void noarr_matrix_transpose(Matrix& matrix)
 {
 	std::size_t x_size = matrix.template length<'n'>();
@@ -95,7 +95,7 @@ void noarr_matrix_transpose(Matrix& matrix)
  * @tparam matrix: source noarr matrix
  * @param scalar: scalar
  */
-template<typename Matrix>
+template<class Matrix>
 void noarr_matrix_scalar_multiplication(Matrix& matrix, int scalar)
 {
 	std::size_t x_size = matrix.template length<'n'>();

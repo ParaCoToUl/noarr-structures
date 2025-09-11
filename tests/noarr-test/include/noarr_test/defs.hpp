@@ -28,9 +28,9 @@ static constexpr bool type_is_simple(const T &/*t*/) {
 }
 
 
-template<typename T1, typename T2>
+template<class T1, class T2>
 constexpr static bool equal_data(const T1 &/*t1*/, const T2 &/*t2*/) { return false; }
-template<typename T>
+template<class T>
 constexpr static bool equal_data(const T &t1, const T &t2) {
 	if constexpr (std::is_empty_v<T>) {
 		return true;

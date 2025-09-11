@@ -62,7 +62,7 @@ In file [matrix.cpp](matrix.cpp) basic matrix is implemented. Example first gene
 In file [noarr_matrix_functions.hpp](noarr_matrix_functions.hpp) are implemented several matrix functions. The important function is:
 
 ```cpp
-template<typename Matrix, typename Matrix2, typename Structure3>
+template<class Matrix, class Matrix2, class Structure3>
 auto noarr_matrix_multiply(Matrix& matrix1, Matrix2& matrix2, 
     Structure3 structure)
 ```
