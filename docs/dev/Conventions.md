@@ -15,12 +15,12 @@ We use `struct`, `class` and `typename` in such a way that each has exactly one 
 Example:
 
 ```cpp
-struct foo { // not class
-	using some_type = float; // not typedef
+struct foo { // Not class
+	using some_type = float; // Not typedef
 };
 
-template<class Param> // not typename
-struct generic_foo { // not class
+template<class Param> // Not typename
+struct generic_foo { // Not class
 	using some_type = typename Param::value_type;
 };
 ```

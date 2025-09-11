@@ -48,21 +48,21 @@ Noarr provides the following functions to create a state instance:
 ```cpp
 using noarr::lit;
 
-// indices in (x, y) are (3, 4)
+// Indices in (x, y) are (3, 4)
 auto s1 = noarr::make_state<noarr::index_in<'x'>, noarr::index_in<'y'>>(3, 4);
 
-// shortcut for the above
+// Shortcut for the above
 auto s2 = noarr::idx<'x', 'y'>(3, 4);
 
-// this one also sets the length in one of the dimensions
+// This one also sets the length in one of the dimensions
 // - use this in case the structure does not have the length already
 // - no shortcut is available
 auto s3 = noarr::make_state<noarr::index_in<'x'>, noarr::index_in<'y'>, noarr::length_in<'x'>>(3, 4, 10);
 
-// make the x index static
+// Make the x index static
 auto s4 = noarr::idx<'x', 'y'>(lit<3>, 4);
 
-// all combined
+// All combined
 auto s5 = noarr::make_state<noarr::index_in<'x'>, noarr::index_in<'y'>, noarr::length_in<'x'>, noarr::cuda_stripe_index>(lit<3>, 4, lit<10>, threadIdx.x + (1<<i));
 ```
 
@@ -73,7 +73,7 @@ Multiple states can also be merged using the `&` operator.
 State items can be retrieved using the state's methods or (somewhat more conveniently) using some shortcut functions:
 
 ```cpp
-auto my_state = s5; // or s1 or s2 or s3 or s4, from the previous snippet
+auto my_state = s5; // Or s1 or s2 or s3 or s4, from the previous snippet
 using my_state_t = decltype(my_state);
 
 // the easy way to get indices
@@ -84,14 +84,14 @@ auto [x2, y2] = noarr::get_indices<'x', 'y'>(my_state);
 auto x3 = my_state.template get<noarr::index_in<'x'>>();
 auto xlen = my_state.template get<noarr::length_in<'x'>>();
 
-// getting types - might spare you one decltype
+// Getting types - might spare you one decltype
 using x_t = noarr::state_get_t<my_state_t, noarr::index_in<'x'>>;
 
-// only works with static state item values (e.g. s5)
+// Only works with static state item values (e.g. s5)
 constexpr std::size_t sx = x_t::value;
 constexpr std::size_t sxlen = noarr::state_get_t<my_state_t, noarr::length_in<'x'>>::value;
 
-// query the existence of item
+// Query the existence of item
 constexpr bool has_xlen = my_state_t::template contains<noarr::length_in<'x'>>;
 if constexpr(has_xlen) { /*...*/ } /*...*/
 ```
@@ -101,16 +101,16 @@ if constexpr(has_xlen) { /*...*/ } /*...*/
 State is immutable, you have to create a new state:
 
 ```cpp
-// increment index in 'x' and return a new state (other indices are copied unchanged)
+// Increment index in 'x' and return a new state (other indices are copied unchanged)
 auto new_state = noarr::update_index<'x'>(my_state, [](auto x) {return x + 1;});
 
-// shortcut for the above, can update more than one index, but cannot work with lambdas
+// Shortcut for the above, can update more than one index, but cannot work with lambdas
 auto state_east = noarr::neighbor<'x'>(my_state, 1);
 
 auto state_north_east = noarr::neighbor<'x', 'y'>(my_state, +1, -1);
 auto state_south_east = noarr::neighbor<'x', 'y'>(my_state, +1, +1);
 
-// create a new item (or replace existing one without seeing it)
+// Create a new item (or replace existing one without seeing it)
 auto my_state_3d = my_state.template with<noarr::index_in<'z'>>(0);
 ```
 
@@ -155,11 +155,11 @@ auto s1 = noarr::idx<'x', 'y'>(3, 4);
 auto south_east = s1 + noarr::idx<'x', 'y'>(1, 1);
 auto north_west = s1 - noarr::idx<'x', 'y'>(1, 1);
 
-// however, for some cases, this might require more typing
+// However, for some cases, this might require more typing
 auto south_west = s1 + noarr::idx<'x'>(1) - noarr::idx<'y'>(1);
 auto north_east = s1 - noarr::idx<'x'>(1) + noarr::idx<'y'>(1);
 
-// compare to the use of neighbor
+// Compare to the use of neighbor
 auto south_west2 = noarr::neighbor<'x', 'y'>(s1, 1, -1);
 auto north_east2 = noarr::neighbor<'x', 'y'>(s1, -1, 1);
 

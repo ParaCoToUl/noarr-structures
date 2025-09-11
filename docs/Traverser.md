@@ -11,13 +11,13 @@ Traverser is also the library's main tool for data parallelism.
 In the following example, we use a simple call to `for_each` to iterate over a 2D structure.
 
 ```cpp
-// usual matrix allocation
+// Usual matrix allocation
 auto matrix_struct = noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>();
 auto matrix = noarr::make_bag(matrix_struct);
 
-// traverser example: zero out the matrix
+// Traverser example: zero out the matrix
 noarr::traverser(matrix).for_each([&](auto s) {
-	// this code executes for each element, matrix[s]
+	// This code executes for each element, matrix[s]
 	matrix[s] = 0;
 });
 ```
@@ -35,7 +35,7 @@ The following example counts the columns in a really impractical way:
 ```cpp
 std::size_t num_cols = 0;
 noarr::traverser(matrix).template for_dims<'j'>([&](auto t) {
-	// this code executes for each column, that is, for each distinct j
+	// This code executes for each column, that is, for each distinct j
 	num_cols++;
 });
 assert(num_cols == (matrix | noarr::get_length<'j'>()));
@@ -50,14 +50,14 @@ In the following example, we nest a `for_each` call in a `for_dims` call.
 The outer `for_dims` call iterates all `'j'` while the inner `for_each` calls iterate all `'i'`.
 
 ```cpp
-// normalize each column separately
+// Normalize each column separately
 noarr::traverser(matrix).template for_dims<'j'>([&](auto t) {
-	// this code executes for each column:
+	// This code executes for each column:
 	// t is a traverser with 'j' fixed
 
 	double norm2 = 0;
 	t.for_each([&](auto s) {
-		// this code executes for each element in that column:
+		// This code executes for each element in that column:
 		// s is a state with both 'i' and 'j'
 		double elem = matrix[s];
 		norm2 += elem * elem;
@@ -77,35 +77,35 @@ The following example sketches some ways to traverse a 3D array:
 ```cpp
 auto a3d = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>() ^ noarr::array<'k', 500>());
 
-// iterate all possible indices for 'j'
+// Iterate all possible indices for 'j'
 noarr::traverser(a3d).template for_dims<'j'>([&](auto trav) {
 	// trav has 'j' fixed (what remains is 'k' and 'i')
 
-	// iterate all possible indices for 'k' and 'i'
+	// Iterate all possible indices for 'k' and 'i'
 	trav.for_each([&](auto state) {
 		// state has 'i', 'j', 'k'
 	});
 });
 
-// iterate all possible indices for 'k' and 'i'
+// Iterate all possible indices for 'k' and 'i'
 noarr::traverser(a3d).template for_dims<'k', 'i'>([&](auto trav) {
 	// trav has 'k' and 'i' fixed (what remains is 'j')
 
-	// iterate all possible indices for 'j'
+	// Iterate all possible indices for 'j'
 	trav.for_each([&](auto state) {
 		// state has 'i', 'j', 'k'
 	});
 });
 
-// iterate all possible indices for 'i'
+// Iterate all possible indices for 'i'
 noarr::traverser(a3d).template for_dims<'i'>([&](auto trav) {
 	// trav has 'i' fixed (what remains is 'k' and 'j')
 
-	// iterate all possible indices for 'j'
+	// Iterate all possible indices for 'j'
 	trav.template for_dims<'j'>([&](auto inner_trav) {
 		// inner_trav has both 'i' and 'j' fixed (what remains is 'k')
 
-		// iterate all possible indices for 'k'
+		// Iterate all possible indices for 'k'
 		inner_trav.for_each([&](auto state) {
 			// state has 'i', 'j', 'k'
 		});
@@ -116,21 +116,21 @@ noarr::traverser(a3d).template for_dims<'i'>([&](auto trav) {
 The following edge cases are possible, too:
 
 ```cpp
-// iterate all possible indices for 'i', 'j', 'k', effectively iterating all elements
+// Iterate all possible indices for 'i', 'j', 'k', effectively iterating all elements
 noarr::traverser(a3d).template for_dims<'i', 'j', 'k'>([&](auto trav) {
 	// trav has 'i', 'j', 'k' fixed (nothing remains)
 
-	// this traversal will have exactly one iteration (it will not add any dimensions)
+	// This traversal will have exactly one iteration (it will not add any dimensions)
 	trav.for_each([&](auto state) {
 		// state has 'i', 'j', 'k'
 	});
 });
 
-// perform one iteration, passing an equivalent traverser to the lambda
+// Perform one iteration, passing an equivalent traverser to the lambda
 noarr::traverser(a3d).template for_dims<>([&](auto trav) {
 	// trav has no dimensions fixed, it is the same as the outer `noarr::traverser(matrix)`
 
-	// iterate all possible indices for 'i', 'j', 'k'
+	// Iterate all possible indices for 'i', 'j', 'k'
 	trav.for_each([&](auto state) {
 		// state has 'i', 'j', 'k'
 	});
@@ -152,10 +152,10 @@ noarr::traverser(matrix).for_each([&](auto s) {
 });
 
 noarr::traverser(matrix).template for_dims<'j', 'i'>([&](auto t) {
-	// we can use traverser as if it was a state
+	// We can use traverser as if it was a state
 	matrix[t] = 0;
 
-	// or we can extract the state explicitly
+	// Or we can extract the state explicitly
 	auto s = t.state();
 	matrix[s] = 0;
 });
@@ -166,8 +166,8 @@ For example:
 
 ```cpp
 noarr::traverser(matrix).template for_dims<'i'>([&](auto t) {
-	auto s = t.state(); // this is OK, s contains just 'i'
-	matrix[s] = 0; // this fails, s does not contain 'j'!
+	auto s = t.state(); // This is OK, s contains just 'i'
+	matrix[s] = 0; // This fails, s does not contain 'j'!
 });
 ```
 
@@ -188,22 +188,20 @@ Note that in this simple case, splitting into blocks will not have any significa
 ```cpp
 auto original = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>());
 
-// create a proto-structure that splits dimension 'i' into blocks of size 4,
-// the resulting structure will have dimensions 'y' (index of block) and 'x' (index of element within block)
+// Create a proto-structure that splits dimension 'i' into blocks of size 4,
+//   the resulting structure will have dimensions 'y' (index of block) and 'x' (index of element within block)
 auto blk = noarr::into_blocks<'i', 'y', 'x'>(4);
 
-// variant 1
-
+// Variant 1:
 noarr::traverser(original).order(blk).for_each([&](auto state) {
 	// state contains 'i' and can therefore be used with the original structure
 	original[state] = 0;
 
 	// state does not contain 'x' or 'y'
-	// (these were converted into 'i' internally by traverser)
+	//   (these were converted into 'i' internally by traverser)
 });
 
-// variant 2
-
+// Variant 2:
 auto blocked = original.get_ref() ^ blk;
 
 noarr::traverser(blocked).for_each([&](auto state) {
@@ -211,10 +209,14 @@ noarr::traverser(blocked).for_each([&](auto state) {
 	blocked[state] = 0;
 
 	// state does not contain 'i', because the traverser cannot know about 'i'
-	// (all it got was a structure with dimensions 'x' and 'y')
-	original[state] = 0; // this fails!
+	//   (all it got was a structure with dimensions 'x' and 'y')
+	/* This fails during compilation: */ original[state] = 0;
 });
 ```
+
+The difference between the two variants may seem subtle, but it is important. The traverser always returns states relative to the initial structures,
+this is the reason why in the second variant, the state cannot be used to index `original`; the traverser was constructed from `blocked`, which contains
+just `'x'` and `'y'`, while `original` expects a state containing `'i'`.
 
 Whether `order` should be used (instead of wrapping the structure manually) depends on the situation.
 In some applications, it may be necessary to extract indices from the state for some other use apart from structure indexing.
@@ -268,7 +270,7 @@ When multiple structures share a dimension, they must also have the same length 
 Each dimension is iterated only once and the state will only contain one index for that dimension, regardless of how many structures it appears in.
 
 ```cpp
-// structure copy, all dimensions are shared
+// Structure copy, all dimensions are shared
 auto from = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>(), from_data);
 auto to = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 400>() ^ noarr::array<'i', 300>());
 
@@ -276,7 +278,7 @@ noarr::traverser(from, to).for_each([&](auto s) {
 	to[s] = from[s];
 });
 
-// matrix multiplication, each dimension is shared by just two structures
+// Matrix multiplication, each dimension is shared by just two structures
 auto a = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>(), a_data);
 auto b = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 400>() ^ noarr::array<'k', 500>(), b_data);
 auto c = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'k', 500>());
@@ -299,9 +301,9 @@ The first example in this document could be written equivalently as:
 auto matrix_struct = noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>();
 auto matrix = noarr::make_bag(matrix_struct);
 
-// note: here we passed matrix (not matrix_struct) in the first example
+// Note: here we passed matrix (not matrix_struct) in the first example
 noarr::traverser(matrix_struct).for_each([&](auto s) {
-	// we still use the bag on this line
+	// We still use the bag on this line
 	matrix[s] = 0;
 });
 ```
@@ -330,17 +332,17 @@ For example:
 auto matrix = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() ^ noarr::array<'j', 400>());
 
 for(auto trav : noarr::traverser(matrix)) {
-	// this code executes for each column:
+	// This code executes for each column:
 	// t is a traverser with 'j' fixed
 
 	trav.for_each([&](auto state) {
-		// only now we have the index in i
+		// Only now we have the index in i
 		matrix[state] = 0;
 	});
 
 	// ~or~
 
-	for(auto unit_trav : trav) { // iterate the topmost dimension of trav, leaving no dimensions
+	for(auto unit_trav : trav) { // Iterate the topmost dimension of trav, leaving no dimensions
 		matrix[unit_trav] = 0;
 	}
 }
@@ -367,17 +369,17 @@ auto matrix = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 300>() 
 
 #pragma omp parallel for
 for(auto trav : noarr::traverser(matrix)) {
-	// this code executes for each column:
+	// This code executes for each column:
 	// t is a traverser with 'j' fixed
 
 	trav.for_each([&](auto state) {
-		// only now we have the index in i
+		// Only now we have the index in i
 		matrix[state] = 0;
 	});
 
 	// ~or~
 
-	for(auto unit_trav : trav) { // iterate the topmost dimension of trav, leaving no dimensions
+	for(auto unit_trav : trav) { // Iterate the topmost dimension of trav, leaving no dimensions
 		matrix[unit_trav] = 0;
 	}
 }
@@ -424,8 +426,8 @@ When also including `<noarr/structures/interop/tbb.hpp>`, the range can be used 
 ```cpp
 tbb::parallel_for(noarr::traverser(matrix).range(), [&](auto subrange) {
 	for(auto trav : subrange) {
-		// note: the original structure was two-dimensional,
-		// we have only iterated one dimension - the other one still remains
+		// Note: the original structure was two-dimensional,
+		//   we have only iterated one dimension - the other one still remains
 		for(auto trav : trav) {
 			matrix[trav] = 0;
 		}
@@ -433,7 +435,7 @@ tbb::parallel_for(noarr::traverser(matrix).range(), [&](auto subrange) {
 
 	// ~or~
 
-	// convert to traverser, and continue as usual
+	// Convert to traverser, and continue as usual
 	subrange.as_traverser().for_each([&](auto state) {
 		matrix[state] = 0;
 	});
@@ -443,7 +445,7 @@ tbb::parallel_for(noarr::traverser(matrix).range(), [&](auto subrange) {
 If the only thing you would do with the traverser is a `for_each`, there is also a shortcut available:
 
 ```cpp
-// note: we don't pass a range here, just the traverser
+// Note: we don't pass a range here, just the traverser
 noarr::tbb_for_each(noarr::traverser(matrix), [&](auto state) {
 	matrix[state] = 0;
 });
@@ -456,10 +458,10 @@ In the following example, we use it to sum the rows and columns of a matrix:
 
 ```cpp
 auto matrix = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 300>() ^ noarr::array<'i', 400>(), matrix_data);
-auto row_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 400>()); // a column vector
-auto col_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 300>()); // a row vector
+auto row_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'i', 400>()); // A column vector
+auto col_sums = noarr::make_bag(noarr::scalar<float>() ^ noarr::array<'j', 300>()); // A row vector
 
-// row sums - serial version for comparison:
+// Row sums - serial version for comparison:
 
 noarr::traverser(row_sums).for_each([&](auto state) {
 	row_sums[state] = 0;
@@ -469,32 +471,32 @@ noarr::traverser(matrix).for_each([&](auto state) {
 	row_sums[state] += matrix[state];
 });
 
-// row sums - parallel version:
+// Row sums - parallel version:
 
 noarr::tbb_reduce(
-	// input traverser
+	// Input traverser
 	noarr::traverser(matrix),
 
-	// fill the output with neutral elements (zeros) with respect to the operation (+)
+	// Fill the output with neutral elements (zeros) with respect to the operation (+)
 	[](auto state, auto &out) {
 		out[state] = 0; // out is a bag: row_sums or its copy
 	},
 
-	// accumulate elements into (partial) result
+	// Accumulate elements into (partial) result
 	[matrix](auto state, auto &out) {
 		out[state] += matrix[state];
 	},
 
-	// in-place join partial results
+	// In-place join partial results
 	[](auto state, auto &out_left, const auto &out_right) {
 		out_left[state] += out_right[state];
 	},
 
-	// output bag
+	// Output bag
 	row_sums
 );
 
-// column sums - parallel version:
+// Column sums - parallel version:
 
 noarr::tbb_reduce(/* ... all args the same ... */, col_sums);
 ```
@@ -514,32 +516,32 @@ The two structures need not be related and the output structure may be accessed 
 In the following example, the input structure only has an `'i'` dimension, while the output structure only has `'v'`:
 
 ```cpp
-// vector of values in range [0, 256), indexed by some 'i'
+// Vector of values in range [0, 256), indexed by some 'i'
 auto values = noarr::make_bag(noarr::scalar<std::uint8_t>() ^ noarr::vector<'i'>(size), values_data);
-// histogram of the values, indexed by the value ('v'), gives the number of occurrences
+// Histogram of the values, indexed by the value ('v'), gives the number of occurrences
 auto histogram = noarr::make_bag(noarr::scalar<std::size_t>() ^ noarr::array<'v', 256>());
 
 noarr::tbb_reduce(
-	// input traverser
+	// Input traverser
 	noarr::traverser(values),
 
-	// fill the output with neutral elements
+	// Fill the output with neutral elements
 	[](auto histo_state, auto &histo) {
 		histo[histo_state] = 0;
 	},
 
-	// accumulate elements into (partial) result
+	// Accumulate elements into (partial) result
 	[values](auto values_state, auto &histo) {
 		std::uint8_t value = values[values_state];
-		histo[noarr::idx<'v'>(value)] += 1; // note: cannot use values_state for histo
+		histo[noarr::idx<'v'>(value)] += 1; // Note: cannot use values_state for histo
 	},
 
-	// in-place join partial results
+	// In-place join partial results
 	[](auto histo_state, auto &histo_left, const auto &histo_right) {
 		histo_left[histo_state] += histo_right[histo_state];
 	},
 
-	// output bag
+	// Output bag
 	histogram
 );
 ```
@@ -562,7 +564,7 @@ template<typename T, typename A, typename B, typename C>
 __global__ void matmul(T trav, A a, B b, C c) {
 	float result = 0;
 
-	trav.for_each([=, &result](auto state) { // for each j
+	trav.for_each([=, &result](auto state) { // For each j
 		result += a[state] * b[state];
 	});
 
@@ -592,7 +594,7 @@ __global__ void matmul(T trav, A a, B b, C c) {
 	trav.template for_dims<'r', 's'>([=](auto trav) {
 		float result = 0;
 
-		trav.for_each([=, &result](auto state) { // for each j
+		trav.for_each([=, &result](auto state) { // For each j
 			result += a[state] * b[state];
 		});
 

@@ -4,7 +4,7 @@ The [`set_length`](../structs/set_length.md) proto-structure is not the only way
 It is possible to pass it in a [state](../State.md):
 
 ```cpp
-// a structure with no lengths
+// A structure with no lengths
 auto my_matrix = noarr::scalar<float>() ^ noarr::vector<'i'>() ^ noarr::vector<'j'>();
 
 auto state = noarr::idx<'i', 'j'>(2, 1).template with<noarr::length_in<'i'>, noarr::length_in<'j'>>(3, 3);
@@ -30,16 +30,16 @@ It will then also be available in the state passed to the lambda:
 
 ```cpp
 noarr::traverser(my_matrix).order(noarr::set_length<'i', 'j'>(3, 3)).for_each([my_matrix](auto state) {
-	// these will always pass, since set_length puts the lengths in the state
+	// These will always pass, since set_length puts the lengths in the state
 	assert(state.template get<noarr::length_in<'i'>>() == 3);
 	assert(state.template get<noarr::length_in<'j'>>() == 3);
 
-	// these will not even compile, because the length is not set in my_matrix
+	// These will not even compile, because the length is not set in my_matrix
 	auto i_len = my_matrix | noarr::get_length<'i'>();
 	auto j_len = my_matrix | noarr::get_length<'j'>();
 
-	// this will work thanks to the state
-	std::size_t off = my_matrix | noarr::offset(state); // or get_at
+	// This will work thanks to the state
+	std::size_t off = my_matrix | noarr::offset(state); // Or get_at
 	// ...
 });
 ```

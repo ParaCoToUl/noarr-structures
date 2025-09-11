@@ -30,15 +30,15 @@ The following example shows how these can be treated as a sized (C++ style) stri
 using struct_type = noarr::scalar<float>;
 
 using s = noarr::mangle_to_str<struct_type>;
-// use as sized
+// Use as sized
 assert(std::memcmp(s::c_str, "scalar<float>", s::length) == 0);
-// use as null-terminated
+// Use as null-terminated
 assert(std::strcmp(s::c_str, "scalar<float>") == 0);
-// convert to std::string (two options)
+// Convert to std::string (two options)
 assert(std::string(s::c_str, s::length) == "scalar<float>");
 assert(std::string(s::c_str) == "scalar<float>");
 
-// for templates
+// For templates
 static_assert(std::is_same_v<noarr::mangle<struct_type>, std::integer_sequence<char, 's', 'c', 'a', 'l', 'a', 'r', '<', 'f', 'l', 'o', 'a', 't', '>'>>);
 ```
 

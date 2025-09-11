@@ -56,7 +56,7 @@ For example, a CUDA grid executing the following code traverses a vector regardl
 auto structure = noarr::scalar<float>() ^ noarr::vector<'i'>(1024*1024);
 
 noarr::traverser(structure).order(noarr::cuda_step_grid()).for_each([&](auto state) {
-	std::size_t off = structure | noarr::offset(state); // or use bag
+	std::size_t off = structure | noarr::offset(state); // Or use bag
 	// ...
 });
 ```
@@ -79,7 +79,7 @@ So does `noarr::cuda_step`, for which it is usually not the best choice. For exa
 auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(1024) ^ noarr::vector<'i'>(1024);
 
 noarr::traverser(matrix).order(noarr::cuda_step_block()).for_each([&](auto state) {
-	std::size_t off = matrix | noarr::offset(state); // or use bag
+	std::size_t off = matrix | noarr::offset(state); // Or use bag
 	// ...
 });
 ```

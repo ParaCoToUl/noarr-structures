@@ -54,9 +54,9 @@ auto structure = noarr::scalar<float>() ^ noarr::vector<'i'>();
 
 auto shifted = structure ^ noarr::shift<'i'>(10);
 
-auto updated = shifted ^ noarr::set_length<'i'>(32); // this sets the length after shifting
+auto updated = shifted ^ noarr::set_length<'i'>(32); // This sets the length after shifting
 
-// the length of the vector includes the shift, and thus so does the size
+// The length of the vector includes the shift, and thus so does the size
 auto size = updated | noarr::get_size();
 assert(size == 42 * sizeof(float));
 ```
@@ -73,11 +73,11 @@ Both `shift` and `slice` can also be used in [`traverser::order()`](../Traverser
 
 ```cpp
 noarr::traverser(matrix).order(noarr::shift<'j', 'i'>(3, 2)).for_each([&](auto state) {
-	// the indices here are already shifted
+	// The indices here are already shifted
 	auto [i, j] = noarr::get_indices<'i', 'j'>(state);
 	assert(j >= 3 && i >= 2 && j < 12 && i < 8);
 
-	// use it directly with the original structure (or bag)
+	// Use it directly with the original structure (or bag)
 	std::size_t off = matrix | noarr::offset(state);
 });
 ```

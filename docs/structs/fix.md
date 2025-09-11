@@ -50,17 +50,17 @@ std::size_t offset_row1_col3 = struct_of_one_elem | noarr::offset();
 Similarly, `fix` can be used in [`traverser::order()`](../Traverser.md#orderproto-structure-customizing-the-traversal) to limit the traversal to that same subset:
 
 ```cpp
-// left image
+// Left image
 noarr::traverser(matrix).order(noarr::fix<'i'>(2)).for_each([&](auto state) {
-	// always 2, provided by the `fix` in `order`
+	// Always 2, provided by the `fix` in `order`
 	std::size_t i = noarr::get_index<'i'>(state);
-	// different every time, iterated by the traverser
+	// Different every time, iterated by the traverser
 	std::size_t j = noarr::get_index<'j'>(state);
 
-	std::size_t elem_offset = matrix | noarr::offset(state); // or bag[]
+	std::size_t elem_offset = matrix | noarr::offset(state); // Or bag[]
 });
 
-// right image
+// Right image
 noarr::traverser(matrix).order(noarr::fix<'j'>(2)).for_each([&](auto state) {
 	// j always 2, i distinct
 });

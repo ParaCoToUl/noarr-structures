@@ -42,7 +42,7 @@ auto edges_aos = noarr::pack(noarr::scalar<int>(), noarr::scalar<int>(), noarr::
 It will be useful to extract the `array`:
 
 ```cpp
-auto a = noarr::array<'i', 1024>(); // or vector if it should not be hardcoded
+auto a = noarr::array<'i', 1024>(); // Or vector if it should not be hardcoded
 auto edges_aos = noarr::pack(noarr::scalar<int>(), noarr::scalar<int>(), noarr::scalar<float>()) ^ noarr::tuple<'t'>() ^ a;
 ```
 
@@ -56,19 +56,19 @@ auto edges_soa = noarr::pack(noarr::scalar<int>() ^ a, noarr::scalar<int>() ^ a,
 The main advantage noarr tuples bring here is the layout agnosticity. The following algorithm works with both `edges_aos` and `edges_soa`:
 
 ```cpp
-auto edges = noarr::make_bag(edges_soa, data_ptr); // or edges_aos
+auto edges = noarr::make_bag(edges_soa, data_ptr); // Or edges_aos
 
-// a static index is necessary to index a tuple -- noarr::lit is a shortcut to create one
+// A static index is necessary to index a tuple -- noarr::lit is a shortcut to create one
 using noarr::lit;
 
 for(std::size_t i = 0; i < num_edges; i++) {
-	// the order of indices is not significant (but do not do this)
+	// The order of indices is not significant (but do not do this)
 	int x = edges.template at<'t', 'i'>(lit<0>, i);
 	int y = edges.template at<'i', 't'>(i, lit<1>);
 	float force = edges.template at<'t', 'i'>(lit<2>, i);
 
-	// a dimension can be fixed regardless of the layout
-	// (only in AoS the result will be contiguous, but that does not matter much)
+	// A dimension can be fixed regardless of the layout
+	//   (only in AoS the result will be contiguous, but that does not matter much)
 	auto edge = edges ^ noarr::fix<'i'>(i);
 	int also_x = edge.template at<'t'>(lit<0>); // i already fixed, t remained
 	// ...

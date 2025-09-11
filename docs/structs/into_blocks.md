@@ -132,13 +132,13 @@ auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(12) ^ noarr::vector<'i
 The traversal in any of the following will be the same:
 
 ```cpp
-// the default order
+// The default order
 noarr::traverser(matrix).for_each([&](auto state) {
-	std::size_t off = matrix | noarr::offset(state); // or use bag
+	std::size_t off = matrix | noarr::offset(state); // Or use bag
 	// ...
 });
 
-// any combination of blocks
+// Any combination of blocks
 noarr::traverser(matrix).order(noarr::into_blocks<'i', 'I', 'i'>(4)).for_each(/*...*/);
 noarr::traverser(matrix).order(noarr::into_blocks<'j', 'J', 'j'>(4)).for_each(/*...*/);
 noarr::traverser(matrix).order(noarr::into_blocks<'i', 'I', 'i'>(4) ^ noarr::into_blocks<'j', 'J', 'j'>(4)).for_each(/*...*/);
@@ -155,7 +155,7 @@ We can split the inner dimension into blocks and then hoist the block index so t
 auto tile_j = noarr::into_blocks<'j', 'J', 'j'>(4) ^ noarr::hoist<'J'>();
 
 noarr::traverser(matrix).order(tile_j).for_each([&](auto state) {
-	std::size_t off = matrix | noarr::offset(state); // or use bag
+	std::size_t off = matrix | noarr::offset(state); // Or use bag
 	// ...
 });
 ```
@@ -176,7 +176,7 @@ auto tile_j = noarr::into_blocks<'j', 'J', 'j'>(4) ^ noarr::hoist<'J'>();
 auto tile_i = noarr::into_blocks<'i', 'I', 'i'>(4) ^ noarr::hoist<'I'>();
 
 noarr::traverser(matrix).order(tile_j ^ tile_i).for_each([&](auto state) {
-	std::size_t off = matrix | noarr::offset(state); // or use bag
+	std::size_t off = matrix | noarr::offset(state); // Or use bag
 	// ...
 });
 ```
@@ -217,7 +217,7 @@ If we want to make full use of the vector unit, we need multiple partial sums (a
 read input in blocks of the same size, and always add a whole block to the vector of sums:
 
 ```cpp
-// assuming avx512: 16 elems * 32 bits per elem = 512 bits (it is generally ok to overshoot)
+// Assuming avx512: 16 elems * 32 bits per elem = 512 bits (it is generally ok to overshoot)
 constexpr std::size_t block_size = 16;
 
 auto input = noarr::make_bag(noarr::scalar<float>() ^ noarr::vector<'i'>(num_elems), input_data);
@@ -228,8 +228,8 @@ noarr::traverser(sums).for_each([&](auto si) {
 	sums[si] = 0;
 });
 
-// note: we cannot put this into `order()`, since we need
-// the state (`sii` below) to really have both 'I' and 'i'
+// Note: we cannot put this into `order()`, since we need
+//   the state (`sii` below) to really have both 'I' and 'i'
 auto input_blocks = input ^ noarr::into_blocks_static<'i', '!', 'I', 'i'>(block_size);
 
 noarr::traverser(input_blocks).for_each([&](auto sii) {

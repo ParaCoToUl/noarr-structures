@@ -64,7 +64,7 @@ Once the length is set, it cannot be updated using another `^ noarr::set_length`
 
 ```cpp
 std::size_t ten = my_structure_of_ten | noarr::get_length<'i'>();
-std::size_t three = my_matrix_3x3 | noarr::get_length<'i'>(); // same with 'j'
+std::size_t three = my_matrix_3x3 | noarr::get_length<'i'>(); // Same with 'j'
 ```
 
 Notice the difference in the operator used (`|` and not `^`). That is because `get_length` is *not* a [proto-structure](Glossary.md#proto-structure).
@@ -97,7 +97,7 @@ std::size_t eight = my_structure_of_ten | noarr::offset<'i'>(2); // 2 * sizeof(f
 std::size_t twenty = my_matrix_3x3 | noarr::offset<'i', 'j'>(2, 1); // 5 * sizeof(float)
 // 1 * 3 * sizeof(float) for the vector<'j'>, plus 2 * sizeof(float) for the vector<'i'>
 
-// order of dimensions is not relevant
+// Order of dimensions is not relevant
 std::size_t also_twenty = my_matrix_3x3 | noarr::offset<'j', 'i'>(1, 2);
 ```
 
@@ -105,7 +105,7 @@ Alternatively, it is possible to pass all indices at once, using a [state](Gloss
 
 ```cpp
 auto state = noarr::idx<'i', 'j'>(2, 1);
-std::size_t eight = my_structure_of_ten | noarr::offset(state); // this will ignore 'j', but OK
+std::size_t eight = my_structure_of_ten | noarr::offset(state); // This will ignore 'j', but OK
 std::size_t twenty = my_matrix_3x3 | noarr::offset(state);
 ```
 
@@ -154,13 +154,13 @@ A bag can be indexed using a [state](State.md) (similarly to [`get_at`](#get_at)
 
 ```cpp
 auto state = noarr::idx<'i'>(9);
-float &last_elem = ref_bag[state]; // or unique_bag
+float &last_elem = ref_bag[state]; // Or unique_bag
 ```
 
 It is still possible to pass the indices directly, but this time it gets slightly more complicated:
 
 ```cpp
-float &last_elem = ref_bag.template at<'i'>(9); // or unique_bag
+float &last_elem = ref_bag.template at<'i'>(9); // Or unique_bag
 ```
 
 The `template` keyword may be omitted only when the type of the bag is known to the compiler.
@@ -183,7 +183,7 @@ There is no difference between copying and moving (both the original and the new
 It is possible to get a reference bag pointing to a unique bag:
 
 ```cpp
-auto ref_bag = unique_bag.get_ref(); // can be used on any bag type
+auto ref_bag = unique_bag.get_ref(); // Can be used on any bag type
 ```
 
 In this case, `unique_bag` remains valid and retains the ownership. `ref_bag` is only valid as long as `unique_bag` (or more precisely the data it points to).
@@ -212,7 +212,7 @@ Algorithms that can work with one should be able to work with the other. However
 So the right approach is to template all functions and then select between compiled versions. Here we make use of the fact that [dimensions](Glossary.md#dimension) are named:
 
 ```cpp
-// function which does some logic templated by different structures
+// Function that does some logic templated by different structures
 template<typename Structure>
 void mul_by_scalar(Structure structure, void *data, float factor) {
 	auto i_len = structure | noarr::get_length<'i'>();
@@ -228,7 +228,7 @@ void mul_by_scalar(Structure structure, void *data, float factor) {
 The same written with a bag:
 
 ```cpp
-// function which does some logic templated by different structures
+// Function that does some logic templated by different structures
 template<typename Bag>
 void mul_by_scalar(Bag &bag, float factor) {
 	auto i_len = bag | noarr::get_length<'i'>();
@@ -244,7 +244,7 @@ void mul_by_scalar(Bag &bag, float factor) {
 The same written with a [traverser](Traverser.md) (which can select the order of the loops to work efficiently with both structures):
 
 ```cpp
-// function which does some logic templated by different structures
+// Function that does some logic templated by different structures
 template<typename Bag>
 void mul_by_scalar(Bag &bag, float factor) {
 	noarr::traverser(bag).for_each([&](auto state) {

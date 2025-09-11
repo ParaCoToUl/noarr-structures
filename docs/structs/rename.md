@@ -31,14 +31,14 @@ Dimension renaming can be used to make two structures compatible (for traversal 
 In the following example, we copy a vector indexed by `'i'` into one indexed by `'x'`:
 
 ```cpp
-// let's say we cannot change these definitions
+// Let's say we cannot change these definitions
 auto from = noarr::make_bag(noarr::scalar<float>() ^ noarr::vector<'i'>(42), /*...*/);
 auto to = noarr::make_bag(noarr::scalar<float>() ^ noarr::vector<'x'>(42));
 
-// create a view of `from` that is compatible with `to`
+// Create a view of `from` that is compatible with `to`
 auto from_view = from ^ noarr::rename<'i', 'x'>();
 
-// copy as if they had the same structure
+// Copy as if they had the same structure
 noarr::traverser(to).for_each([&](auto state) {
 	to[state] = from_view[state];
 });

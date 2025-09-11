@@ -22,9 +22,9 @@ auto get_width(Structure s) {
 	return s | noarr::get_length<'x'>();
 }
 
-auto w = matrix | get_width; // this will not work (using template without call)
-auto w = matrix | get_width(); // this does not make sense (the function expects one argument)
-auto w = get_width(matrix); // works but not what we wanted
+auto w = matrix | get_width; // This will not work (using template without call)
+auto w = matrix | get_width(); // This does not make sense (the function expects one argument)
+auto w = get_width(matrix); // Works but not what we wanted
 ```
 
 The solution is to use an object with a generic `operator()`. For example a lambda:
@@ -55,7 +55,7 @@ Alternatively, you can define a type (the call-like expression will then be a de
 
 ```cpp
 struct get_width {
-	// add custom constructor to have args
+	// Add custom constructor to have args
 
 	template<typename Structure>
 	auto operator()(Structure s) {
@@ -63,5 +63,5 @@ struct get_width {
 	}
 };
 
-auto w = matrix | get_width(); // same as get_width{}
+auto w = matrix | get_width(); // Same as get_width{}
 ```

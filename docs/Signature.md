@@ -83,7 +83,7 @@ struct foo<noarr::function_sig<Dim, ArgLength, RetSig>> {
 	// Inspect Dim, ArgLength, and RetSig:
 	static constexpr bool xxx = ArgLength::is_known; // true for false for dynamic_arg_length and static_arg_length, false for dynamic_arg_length
 	static constexpr bool yyy = ArgLength::is_static; // true for false for static_arg_length, false for dynamic_arg_length and dynamic_arg_length
-	static constexpr bool zzz = ArgLength::value; // beware! only valid if ::is_static, i.e. if ArgLength is static_arg_length<N> (::value is the N)
+	static constexpr bool zzz = ArgLength::value; // Beware! only valid if ::is_static, i.e. if ArgLength is static_arg_length<N> (::value is the N)
 	using example_recursion = foo<RetSig>;
 };
 
@@ -93,7 +93,7 @@ struct foo<noarr::dep_function_sig<Dim, RetSigs...>> {
 	static constexpr bool zzz = sizeof...(RetSigs);
 	// Alternatively, reconstruct dep_function_sig<Dim, RetSigs...> and use its static members:
 	using orig_sig = noarr::dep_function_sig<Dim, RetSigs...>;
-	using elem_3_sig = typename orig_sig::template ret_sig<3>; // extract the third element - this is an example, there will usually be some computation instead of just 3
+	using elem_3_sig = typename orig_sig::template ret_sig<3>; // Extract the third element - this is an example, there will usually be some computation instead of just 3
 };
 
 template<class ValueType>
@@ -127,21 +127,21 @@ The simplest transformation is adding an index. When a structure is wrapped in a
 ```cpp
 auto elem = noarr::scalar<float>();
 using elem_sig = noarr::scalar_sig<float>;
-static_assert(std::is_same_v<decltype(elem)::signature, elem_sig>); // should pass
+static_assert(std::is_same_v<decltype(elem)::signature, elem_sig>); // Should pass
 
 auto arr1D = elem ^ noarr::array<'x', 42>();
 using arr1D_sig = noarr::function_sig<'x', noarr::static_arg_length<42>, elem_sig>;
-static_assert(std::is_same_v<decltype(arr1D)::signature, arr1D_sig>); // should pass
+static_assert(std::is_same_v<decltype(arr1D)::signature, arr1D_sig>); // Should pass
 
 auto arr2D = arr1D ^ noarr::array<'y', 54>();
 using arr2D_sig = noarr::function_sig<'y', noarr::static_arg_length<54>, arr1D_sig>;
-static_assert(std::is_same_v<decltype(arr2D)::signature, arr2D_sig>); // should pass
+static_assert(std::is_same_v<decltype(arr2D)::signature, arr2D_sig>); // Should pass
 ```
 
 Just a variant of the above is [`noarr::vector`](structs/vector.md), which does not need to have a statically fixed length:
 
 ```cpp
-// using elem from above
+// Using elem from above
 auto vec1D = elem ^ noarr::vector<'x'>();
 using vec1D_sig = noarr::function_sig<'x', noarr::dynamic_arg_length, elem_sig>; // dynamic_arg_length instead of static_arg_length
 ```
@@ -154,15 +154,15 @@ In the following example, we set the length of a vector to a compile-time consta
 Note that this will *not* result in an array structure type, but the structure *will* have the same signature as the array.
 
 ```cpp
-// using elem from above
+// Using elem from above
 auto vec1D_sized = elem ^ noarr::vector<'x'>() ^ noarr::set_length<'x'>(noarr::lit<42>);
-using vec1D_sized_sig = noarr::function_sig<'x', noarr::static_arg_length<42>, elem_sig>; // exactly the same as arr1D_sig
+using vec1D_sized_sig = noarr::function_sig<'x', noarr::static_arg_length<42>, elem_sig>; // Exactly the same as arr1D_sig
 ```
 
 We used `noarr::lit` to make sure the expression is constant. Without it, we will end up with a dynamic size.
 
 ```cpp
-// using elem from above
+// Using elem from above
 auto vec1D_dynsized = elem ^ noarr::vector<'x'>() ^ noarr::set_length<'x'>(42);
 using vec1D_dynsized_sig = noarr::function_sig<'x', noarr::dynamic_arg_length, elem_sig>;
 ```
@@ -172,13 +172,13 @@ using vec1D_dynsized_sig = noarr::function_sig<'x', noarr::dynamic_arg_length, e
 Most structures not only add and modify dimensions. For example, [`noarr::into_blocks`](structs/into_blocks.md) adds new dimensions, but also removes one:
 
 ```cpp
-// same as previous, just rewritten as one-liners
+// Same as previous, just rewritten as one-liners
 auto arr2D = noarr::scalar<float>() ^ noarr::array<'x', 42>() ^ noarr::array<'y', 54>();
 using arr2D_sig = noarr::function_sig<'y', noarr::static_arg_length<54>,
                    noarr::function_sig<'x', noarr::static_arg_length<42>,
                     noarr::scalar_sig<float> > >;
 
-auto blocked = arr2D ^ noarr::into_blocks<'x', 'u', 'v'>(); // removes x, adds u and v
+auto blocked = arr2D ^ noarr::into_blocks<'x', 'u', 'v'>(); // Removes x, adds u and v
 using blocked_sig = noarr::function_sig<'y', noarr::static_arg_length<54>,
                      noarr::function_sig<'u', noarr::dynamic_arg_length, // u is dynamic, its length is computed from the lengths of x/v
                       noarr::function_sig<'v', noarr::dynamic_arg_length, // v is unknown, its length must be set externally
@@ -195,13 +195,13 @@ For this reason, `'x'` will be completely absent from the signature.
 In the same way `into_blocks` replaces a dimension with two new ones, [`noarr::fix`](structs/fix.md) replaces it with nothing (zero new dimensions).
 
 ```cpp
-// same as previous, just rewritten as one-liners
+// Same as previous, just rewritten as one-liners
 auto arr2D = noarr::scalar<float>() ^ noarr::array<'x', 42>() ^ noarr::array<'y', 54>();
 using arr2D_sig = noarr::function_sig<'y', noarr::static_arg_length<54>,
                    noarr::function_sig<'x', noarr::static_arg_length<42>,
                     noarr::scalar_sig<float> > >;
 
-auto fixed = arr2D ^ noarr::fix<'x'>(6); // removes x, adds nothing
+auto fixed = arr2D ^ noarr::fix<'x'>(6); // Removes x, adds nothing
 using fixed_sig = noarr::function_sig<'y', noarr::static_arg_length<54>,
                    noarr::scalar_sig<float> >;
 ```
@@ -225,14 +225,14 @@ Signatures are intended to allow generic algorithms and functions to work with a
 Note that due to C++ limitations, `::signature` will not work when used on template parameters (or anything derived from them). You will need to add `typename`:
 
 ```cpp
-// obtaining signature from type directly:
+// Obtaining signature from type directly:
 template<typename S>
 void foo(S structure) {
 	using sig = typename S::signature;
 	// ...
 }
 
-// obtaining signature when no type name is available (e.g. in lambda):
+// Obtaining signature when no type name is available (e.g. in lambda):
 auto lambda_foo = [](auto structure) {
 	using sig = typename decltype(structure)::signature;
 	// ...
@@ -272,11 +272,11 @@ using new_sig = typename old_sig::template replace<replacement, old_dim>;
 // ::replace will never try to instantiate the Replacement template for something that does not match the requested dimension name.
 
 template<auto Dim, class ArgLength, class RetSig>
-struct replacement<noarr::function_sig<Dim, ArgLength, RetSig>> { /*...*/ }; // dimension name Dim other than the requested old_dim
+struct replacement<noarr::function_sig<Dim, ArgLength, RetSig>> { /*...*/ }; // Dimension name Dim other than the requested old_dim
 template<auto Dim, class... RetSigs>
-struct replacement<noarr::dep_function_sig<Dim, RetSigs...>> { /*...*/ }; // dimension name Dim other than the requested old_dim
+struct replacement<noarr::dep_function_sig<Dim, RetSigs...>> { /*...*/ }; // Dimension name Dim other than the requested old_dim
 template<class ValueType>
-struct replacement<noarr::scalar_sig<ValueType>> { /*...*/ }; // no dimension name at all
+struct replacement<noarr::scalar_sig<ValueType>> { /*...*/ }; // No dimension name at all
 
 #endif
 ```

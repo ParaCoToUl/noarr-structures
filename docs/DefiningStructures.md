@@ -80,10 +80,10 @@ auto hdr_image = hdr_pixel ^ grid;
 Note that there is a slight difference in the definitions of `image` from the [previous section](#defining-structures-using-composition) and the new `image`:
 
 ```cpp
-// parentheses emphasize the implicit left-associativity
+// Parentheses emphasize the implicit left-associativity
 auto image = (pixel ^ noarr::array<'x', 1920>()) ^ noarr::array<'y', 1080>();
 
-// parentheses inserted because of the separate definition of `grid`
+// Parentheses inserted because of the separate definition of `grid`
 auto image = pixel ^ (noarr::array<'x', 1920>() ^ noarr::array<'y', 1080>());
 ```
 
@@ -161,7 +161,7 @@ You can start with the following template template. It is a structure with one d
 
 template<noarr::IsDim auto Dim, class T, class U, std::size_t V>
 struct bar_t : public noarr::strict_contain<T, U> {
-	// inherit constructors
+	// Inherit constructors
 	using noarr::strict_contain<T, U>::strict_contain;
 
 	static constexpr char name[] = "::foo::bar_t";
@@ -175,12 +175,12 @@ struct bar_t : public noarr::strict_contain<T, U> {
 
 private:
 	constexpr T sub_structure() const noexcept {
-		// sub-structure is stored in an inherited field, retrieve it from there
+		// Sub-structure is stored in an inherited field, retrieve it from there
 		return noarr::strict_contain<T, U>::template get<0>();
 	}
 
 	constexpr U get_u() const noexcept {
-		// the U value stored in an inherited field, retrieve it from there
+		// The U value stored in an inherited field, retrieve it from there
 		return noarr::strict_contain<T, U>::template get<1>();
 	}
 
@@ -198,7 +198,7 @@ public:
 	requires(has_size<State>())
 	{
 		auto sub_size = sub_structure().size(sub_state(state));
-		return ...; // could return sub_size if it is the same
+		return ...; // Could return sub_size if it is the same
 	}
 
 	template<noarr::IsState State>
@@ -218,7 +218,7 @@ public:
 	requires(has_strict_offset_of<Sub, State>())
 	{
 		auto sub_offset = noarr::offset_of<Sub>(sub_structure(), sub_state(state));
-		return ...; // could return sub_offset if it is the same
+		return ...; // Could return sub_offset if it is the same
 	}
 
 	template<auto QDim, noarr::IsState State>
@@ -234,10 +234,10 @@ public:
 	requires(has_length<QDim, State>())
 	{
 		if constexpr(QDim == Dim) {
-			// here we return our own length
+			// Here we return our own length
 			return ...;
 		} else {
-			// caller asked somebody else, forward to sub-structure
+			// Caller asked somebody else, forward to sub-structure
 			return sub_structure().template length<QDim>(sub_state(state));
 		}
 	}
@@ -278,9 +278,9 @@ For example, a proto-structure for the `bar_t` structure shown [above](#example-
 ```cpp
 // namespace foo
 
-template<noarr::IsDim auto Dim, class U, std::size_t V> // we need to already know all the template arguments except for the one sub-structure argument
+template<noarr::IsDim auto Dim, class U, std::size_t V> // We need to already know all the template arguments except for the one sub-structure argument
 struct bar {
-	// we also need to know the values of the fields, again except for the sub-structure
+	// We also need to know the values of the fields, again except for the sub-structure
 	U u;
 
 	static constexpr bool proto_preserves_layout = true or false;

@@ -23,14 +23,14 @@ The proper way to extract the value is by taking the type of the expression and 
 ```cpp
 auto answer = lit<42>;
 
-std::size_t a0 = answer; // correct, implicit conversion to dynamic, cannot ever be converted back or used as template parameter
-std::size_t a1 = decltype(answer)::value; // correct, but unnecessarily complex
+std::size_t a0 = answer; // Correct, implicit conversion to dynamic, cannot ever be converted back or used as template parameter
+std::size_t a1 = decltype(answer)::value; // Correct, but unnecessarily complex
 
-constexpr std::size_t a2 = decltype(answer)::value; // correct, can be used for template parameter
-auto answer2 = lit<a2>; // correct, conversion back to integral_constant
+constexpr std::size_t a2 = decltype(answer)::value; // Correct, can be used for template parameter
+auto answer2 = lit<a2>; // Correct, conversion back to integral_constant
 
-constexpr std::size_t a3 = answer; // incorrect! (conversion from non-constexpr value)
-constexpr std::size_t a4 = answer.value; // incorrect! (member of non-constexpr value, albeit static)
+constexpr std::size_t a3 = answer; // Incorrect! (conversion from non-constexpr value)
+constexpr std::size_t a4 = answer.value; // Incorrect! (member of non-constexpr value, albeit static)
 ```
 
 
@@ -45,11 +45,11 @@ The simplest way to create a structure with such a dimension is [`noarr::vector`
 ```cpp
 auto structure = noarr::scalar<float>() ^ noarr::vector<'x'>(42);
 
-auto size = structure | noarr::get_size(); // returns 42*sizeof(float) as a dynamic value
-auto length = structure | noarr::get_length<'x'>(); // returns 42 as a dynamic value
+auto size = structure | noarr::get_size(); // Returns 42*sizeof(float) as a dynamic value
+auto length = structure | noarr::get_length<'x'>(); // Returns 42 as a dynamic value
 
-auto doffset6 = structure | noarr::offset<'x'>(6); // returns 6*sizeof(float) as a dynamic value
-auto soffset6 = structure | noarr::offset<'x'>(lit<6>); // returns 6*sizeof(float) as a static value
+auto doffset6 = structure | noarr::offset<'x'>(6); // Returns 6*sizeof(float) as a dynamic value
+auto soffset6 = structure | noarr::offset<'x'>(lit<6>); // Returns 6*sizeof(float) as a static value
 ```
 
 Note that in some cases (not this one), the length may depend on other parameters, some of which may not yet be known.
@@ -70,13 +70,13 @@ The previous example can be updated to an array-like by adding `lit<...>`:
 ```cpp
 auto structure = noarr::scalar<float>() ^ noarr::vector<'x'>(lit<42>); // <- added lit here
 
-// different from vector-like
-auto size = structure | noarr::get_size(); // returns 42*sizeof(float) as a *static* value
-auto length = structure | noarr::get_length<'x'>(); // returns 42 as a *static* value
+// Different from vector-like
+auto size = structure | noarr::get_size(); // Returns 42*sizeof(float) as a *static* value
+auto length = structure | noarr::get_length<'x'>(); // Returns 42 as a *static* value
 
-// same as vector-like
-auto doffset6 = structure | noarr::offset<'x'>(6); // returns 6*sizeof(float) as a dynamic value
-auto soffset6 = structure | noarr::offset<'x'>(lit<6>); // returns 6*sizeof(float) as a static value
+// Same as vector-like
+auto doffset6 = structure | noarr::offset<'x'>(6); // Returns 6*sizeof(float) as a dynamic value
+auto soffset6 = structure | noarr::offset<'x'>(lit<6>); // Returns 6*sizeof(float) as a static value
 ```
 
 Another way to create an array-like dimension is, as the name suggests, [`noarr::array`](structs/array.md):
@@ -84,7 +84,7 @@ Another way to create an array-like dimension is, as the name suggests, [`noarr:
 ```cpp
 auto structure = noarr::scalar<float>() ^ noarr::array<'x', 42>();
 
-// in this case, array will behave exactly the same as vector(lit)
+// In this case, array will behave exactly the same as vector(lit)
 ```
 
 In the [signature](Signature.md), array-like dimensions are represented as `noarr::function_sig<Dim, noarr::static_arg_length<N>, T>`.
@@ -101,13 +101,13 @@ The simplest way to create a structure with such a dimension is [`noarr::tuple`]
 ```cpp
 auto structure = noarr::pack(noarr::scalar<long>(), noarr::scalar<short>()) ^ noarr::tuple<'x'>();
 
-auto size = structure | noarr::get_size(); // returns sizeof(long)+sizeof(short) as a *static* value
-auto length = structure | noarr::get_length<'x'>(); // returns 2 as a static value
+auto size = structure | noarr::get_size(); // Returns sizeof(long)+sizeof(short) as a *static* value
+auto length = structure | noarr::get_length<'x'>(); // Returns 2 as a static value
 
-auto soffset0 = structure | noarr::offset<'x'>(lit<0>); // returns 0 as a static value
-auto soffset1 = structure | noarr::offset<'x'>(lit<1>); // returns sizeof(long) as a static value
-auto soffset2 = structure | noarr::offset<'x'>(lit<2>); // fails at compile time (tuple index out of range)
-auto doffset1 = structure | noarr::offset<'x'>(1); // fails at compile time (tuple index must be static)
+auto soffset0 = structure | noarr::offset<'x'>(lit<0>); // Returns 0 as a static value
+auto soffset1 = structure | noarr::offset<'x'>(lit<1>); // Returns sizeof(long) as a static value
+auto soffset2 = structure | noarr::offset<'x'>(lit<2>); // Fails at compile time (tuple index out of range)
+auto doffset1 = structure | noarr::offset<'x'>(1); // Fails at compile time (tuple index must be static)
 ```
 
 In the [signature](Signature.md), tuple-like dimensions are represented as `noarr::dep_function_sig<Dim, T...>`.
@@ -125,23 +125,23 @@ The simplest way to create a structure with such a dimension is [`noarr::vector`
 auto structure = noarr::scalar<float>() ^ noarr::vector<'x'>();
 
 // structure cannot be queried until the length is known
-auto size = structure | noarr::get_size(); // fails at compile time (unknown vector length)
+auto size = structure | noarr::get_size(); // Fails at compile time (unknown vector length)
 
-// option 0: set length in the structure, dynamically
+// Option 0: set length in the structure, dynamically
 auto structure42 = structure ^ noarr::set_length<'x'>(42);
-auto size = structure42 | noarr::get_size(); // returns 42*sizeof(float) as a dynamic value
+auto size = structure42 | noarr::get_size(); // Returns 42*sizeof(float) as a dynamic value
 
-// option 1: set length in the structure, statically
+// Option 1: set length in the structure, statically
 auto structure42 = structure ^ noarr::set_length<'x'>(lit<42>);
-auto size = structure42 | noarr::get_size(); // returns 42*sizeof(float) as a static value
+auto size = structure42 | noarr::get_size(); // Returns 42*sizeof(float) as a static value
 
-// option 2: set length in the structure during the query, dynamically
+// Option 2: set length in the structure during the query, dynamically
 auto state42 = noarr::make_state<noarr::length_in<'x'>>(42);
-auto size = structure | noarr::get_size(state42); // returns 42*sizeof(float) as a dynamic value
+auto size = structure | noarr::get_size(state42); // Returns 42*sizeof(float) as a dynamic value
 
-// option 3: set length in the structure during the query, statically
+// Option 3: set length in the structure during the query, statically
 auto state42 = noarr::make_state<noarr::length_in<'x'>>(lit<42>);
-auto size = structure | noarr::get_size(state42); // returns 42*sizeof(float) as a static value
+auto size = structure | noarr::get_size(state42); // Returns 42*sizeof(float) as a static value
 
 // ...
 ```

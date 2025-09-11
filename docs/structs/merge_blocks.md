@@ -85,7 +85,7 @@ then convert to blocks, and only then apply the proper size:
 
 ```cpp
 std::size_t block_size = 4;
-std::size_t num_blocks = (num_cols + block_size - 1) / block_size; // this is ceiling(num_cols / block_size)
+std::size_t num_blocks = (num_cols + block_size - 1) / block_size; // This is ceiling(num_cols / block_size)
 
 auto matrix = noarr::scalar<float>()
 	^ noarr::vector<'e'>(block_size)
@@ -110,13 +110,13 @@ std::size_t tile_rows = 4;
 std::size_t tile_cols = 4;
 
 auto tiled_matrix = noarr::scalar<float>()
-	// create a tile
+	// Create a tile
 	^ noarr::vector<'j'>(tile_cols)
 	^ noarr::vector<'i'>(tile_rows)
-	// create the grid of tiles
+	// Create the grid of tiles
 	^ noarr::vector<'J'>(num_cols / tile_cols)
 	^ noarr::vector<'I'>(num_rows / tile_rows)
-	// merge the tiles together
+	// Merge the tiles together
 	^ noarr::merge_blocks<'J', 'j', 'j'>()
 	^ noarr::merge_blocks<'I', 'i', 'i'>();
 ```

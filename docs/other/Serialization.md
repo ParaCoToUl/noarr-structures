@@ -34,7 +34,7 @@ if(!noarr::deserialize_data(std::ifstream("path/to/src"), bag)) {
 	return 1;
 }
 
-// ... <- do some transformation on the data
+// ... <- Do some transformation on the data
 
 if(!noarr::serialize_data(std::ofstream("path/to/dest"), bag)) {
 	std::cerr << "Output error" << std::endl;

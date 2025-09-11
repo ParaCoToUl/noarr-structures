@@ -36,10 +36,10 @@ you can use the second kind (`for_each`-like) in combination with `noarr::hoist`
 ```cpp
 auto matrix = noarr::scalar<float>() ^ noarr::vector<'j'>(4) ^ noarr::vector<'i'>(3);
 
-// various ways to do a i-major traversal (row-by-row if i is row index)
+// Various ways to do a i-major traversal (row-by-row if i is row index)
 
 noarr::traverser(matrix)
-	.for_each([](auto inner_trav) { /* ... */ }); // the default with the current definition
+	.for_each([](auto inner_trav) { /* ... */ }); // The default with the current definition
 
 noarr::traverser(matrix)
 	.template for_dims<'i', 'j'>([](auto inner_trav) { /* ... */ });
@@ -51,7 +51,7 @@ noarr::traverser(matrix)
 noarr::traverser(matrix ^ noarr::hoist<'i'>())
 	.for_each([](auto inner_trav) { /* ... */ });
 
-// various ways to do a j-major traversal (column-by-column if i is row index)
+// Various ways to do a j-major traversal (column-by-column if i is row index)
 
 noarr::traverser(matrix)
 	.template for_dims<'j', 'i'>([](auto inner_trav) { /* ... */ });

@@ -30,11 +30,11 @@ see [`noarr::vector`](vector.md) and [Lengths section in Basic Usage](../BasicUs
 Use array for homogeneous "tuples", i.e. structures with a constant size of the same type/structure:
 
 ```cpp
-// the coordinates of a point in 3D (x, y, z)
+// The coordinates of a point in 3D (x, y, z)
 auto point = noarr::scalar<float>() ^ noarr::array<'i', 3>();
 // color, dim 'c' is the channel (for r, g, b, alpha)
 auto color = noarr::scalar<std::uint8_t>() ^ noarr::array<'c', 4>();
-// a complex number (when represented using a structure)
+// A complex number (when represented using a structure)
 auto complex = noarr::scalar<float>() ^ noarr::array<'c', 2>();
 ```
 
@@ -45,9 +45,9 @@ However, when we use `noarr::array`, we can further customize the layout:
 ```cpp
 auto complex_proto = noarr::array<'c', 2>();
 
-// a complex vector, array-of-structures (the usual representation)
+// A complex vector, array-of-structures (the usual representation)
 auto complex_vec_aos = noarr::scalar<float>() ^ complex_proto ^ noarr::vector<'i'>();
-// structure-of-arrays (an alternative representation)
+// Structure-of-arrays (an alternative representation)
 auto complex_vec_soa = noarr::scalar<float>() ^ noarr::vector<'i'>() ^ complex_proto;
 ```
 

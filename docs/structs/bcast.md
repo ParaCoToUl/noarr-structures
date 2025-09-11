@@ -45,7 +45,7 @@ auto structure = noarr::scalar<float>() ^ noarr::vector<'i'>(42);
 noarr::traverser(structure ^ noarr::bcast<'r'>(5)).for_each([&](auto state) {
 	int round = noarr::get_index<'r'>(state);
 
-	// fine, structure will ignore 'r' (same with e.g. bag[] or get_at)
+	// Fine, structure will ignore 'r' (same with e.g. bag[] or get_at)
 	std::size_t off = structure | noarr::offset(state);
 });
 ```
