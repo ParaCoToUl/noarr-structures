@@ -58,20 +58,20 @@ constexpr bool has_offset_of() noexcept {
 	}
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 requires (has_offset_of<StructInner, StructOuter, State>())
-constexpr auto offset_of(StructOuter structure, State state) noexcept {
+constexpr auto offset_of(StructOuter structure, State state, Start start = Start{}) noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
-		return constexpr_arithmetic::make_const<0>(); // offset of itself is always 0
+		return start; // offset of itself is always 0
 	} else {
-		return structure.template strict_offset_of<struct_inner_t>(state);
+		return structure.template strict_offset_of<struct_inner_t>(state, start);
 	}
 }
 
-template<class StructInner, class StructOuter, IsState State>
-constexpr void offset_of(StructOuter /*structure*/, State /*state*/) noexcept {
+template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+constexpr void offset_of(StructOuter /*structure*/, State /*state*/, Start /*start*/ = Start{}) noexcept {
 	static_assert(
 		has_offset_of<StructInner, StructOuter, State>(),
 		"The inner structure is not accessed in the outer structure with the given state, cannot get its offset");

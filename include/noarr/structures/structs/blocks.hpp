@@ -140,11 +140,11 @@ public:
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, into_blocks_t, State>())
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state));
+	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
+		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
 	template<auto QDim, IsState State>
@@ -382,11 +382,11 @@ public:
 		}
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, into_blocks_dynamic_t, State>())
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state));
+	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
+		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
 	template<auto QDim, IsState State>
@@ -656,11 +656,11 @@ public:
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, into_blocks_static_t, State>())
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state));
+	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
+		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
 	template<auto QDim, IsState State>
@@ -919,11 +919,11 @@ public:
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, merge_blocks_t, State>())
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state));
+	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
+		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
 	template<auto QDim, IsState State>

@@ -105,17 +105,17 @@ struct tuple_t : strict_contain<TS...> {
 		}
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, tuple_t, State>())
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
 		using namespace constexpr_arithmetic;
 
 		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 		const auto sub_stat = sub_state(state);
 
-		return size_inner(std::make_index_sequence<index>(), sub_stat) +
-		       offset_of<Sub>(sub_structure<index>(), sub_stat);
+		return offset_of<Sub>(sub_structure<index>(), sub_stat,
+		                      size_inner(std::make_index_sequence<index>(), sub_stat) + start);
 	}
 
 	template<auto QDim, IsState State>
@@ -298,10 +298,10 @@ struct vector_t : strict_contain<T> {
 		}
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, vector_t, State>())
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
 		using namespace constexpr_arithmetic;
 		if constexpr (!std::is_same_v<decltype(std::declval<State>().template get<length_in<Dim>>()),
 		                              std::integral_constant<std::size_t, 1>>) {
@@ -309,12 +309,12 @@ struct vector_t : strict_contain<T> {
 			const auto index = state.template get<index_in<Dim>>();
 			const auto sub_struct = sub_structure();
 			const auto sub_stat = sub_state(state);
-			return index * sub_struct.size(sub_stat) + offset_of<Sub>(sub_struct, sub_stat);
+			return offset_of<Sub>(sub_struct, sub_stat, index * sub_struct.size(sub_stat) + start);
 		} else {
 			// Optimization: length is one, thus the only valid index is zero.
 			// Assume the index is valid (caller's responsibility).
 			// offset = 0 * elem_size + offset_within_elem = offset_within_elem
-			return offset_of<Sub>(sub_structure(), sub_state(state));
+			return offset_of<Sub>(sub_structure(), sub_state(state), start);
 		}
 	}
 

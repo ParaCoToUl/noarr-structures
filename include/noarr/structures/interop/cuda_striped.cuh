@@ -148,19 +148,19 @@ public:
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State>
+	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, cuda_striped_t, State>())
 	[[nodiscard]]
-	constexpr auto strict_offset_of(State state) const noexcept {
+	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
 		using namespace constexpr_arithmetic;
 		const auto sub_offset = offset_of<Sub>(sub_structure(), sub_state(state));
 		const auto offset_major = sub_offset / make_const<stripe_width>();
 		if constexpr (std::is_same_v<Sub, ElemType> && stripe_width_elems == 1) {
 			// Optimization: offset_minor should be zero.
-			return offset_inner(state, offset_major);
+			return offset_inner(state, offset_major, start);
 		} else {
 			const auto offset_minor = sub_offset % make_const<stripe_width>();
-			return offset_inner(state, offset_major) + offset_minor;
+			return offset_inner(state, offset_major, start + offset_minor);
 		}
 	}
 
@@ -202,16 +202,16 @@ public:
 	}
 
 private:
-	template<class Idx, IsState State>
-	constexpr auto offset_inner(State state, Idx index_of_period) const noexcept {
+	template<class Idx, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+	constexpr auto offset_inner(State state, Idx index_of_period, Start start = Start{}) const noexcept {
 		using namespace constexpr_arithmetic;
 		const auto offset_of_period = index_of_period * make_const<total_width>();
 		if constexpr (state_contains<State, cuda_stripe_index>) {
 			const auto offset_of_stripe = state.template get<cuda_stripe_index>() * make_const<stripe_padded_width>();
-			return offset_of_period + offset_of_stripe;
+			return offset_of_period + offset_of_stripe + start;
 		} else {
 			const std::size_t offset_of_stripe = (threadIdx.x % NumStripes) * stripe_padded_width;
-			return offset_of_period + offset_of_stripe;
+			return offset_of_period + offset_of_stripe + start;
 		}
 	}
 };

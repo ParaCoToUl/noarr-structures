@@ -49,9 +49,9 @@ struct scalar : strict_contain<> {
 		return false;
 	}
 
-	template<class Sub, IsState State = state<>>
+	template<class Sub, IsState State = state<>, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, scalar, State>())
-	static constexpr void strict_offset_of(State /*unused*/ = empty_state) noexcept {}
+	static constexpr void strict_offset_of(State /*unused*/ = empty_state, Start /*unused*/ = Start{}) noexcept {}
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
