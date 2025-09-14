@@ -148,7 +148,7 @@ public:
 	 * @brief return the wrapped structure which describes the `data` blob
 	 */
 	[[nodiscard]]
-	constexpr auto structure() const noexcept {
+	constexpr decltype(auto) structure() const noexcept {
 		return base::template get<0>();
 	}
 
@@ -166,11 +166,11 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<auto... Dims, class... Ts>
+	template<auto... Dims>
 	requires IsDimPack<decltype(Dims)...>
 	[[nodiscard]]
-	constexpr decltype(auto) at(Ts... ts) const noexcept {
-		return structure() | noarr::get_at<Dims...>(data(), ts...);
+	constexpr decltype(auto) at(auto... ts) const noexcept {
+		return noarr::get_at<Dims...>(data(), ts...)(structure());
 	}
 
 	/**
@@ -180,8 +180,8 @@ public:
 	 */
 	template<ToState HasState>
 	[[nodiscard]]
-	constexpr decltype(auto) operator[](HasState has_state) const noexcept {
-		return structure() | noarr::get_at(data(), convert_to_state(has_state));
+	constexpr decltype(auto) operator[](HasState &&has_state) const noexcept {
+		return noarr::get_at(data(), convert_to_state(std::forward<HasState>(has_state)))(structure());
 	}
 
 	/**
@@ -190,14 +190,14 @@ public:
 	 * @tparam Dims: the dimension names
 	 * @param ts: the dimension values
 	 */
-	template<auto... Dims, class... Ts>
+	template<auto... Dims>
 	requires IsDimPack<decltype(Dims)...>
 	[[nodiscard]]
-	constexpr auto offset(Ts... ts) const noexcept {
-		return structure() | noarr::offset<Dims...>(ts...);
+	constexpr auto offset(auto... ts) const noexcept {
+		return noarr::offset<Dims...>(ts...)(structure());
 	}
 
-	template<auto Dim, IsState State>
+	template<auto Dim, IsState State = state<>>
 	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
@@ -213,10 +213,10 @@ public:
 	requires (has_length<Dim, State>())
 	[[nodiscard]]
 	constexpr auto length(State state = empty_state) const noexcept {
-		return structure() | noarr::get_length<Dim>(state);
+		return noarr::get_length<Dim>(state)(structure());
 	}
 
-	template<IsState State>
+	template<IsState State = state<>>
 	[[nodiscard]]
 	static constexpr bool has_size() noexcept {
 		return structure_t::template has_size<State>();
@@ -230,7 +230,7 @@ public:
 	requires (has_size<State>())
 	[[nodiscard]]
 	constexpr auto size(State state = empty_state) const noexcept {
-		return structure() | noarr::get_size(state);
+		return noarr::get_size(state)(structure());
 	}
 
 	/**
@@ -244,15 +244,16 @@ public:
 	requires (ProtoStruct::proto_preserves_layout)
 	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator^(bag_t &&s, ProtoStruct p) {
-		return bag_t<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p,
-		                                                     std::move(std::move(s).template get<1>()));
+		using new_structure_t = std::remove_cvref_t<decltype(s.structure() ^ p)>;
+		return bag_t<new_structure_t, BagPolicy>(s.structure() ^ p, std::move(std::move(s).template get<1>()));
 	}
 
 	template<IsProtoStruct ProtoStruct>
 	requires (ProtoStruct::proto_preserves_layout && std::is_trivially_copy_constructible_v<data_t>)
 	[[nodiscard("Returns a new bag")]]
 	friend constexpr auto operator^(const bag_t &s, ProtoStruct p) {
-		return bag_t<decltype(s.structure() ^ p), BagPolicy>(s.structure() ^ p, s.template get<1>());
+		using new_structure_t = std::remove_cvref_t<decltype(s.structure() ^ p)>;
+		return bag_t<new_structure_t, BagPolicy>(s.structure() ^ p, s.template get<1>());
 	}
 };
 

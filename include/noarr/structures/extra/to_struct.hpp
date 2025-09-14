@@ -21,7 +21,8 @@ concept ToStruct = to_struct_v<std::remove_cvref_t<T>>;
 
 template<ToStruct T>
 constexpr decltype(auto) convert_to_struct(T &&t) noexcept {
-	return to_struct<std::remove_cvref_t<T>>::convert(std::forward<T>(t));
+	using type = std::remove_cvref_t<T>;
+	return to_struct<type>::convert(std::forward<T>(t));
 }
 
 template<IsStruct T>
