@@ -184,12 +184,6 @@ public:
 		return false;
 	}
 
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, cuda_striped_t, State>())
-	constexpr void strict_state_at(State) const noexcept {
-		static_assert(always_false<cuda_striped_t>, "A cuda_striped_t cannot be used in this context");
-	}
-
 	static __device__ inline std::size_t current_stripe_index() noexcept { return threadIdx.x % NumStripes; }
 
 	static __device__ inline std::size_t num_stripes() noexcept { return NumStripes; }

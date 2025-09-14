@@ -144,13 +144,6 @@ public:
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, shift_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state), start);
-	}
-
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
@@ -186,13 +179,6 @@ public:
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, shift_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
@@ -319,7 +305,6 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr bool has_size() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set slice length");
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -340,22 +325,13 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set slice length");
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, slice_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set slice length");
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -373,16 +349,7 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set slice length");
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, slice_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set slice length");
-		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
@@ -502,7 +469,6 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr bool has_size() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set span length");
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -523,22 +489,13 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set span length");
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, span_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set span length");
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -557,15 +514,7 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set span length");
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, span_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
@@ -687,7 +636,6 @@ public:
 	template<IsState State>
 	[[nodiscard]]
 	static constexpr bool has_size() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set step length");
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -708,22 +656,13 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set step length");
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, step_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set step length");
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -743,15 +682,7 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set step length");
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, step_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
@@ -903,13 +834,6 @@ public:
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, reverse_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state), start);
-	}
-
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
@@ -928,13 +852,6 @@ public:
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, reverse_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 

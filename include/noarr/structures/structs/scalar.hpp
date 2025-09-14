@@ -49,29 +49,17 @@ struct scalar : strict_contain<> {
 		return false;
 	}
 
-	template<class Sub, IsState State = state<>, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, scalar, State>())
-	static constexpr void strict_offset_of(State /*unused*/ = empty_state, Start /*unused*/ = Start{}) noexcept {}
-
 	template<auto QDim, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		return false;
 	}
 
-	template<IsDim auto QDim, IsState State = state<>>
-	requires (has_length<QDim, State>())
-	static constexpr void length(State /*unused*/ = empty_state) noexcept {}
-
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
 		return false;
 	}
-
-	template<class Sub, IsState State = state<>>
-	requires (has_state_at<Sub, scalar, State>())
-	static constexpr void strict_state_at(State /*unused*/ = empty_state) noexcept {}
 };
 
 } // namespace noarr

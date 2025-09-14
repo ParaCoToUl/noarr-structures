@@ -65,8 +65,10 @@ constexpr auto offset_of(StructOuter structure, State state, Start start = Start
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return start; // offset of itself is always 0
-	} else {
+	} else if constexpr (requires { structure.template strict_offset_of<struct_inner_t>(state, start); }) {
 		return structure.template strict_offset_of<struct_inner_t>(state, start);
+	} else {
+		return offset_of<struct_inner_t>(structure.sub_structure(state), structure.sub_state(state), start);
 	}
 }
 
@@ -95,8 +97,10 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return state;
-	} else {
+	} else if constexpr (requires { structure.template strict_state_at<struct_inner_t>(state); }) {
 		return structure.template strict_state_at<struct_inner_t>(state);
+	} else {
+		return state_at<struct_inner_t>(structure.sub_structure(state), structure.sub_state(state));
 	}
 }
 

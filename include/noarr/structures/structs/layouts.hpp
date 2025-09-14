@@ -78,7 +78,6 @@ struct tuple_t : strict_contain<TS...> {
 	requires (has_size<State>())
 	[[nodiscard]]
 	constexpr auto size(State state) const noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set tuple length");
 		return size_inner(is, sub_state(state));
 	}
 
@@ -92,7 +91,6 @@ struct tuple_t : strict_contain<TS...> {
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_offset_of() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set tuple length");
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			static_assert(
 				requires { state_get_t<State, index_in<Dim>>::value; },
@@ -122,7 +120,6 @@ struct tuple_t : strict_contain<TS...> {
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set tuple length");
 		if constexpr (QDim == Dim) {
 			return !state_contains<State, index_in<Dim>>;
 		} else if constexpr (state_contains<State, index_in<Dim>>) {
@@ -149,12 +146,6 @@ struct tuple_t : strict_contain<TS...> {
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
 		return false;
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, tuple_t, State>())
-	constexpr void strict_state_at(State /*state*/) const noexcept {
-		static_assert(value_always_false<Dim>, "A tuple cannot be used in this context");
 	}
 
 private:
@@ -344,10 +335,6 @@ struct vector_t : strict_contain<T> {
 	static constexpr bool has_strict_state_at() noexcept {
 		return false;
 	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, vector_t, State>())
-	constexpr void strict_state_at(State /*state*/) const noexcept {}
 };
 
 template<IsDim auto Dim>

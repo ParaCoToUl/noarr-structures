@@ -73,13 +73,6 @@ struct bcast_t : strict_contain<T> {
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, bcast_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state), start);
-	}
-
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
@@ -106,13 +99,6 @@ struct bcast_t : strict_contain<T> {
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, bcast_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 

@@ -191,7 +191,6 @@ private:
 		requires (sizeof...(DimsI) == sizeof...(Dims) && IsState<State>)
 		[[nodiscard]]
 		static constexpr auto sub_state(State state, T sub_structure, std::index_sequence<DimsI...> /*is*/) noexcept {
-			static_assert(!state_contains<State, length_in<Dim>>, "Cannot set z-curve length");
 			const auto tmp_state = clean_state(state);
 			if constexpr (state_contains<State, index_in<Dim>>) {
 				const std::size_t index = state.template get<index_in<Dim>>();
@@ -256,21 +255,13 @@ public:
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
-	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
-	requires (has_offset_of<Sub, merge_zcurve_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_offset_of(State state, Start start = Start{}) const noexcept {
-		return offset_of<Sub>(sub_structure(), sub_state(state), start);
-	}
-
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(!state_contains<State, index_in<QDim>>,
-		              "This dimension is already fixed, it cannot be used from outside");
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set z-curve length");
-		if constexpr (QDim == Dim) {
+		if constexpr (state_contains<State, index_in<QDim>>) {
+			return false;
+		} else if constexpr (QDim == Dim) {
 			return (... && sub_structure_t::template has_length<Dims, sub_state_t<State>>());
 		} else {
 			return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
@@ -291,15 +282,7 @@ public:
 	template<class Sub, IsState State>
 	[[nodiscard]]
 	static constexpr bool has_strict_state_at() noexcept {
-		static_assert(!state_contains<State, length_in<Dim>>, "Cannot set z-curve length");
 		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
-	template<class Sub, IsState State>
-	requires (has_state_at<Sub, merge_zcurve_t, State>())
-	[[nodiscard]]
-	constexpr auto strict_state_at(State state) const noexcept {
-		return state_at<Sub>(sub_structure(), sub_state(state));
 	}
 };
 
