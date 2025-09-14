@@ -112,7 +112,7 @@ struct union_t : strict_contain<Structs...> {
 
 	template<std::size_t Index>
 	[[nodiscard("returns a copy of the underlying struct")]]
-	constexpr auto sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->template get<Index>();
 	}
 
@@ -163,15 +163,16 @@ constexpr U make_union(const Ts &...s) noexcept {
 
 template<class Struct, class Order>
 struct traverser_t : strict_contain<Struct, Order> {
-	using strict_contain<Struct, Order>::strict_contain;
+	using base = strict_contain<Struct, Order>;
+	using base::base;
 
 	[[nodiscard("returns a copy of the underlying struct")]]
-	constexpr auto get_struct() const noexcept {
+	constexpr decltype(auto) get_struct() const noexcept {
 		return this->template get<0>();
 	}
 
 	[[nodiscard("returns a copy of the underlying order")]]
-	constexpr auto get_order() const noexcept {
+	constexpr decltype(auto) get_order() const noexcept {
 		return this->template get<1>();
 	}
 
@@ -180,6 +181,18 @@ struct traverser_t : strict_contain<Struct, Order> {
 	constexpr auto order(NewOrder new_order) const noexcept {
 		return traverser_t<Struct, decltype(get_order() ^ new_order)>(get_struct(), get_order() ^ new_order);
 	}
+
+	[[nodiscard("returns a copy of the top struct (combination of the underlying struct and order)")]]
+	constexpr auto top_struct() const noexcept {
+		return get_struct() ^ get_order();
+	}
+
+	[[nodiscard("construct an object representing the state of the traverser")]]
+	constexpr auto state() const noexcept {
+		return state_at<Struct>(top_struct(), empty_state);
+	}
+
+	using signature = typename decltype(std::declval<Struct>() ^ std::declval<Order>())::signature;
 
 	template<auto... Dims, class F>
 	requires IsDimPack<decltype(Dims)...>
@@ -190,8 +203,7 @@ struct traverser_t : strict_contain<Struct, Order> {
 	template<auto Dim, auto... Dims, class F>
 	requires IsDimPack<decltype(Dim), decltype(Dims)...>
 	constexpr void for_sections(F f) const {
-		using dim_tree_helper =
-			dim_tree_filter<sig_dim_tree<typename decltype(top_struct())::signature>, in_dim_sequence<Dim, Dims...>>;
+		using dim_tree_helper = dim_tree_filter<sig_dim_tree<signature>, in_dim_sequence<Dim, Dims...>>;
 		static_assert((dim_tree_contains<Dim, dim_tree_helper> && ... && dim_tree_contains<Dims, dim_tree_helper>),
 		              "Requested dimensions are not present");
 		for_each_impl(dim_tree_helper(), f, empty_state);
@@ -199,28 +211,17 @@ struct traverser_t : strict_contain<Struct, Order> {
 
 	template<class F>
 	constexpr void for_sections(F f) const {
-		using dim_tree_helper = sig_dim_tree<typename decltype(top_struct())::signature>;
+		using dim_tree_helper = sig_dim_tree<signature>;
 		for_each_impl(dim_tree_helper(), f, empty_state);
 	}
 
 	template<auto... Dims, class F>
 	requires IsDimPack<decltype(Dims)...>
 	constexpr void for_dims(F f) const {
-		using dim_tree_helper =
-			dim_tree_filter<sig_dim_tree<typename decltype(top_struct())::signature>, in_dim_sequence<Dims...>>;
+		using dim_tree_helper = dim_tree_filter<sig_dim_tree<signature>, in_dim_sequence<Dims...>>;
 		static_assert((... && dim_tree_contains<Dims, dim_tree_helper>), "Requested dimensions are not present");
 		using reordered_tree = dim_tree_reorder<dim_tree_helper, Dims...>;
 		for_each_impl(reordered_tree(), f, empty_state);
-	}
-
-	[[nodiscard("construct an object representing the state of the traverser")]]
-	constexpr auto state() const noexcept {
-		return state_at<Struct>(top_struct(), empty_state);
-	}
-
-	[[nodiscard("returns a copy of the top struct (combination of the underlying struct and order)")]]
-	constexpr auto top_struct() const noexcept {
-		return get_struct() ^ get_order();
 	}
 
 	template<auto Dim>

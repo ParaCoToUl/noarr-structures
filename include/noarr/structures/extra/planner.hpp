@@ -40,17 +40,25 @@ struct planner_ending_elem_t : flexible_contain<F> {
 
 	using base::base;
 
+private:
+	struct sigholder_t {
+		using signature = Sig;
+		static_assert(!always_false<signature>); // prevents false warnings
+
+		template<auto Dim, IsState State>
+		requires IsDim<decltype(Dim)>
+		static constexpr bool has_length() noexcept {
+			return false;
+		}
+	};
+
+public:
 	template<class NewOrder>
 	[[nodiscard]]
 	constexpr auto order(NewOrder /*new_order*/) const noexcept {
-		struct sigholder_t {
-			using signature = Sig;
-			static_assert(!always_false<signature>); // prevents false warnings
-		};
+		using signature = typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature;
 
-		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
-
-		return planner_ending_elem_t<typename new_sigholder_t::signature, F>(base::get());
+		return planner_ending_elem_t<signature, F>(base::get());
 	}
 
 	template<class Planner>
@@ -82,17 +90,25 @@ struct planner_ending_t : flexible_contain<F> {
 
 	using base::base;
 
+private:
+	struct sigholder_t {
+		using signature = Sig;
+		static_assert(!always_false<signature>); // prevents false warnings
+
+		template<auto Dim, IsState State>
+		requires IsDim<decltype(Dim)>
+		static constexpr bool has_length() noexcept {
+			return false;
+		}
+	};
+
+public:
 	template<class NewOrder>
 	[[nodiscard]]
 	constexpr auto order(NewOrder /*new_order*/) const noexcept {
-		struct sigholder_t {
-			using signature = Sig;
-			static_assert(!always_false<signature>); // prevents false warnings
-		};
+		using signature = typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature;
 
-		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
-
-		return planner_ending_t<typename new_sigholder_t::signature, F>(base::get());
+		return planner_ending_t<signature, F>(base::get());
 	}
 
 	template<class Planner>
@@ -230,17 +246,25 @@ struct planner_sections_t : flexible_contain<F> {
 
 	using base::base;
 
+private:
+	struct sigholder_t {
+		using signature = Sig;
+		static_assert(!always_false<signature>); // prevents false warnings
+
+		template<auto Dim, IsState State>
+		requires IsDim<decltype(Dim)>
+		static constexpr bool has_length() noexcept {
+			return false;
+		}
+	};
+
+public:
 	template<class NewOrder>
 	[[nodiscard]]
 	constexpr auto order(NewOrder /*new_order*/) const noexcept {
-		struct sigholder_t {
-			using signature = Sig;
-			static_assert(!always_false<signature>); // prevents false warnings
-		};
+		using signature = typename decltype(sigholder_t() ^ std::declval<NewOrder>())::signature;
 
-		using new_sigholder_t = decltype(sigholder_t() ^ std::declval<NewOrder>());
-
-		return planner_sections_t<typename new_sigholder_t::signature, F>(base::get());
+		return planner_sections_t<signature, F>(base::get());
 	}
 
 	template<class Planner>
@@ -319,17 +343,24 @@ struct planner_t<union_t<Structs...>, Order, Ending> : flexible_contain<union_t<
 		return make_planner(get_union(), get_order(), planner_endings(planner_ending_elem_t<signature, F>(f)));
 	}
 
+private:
+	struct sigholder_t {
+		using union_sig = typename union_struct::signature;
+		using signature = union_sig;
+		static_assert(!always_false<signature>); // prevents false warnings // suppresses warnings
+
+		template<auto Dim, IsState State>
+		requires IsDim<decltype(Dim)>
+		static constexpr bool has_length() noexcept {
+			return false;
+		}
+	};
+
+public:
 	template<auto... Dims, class F>
 	requires IsDimPack<decltype(Dims)...>
 	[[nodiscard("returns a new planner")]]
 	constexpr auto for_sections(F f) const {
-		using union_sig = typename union_struct::signature;
-
-		struct sigholder_t {
-			using signature = union_sig;
-			static_assert(!always_false<signature>); // prevents false warnings // suppresses warnings
-		};
-
 		using signature = typename decltype(sigholder_t() ^ reorder<Dims...>())::signature;
 
 		return make_planner(get_union(), get_order(), get_ending().add_ending(planner_sections_t<signature, F>(f)));

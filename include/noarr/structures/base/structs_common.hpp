@@ -136,7 +136,12 @@ to_each(ProtoStruct) -> to_each<ProtoStruct>;
  * @tparam T: the input type
  */
 template<class T>
-concept IsStruct = IsSignature<typename std::remove_cvref_t<T>::signature>;
+concept IsStruct = requires {
+	typename std::remove_cvref_t<T>::signature;
+	requires IsSignature<typename std::remove_cvref_t<T>::signature>;
+
+	{ std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>() } -> std::convertible_to<bool>;
+};
 
 /**
  * @brief returns whether the type `T` meets the criteria for proto-structures
@@ -144,7 +149,9 @@ concept IsStruct = IsSignature<typename std::remove_cvref_t<T>::signature>;
  * @tparam T: the input type
  */
 template<class T>
-concept IsProtoStruct = std::same_as<decltype(std::remove_cvref_t<T>::proto_preserves_layout), const bool>;
+concept IsProtoStruct = requires {
+	{ std::remove_cvref_t<T>::proto_preserves_layout } -> std::convertible_to<bool>;
+};
 
 namespace helpers {
 
