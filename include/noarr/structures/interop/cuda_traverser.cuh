@@ -122,7 +122,6 @@ struct cuda_fix_t : strict_contain<T> {
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		static_assert(QDim != Dim, "This dimension is already fixed, it cannot be used from outside");
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 

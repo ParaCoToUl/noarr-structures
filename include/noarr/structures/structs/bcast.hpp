@@ -44,7 +44,6 @@ struct bcast_t : strict_contain<T> {
 	template<IsState State>
 	using clean_state_t = decltype(clean_state(std::declval<State>()));
 
-	static_assert(!T::signature::template any_accept<Dim>, "Dimension name already used");
 	using signature = function_sig<Dim, dynamic_arg_length, typename T::signature>;
 
 	template<IsState State>

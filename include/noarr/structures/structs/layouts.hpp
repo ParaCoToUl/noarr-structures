@@ -98,7 +98,6 @@ struct tuple_t : strict_contain<TS...> {
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 			return has_offset_of<Sub, sub_structure_t<index>, sub_state_t<State>>();
 		} else {
-			static_assert(state_contains<State, index_in<Dim>>, "Tuple indices must be set");
 			return false;
 		}
 	}

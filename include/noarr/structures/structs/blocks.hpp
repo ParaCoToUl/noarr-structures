@@ -184,8 +184,6 @@ public:
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
-		static_assert(!state_contains<State, index_in<QDim>>,
-		              "This dimension is already fixed, it cannot be used from outside");
 		if constexpr (QDim == DimMinor) {
 			if constexpr (state_contains<State, length_in<DimMinor>>) {
 				return state.template get<length_in<DimMinor>>();
