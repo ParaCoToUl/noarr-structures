@@ -3,6 +3,8 @@
 
 #include <cstddef>
 
+#include <type_traits>
+
 #include "../base/state.hpp"
 #include "../base/structs_common.hpp"
 #include "../base/utility.hpp"
@@ -180,24 +182,30 @@ requires (sizeof...(Dims) == sizeof...(Lengths)) && IsDimPack<decltype(Dims)...>
 
 // Working with state (especially in traverser lambdas)
 
-template<IsDim auto Dim, ToState HasState>
+template<auto Dim, class HasState>
+requires IsDim<decltype(Dim)> && ToState<HasState> &&
+         state_contains<to_state_t<std::remove_cvref_t<HasState>>, index_in<Dim>>
 constexpr auto get_index(HasState has_state) noexcept {
 	return convert_to_state(has_state).template get<index_in<Dim>>();
 }
 
-template<IsDim auto Dim, ToState HasState>
+template<auto Dim, class HasState>
+requires IsDim<decltype(Dim)> && ToState<HasState> &&
+         state_contains<to_state_t<std::remove_cvref_t<HasState>>, length_in<Dim>>
 constexpr auto get_length_in(HasState has_state) noexcept {
 	return convert_to_state(has_state).template get<length_in<Dim>>();
 }
 
 template<auto... Dims, class HasState>
-requires IsDimPack<decltype(Dims)...> && ToState<HasState>
+requires IsDimPack<decltype(Dims)...> && ToState<HasState> &&
+         state_contains<to_state_t<std::remove_cvref_t<HasState>>, index_in<Dims>...>
 constexpr auto get_indices(HasState has_state) noexcept {
 	return std::make_tuple(convert_to_state(has_state).template get<index_in<Dims>>()...);
 }
 
 template<auto... Dims, class HasState>
-requires IsDimPack<decltype(Dims)...> && ToState<HasState>
+requires IsDimPack<decltype(Dims)...> && ToState<HasState> &&
+         state_contains<to_state_t<std::remove_cvref_t<HasState>>, length_in<Dims>...>
 constexpr auto get_lengths_in(HasState has_state) noexcept {
 	return std::make_tuple(convert_to_state(has_state).template get<length_in<Dims>>()...);
 }
