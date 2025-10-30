@@ -1,4 +1,4 @@
-name: Docs check - Ubuntu
+name: Docs check - Ubuntu-24.04
 
 on:
   push:
@@ -10,13 +10,13 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Install gcc
-      run: sudo apt-get update && sudo apt-get upgrade -y && sudo apt-get install g++ clang
+      run: sudo apt-get update && sudo apt-get install -y g++ clang
 
     - name: Test
       run: docs_check/check
