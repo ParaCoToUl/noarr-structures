@@ -247,6 +247,9 @@ Others are not useful at all -- for example [`noarr::rename`](structs/rename.md)
 In this case, you can use the manual variant, `noarr::traverser(orig_struct ^ noarr::bcast<'n'>(...))`,
 and still use just `orig_struct` in the lambda body, since `orig_struct` will ignore `'n'` anyway.
 
+Note that, if the dimensions added by the applied proto-structures are to be used in `for_dims` (or `for_each`),
+it is always necessary to apply the proto-structure to the original structure instead of using `order` on the traverser.
+
 See the linked documentation pages for usage examples and detailed descriptions.
 
 
