@@ -10,7 +10,7 @@
 #include <noarr/structures/extra/mangle.hpp>
 
 template<char... Chars>
-std::string cp2a(std::integer_sequence<char, Chars...>) { return {Chars...}; }
+static std::string cp2a(std::integer_sequence<char, Chars...> /*is*/) { return {Chars...}; }
 
 static std::string int_name = "int" + std::to_string(sizeof(int) * 8) + "_t";
 static std::string size_name = "uint" + std::to_string(sizeof(std::size_t) * 8) + "_t";
