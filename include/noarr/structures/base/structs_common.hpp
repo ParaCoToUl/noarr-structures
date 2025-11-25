@@ -46,17 +46,55 @@ struct dim_param {
 	using value_type = decltype(Dim);
 	static constexpr auto value = Dim;
 };
+
+template<class StructInner, class StructOuter, class State>
+concept defines_has_strict_offset_of =
+	IsState<State> && requires { StructOuter::template has_strict_offset_of<StructInner, State>(); };
+
+template<class Struct>
+concept defines_constant_substructure_t = requires { typename Struct::sub_structure_t; };
+
 template<class StructInner, class StructOuter, class State, class Start>
 concept defines_strict_offset_of = IsState<State> && requires(StructOuter structure, State state, Start start) {
 	structure.template strict_offset_of<StructInner>(state, start);
 };
 
 template<class StructInner, class StructOuter, class State>
+concept defines_has_strict_state_at =
+	IsState<State> && requires { StructOuter::template has_strict_state_at<StructInner, State>(); };
+
+template<class StructInner, class StructOuter, class State>
 concept defines_strict_state_at = IsState<State> && requires(StructOuter structure, State state) {
 	structure.template strict_state_at<StructInner>(state);
 };
 
+template<class StructInner, class StructOuter, IsState State>
+constexpr bool has_offset_of() noexcept;
+
+template<class StructInner, class StructOuter, IsState State>
+constexpr bool has_state_at() noexcept;
+
 namespace helpers {
+
+template<class StructInner, class StructOuter, IsState State>
+requires defines_has_strict_offset_of<StructInner, StructOuter, State>
+constexpr auto has_offset_of_impl() noexcept {
+	return StructOuter::template has_strict_offset_of<StructInner, State>();
+}
+
+template<class StructInner, class StructOuter, IsState State>
+requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
+         defines_constant_substructure_t<StructOuter>
+constexpr auto has_offset_of_impl() noexcept {
+	return has_offset_of<StructInner, typename StructOuter::sub_structure_t,
+	                     typename StructOuter::template sub_state_t<State>>();
+}
+
+template<class StructInner, class StructOuter, IsState State>
+constexpr auto has_offset_of_impl() noexcept {
+	return has_offset_of<StructInner, typename StructOuter::template sub_structure_t<State>,
+	                     typename StructOuter::template sub_state_t<State>>();
+}
 
 template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 requires defines_strict_offset_of<StructInner, StructOuter, State, Start>
@@ -67,6 +105,25 @@ constexpr auto offset_of_impl(StructOuter structure, State state, Start start = 
 template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 constexpr auto offset_of_impl(StructOuter structure, State state, Start start = Start{}) noexcept {
 	return offset_of<StructInner>(structure.sub_structure(state), structure.sub_state(state), start);
+}
+
+template<class StructInner, class StructOuter, IsState State>
+requires defines_has_strict_state_at<StructInner, StructOuter, State>
+constexpr auto has_state_at_impl() noexcept {
+	return StructOuter::template has_strict_state_at<StructInner, State>();
+}
+
+template<class StructInner, class StructOuter, IsState State>
+requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) && defines_constant_substructure_t<StructOuter>
+constexpr auto has_state_at_impl() noexcept {
+	return has_state_at<StructInner, typename StructOuter::sub_structure_t,
+	                    typename StructOuter::template sub_state_t<State>>();
+}
+
+template<class StructInner, class StructOuter, IsState State>
+constexpr auto has_state_at_impl() noexcept {
+	return has_state_at<StructInner, typename StructOuter::template sub_structure_t<State>,
+	                    typename StructOuter::template sub_state_t<State>>();
 }
 
 template<class StructInner, class StructOuter, IsState State>
@@ -89,7 +146,7 @@ constexpr bool has_offset_of() noexcept {
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return true;
 	} else {
-		return struct_outer_t::template has_strict_offset_of<struct_inner_t, State>();
+		return helpers::has_offset_of_impl<struct_inner_t, struct_outer_t, State>();
 	}
 }
 
@@ -119,7 +176,7 @@ constexpr bool has_state_at() noexcept {
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return true;
 	} else {
-		return struct_outer_t::template has_strict_state_at<struct_inner_t, State>();
+		return helpers::has_state_at_impl<struct_inner_t, struct_outer_t, State>();
 	}
 }
 
