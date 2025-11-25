@@ -211,12 +211,6 @@ struct reorder_t : strict_contain<T> {
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
 	}
-
-	template<class Sub, IsState State>
-	[[nodiscard]]
-	static constexpr bool has_strict_state_at() noexcept {
-		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
-	}
 };
 
 template<auto... Dims>
@@ -306,12 +300,6 @@ public:
 		return sub_structure().align(sub_state(state));
 	}
 
-	template<class Sub, IsState State>
-	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
-		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
@@ -324,12 +312,6 @@ public:
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);
-	}
-
-	template<class Sub, IsState State>
-	[[nodiscard]]
-	static constexpr bool has_strict_state_at() noexcept {
-		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 };
 
@@ -543,12 +525,6 @@ public:
 		return sub_structure().align(sub_state(state));
 	}
 
-	template<class Sub, IsState State>
-	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
-		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
@@ -562,12 +538,6 @@ public:
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<helpers::rename_dim<QDim, external, internal>::dim>(sub_state(state));
-	}
-
-	template<class Sub, IsState State>
-	[[nodiscard]]
-	static constexpr bool has_strict_state_at() noexcept {
-		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 };
 
@@ -689,12 +659,6 @@ public:
 		return sub_structure().align(sub_state(state));
 	}
 
-	template<class Sub, IsState State>
-	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
-		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
-	}
-
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
@@ -707,12 +671,6 @@ public:
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
-	}
-
-	template<class Sub, IsState State>
-	[[nodiscard]]
-	static constexpr bool has_strict_state_at() noexcept {
-		return has_state_at<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 };
 
