@@ -46,6 +46,41 @@ struct dim_param {
 	using value_type = decltype(Dim);
 	static constexpr auto value = Dim;
 };
+template<class StructInner, class StructOuter, class State, class Start>
+concept defines_strict_offset_of = IsState<State> && requires(StructOuter structure, State state, Start start) {
+	structure.template strict_offset_of<StructInner>(state, start);
+};
+
+template<class StructInner, class StructOuter, class State>
+concept defines_strict_state_at = IsState<State> && requires(StructOuter structure, State state) {
+	structure.template strict_state_at<StructInner>(state);
+};
+
+namespace helpers {
+
+template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+requires defines_strict_offset_of<StructInner, StructOuter, State, Start>
+constexpr auto offset_of_impl(StructOuter structure, State state, Start start = Start{}) noexcept {
+	return structure.template strict_offset_of<StructInner>(state, start);
+}
+
+template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+constexpr auto offset_of_impl(StructOuter structure, State state, Start start = Start{}) noexcept {
+	return offset_of<StructInner>(structure.sub_structure(state), structure.sub_state(state), start);
+}
+
+template<class StructInner, class StructOuter, IsState State>
+requires defines_strict_state_at<StructInner, StructOuter, State>
+constexpr auto state_at_impl(StructOuter structure, State state) noexcept {
+	return structure.template strict_state_at<StructInner>(state);
+}
+
+template<class StructInner, class StructOuter, IsState State>
+constexpr auto state_at_impl(StructOuter structure, State state) noexcept {
+	return state_at<StructInner>(structure.sub_structure(state), structure.sub_state(state));
+}
+
+} // namespace helpers
 
 template<class StructInner, class StructOuter, IsState State>
 constexpr bool has_offset_of() noexcept {
@@ -65,10 +100,8 @@ constexpr auto offset_of(StructOuter structure, State state, Start start = Start
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return start; // offset of itself is always 0
-	} else if constexpr (requires { structure.template strict_offset_of<struct_inner_t>(state, start); }) {
-		return structure.template strict_offset_of<struct_inner_t>(state, start);
 	} else {
-		return offset_of<struct_inner_t>(structure.sub_structure(state), structure.sub_state(state), start);
+		return helpers::offset_of_impl<struct_inner_t>(structure, state, start);
 	}
 }
 
@@ -97,10 +130,8 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
 		return state;
-	} else if constexpr (requires { structure.template strict_state_at<struct_inner_t>(state); }) {
-		return structure.template strict_state_at<struct_inner_t>(state);
 	} else {
-		return state_at<struct_inner_t>(structure.sub_structure(state), structure.sub_state(state));
+		return helpers::state_at_impl<struct_inner_t>(structure, state);
 	}
 }
 
