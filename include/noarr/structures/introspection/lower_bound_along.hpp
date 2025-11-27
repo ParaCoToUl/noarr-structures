@@ -507,7 +507,7 @@ private:
 	using sub_structure_t = typename Structure::sub_structure_t;
 	using sub_state_t = typename Structure::template sub_state_t<State>;
 
-	constexpr static auto QDimNew =
+	static constexpr auto QDimNew =
 		helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
 
 	static constexpr bool get_value() noexcept {
