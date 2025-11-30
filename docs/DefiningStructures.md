@@ -102,22 +102,22 @@ A structure class must have at least the following public members:
 - `signature` member type that
   - is a type alias to a [valid signature](Signature.md)
   - should describe the dimensions accepted in the `state` argument of the remaining members
-- `template<IsState State> static constexpr bool has_size() noexcept` and
+- `template<IsState State> static consteval bool has_size() noexcept` and
   `template<IsState State> constexpr auto size(State state) const noexcept`
   - `size` must be defined only when `has_size<State>()` is `true`
   - should return the size of the structure in bytes (as `std::size_t` or `std::integral_constant`)
 - `template<IsState State> constexpr auto align(State state) const noexcept`
   - optional; if present should return the alignment requirement in bytes
-- `template<class Sub, IsState State> static constexpr bool has_strict_offset_of() noexcept` and
+- `template<class Sub, IsState State> static consteval bool has_strict_offset_of() noexcept` and
   `template<class Sub, IsState State> constexpr auto strict_offset_of(State state) const noexcept`
   - `strict_offset_of` must be defined only when `has_strict_offset_of<Sub, State>()` is `true`
   - should return the offset of a [sub-structure](Glossary.md#sub-structure) `Sub`
   - is recommended to call `offset_of<Sub>` on one of its sub-structures
-- `template<auto QDim, IsState State> static constexpr bool has_length() noexcept` and
+- `template<auto QDim, IsState State> static consteval bool has_length() noexcept` and
   `template<auto QDim, IsState State> constexpr auto length(State state) const noexcept`
   - `length` must be defined only when `has_length<QDim, State>()` is `true`
   - should return the [length](Glossary.md#length) in dimension `QDim`
-- `template<class Sub, IsState State> static constexpr bool has_strict_state_at() noexcept` and
+- `template<class Sub, IsState State> static consteval bool has_strict_state_at() noexcept` and
   `template<class Sub, IsState State> constexpr auto strict_state_at(State state) const noexcept`
   - `strict_state_at` must be defined only when `has_strict_state_at<Sub, State>()` is `true`
   - should return the result of `state_at<Sub>(struct2, state2)` call, where
@@ -190,7 +190,7 @@ public:
 	}
 
 	template<noarr::IsState State>
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return T::template has_size<decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
 	}
 
@@ -210,7 +210,7 @@ public:
 	}
 
 	template<class Sub, noarr::IsState State>
-	static constexpr bool has_strict_offset_of() noexcept {
+	static consteval bool has_strict_offset_of() noexcept {
 		return noarr::has_offset_of<Sub, T, decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
 	}
 
@@ -223,7 +223,7 @@ public:
 	}
 
 	template<auto QDim, noarr::IsState State>
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (QDim == Dim)
 			return true;
 		else
@@ -244,7 +244,7 @@ public:
 	}
 
 	template<class Sub, noarr::IsState State>
-	static constexpr bool has_strict_state_at() noexcept {
+	static consteval bool has_strict_state_at() noexcept {
 		return noarr::has_state_at<Sub, T, decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
 	}
 

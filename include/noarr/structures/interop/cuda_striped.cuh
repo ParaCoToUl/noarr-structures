@@ -114,7 +114,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -144,7 +144,7 @@ public:
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
+	static consteval bool has_strict_offset_of() noexcept {
 		return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
@@ -167,7 +167,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -180,7 +180,7 @@ public:
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_state_at() noexcept {
+	static consteval bool has_strict_state_at() noexcept {
 		return false;
 	}
 

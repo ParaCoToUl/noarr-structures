@@ -116,7 +116,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -136,7 +136,7 @@ public:
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (QDim == DimMinor) {
 			if constexpr (state_contains<State, index_in<DimMinor>>) {
 				return false;
@@ -326,7 +326,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -346,7 +346,7 @@ public:
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
+	static consteval bool has_strict_offset_of() noexcept {
 		if constexpr (!state_contains<State, index_in<DimMajor>, index_in<DimMinor>, index_in<DimIsPresent>>) {
 			return false;
 		} else {
@@ -356,7 +356,7 @@ public:
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (QDim == DimIsPresent) {
 			if constexpr (!state_contains<State, index_in<DimMajor>, index_in<DimMinor>>) {
 				return false;
@@ -584,7 +584,7 @@ public:
 		decltype(impl::sub_state(std::declval<State>(), std::declval<sub_structure_t>(), std::declval<MinorLenT>()));
 
 	template<IsState State>
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -604,7 +604,7 @@ public:
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (state_contains<State, index_in<QDim>>) {
 			// This dimension is already fixed, it cannot be used from outside
 			return false;
@@ -821,7 +821,7 @@ public:
 	using sub_state_t = decltype(impl::sub_state(std::declval<State>(), std::declval<sub_structure_t>()));
 
 	template<IsState State>
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -841,7 +841,7 @@ public:
 
 	template<auto QDim, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		static_assert(!state_contains<State, index_in<QDim>>,
 		              "This dimension is already fixed, it cannot be used from outside");
 		if constexpr (QDim == Dim) {

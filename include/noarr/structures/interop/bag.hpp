@@ -200,7 +200,7 @@ public:
 	template<auto Dim, IsState State = state<>>
 	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return structure_t::template has_length<Dim, State>();
 	}
 
@@ -218,7 +218,7 @@ public:
 
 	template<IsState State = state<>>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return structure_t::template has_size<State>();
 	}
 

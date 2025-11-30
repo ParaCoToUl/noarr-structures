@@ -170,7 +170,7 @@ struct reorder_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return complete && sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -190,14 +190,14 @@ struct reorder_t : strict_contain<T> {
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
+	static consteval bool has_strict_offset_of() noexcept {
 		return complete && has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 	}
 
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return (complete || signature::template any_accept<QDim>) &&
 		       sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
@@ -279,7 +279,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -300,7 +300,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -504,7 +504,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -525,7 +525,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<helpers::rename_dim<QDim, external, internal>::dim,
 		                                            sub_state_t<State>>();
 	}
@@ -638,7 +638,7 @@ public:
 	using sub_state_t = decltype(sub_state(std::declval<State>()));
 
 	template<IsState State>
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -659,7 +659,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 

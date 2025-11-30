@@ -47,7 +47,7 @@ private:
 
 		template<auto Dim, IsState State>
 		requires IsDim<decltype(Dim)>
-		static constexpr bool has_length() noexcept {
+		static consteval bool has_length() noexcept {
 			return false;
 		}
 	};
@@ -97,7 +97,7 @@ private:
 
 		template<auto Dim, IsState State>
 		requires IsDim<decltype(Dim)>
-		static constexpr bool has_length() noexcept {
+		static consteval bool has_length() noexcept {
 			return false;
 		}
 	};
@@ -253,7 +253,7 @@ private:
 
 		template<auto Dim, IsState State>
 		requires IsDim<decltype(Dim)>
-		static constexpr bool has_length() noexcept {
+		static consteval bool has_length() noexcept {
 			return false;
 		}
 	};
@@ -351,7 +351,7 @@ private:
 
 		template<auto Dim, IsState State>
 		requires IsDim<decltype(Dim)>
-		static constexpr bool has_length() noexcept {
+		static consteval bool has_length() noexcept {
 			return false;
 		}
 	};

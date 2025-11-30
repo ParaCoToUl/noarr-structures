@@ -140,7 +140,7 @@ public:
 	template<auto Dim, IsState State>
 	requires IsDim<decltype(Dim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (first_match<Dim> < sizeof...(Structs)) {
 			return sub_structure_t<first_match<Dim>>::template has_length<Dim, State>();
 		} else {

@@ -231,7 +231,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -252,7 +252,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (state_contains<State, index_in<QDim>>) {
 			return false;
 		} else if constexpr (QDim == Dim) {

@@ -73,23 +73,23 @@ concept defines_strict_state_at = IsState<State> && requires(StructOuter structu
 };
 
 template<class StructInner, class StructOuter, IsState State>
-constexpr bool has_offset_of() noexcept;
+consteval bool has_offset_of() noexcept;
 
 template<class StructInner, class StructOuter, IsState State>
-constexpr bool has_state_at() noexcept;
+consteval bool has_state_at() noexcept;
 
 namespace helpers {
 
 template<class StructInner, class StructOuter, IsState State>
 requires defines_has_strict_offset_of<StructInner, StructOuter, State>
-constexpr bool has_offset_of_impl() noexcept {
+consteval bool has_offset_of_impl() noexcept {
 	return StructOuter::template has_strict_offset_of<StructInner, State>();
 }
 
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
          defines_constant_substructure_t<StructOuter>
-constexpr bool has_offset_of_impl() noexcept {
+consteval bool has_offset_of_impl() noexcept {
 	return has_offset_of<StructInner, typename StructOuter::sub_structure_t,
 	                     typename StructOuter::template sub_state_t<State>>();
 }
@@ -97,7 +97,7 @@ constexpr bool has_offset_of_impl() noexcept {
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
          (!defines_constant_substructure_t<StructOuter>)
-constexpr bool has_offset_of_impl() noexcept {
+consteval bool has_offset_of_impl() noexcept {
 	return has_offset_of<StructInner, typename StructOuter::template sub_structure_t<State>,
 	                     typename StructOuter::template sub_state_t<State>>();
 }
@@ -115,13 +115,13 @@ constexpr auto offset_of_impl(StructOuter structure, State state, Start start = 
 
 template<class StructInner, class StructOuter, IsState State>
 requires defines_has_strict_state_at<StructInner, StructOuter, State>
-constexpr bool has_state_at_impl() noexcept {
+consteval bool has_state_at_impl() noexcept {
 	return StructOuter::template has_strict_state_at<StructInner, State>();
 }
 
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) && defines_constant_substructure_t<StructOuter>
-constexpr bool has_state_at_impl() noexcept {
+consteval bool has_state_at_impl() noexcept {
 	return has_state_at<StructInner, typename StructOuter::sub_structure_t,
 	                    typename StructOuter::template sub_state_t<State>>();
 }
@@ -129,7 +129,7 @@ constexpr bool has_state_at_impl() noexcept {
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) &&
          (!defines_constant_substructure_t<StructOuter>)
-constexpr bool has_state_at_impl() noexcept {
+consteval bool has_state_at_impl() noexcept {
 	return has_state_at<StructInner, typename StructOuter::template sub_structure_t<State>,
 	                    typename StructOuter::template sub_state_t<State>>();
 }
@@ -148,7 +148,7 @@ constexpr auto state_at_impl(StructOuter structure, State state) noexcept {
 } // namespace helpers
 
 template<class StructInner, class StructOuter, IsState State>
-constexpr bool has_offset_of() noexcept {
+consteval bool has_offset_of() noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {
@@ -178,7 +178,7 @@ constexpr void offset_of(StructOuter /*structure*/, State /*state*/, Start /*sta
 }
 
 template<class StructInner, class StructOuter, IsState State>
-constexpr bool has_state_at() noexcept {
+consteval bool has_state_at() noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
 	if constexpr (std::is_same_v<struct_inner_t, struct_outer_t>) {

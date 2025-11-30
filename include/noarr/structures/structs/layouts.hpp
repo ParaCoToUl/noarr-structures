@@ -72,7 +72,7 @@ struct tuple_t : strict_contain<TS...> {
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return has_size_inner<sub_state_t<State>>(is);
 	}
 
@@ -92,7 +92,7 @@ struct tuple_t : strict_contain<TS...> {
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
+	static consteval bool has_strict_offset_of() noexcept {
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			static_assert(
 				requires { state_get_t<State, index_in<Dim>>::value; },
@@ -119,7 +119,7 @@ struct tuple_t : strict_contain<TS...> {
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (QDim == Dim) {
 			return !state_contains<State, index_in<Dim>>;
 		} else if constexpr (state_contains<State, index_in<Dim>>) {
@@ -143,7 +143,7 @@ struct tuple_t : strict_contain<TS...> {
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_state_at() noexcept {
+	static consteval bool has_strict_state_at() noexcept {
 		return false;
 	}
 
@@ -152,7 +152,7 @@ private:
 
 	template<IsState State, std::size_t... IS>
 	[[nodiscard]]
-	static constexpr bool has_size_inner(std::index_sequence<IS...> /*is*/) noexcept {
+	static consteval bool has_size_inner(std::index_sequence<IS...> /*is*/) noexcept {
 		return (... && std::remove_cvref_t<decltype(std::declval<tuple_t>().template get<IS>())>::template has_size<
 						   sub_state_t<State>>());
 	}
@@ -255,7 +255,7 @@ struct vector_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		if constexpr (state_contains<State, length_in<Dim>>) {
 			return sub_structure_t::template has_size<sub_state_t<State>>();
 		} else {
@@ -281,7 +281,7 @@ struct vector_t : strict_contain<T> {
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_offset_of() noexcept {
+	static consteval bool has_strict_offset_of() noexcept {
 		if constexpr (state_contains<State, index_in<Dim>, length_in<Dim>>) {
 			return has_offset_of<Sub, sub_structure_t, sub_state_t<State>>();
 		} else {
@@ -311,7 +311,7 @@ struct vector_t : strict_contain<T> {
 
 	template<IsDim auto QDim, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (QDim == Dim) {
 			return state_contains<State, length_in<Dim>> && !state_contains<State, index_in<Dim>>;
 		} else {
@@ -332,7 +332,7 @@ struct vector_t : strict_contain<T> {
 
 	template<class Sub, IsState State>
 	[[nodiscard]]
-	static constexpr bool has_strict_state_at() noexcept {
+	static consteval bool has_strict_state_at() noexcept {
 		return false;
 	}
 };

@@ -120,7 +120,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -141,7 +141,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		if constexpr (QDim == Dim) {
 			if constexpr (state_contains<State, length_in<Dim>>) {
 				return true;
@@ -292,7 +292,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -313,7 +313,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -444,7 +444,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -465,7 +465,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -599,7 +599,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -620,7 +620,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
@@ -762,7 +762,7 @@ public:
 
 	template<IsState State>
 	[[nodiscard]]
-	static constexpr bool has_size() noexcept {
+	static consteval bool has_size() noexcept {
 		return sub_structure_t::template has_size<sub_state_t<State>>();
 	}
 
@@ -783,7 +783,7 @@ public:
 	template<auto QDim, IsState State>
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
-	static constexpr bool has_length() noexcept {
+	static consteval bool has_length() noexcept {
 		return sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
