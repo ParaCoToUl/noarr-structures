@@ -35,7 +35,7 @@ struct to_struct<T> : std::true_type {
 	}
 };
 
-template<class T>
+template<IsStruct T>
 struct to_struct<pack<T>> : std::true_type {
 	using type = T;
 
