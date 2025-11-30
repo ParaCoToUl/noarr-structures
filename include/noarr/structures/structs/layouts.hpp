@@ -58,8 +58,10 @@ struct tuple_t : strict_contain<TS...> {
 		return state.template remove<index_in<Dim>>();
 	}
 
-	template<std::size_t Index>
-	using sub_structure_t = std::remove_cvref_t<decltype(std::declval<base>().template get<Index>())>;
+	template<IsState State>
+	requires (state_contains<State, index_in<Dim>>)
+	using sub_structure_t =
+		std::remove_cvref_t<decltype(std::declval<base>().template get<state_get_t<State, index_in<Dim>>::value>())>;
 	template<IsState State>
 	using sub_state_t = std::remove_cvref_t<decltype(sub_state(std::declval<State>()))>;
 	template<IsState State>
@@ -95,8 +97,7 @@ struct tuple_t : strict_contain<TS...> {
 			static_assert(
 				requires { state_get_t<State, index_in<Dim>>::value; },
 				"Tuple index must be set statically, wrap it in lit<> (e.g. replace 42 with lit<42>)");
-			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-			return has_offset_of<Sub, sub_structure_t<index>, sub_state_t<State>>();
+			return has_offset_of<Sub, sub_structure_t<State>, sub_state_t<State>>();
 		} else {
 			return false;
 		}
@@ -122,8 +123,7 @@ struct tuple_t : strict_contain<TS...> {
 		if constexpr (QDim == Dim) {
 			return !state_contains<State, index_in<Dim>>;
 		} else if constexpr (state_contains<State, index_in<Dim>>) {
-			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-			return sub_structure_t<index>::template has_length<QDim, sub_state_t<State>>();
+			return sub_structure_t<State>::template has_length<QDim, sub_state_t<State>>();
 		} else {
 			return false;
 		}
@@ -153,7 +153,8 @@ private:
 	template<IsState State, std::size_t... IS>
 	[[nodiscard]]
 	static constexpr bool has_size_inner(std::index_sequence<IS...> /*is*/) noexcept {
-		return (... && sub_structure_t<IS>::template has_size<sub_state_t<State>>());
+		return (... && std::remove_cvref_t<decltype(std::declval<tuple_t>().template get<IS>())>::template has_size<
+						   sub_state_t<State>>());
 	}
 
 	template<IsState State>

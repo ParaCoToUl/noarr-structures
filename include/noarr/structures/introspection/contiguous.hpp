@@ -53,9 +53,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (state_contains<State, index_in<Dim>>) {
-			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-
-			using sub_struct = typename Structure::template sub_structure_t<index>;
+			using sub_struct = typename Structure::template sub_structure_t<State>;
 			using sub_state = typename Structure::template sub_state_t<State>;
 
 			return is_contiguous<sub_struct, sub_state>::value;

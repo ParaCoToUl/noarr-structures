@@ -116,10 +116,10 @@ struct union_t : strict_contain<Structs...> {
 		return this->template get<Index>();
 	}
 
+private:
 	template<std::size_t Index>
 	using sub_structure_t = std::remove_cvref_t<decltype(std::declval<base>().template get<Index>())>;
 
-private:
 	template<auto Dim, std::size_t I>
 	[[nodiscard("returns the index of the first struct that accepts the dimension")]]
 	static constexpr std::size_t find_first_match() noexcept {

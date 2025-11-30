@@ -128,12 +128,10 @@ private:
 							  index_t::value;
 							  requires (index_t::value < sizeof...(Ts));
 						  }) {
-				constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-
 				if constexpr (QDim == Dim) {
 					return false;
 				} else {
-					using sub_structure_t = typename Structure::template sub_structure_t<index>;
+					using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 					return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::value;
 				}
@@ -156,10 +154,7 @@ public:
 	{
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
-			using index_t = state_get_t<State, index_in<Dim>>;
-			constexpr std::size_t index = index_t::value;
-
-			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::is_monotonic();
 		} else {
@@ -173,13 +168,10 @@ public:
 	{
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
-			using index_t = state_get_t<State, index_in<Dim>>;
-			constexpr std::size_t index = index_t::value;
-
-			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(
-				structure.sub_structure(index), structure.sub_state(state));
+				structure.sub_structure(state), structure.sub_state(state));
 
 		} else {
 			using namespace constexpr_arithmetic;
@@ -198,19 +190,15 @@ public:
 	{
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
-			using index_t = state_get_t<State, index_in<Dim>>;
-			constexpr std::size_t index = index_t::value;
-
-			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound(
-				structure.sub_structure(index), structure.sub_state(state), min, end);
+				structure.sub_structure(state), structure.sub_state(state), min, end);
 
 		} else {
 			// QDim == Dim
-			constexpr std::size_t index = decltype(min)::value;
-
-			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using min_state = decltype(state.template with<index_in<Dim>>(min));
+			using sub_structure_t = typename Structure::template sub_structure_t<min_state>;
 
 			return offset_of<sub_structure_t>(structure, state.template with<index_in<Dim>>(min));
 		}
@@ -221,14 +209,10 @@ public:
 	{
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
-			using index_t = state_get_t<State, index_in<Dim>>;
-
-			constexpr std::size_t index = index_t::value;
-
-			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(
-				structure.sub_structure(index), structure.sub_state(state));
+				structure.sub_structure(state), structure.sub_state(state));
 
 		} else {
 			using namespace constexpr_arithmetic;
@@ -247,14 +231,10 @@ public:
 	{
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			// QDim != Dim
-			using index_t = state_get_t<State, index_in<Dim>>;
-
-			constexpr std::size_t index = index_t::value;
-
-			using sub_structure_t = typename Structure::template sub_structure_t<index>;
+			using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 			return has_lower_bound_along<QDim, sub_structure_t, sub_state_t>::lower_bound_at(
-				structure.sub_structure(index), structure.sub_state(state), min, end);
+				structure.sub_structure(state), structure.sub_state(state), min, end);
 
 		} else {
 			// QDim == Dim

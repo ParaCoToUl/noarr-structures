@@ -125,9 +125,7 @@ private:
 							  index_t::value;
 							  requires (index_t::value < sizeof...(Ts));
 						  }) {
-				constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-
-				using sub_structure_t = typename Structure::template sub_structure_t<index>;
+				using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 				if constexpr (QDim == Dim) {
 					return has_offset_of<sub_structure_t, Structure, State>();
@@ -149,14 +147,12 @@ public:
 	static constexpr auto offset(Structure structure, State state) noexcept
 	requires value
 	{
-		constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
-
-		using sub_structure_t = typename Structure::template sub_structure_t<index>;
+		using sub_structure_t = typename Structure::template sub_structure_t<State>;
 
 		if constexpr (QDim == Dim) {
 			return offset_of<sub_structure_t>(structure, state);
 		} else {
-			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(index),
+			return has_offset_along<QDim, sub_structure_t, sub_state_t>::offset(structure.sub_structure(state),
 			                                                                    structure.sub_state(state));
 		}
 	}
