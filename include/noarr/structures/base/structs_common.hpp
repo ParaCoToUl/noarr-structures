@@ -82,14 +82,14 @@ namespace helpers {
 
 template<class StructInner, class StructOuter, IsState State>
 requires defines_has_strict_offset_of<StructInner, StructOuter, State>
-constexpr auto has_offset_of_impl() noexcept {
+constexpr bool has_offset_of_impl() noexcept {
 	return StructOuter::template has_strict_offset_of<StructInner, State>();
 }
 
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
          defines_constant_substructure_t<StructOuter>
-constexpr auto has_offset_of_impl() noexcept {
+constexpr bool has_offset_of_impl() noexcept {
 	return has_offset_of<StructInner, typename StructOuter::sub_structure_t,
 	                     typename StructOuter::template sub_state_t<State>>();
 }
@@ -97,7 +97,7 @@ constexpr auto has_offset_of_impl() noexcept {
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
          (!defines_constant_substructure_t<StructOuter>)
-constexpr auto has_offset_of_impl() noexcept {
+constexpr bool has_offset_of_impl() noexcept {
 	return has_offset_of<StructInner, typename StructOuter::template sub_structure_t<State>,
 	                     typename StructOuter::template sub_state_t<State>>();
 }
@@ -115,13 +115,13 @@ constexpr auto offset_of_impl(StructOuter structure, State state, Start start = 
 
 template<class StructInner, class StructOuter, IsState State>
 requires defines_has_strict_state_at<StructInner, StructOuter, State>
-constexpr auto has_state_at_impl() noexcept {
+constexpr bool has_state_at_impl() noexcept {
 	return StructOuter::template has_strict_state_at<StructInner, State>();
 }
 
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) && defines_constant_substructure_t<StructOuter>
-constexpr auto has_state_at_impl() noexcept {
+constexpr bool has_state_at_impl() noexcept {
 	return has_state_at<StructInner, typename StructOuter::sub_structure_t,
 	                    typename StructOuter::template sub_state_t<State>>();
 }
@@ -129,7 +129,7 @@ constexpr auto has_state_at_impl() noexcept {
 template<class StructInner, class StructOuter, IsState State>
 requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) &&
          (!defines_constant_substructure_t<StructOuter>)
-constexpr auto has_state_at_impl() noexcept {
+constexpr bool has_state_at_impl() noexcept {
 	return has_state_at<StructInner, typename StructOuter::template sub_structure_t<State>,
 	                    typename StructOuter::template sub_state_t<State>>();
 }
