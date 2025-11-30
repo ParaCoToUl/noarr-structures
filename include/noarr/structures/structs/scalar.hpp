@@ -50,6 +50,7 @@ struct scalar : strict_contain<> {
 	}
 
 	template<auto QDim, IsState State>
+	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
 		return false;
