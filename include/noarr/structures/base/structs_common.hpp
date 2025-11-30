@@ -48,8 +48,10 @@ struct dim_param {
 };
 
 template<class StructInner, class StructOuter, class State>
-concept defines_has_strict_offset_of =
-	IsState<State> && requires { StructOuter::template has_strict_offset_of<StructInner, State>(); };
+concept defines_has_strict_offset_of = requires {
+	requires (bool) StructOuter::template has_strict_offset_of<StructInner, State>() ||
+				 !(bool)StructOuter::template has_strict_offset_of<StructInner, State>();
+} || requires { StructOuter::template has_strict_offset_of<StructInner, State>(); };
 
 template<class Struct>
 concept defines_constant_substructure_t = requires { typename Struct::sub_structure_t; };
@@ -60,8 +62,10 @@ concept defines_strict_offset_of = IsState<State> && requires(StructOuter struct
 };
 
 template<class StructInner, class StructOuter, class State>
-concept defines_has_strict_state_at =
-	IsState<State> && requires { StructOuter::template has_strict_state_at<StructInner, State>(); };
+concept defines_has_strict_state_at = requires {
+	requires (bool) StructOuter::template has_strict_state_at<StructInner, State>() ||
+				 !(bool)StructOuter::template has_strict_state_at<StructInner, State>();
+} || requires { StructOuter::template has_strict_state_at<StructInner, State>(); };
 
 template<class StructInner, class StructOuter, class State>
 concept defines_strict_state_at = IsState<State> && requires(StructOuter structure, State state) {
@@ -91,6 +95,8 @@ constexpr auto has_offset_of_impl() noexcept {
 }
 
 template<class StructInner, class StructOuter, IsState State>
+requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
+         (!defines_constant_substructure_t<StructOuter>)
 constexpr auto has_offset_of_impl() noexcept {
 	return has_offset_of<StructInner, typename StructOuter::template sub_structure_t<State>,
 	                     typename StructOuter::template sub_state_t<State>>();
@@ -121,6 +127,8 @@ constexpr auto has_state_at_impl() noexcept {
 }
 
 template<class StructInner, class StructOuter, IsState State>
+requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) &&
+         (!defines_constant_substructure_t<StructOuter>)
 constexpr auto has_state_at_impl() noexcept {
 	return has_state_at<StructInner, typename StructOuter::template sub_structure_t<State>,
 	                    typename StructOuter::template sub_state_t<State>>();
