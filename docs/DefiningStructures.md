@@ -174,20 +174,21 @@ struct bar_t : public noarr::strict_contain<T, U> {
 	using signature = ...;
 
 private:
-	constexpr T sub_structure() const noexcept {
-		// Sub-structure is stored in an inherited field, retrieve it from there
-		return noarr::strict_contain<T, U>::template get<0>();
-	}
-
 	constexpr U get_u() const noexcept {
 		// The U value stored in an inherited field, retrieve it from there
 		return noarr::strict_contain<T, U>::template get<1>();
 	}
 
+public:
+	constexpr T sub_structure() const noexcept {
+		// Sub-structure is stored in an inherited field, retrieve it from there
+		return noarr::strict_contain<T, U>::template get<0>();
+	}
+
 	constexpr auto sub_state(noarr::IsState auto state) const noexcept {
 		return ...;
 	}
-public:
+
 	template<noarr::IsState State>
 	static constexpr bool has_size() noexcept {
 		return T::template has_size<decltype(std::declval<bar_t>().sub_state(std::declval<State>()))>();
