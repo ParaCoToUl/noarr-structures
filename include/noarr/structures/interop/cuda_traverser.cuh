@@ -75,15 +75,16 @@ struct cuda_fix_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	static __device__ inline auto clean_state(State state) noexcept {
+	static constexpr auto clean_state(State state) noexcept {
 		return state.template remove<length_in<Dim>, index_in<Dim>>();
 	}
 
 	using sub_structure_t = T;
 	template<IsState State>
-	using sub_state_t = decltype(sub_state(std::declval<State>()));
+	using sub_state_t = std::remove_cvref_t<
+		decltype(std::declval<State>().template remove<length_in<Dim>>().template with<index_in<Dim>>(0u))>;
 	template<IsState State>
-	using clean_state_t = decltype(clean_state(std::declval<State>()));
+	using clean_state_t = std::remove_cvref_t<decltype(clean_state(std::declval<State>()))>;
 
 	template<IsState State>
 	[[nodiscard]]
