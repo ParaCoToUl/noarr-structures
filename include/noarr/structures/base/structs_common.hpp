@@ -232,7 +232,8 @@ concept IsStruct = requires {
 	typename std::remove_cvref_t<T>::signature;
 	requires IsSignature<typename std::remove_cvref_t<T>::signature>;
 
-	{ std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>() } -> std::convertible_to<bool>;
+	requires (bool) std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>() ||
+				 !(bool)std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>();
 };
 
 /**
@@ -242,7 +243,8 @@ concept IsStruct = requires {
  */
 template<class T>
 concept IsProtoStruct = requires {
-	{ std::remove_cvref_t<T>::proto_preserves_layout } -> std::convertible_to<bool>;
+	requires (bool) std::remove_cvref_t<T>::proto_preserves_layout ||
+				 !(bool)std::remove_cvref_t<T>::proto_preserves_layout;
 };
 
 namespace helpers {
