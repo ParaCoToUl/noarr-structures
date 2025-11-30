@@ -198,7 +198,8 @@ struct reorder_t : strict_contain<T> {
 	requires IsDim<decltype(QDim)>
 	[[nodiscard]]
 	static constexpr bool has_length() noexcept {
-		return (complete || signature::template any_accept<QDim>) && sub_structure_t::template has_length<QDim, sub_state_t<State>>();
+		return (complete || signature::template any_accept<QDim>) &&
+		       sub_structure_t::template has_length<QDim, sub_state_t<State>>();
 	}
 
 	template<auto QDim, IsState State>
