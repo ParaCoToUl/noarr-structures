@@ -19,7 +19,7 @@ struct dim {
 
 	template<auto Tag2>
 	requires std::same_as<decltype(Tag), decltype(Tag2)>
-	constexpr bool operator==(const dim<Tag2> & /*other*/) const noexcept {
+	constexpr bool operator==(dim<Tag2> /*other*/) const noexcept {
 		if constexpr (std::is_empty_v<decltype(Tag2)>) {
 			return true;
 		} else {
@@ -28,13 +28,13 @@ struct dim {
 	}
 
 	template<auto Tag2>
-	constexpr bool operator==(const dim<Tag2> & /*other*/) const noexcept {
+	constexpr bool operator==(dim<Tag2> /*other*/) const noexcept {
 		return false;
 	}
 
-	friend constexpr bool operator==(char /*lhs*/, const dim & /*rhs*/) noexcept { return false; }
+	friend constexpr bool operator==(char /*lhs*/, dim /*rhs*/) noexcept { return false; }
 
-	friend constexpr bool operator==(const dim & /*lhs*/, char /*rhs*/) noexcept { return false; }
+	friend constexpr bool operator==(dim /*lhs*/, char /*rhs*/) noexcept { return false; }
 };
 
 template<class T>
