@@ -17,8 +17,6 @@ struct dim {
 	using tag_type = decltype(Tag);
 	static constexpr tag_type tag = Tag;
 
-	constexpr dim() noexcept = default;
-
 	template<auto Tag2>
 	requires std::same_as<decltype(Tag), decltype(Tag2)>
 	constexpr bool operator==(const dim<Tag2> & /*other*/) const noexcept {
