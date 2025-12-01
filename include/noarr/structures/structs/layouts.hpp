@@ -31,7 +31,7 @@ struct tuple_t : strict_contain<TS...> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr auto sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		if constexpr (state_contains<State, index_in<Dim>>) {
 			constexpr std::size_t index = state_get_t<State, index_in<Dim>>::value;
 			return this->template get<index>();
@@ -42,7 +42,7 @@ struct tuple_t : strict_contain<TS...> {
 
 	template<std::size_t Index>
 	[[nodiscard]]
-	constexpr auto sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->template get<Index>();
 	}
 
@@ -223,12 +223,12 @@ struct vector_t : strict_contain<T> {
 	using base::base;
 
 	template<IsState State>
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return base::get();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return base::get();
 	}
 

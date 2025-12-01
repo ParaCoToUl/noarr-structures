@@ -64,11 +64,11 @@ struct cuda_striped_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return strict_contain<T>::get();
 	}
 
-	constexpr T sub_structure() const noexcept { return strict_contain<T>::get(); }
+	constexpr decltype(auto) sub_structure() const noexcept { return strict_contain<T>::get(); }
 
 	template<IsState State>
 	[[nodiscard]]

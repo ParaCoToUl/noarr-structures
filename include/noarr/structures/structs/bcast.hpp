@@ -17,12 +17,12 @@ struct bcast_t : strict_contain<T> {
 	using params = struct_params<dim_param<Dim>, structure_param<T>>;
 
 	template<IsState State>
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return strict_contain<T>::get();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return strict_contain<T>::get();
 	}
 

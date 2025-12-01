@@ -23,12 +23,12 @@ struct shift_t : strict_contain<T, StartT> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->template get<0>();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->template get<0>();
 	}
 
@@ -209,12 +209,12 @@ struct slice_t : strict_contain<T, StartT, LenT> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->template get<0>();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->template get<0>();
 	}
 
@@ -361,12 +361,12 @@ struct span_t : strict_contain<T, StartT, EndT> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->template get<0>();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->template get<0>();
 	}
 
@@ -514,12 +514,12 @@ struct step_t : strict_contain<T, StartT, StrideT> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->template get<0>();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->template get<0>();
 	}
 
@@ -687,12 +687,12 @@ struct reverse_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->get();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->get();
 	}
 

@@ -23,12 +23,12 @@ struct into_blocks_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->get();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->get();
 	}
 
@@ -227,12 +227,12 @@ struct into_blocks_dynamic_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->get();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->get();
 	}
 
@@ -488,12 +488,12 @@ struct into_blocks_static_t : strict_contain<T, MinorLenT> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->template get<0>();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->template get<0>();
 	}
 
@@ -696,12 +696,12 @@ struct merge_blocks_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure(State /*state*/) const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->get();
 	}
 
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		return this->get();
 	}
 

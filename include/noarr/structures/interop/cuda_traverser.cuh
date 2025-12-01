@@ -59,11 +59,11 @@ struct cuda_fix_t : strict_contain<T> {
 
 	template<IsState State>
 	[[nodiscard]]
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure(State /*state*/) const noexcept {
 		return this->get();
 	}
 
-	constexpr T sub_structure() const noexcept { return this->get(); }
+	constexpr decltype(auto) sub_structure() const noexcept { return this->get(); }
 
 	using signature = typename T::signature::template replace<sig_remove_first, Dim>;
 

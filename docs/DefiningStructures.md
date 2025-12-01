@@ -180,7 +180,7 @@ private:
 	}
 
 public:
-	constexpr T sub_structure() const noexcept {
+	constexpr decltype(auto) sub_structure() const noexcept {
 		// Sub-structure is stored in an inherited field, retrieve it from there
 		return noarr::strict_contain<T, U>::template get<0>();
 	}
