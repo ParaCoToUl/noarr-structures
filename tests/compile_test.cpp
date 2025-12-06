@@ -38,7 +38,7 @@ TEST_CASE("Examples for Noarr Structures", "[compile test]") {
 
 	const auto offset = (matrix | noarr::offset(noarr::idx<'r', 'c'>(row, col))) / sizeof(int);
 
-	REQUIRE(static_cast<std::ptrdiff_t>(offset) == &value - (int*)matrix.data());
+	REQUIRE(static_cast<std::ptrdiff_t>(offset) == &value - static_cast<int*>(matrix.data()));
 
 	{
 		auto matrix2 = noarr::bag(col_major_matrix, matrix.data());
@@ -74,7 +74,7 @@ TEST_CASE("Examples for Noarr Traversers", "[compile tests]") {
 
 	traverser | [&](const auto idx) {
 		const auto [row, col] = noarr::get_indices<'r', 'c'>(idx);
-		matrix[idx] = col * ROWS + row;
+		matrix[idx] = static_cast<int>(col * ROWS + row);
 
 		REQUIRE(iteration == col * ROWS + row);
 		iteration++;
@@ -90,7 +90,7 @@ TEST_CASE("Examples for Noarr Traversers", "[compile tests]") {
 
 			const int value = matrix[idx];
 
-			REQUIRE(value == int(col * ROWS + row));
+			REQUIRE(value == static_cast<int>(col * ROWS + row));
 			REQUIRE(iteration == row * COLS + col);
 			iteration++;
 		};

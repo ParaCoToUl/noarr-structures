@@ -187,13 +187,13 @@ struct cuda_traverser_t<Struct, Order, dim_sequence<DimsB...>, dim_sequence<Dims
 	[[nodiscard]]
 	constexpr dim3 grid_dim() const noexcept {
 		const auto full = this->top_struct();
-		return {(uint)full.template length<DimsB>(empty_state)...};
+		return {static_cast<uint>(full.template length<DimsB>(empty_state))...};
 	}
 
 	[[nodiscard]]
 	constexpr dim3 block_dim() const noexcept {
 		const auto full = this->top_struct();
-		return {(uint)full.template length<DimsT>(empty_state)...};
+		return {static_cast<uint>(full.template length<DimsT>(empty_state))...};
 	}
 
 	[[nodiscard]]

@@ -252,9 +252,9 @@ TEST_CASE("Traverser ordered renamed access", "[traverser]") {
 		REQUIRE((b | offset(s)) / sizeof(int) == s.template get<index_in<'y'>>() * 40 + s.template get<index_in<'z'>>());
 		REQUIRE((c | offset(s)) / sizeof(int) == s.template get<index_in<'x'>>() * 40 + s.template get<index_in<'z'>>());
 
-		REQUIRE((char*) &(a | get_at(ap, s)) == (char*) ap + (a | offset(s)));
-		REQUIRE((char*) &(b | get_at(bp, s)) == (char*) bp + (b | offset(s)));
-		REQUIRE((char*) &(c | get_at(cp, s)) == (char*) cp + (c | offset(s)));
+		REQUIRE(reinterpret_cast<const char*>(&(a | get_at(ap, s))) == static_cast<const char*>(ap) + (a | offset(s)));
+		REQUIRE(reinterpret_cast<const char*>(&(b | get_at(bp, s))) == static_cast<const char*>(bp) + (b | offset(s)));
+		REQUIRE(reinterpret_cast<const char*>(&(c | get_at(cp, s))) == static_cast<const char*>(cp) + (c | offset(s)));
 	};
 
 	traverser(a, b, c).order(reorder<'x', 'y', 'z'>() ^ rename<'y', 't'>()).for_each(action);

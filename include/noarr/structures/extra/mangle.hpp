@@ -173,7 +173,7 @@ struct mangle_expr_helpers {
 		char *ptr = buff + max_size;
 		std::size_t sz = 0;
 		do {
-			*--ptr = '0' + u % 10;
+			*--ptr = static_cast<char>('0' + u % 10);
 			sz++;
 		} while (u /= 10);
 		if (neg) {

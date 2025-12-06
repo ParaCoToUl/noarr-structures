@@ -23,8 +23,8 @@ concept IsStruct = requires {
 	typename std::remove_cvref_t<T>::signature;
 	requires IsSignature<typename std::remove_cvref_t<T>::signature>;
 
-	requires (bool) std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>() ||
-				 !(bool)std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>();
+	requires static_cast<bool>(std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>()) ||
+				 !static_cast<bool>(std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>());
 };
 
 /**
@@ -34,8 +34,8 @@ concept IsStruct = requires {
  */
 template<class T>
 concept IsProtoStruct = requires {
-	requires (bool) std::remove_cvref_t<T>::proto_preserves_layout ||
-				 !(bool)std::remove_cvref_t<T>::proto_preserves_layout;
+	requires static_cast<bool>(std::remove_cvref_t<T>::proto_preserves_layout) ||
+				 !static_cast<bool>(std::remove_cvref_t<T>::proto_preserves_layout);
 };
 
 /**
@@ -73,8 +73,8 @@ struct dim_param {
 
 template<class StructInner, class StructOuter, class State>
 concept defines_has_strict_offset_of = requires {
-	requires (bool) StructOuter::template has_strict_offset_of<StructInner, State>() ||
-				 !(bool)StructOuter::template has_strict_offset_of<StructInner, State>();
+	requires static_cast<bool>(StructOuter::template has_strict_offset_of<StructInner, State>()) ||
+				 !static_cast<bool>(StructOuter::template has_strict_offset_of<StructInner, State>());
 } || requires { StructOuter::template has_strict_offset_of<StructInner, State>(); };
 
 template<IsStruct Struct, IsState State>
@@ -101,8 +101,8 @@ concept defines_strict_offset_of = IsState<State> && requires(StructOuter struct
 
 template<class StructInner, class StructOuter, class State>
 concept defines_has_strict_state_at = requires {
-	requires (bool) StructOuter::template has_strict_state_at<StructInner, State>() ||
-				 !(bool)StructOuter::template has_strict_state_at<StructInner, State>();
+	requires static_cast<bool>(StructOuter::template has_strict_state_at<StructInner, State>()) ||
+				 !static_cast<bool>(StructOuter::template has_strict_state_at<StructInner, State>());
 } || requires { StructOuter::template has_strict_state_at<StructInner, State>(); };
 
 template<class StructInner, class StructOuter, class State>

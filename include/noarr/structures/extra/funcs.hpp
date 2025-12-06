@@ -118,22 +118,22 @@ namespace helpers {
 
 template<class T>
 constexpr auto sub_ptr(void *ptr, std::size_t off) noexcept {
-	return reinterpret_cast<T *>(reinterpret_cast<char *>(ptr) + off);
+	return reinterpret_cast<T *>(static_cast<char *>(ptr) + off);
 }
 
 template<class T>
 constexpr auto sub_ptr(const void *ptr, std::size_t off) noexcept {
-	return reinterpret_cast<const T *>(reinterpret_cast<const char *>(ptr) + off);
+	return reinterpret_cast<const T *>(static_cast<const char *>(ptr) + off);
 }
 
 template<class T>
 constexpr auto sub_ptr(volatile void *ptr, std::size_t off) noexcept {
-	return reinterpret_cast<volatile T *>(reinterpret_cast<volatile char *>(ptr) + off);
+	return reinterpret_cast<volatile T *>(static_cast<volatile char *>(ptr) + off);
 }
 
 template<class T>
 constexpr auto sub_ptr(const volatile void *ptr, std::size_t off) noexcept {
-	return reinterpret_cast<const volatile T *>(reinterpret_cast<const volatile char *>(ptr) + off);
+	return reinterpret_cast<const volatile T *>(static_cast<const volatile char *>(ptr) + off);
 }
 
 } // namespace helpers
