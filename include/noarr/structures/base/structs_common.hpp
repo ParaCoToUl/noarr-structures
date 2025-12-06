@@ -3,7 +3,6 @@
 
 #include <cstddef>
 
-#include <concepts>
 #include <type_traits>
 #include <utility>
 
@@ -15,6 +14,31 @@
 namespace noarr {
 
 /**
+ * @brief returns whether the type `T` meets the criteria for structures
+ *
+ * @tparam T: the input type
+ */
+template<class T>
+concept IsStruct = requires {
+	typename std::remove_cvref_t<T>::signature;
+	requires IsSignature<typename std::remove_cvref_t<T>::signature>;
+
+	requires (bool) std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>() ||
+				 !(bool)std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>();
+};
+
+/**
+ * @brief returns whether the type `T` meets the criteria for proto-structures
+ *
+ * @tparam T: the input type
+ */
+template<class T>
+concept IsProtoStruct = requires {
+	requires (bool) std::remove_cvref_t<T>::proto_preserves_layout ||
+				 !(bool)std::remove_cvref_t<T>::proto_preserves_layout;
+};
+
+/**
  * @brief a pack of the template parameters of the structure
  *
  * @tparam Params: template parameters of the structure
@@ -24,7 +48,7 @@ struct struct_params : flexible_contain<Params...> {
 	using flexible_contain<Params...>::flexible_contain;
 };
 
-template<class Struct>
+template<IsStruct Struct>
 struct structure_param {
 	using type = Struct;
 };
@@ -72,21 +96,27 @@ concept defines_strict_state_at = IsState<State> && requires(StructOuter structu
 	structure.template strict_state_at<StructInner>(state);
 };
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 consteval bool has_offset_of() noexcept;
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 consteval bool has_state_at() noexcept;
+
+template<IsStruct StructInner, IsStruct StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+constexpr auto offset_of(StructOuter structure, State state, Start start = Start{}) noexcept;
+
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
+constexpr auto state_at(StructOuter structure, State state) noexcept;
 
 namespace helpers {
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires defines_has_strict_offset_of<StructInner, StructOuter, State>
 consteval bool has_offset_of_impl() noexcept {
 	return StructOuter::template has_strict_offset_of<StructInner, State>();
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
          defines_constant_substructure_t<StructOuter>
 consteval bool has_offset_of_impl() noexcept {
@@ -94,7 +124,7 @@ consteval bool has_offset_of_impl() noexcept {
 	                     typename StructOuter::template sub_state_t<State>>();
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires (!defines_has_strict_offset_of<StructInner, StructOuter, State>) &&
          (!defines_constant_substructure_t<StructOuter>)
 consteval bool has_offset_of_impl() noexcept {
@@ -102,31 +132,31 @@ consteval bool has_offset_of_impl() noexcept {
 	                     typename StructOuter::template sub_state_t<State>>();
 }
 
-template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 requires defines_strict_offset_of<StructInner, StructOuter, State, Start>
 constexpr auto offset_of_impl(StructOuter structure, State state, Start start = Start{}) noexcept {
 	return structure.template strict_offset_of<StructInner>(state, start);
 }
 
-template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 constexpr auto offset_of_impl(StructOuter structure, State state, Start start = Start{}) noexcept {
 	return offset_of<StructInner>(structure.sub_structure(state), structure.sub_state(state), start);
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires defines_has_strict_state_at<StructInner, StructOuter, State>
 consteval bool has_state_at_impl() noexcept {
 	return StructOuter::template has_strict_state_at<StructInner, State>();
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) && defines_constant_substructure_t<StructOuter>
 consteval bool has_state_at_impl() noexcept {
 	return has_state_at<StructInner, typename StructOuter::sub_structure_t,
 	                    typename StructOuter::template sub_state_t<State>>();
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires (!defines_has_strict_state_at<StructInner, StructOuter, State>) &&
          (!defines_constant_substructure_t<StructOuter>)
 consteval bool has_state_at_impl() noexcept {
@@ -134,20 +164,20 @@ consteval bool has_state_at_impl() noexcept {
 	                    typename StructOuter::template sub_state_t<State>>();
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires defines_strict_state_at<StructInner, StructOuter, State>
 constexpr auto state_at_impl(StructOuter structure, State state) noexcept {
 	return structure.template strict_state_at<StructInner>(state);
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 constexpr auto state_at_impl(StructOuter structure, State state) noexcept {
 	return state_at<StructInner>(structure.sub_structure(state), structure.sub_state(state));
 }
 
 } // namespace helpers
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 consteval bool has_offset_of() noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
@@ -158,7 +188,7 @@ consteval bool has_offset_of() noexcept {
 	}
 }
 
-template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 requires (has_offset_of<StructInner, StructOuter, State>())
 constexpr auto offset_of(StructOuter structure, State state, Start start = Start{}) noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
@@ -170,14 +200,14 @@ constexpr auto offset_of(StructOuter structure, State state, Start start = Start
 	}
 }
 
-template<class StructInner, class StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 constexpr void offset_of(StructOuter /*structure*/, State /*state*/, Start /*start*/ = Start{}) noexcept {
 	static_assert(
 		has_offset_of<StructInner, StructOuter, State>(),
 		"The inner structure is not accessed in the outer structure with the given state, cannot get its offset");
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 consteval bool has_state_at() noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
 	using struct_outer_t = std::remove_cvref_t<StructOuter>;
@@ -188,7 +218,7 @@ consteval bool has_state_at() noexcept {
 	}
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 requires (has_state_at<StructInner, StructOuter, State>())
 constexpr auto state_at(StructOuter structure, State state) noexcept {
 	using struct_inner_t = std::remove_cvref_t<StructInner>;
@@ -200,7 +230,7 @@ constexpr auto state_at(StructOuter structure, State state) noexcept {
 	}
 }
 
-template<class StructInner, class StructOuter, IsState State>
+template<IsStruct StructInner, IsStruct StructOuter, IsState State>
 constexpr void state_at(StructOuter /*structure*/, State /*state*/) noexcept {
 	static_assert(
 		has_state_at<StructInner, StructOuter, State>(),
@@ -218,7 +248,7 @@ struct pack : flexible_contain<Args...> {
 template<class... Args>
 pack(pack<Args...>) -> pack<pack<Args...>>;
 
-template<class ProtoStruct>
+template<IsProtoStruct ProtoStruct>
 struct to_each : ProtoStruct {
 	using ProtoStruct::ProtoStruct;
 
@@ -227,33 +257,8 @@ struct to_each : ProtoStruct {
 	explicit constexpr to_each(ProtoStruct p) noexcept : ProtoStruct(p) {}
 };
 
-template<class ProtoStruct>
+template<IsProtoStruct ProtoStruct>
 to_each(ProtoStruct) -> to_each<ProtoStruct>;
-
-/**
- * @brief returns whether the type `T` meets the criteria for structures
- *
- * @tparam T: the input type
- */
-template<class T>
-concept IsStruct = requires {
-	typename std::remove_cvref_t<T>::signature;
-	requires IsSignature<typename std::remove_cvref_t<T>::signature>;
-
-	requires (bool) std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>() ||
-				 !(bool)std::remove_cvref_t<T>::template has_length<dim<__LINE__>{}, state<>>();
-};
-
-/**
- * @brief returns whether the type `T` meets the criteria for proto-structures
- *
- * @tparam T: the input type
- */
-template<class T>
-concept IsProtoStruct = requires {
-	requires (bool) std::remove_cvref_t<T>::proto_preserves_layout ||
-				 !(bool)std::remove_cvref_t<T>::proto_preserves_layout;
-};
 
 namespace helpers {
 
@@ -261,14 +266,14 @@ template<class F, bool PreservesLayout>
 struct make_proto_impl : F {
 	static constexpr bool proto_preserves_layout = PreservesLayout;
 
-	template<class Struct>
+	template<IsStruct Struct>
 	constexpr decltype(auto) instantiate_and_construct(Struct s) const noexcept {
 		return (*this)(s);
 	}
 };
 
 template<class... Structs, class ProtoStruct, std::size_t... Indices>
-requires IsProtoStruct<ProtoStruct>
+requires (... && IsStruct<Structs>) && IsProtoStruct<ProtoStruct>
 constexpr decltype(auto) pass_pack(const pack<Structs...> &s, ProtoStruct &&p,
                                    std::index_sequence<Indices...> /*unused*/) noexcept {
 	return std::forward<ProtoStruct>(p).instantiate_and_construct(s.template get<Indices>()...);
@@ -280,6 +285,7 @@ constexpr auto pass_pack(const Arg &s, const pack<Args...> &p, std::index_sequen
 }
 
 template<class... Structs, class Arg, std::size_t... Indices>
+requires (... && IsStruct<Structs>)
 constexpr auto pass_pack(const pack<Structs...> &s, const to_each<Arg> &p,
                          std::index_sequence<Indices...> /*unused*/) noexcept {
 	return pack((s.template get<Indices>() ^ p)...);
