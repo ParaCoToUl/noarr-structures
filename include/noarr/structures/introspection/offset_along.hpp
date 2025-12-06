@@ -1,8 +1,6 @@
 #ifndef NOARR_STRUCTURES_OFFSET_ALONG_HPP
 #define NOARR_STRUCTURES_OFFSET_ALONG_HPP
 
-#include <cstddef>
-
 #include <type_traits>
 
 #include "../base/state.hpp"
@@ -28,8 +26,8 @@ template<IsDim auto QDim, class T, IsState State>
 struct generic_has_offset_along {
 private:
 	using Structure = T;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept { return has_offset_along<QDim, sub_structure_t, sub_state_t>::value; }
 
@@ -49,8 +47,8 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_offset_along<QDim, bcast_t<Dim, T>, State> {
 private:
 	using Structure = bcast_t<Dim, T>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
@@ -81,8 +79,8 @@ template<IsDim auto QDim, IsDim auto Dim, class T, IsState State>
 struct has_offset_along<QDim, vector_t<Dim, T>, State> {
 private:
 	using Structure = vector_t<Dim, T>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
@@ -115,7 +113,7 @@ template<IsDim auto QDim, IsDim auto Dim, class... Ts, IsState State>
 struct has_offset_along<QDim, tuple_t<Dim, Ts...>, State> {
 private:
 	using Structure = tuple_t<Dim, Ts...>;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (state_contains<State, index_in<Dim>>) {
@@ -125,7 +123,7 @@ private:
 							  index_t::value;
 							  requires (index_t::value < sizeof...(Ts));
 						  }) {
-				using sub_structure_t = typename Structure::template sub_structure_t<State>;
+				using sub_structure_t = struct_sub_structure_t<Structure, State>;
 
 				if constexpr (QDim == Dim) {
 					return has_offset_of<sub_structure_t, Structure, State>();
@@ -147,7 +145,7 @@ public:
 	static constexpr auto offset(Structure structure, State state) noexcept
 	requires value
 	{
-		using sub_structure_t = typename Structure::template sub_structure_t<State>;
+		using sub_structure_t = struct_sub_structure_t<Structure, State>;
 
 		if constexpr (QDim == Dim) {
 			return offset_of<sub_structure_t>(structure, state);
@@ -174,8 +172,8 @@ requires IsDimPack<decltype(DimPairs)...> && (sizeof...(DimPairs) % 2 == 0)
 struct has_offset_along<QDim, rename_t<T, DimPairs...>, State> {
 private:
 	using Structure = rename_t<T, DimPairs...>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr auto QDimNew =
 		helpers::rename_dim<QDim, typename Structure::external, typename Structure::internal>::dim;
@@ -205,8 +203,8 @@ requires IsDim<decltype(DimA)> && IsDim<decltype(DimB)> && IsDim<decltype(Dim)> 
 struct has_offset_along<QDim, join_t<T, DimA, DimB, Dim>, State> {
 private:
 	using Structure = join_t<T, DimA, DimB, Dim>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {
@@ -261,8 +259,8 @@ template<IsDim auto QDim, IsDim auto Dim, IsDim auto DimMajor, IsDim auto DimMin
 struct has_offset_along<QDim, into_blocks_t<Dim, DimMajor, DimMinor, T>, State> {
 private:
 	using Structure = into_blocks_t<Dim, DimMajor, DimMinor, T>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == DimMajor) {
@@ -309,8 +307,8 @@ requires (DimIsBorder != DimMajor) && (DimIsBorder != DimMinor) && (DimMajor != 
 struct has_offset_along<QDim, into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>, State> {
 private:
 	using Structure = into_blocks_static_t<Dim, DimIsBorder, DimMajor, DimMinor, T, MinorLenT>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == DimMajor) {
@@ -369,8 +367,8 @@ requires (DimMajor != DimMinor) && (DimMinor != DimIsPresent) && (DimIsPresent !
 struct has_offset_along<QDim, into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>, State> {
 private:
 	using Structure = into_blocks_dynamic_t<Dim, DimMajor, DimMinor, DimIsPresent, T>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == DimMajor) {
@@ -420,8 +418,8 @@ template<IsDim auto QDim, IsDim auto DimMajor, IsDim auto DimMinor, IsDim auto D
 struct has_offset_along<QDim, merge_blocks_t<DimMajor, DimMinor, Dim, T>, State> {
 private:
 	using Structure = merge_blocks_t<DimMajor, DimMinor, Dim, T>;
-	using sub_structure_t = typename Structure::sub_structure_t;
-	using sub_state_t = typename Structure::template sub_state_t<State>;
+	using sub_structure_t = struct_sub_structure_t<Structure, State>;
+	using sub_state_t = struct_sub_state_t<Structure, State>;
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (QDim == Dim) {

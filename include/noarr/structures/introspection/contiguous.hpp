@@ -1,8 +1,6 @@
 #ifndef NOARR_STRUCTURES_CONTIGUOUS_HPP
 #define NOARR_STRUCTURES_CONTIGUOUS_HPP
 
-#include <cstddef>
-
 #include <type_traits>
 #include <utility>
 
@@ -35,7 +33,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (state_contains<State, length_in<Dim>>) {
-			return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
+			return is_contiguous<T, struct_sub_state_t<Structure, State>>::value;
 		} else {
 			return false;
 		}
@@ -53,12 +51,12 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (state_contains<State, index_in<Dim>>) {
-			using sub_struct = typename Structure::template sub_structure_t<State>;
-			using sub_state = typename Structure::template sub_state_t<State>;
+			using sub_struct = struct_sub_structure_t<Structure, State>;
+			using sub_state = struct_sub_state_t<Structure, State>;
 
 			return is_contiguous<sub_struct, sub_state>::value;
 		} else {
-			return (... && is_contiguous<Ts, typename Structure::template sub_state_t<State>>::value);
+			return (... && is_contiguous<Ts, struct_sub_state_t<Structure, State>>::value);
 		}
 	}
 
@@ -74,7 +72,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (state_contains<State, length_in<Dim>>) {
-			return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
+			return is_contiguous<T, struct_sub_state_t<Structure, State>>::value;
 		} else {
 			return false;
 		}
@@ -90,9 +88,7 @@ struct is_contiguous<fix_t<Dim, T, IdxT>, State> {
 private:
 	using Structure = fix_t<Dim, T, IdxT>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -104,9 +100,7 @@ struct is_contiguous<set_length_t<Dim, T, LenT>, State> {
 private:
 	using Structure = set_length_t<Dim, T, LenT>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -119,9 +113,7 @@ struct is_contiguous<reorder_t<T, Dims...>, State> {
 private:
 	using Structure = reorder_t<T, Dims...>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -133,9 +125,7 @@ struct is_contiguous<hoist_t<Dim, T>, State> {
 private:
 	using Structure = hoist_t<Dim, T>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -148,9 +138,7 @@ struct is_contiguous<rename_t<T, DimPairs...>, State> {
 private:
 	using Structure = rename_t<T, DimPairs...>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -163,9 +151,7 @@ struct is_contiguous<join_t<T, DimA, DimB, Dim>, State> {
 private:
 	using Structure = join_t<T, DimA, DimB, Dim>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -177,9 +163,7 @@ struct is_contiguous<shift_t<Dim, T, StartT>, State> {
 private:
 	using Structure = shift_t<Dim, T, StartT>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -191,9 +175,7 @@ struct is_contiguous<slice_t<Dim, T, StartT, LenT>, State> {
 private:
 	using Structure = slice_t<Dim, T, StartT, LenT>;
 
-	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
-	}
+	static constexpr bool get_value() noexcept { return is_contiguous<T, struct_sub_state_t<Structure, State>>::value; }
 
 public:
 	using value_type = bool;
@@ -206,7 +188,7 @@ private:
 	using Structure = span_t<Dim, T, StartT, EndT>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename slice_t<Dim, T, StartT, EndT>::template sub_state_t<State>>::value;
+		return is_contiguous<T, struct_sub_state_t<slice_t<Dim, T, StartT, EndT>, State>>::value;
 	}
 
 public:
@@ -221,7 +203,7 @@ private:
 
 	static constexpr bool get_value() noexcept {
 		if constexpr (state_contains<State, index_in<Dim>>) {
-			return is_contiguous<T, typename step_t<Dim, T, StartT, StrideT>::template sub_state_t<State>>::value;
+			return is_contiguous<T, struct_sub_state_t<step_t<Dim, T, StartT, StrideT>, State>>::value;
 		} else {
 			return false;
 		}
@@ -238,7 +220,7 @@ private:
 	using Structure = reverse_t<Dim, T>;
 
 	static constexpr bool get_value() noexcept {
-		return is_contiguous<T, typename reverse_t<Dim, T>::template sub_state_t<State>>::value;
+		return is_contiguous<T, struct_sub_state_t<reverse_t<Dim, T>, State>>::value;
 	}
 
 public:
@@ -259,7 +241,7 @@ private:
 			if constexpr (state_contains<State, index_in<DimMinor>> && !state_contains<State, index_in<DimMajor>>) {
 				return false;
 			} else {
-				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
+				return is_contiguous<T, struct_sub_state_t<Structure, State>>::value;
 			}
 		} else {
 			return false;
@@ -284,7 +266,7 @@ private:
 			if constexpr (state_contains<State, index_in<DimMinor>> && !state_contains<State, index_in<DimMajor>>) {
 				return false;
 			} else {
-				return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
+				return is_contiguous<T, struct_sub_state_t<Structure, State>>::value;
 			}
 		} else {
 			return false;
@@ -313,7 +295,7 @@ private:
 				if constexpr (state_contains<State, index_in<DimMinor>> && !state_contains<State, index_in<DimMajor>>) {
 					return false;
 				} else {
-					return is_contiguous<T, typename Structure::template sub_state_t<State>>::value;
+					return is_contiguous<T, struct_sub_state_t<Structure, State>>::value;
 				}
 			} else {
 				return false;
