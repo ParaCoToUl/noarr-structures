@@ -71,12 +71,6 @@ struct dim_param {
 	static constexpr auto value = Dim;
 };
 
-template<class StructInner, class StructOuter, class State>
-concept defines_has_strict_offset_of = requires {
-	requires static_cast<bool>(StructOuter::template has_strict_offset_of<StructInner, State>()) ||
-				 !static_cast<bool>(StructOuter::template has_strict_offset_of<StructInner, State>());
-} || requires { StructOuter::template has_strict_offset_of<StructInner, State>(); };
-
 template<IsStruct Struct, IsState State>
 constexpr auto struct_sub_structure(Struct structure, State state) noexcept {
 	return structure.sub_structure(state);
@@ -93,6 +87,12 @@ constexpr auto struct_sub_state(Struct structure, State state) noexcept {
 
 template<IsStruct Struct, IsState State>
 using struct_sub_state_t = std::remove_cvref_t<decltype(std::declval<Struct>().sub_state(std::declval<State>()))>;
+
+template<class StructInner, class StructOuter, class State>
+concept defines_has_strict_offset_of = requires {
+	requires static_cast<bool>(StructOuter::template has_strict_offset_of<StructInner, State>()) ||
+				 !static_cast<bool>(StructOuter::template has_strict_offset_of<StructInner, State>());
+} || requires { StructOuter::template has_strict_offset_of<StructInner, State>(); };
 
 template<class StructInner, class StructOuter, class State, class Start>
 concept defines_strict_offset_of = IsState<State> && requires(StructOuter structure, State state, Start start) {
