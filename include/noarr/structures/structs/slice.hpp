@@ -154,7 +154,7 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
+	requires (has_length<QDim, State>())
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		using namespace constexpr_arithmetic;
@@ -788,7 +788,7 @@ public:
 	}
 
 	template<auto QDim, IsState State>
-	requires IsDim<decltype(QDim)>
+	requires (has_length<QDim, State>())
 	[[nodiscard]]
 	constexpr auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(state);

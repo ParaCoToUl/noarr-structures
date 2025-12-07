@@ -1,8 +1,6 @@
 #ifndef NOARR_STRUCTURES_CUDA_TRAVERSER_HPP
 #define NOARR_STRUCTURES_CUDA_TRAVERSER_HPP
 
-#include <cstddef>
-
 #include "../base/contain.hpp"
 #include "../base/state.hpp"
 #include "../base/structs_common.hpp"
@@ -95,7 +93,7 @@ struct cuda_fix_t : strict_contain<T> {
 	template<IsState State>
 	requires (has_size<State>())
 	[[nodiscard]]
-	__device__ inline std::size_t size(State state) const noexcept {
+	__device__ inline auto size(State state) const noexcept {
 		return sub_structure().size(sub_state(state));
 	}
 
@@ -115,7 +113,7 @@ struct cuda_fix_t : strict_contain<T> {
 	template<class Sub, IsState State, class Start = constexpr_arithmetic::make_const<0>>
 	requires (has_offset_of<Sub, cuda_fix_t, State>())
 	[[nodiscard]]
-	__device__ inline std::size_t strict_offset_of(State state, Start start = Start{}) const noexcept {
+	__device__ inline auto strict_offset_of(State state, Start start = Start{}) const noexcept {
 		return offset_of<Sub>(sub_structure(), sub_state(state), start);
 	}
 
@@ -129,7 +127,7 @@ struct cuda_fix_t : strict_contain<T> {
 	template<IsDim auto QDim, IsState State>
 	requires (has_length<QDim, State>())
 	[[nodiscard]]
-	__device__ inline std::size_t length(State state) const noexcept {
+	__device__ inline auto length(State state) const noexcept {
 		return sub_structure().template length<QDim>(sub_state(state));
 	}
 
